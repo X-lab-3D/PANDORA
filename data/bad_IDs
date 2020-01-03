@@ -1,0 +1,11 @@
+Non-IMGT: ['5MEQ', '3E3Q', '5MEN', '5E6I', '5F1N']
+Two-chained (non-peptide): ['2QRT', '2QRS', 2QRI']
+Non-Peptide: ['3NWM', '2QRT', '4L29', '4L3C', '2QRI', '4UQ3', '2QRS']
+
+Long (12-18) peptide: ['3VFO', '3BW9', '3VFN',  '4ZUV', '4UQ2', '3KWW', '3VFU',  '3RGV', '2A83', '5DDH', '1XR9', '4ZUW', '1XH3',
+                       '4JQX', '4ZUT', '1ZHK',  '6AVG', '4PRD', '4U6Y', '5T6Y', '3VFW', '1ZHL', '3VFS', '3VFV', '3KXF', '6AT5', '4PRB',
+                       '2AK4', '3MRE', '3GSO', '3VFM', '6AVF', '4QRT', '3VFT', '1OGT', '3VFR', '4NO0', '4JRY', '3BWA',  '3VFP', '5DEG',
+                       '3VCL',  '4QRU', '1ED3',  '4JRX',  '3DX6']
+
+* TCR within structure
+* Ligands in the binding pocket
