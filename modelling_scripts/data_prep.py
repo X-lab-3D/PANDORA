@@ -57,15 +57,43 @@ def imgt_retrieve_clean(ids_filename):
 
 
         print('Opening %s' %ID)
-        pdb = open('data/PDBs/%s.pdb' %ID, 'r')
-        aflag = False
-        pflag = False
+        #pdb = open('data/PDBs/%s.pdb' %ID, 'r')
+        pdbf = 'data/PDBs/%s.pdb' %ID
+        #aflag = False
+        #pflag = False
         aID = False
         pID = False
-        exflag = False
+        #exflag = False
         count_dict = {}
-        alphabet = list(string.ascii_uppercase)
-        for line in pdb:
+        #alphabet = list(string.ascii_uppercase)
+        
+        seqs = get_seqs(pdbf)
+        for chain in seqs:
+            length = len(seqs[chain])
+            if chain != ' ':
+                count_dict[chain] = length
+            if length > 250 and length < 300 and not aID:
+                aID = chain
+                print('aID : ', aID)
+                print('length : ', length)
+            elif length > 7 and length < 25 and not pID:
+                pID = chain
+                print('pID : ', pID)
+                print('length : ', length)
+        '''
+        aID = list(count_dict)[0]
+        if count_dict[aID] < 269 or count_dict[aID] > 300:
+            print(count_dict)
+            print('########################################################################################################')
+            print('Watch out! The selected chain as alpha MHC chain seems to be too long or too short! Is %s aminoacids long!' %count_dict[aID])
+            print('########################################################################################################')
+        pID = min(count_dict, key=count_dict.get)
+        if count_dict[pID] > 16:
+            print('Watch out! The selected chain as peptide seems to be too long! Is %s aminoacids long!' %count_dict[pID])
+        '''
+        '''
+        for i, line in enumerate(pdb):
+            last_ca = -10
             if not aID:
                 if 'COMPND' in line and 'MOLECULE' in line:
                     aflag = True
@@ -87,24 +115,29 @@ def imgt_retrieve_clean(ids_filename):
                     print('pID:', pID)
                     pFlag = False
             if line.startswith('ATOM') and 'CA' in line:
-                cID = (re.split("[^a-zA-Z]*", line))[13]
-                if cID in alphabet:
-                    if cID in count_dict:
-                        count_dict[cID] += 1
-                    else:
-                        count_dict[cID] = 1
+                if i == last_ca+1:
+                    pass
                 else:
-                    cID = (re.split("[^a-zA-Z]*", line))[14]
-                    if cID in count_dict:
-                        count_dict[cID] += 1
+                    cID = (re.split("[^a-zA-Z]*", line))[13]
+                    if cID in alphabet:
+                        if cID in count_dict:
+                            count_dict[cID] += 1
+                        else:
+                            count_dict[cID] = 1
                     else:
-                        count_dict[cID] = 1
-
-                exflag = True
+                        cID = (re.split("[^a-zA-Z]*", line))[14]
+                        if cID in count_dict:
+                            count_dict[cID] += 1
+                        else:
+                            count_dict[cID] = 1
+                last_ca = i
+        
+        exflag = True
         if exflag:
             pID = min(count_dict, key=count_dict.get)
             print(count_dict)
             print('pID:', pID)
+        '''
         count_dict['allele'] = entry[1]
         if ((len(count_dict)-1) %3) == 0:
             IDs_dict[ID] = count_dict
@@ -133,25 +166,36 @@ def imgt_retrieve_clean(ids_filename):
     IDd.close()
     print('BAD IDs:')
     print(bad_IDs)
+    with open('data/IDs_dict.tsv', 'wt') as outfile:
+        tsv_writer = csv.writer(outfile, delimiter='\t')
+        tsv_writer.writerow(['PDB_ID', 'CHAIN_ID', 'LENGTH', 'ALLELE'])
+        for ID in IDs_dict:
+            for chain_ID in IDs_dict[ID]:
+                if chain_ID != 'allele':
+                    tsv_writer.writerow([ID, chain_ID, IDs_dict[ID][chain_ID], IDs_dict[ID]['allele']])
+    
     return IDs_dict
 
 def get_pdb_seq(IDs):
     sequences = []
     for ID in IDs:
-        seqs = []
         pdbf = 'data/PDBs/%s_AP.pdb' %ID
-        P = PDBParser(QUIET=1)
-        structure = P.get_structure('s', pdbf)
-        for chain in structure.get_chains():
-            sequence = ''
-            for res in chain:
-              try:
-                aa = to_one_letter_code[res.resname]
-              except KeyError:
-                aa= '.'
-              sequence += aa
-            #print("Chain %s: %s" %(chain.id, sequence))
-            seqs.append(sequence)
+        seqs = get_seqs(pdbf)
         sequences.append(seqs)
     return sequences
+
+def get_seqs(pdbf):
+    seqs = {}
+    P = PDBParser(QUIET=1)
+    structure = P.get_structure('s', pdbf)
+    for chain in structure.get_chains():
+        sequence = ''
+        for res in chain:
+          try:
+            aa = to_one_letter_code[res.resname]
+          except KeyError:
+            aa= '.'
+          sequence += aa
+        seqs[chain.id] = sequence
+    return seqs
             
