@@ -1,0 +1,28 @@
+
+                         MODELLER 9.23, 2019/10/22, r11522
+
+     PROTEIN STRUCTURE MODELLING BY SATISFACTION OF SPATIAL RESTRAINTS
+
+
+                     Copyright(c) 1989-2019 Andrej Sali
+                            All Rights Reserved
+
+                             Written by A. Sali
+                               with help from
+              B. Webb, M.S. Madhusudhan, M-Y. Shen, G.Q. Dong,
+          M.A. Marti-Renom, N. Eswar, F. Alber, M. Topf, B. Oliva,
+             A. Fiser, R. Sanchez, B. Yerkovich, A. Badretdinov,
+                     F. Melo, J.P. Overington, E. Feyfant
+                 University of California, San Francisco, USA
+                    Rockefeller University, New York, USA
+                      Harvard University, Cambridge, USA
+                   Imperial Cancer Research Fund, London, UK
+              Birkbeck College, University of London, London, UK
+
+
+Kind, OS, HostName, Kernel, Processor: 4, Darwin darios-imac.umcn.nl 18.7.0 x86_64
+Date and time of compilation         : 2019/10/22 14:53:24
+MODELLER executable type             : mac10v4-intel64
+Job starting time (YY/MM/DD HH:MM:SS): 2020/01/06 15:56:36
+
+['modelling_scripts/cmd_modeller.py', 'data/Alignments/1T0M.ali', '1T0M']

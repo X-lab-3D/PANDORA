@@ -52,8 +52,8 @@ def imgt_retrieve_clean(ids_filename):
                 shutil.copyfileobj(f_in, f_out)
         subprocess.check_call(['rm', 'data/PDBs/%s.pdb.gz' %ID])
         selected_chains_filepath = '%s/data/PDBs/%s_AC.pdb'%(cwd, ID)
-        a_renamed_filepath = '%s/data/PDBs/%s_AA.pdb'%(cwd, ID)
-        new_filepath = '%s/data/PDBs/%s_AP.pdb'%(cwd, ID)
+        a_renamed_filepath = '%s/data/PDBs/%s_MC.pdb'%(cwd, ID)
+        new_filepath = '%s/data/PDBs/%s_MP.pdb'%(cwd, ID)
 
 
         print('Opening %s' %ID)
@@ -142,8 +142,12 @@ def imgt_retrieve_clean(ids_filename):
         if ((len(count_dict)-1) %3) == 0:
             IDs_dict[ID] = count_dict
             os.system('pdb_selchain -%s,%s %s > %s' %(aID, pID, filepath, selected_chains_filepath))
-            os.system('pdb_rplchain -%s:A %s > %s' %(aID, selected_chains_filepath, a_renamed_filepath))
-            os.system('pdb_rplchain -%s:P %s > %s' %(pID, a_renamed_filepath, new_filepath))
+            if pID == 'M':
+                os.system('pdb_rplchain -%s:P %s > %s' %(pID, selected_chains_filepath, a_renamed_filepath))
+                os.system('pdb_rplchain -%s:M %s > %s' %(aID, a_renamed_filepath, new_filepath))
+            else:
+                os.system('pdb_rplchain -%s:M %s > %s' %(aID, selected_chains_filepath, a_renamed_filepath))
+                os.system('pdb_rplchain -%s:P %s > %s' %(pID, a_renamed_filepath, new_filepath))
         else:
             bad_IDs.append(ID)
         try:
@@ -155,7 +159,7 @@ def imgt_retrieve_clean(ids_filename):
         except:
             pass
         try:
-            subprocess.check_call(['rm', 'data/PDBs/%s_AA.pdb' %ID])
+            subprocess.check_call(['rm', 'data/PDBs/%s_MC.pdb' %ID])
         except:
             pass
         aID = None
@@ -179,7 +183,7 @@ def imgt_retrieve_clean(ids_filename):
 def get_pdb_seq(IDs):
     sequences = []
     for ID in IDs:
-        pdbf = 'data/PDBs/%s_AP.pdb' %ID
+        pdbf = 'data/PDBs/%s_MP.pdb' %ID
         seqs = get_seqs(pdbf)
         sequences.append(seqs)
     return sequences

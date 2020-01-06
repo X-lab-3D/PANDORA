@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 import modeller as M
 from modeller import automodel as MA       # Load the automodel class
 env = M.environ()
@@ -6,11 +6,11 @@ env = M.environ()
 class MyLoop(MA.loopmodel):
     def special_patches(self, aln):
         # Rename both chains and renumber the residues in each
-        self.rename_segments(segment_ids=['A', 'C'],
+        self.rename_segments(segment_ids=['M', 'P'],
                              renumber_residues=[1,1])
     def select_loop_atoms(self):
         # Two residue ranges (both will be refined simultaneously)
-        return M.selection(self.residue_range('3:C', '8:C'))
+        return M.selection(self.residue_range('3:P', '8:P'))
         # note: the residue numbers and chain IDs refer to the built model, not to the template(s).
 
     def special_restraints(self, aln):

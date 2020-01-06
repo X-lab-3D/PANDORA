@@ -1,3 +1,4 @@
+
 ###    ###
 from modelling_scripts import data_prep
 #from modelling_scripts import cmd_modeller
@@ -11,7 +12,7 @@ import os
 import time
 from random import choice
 
-IDD = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
+#IDD = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
 
 ## TODO:
 ## Retrieve IDs : Alleles
@@ -20,9 +21,9 @@ IDD = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_
 ## Compare User's input with same allele sequences (select with identity the best one)
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
-#IDD_file = open('data/IDs_ChainsCounts_dict.pkl', 'rb')
-#IDD = pickle.load(IDD_file)
-#IDD_file.close()
+IDD_file = open('data/IDs_ChainsCounts_dict.pkl', 'rb')
+IDD = pickle.load(IDD_file)
+IDD_file.close()
 
 ### Organizing Allele IDs in a dictionary ###
 allele_ID = {}
@@ -59,7 +60,7 @@ P_target = inseqs[1]
 sequences = data_prep.get_pdb_seq(allele_ID[allele])
 ID_seqs_dict = {}
 for i, ID in enumerate(allele_ID[allele]):
-    template = SeqRecord(Seq(sequences[i]['A'], IUPAC.protein), id=ID, name = allele + ID)
+    template = SeqRecord(Seq(sequences[i]['M'], IUPAC.protein), id=ID, name = allele + ID)
     SeqIO.write((template, A_target), "data/FASTAs/%s.fasta" %ID, "fasta")
     ID_seqs_dict[ID] = (sequences[i]['P'])
 
@@ -108,16 +109,23 @@ else:                             ### In case we have multiple templates for thi
     print('')
     print('')
     print(templates_dict)
-    template_ID = templates_dict[int(input())]
+    #template_ID = templates_dict[int(input())]
+    template_ID = templates_dict[0]
     #template_ID = choice(putative_templates)
     peptide_seq = ID_seqs_dict[template_ID]
+    
+    print('##############################')
+    print('Please input one restrain distance cutoff')
+    print('##############################')
+    print('')
+    cutoff = 5
 
 ### Writing a final .ali file with Template sequence / template pept sequence ; Target sequence / target pept sequence ###
 final_alifile_name = 'data/Alignments/%s.ali' %template_ID
 final_alifile = open(final_alifile_name, 'w')
 i = 0
 for line in open('data/Alignments/%s.afa' %template_ID, 'r'):
-    print(line)
+    #print(line)
     if line.startswith('>') and i == 0:
         final_alifile.write(line)
         final_alifile.write('structure:%s_AP.pdb:1:A:9:P::::\n' %template_ID)
@@ -131,6 +139,19 @@ for line in open('data/Alignments/%s.afa' %template_ID, 'r'):
         final_alifile.write(line.rstrip())
 final_alifile.write('/' + str(P_target.seq))
 final_alifile.close()
-            
-#os.system('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s %s >3ROO:A|PDBID|CHAIN|SEQUENCE' %(final_alifile_name, template_ID))
-        
+
+os.popen('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP.pdb %s > data/all_contacts_%s' %(template_ID, cutoff, template_ID))
+
+command = ['/usr/bin/python2.7', 'modelling_scripts/cmd_modeller.py', final_alifile_name, template_ID, '>3ROO:A']
+#subprocess.check_call(command)
+#proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+#(out, err) = proc.communicate()
+#print(proc)
+print(command)
+os.popen('python modelling_scripts/cmd_modeller.py %s %s >3ROO:A' %(final_alifile_name, template_ID)).read()
+
+
+
+
+
+

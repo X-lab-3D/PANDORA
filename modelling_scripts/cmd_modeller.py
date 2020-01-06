@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+
 # 23-Aug-2018 14:36
 
 import modeller as M
-from modeller import automodel as MA
-from modelling_scripts import MyLoop
+import modeller.automodel as MA
+from MyLoop import MyLoop
 import sys
 
 print(sys.argv)
@@ -11,12 +11,18 @@ print(sys.argv)
 alifile = sys.argv[1]
 ID = sys.argv[2]
 query = sys.argv[3]
+#alifile, ID, query = 'data/Alignments/1T0M.ali', '1T0M', '>3ROO:A'
+
+print(alifile)
+print(ID)
+print(query)
 
 M.log.verbose()                                # request verbose output
 env = M.environ()                              # create a new MODELLER environment to build this model in
 
 # directories for input atom files
-env.io.atom_files_directory = ['.', '../atom_files']
+#env.io.atom_files_directory = ['.', '../atom_files']
+env.io.atom_files_directory = './'
 
 # Read in HETATM records from template PDBs
 #env.io.hetatm = True
