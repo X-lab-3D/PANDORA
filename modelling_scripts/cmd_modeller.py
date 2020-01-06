@@ -10,8 +10,8 @@ print(sys.argv)
 
 alifile = sys.argv[1]
 ID = sys.argv[2]
-query = sys.argv[3]
-#alifile, ID, query = 'data/Alignments/1T0M.ali', '1T0M', '>3ROO:A'
+query = sys.argv[2]
+#alifile, ID, query = 'data/Alignments/4PGB.ali', '4PGB', '>3ROO:A'
 
 print(alifile)
 print(ID)

@@ -43,7 +43,7 @@ print('')
 print(allele_ID.keys())
 #allele = input()
 #allele, inseq_file = 'FLA-E*01801', 'data/5xmf.fasta'
-allele, inseq_file = 'H2-Kb', 'data/3roo.fasta'
+allele, inseq_file = 'H2-Kb', 'data/5xmf.fasta'
 
 print('##############################')
 print('Please select your sequence file.')
@@ -110,7 +110,7 @@ else:                             ### In case we have multiple templates for thi
     print('')
     print(templates_dict)
     #template_ID = templates_dict[int(input())]
-    template_ID = templates_dict[0]
+    template_ID = templates_dict[19]
     #template_ID = choice(putative_templates)
     peptide_seq = ID_seqs_dict[template_ID]
     
@@ -127,28 +127,63 @@ i = 0
 for line in open('data/Alignments/%s.afa' %template_ID, 'r'):
     #print(line)
     if line.startswith('>') and i == 0:
-        final_alifile.write(line)
-        final_alifile.write('structure:%s_AP.pdb:1:A:9:P::::\n' %template_ID)
+        final_alifile.write('>P1;' + line.split(' ')[0].strip('>') + '\n')
+        final_alifile.write('structure:data/PDBs/%s_MP.pdb:1:M:9:P::::\n' %template_ID)
         i += 1
     elif line.startswith('>') and i == 1:
-        final_alifile.write('/' + peptide_seq)
+        final_alifile.write('/' + peptide_seq + '*')
         final_alifile.write('\n')
-        final_alifile.write('\n'+ line)
+        final_alifile.write('\n>P1;' + line.split(':')[0].strip('>') + '\n')
         final_alifile.write('sequence:::::::::\n')
     else:
         final_alifile.write(line.rstrip())
-final_alifile.write('/' + str(P_target.seq))
+final_alifile.write('/' + str(P_target.seq) + '*')
 final_alifile.close()
 
-os.popen('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP.pdb %s > data/all_contacts_%s' %(template_ID, cutoff, template_ID))
+os.system('rm data/Alignments/*.afa')
 
-command = ['/usr/bin/python2.7', 'modelling_scripts/cmd_modeller.py', final_alifile_name, template_ID, '>3ROO:A']
-#subprocess.check_call(command)
+# Calculating all Atom contacts
+os.system('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP.pdb %s > data/all_contacts_%s.list' %(template_ID, cutoff, template_ID))
+
+#Selecting only the anchors contacts
+print('##############################')
+print('Please input, ore per time, the anchor positions (only the int number)')
+print('##############################')
+print('')
+anchor_1 = 2
+anchor_2 = 9
+
+with open( 'data/all_contacts_%s.list' %template_ID, 'r') as contacts:
+    with open('data/contacts_P%i_P%i.list' %(anchor_1, anchor_2), 'w') as output:
+        for line in contacts:
+            #print(line.split("\t"))
+            p_aa_id = line.split("\t")[7]
+            p_atom = line.split("\t")[8]
+            m_aa_id = (line.split("\t")[2]).split(' ')[0]
+            if (int(p_aa_id) == anchor_1 or int(p_aa_id) == anchor_2) and ('CA' in p_atom or 'CB' in p_atom):
+                '''
+                if len(m_aa_id) == 4:
+                    print(m_aa_id)
+                    for i, a in enumerate(line):
+                        print(i, a) 
+                    del m_aa_id[1]
+                    print(m_aa_id)
+                    output.write(line[0:7] + line[8:])
+                else:
+                '''
+                output.write(line)
+            
+#Finally launching Modeller. Hopefully.
+#command = ['python', 'modelling_scripts/cmd_modeller.py', final_alifile_name, template_ID, '>3ROO:A']
+#command = ['mod9.23', 'modelling_scripts/cmd_modeller.py']
+#modeller_output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
+#print(modeller_output)
 #proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 #(out, err) = proc.communicate()
 #print(proc)
-print(command)
-os.popen('python modelling_scripts/cmd_modeller.py %s %s >3ROO:A' %(final_alifile_name, template_ID)).read()
+#print(command)
+#os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py').read()
+os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s %s 5XMF' %(final_alifile_name, template_ID)).read()
 
 
 
