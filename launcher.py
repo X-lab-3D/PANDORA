@@ -12,7 +12,7 @@ import os
 import time
 from random import choice
 
-#IDD = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
+#IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
 
 ## TODO:
 ## Retrieve IDs : Alleles
@@ -23,6 +23,7 @@ from random import choice
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 IDD_file = open('data/IDs_ChainsCounts_dict.pkl', 'rb')
 IDD = pickle.load(IDD_file)
+bad_IDs = pickle.load(IDD_file)
 IDD_file.close()
 
 ### Organizing Allele IDs in a dictionary ###
@@ -43,7 +44,7 @@ print('')
 print(allele_ID.keys())
 #allele = input()
 #allele, inseq_file = 'FLA-E*01801', 'data/5xmf.fasta'
-allele, inseq_file = 'H2-Kb', 'data/5xmf.fasta'
+allele, inseq_file = 'HLA-B*27:09', 'data/1ogt.fasta'
 
 print('##############################')
 print('Please select your sequence file.')
@@ -80,7 +81,7 @@ else:                             ### In case we have multiple templates for thi
     putative_templates = []
     for ID in allele_ID[allele]:
         alifile = 'data/Alignments/%s.afa' %ID
-        muscle_commands = ['muscle', '-in', 'data/FASTAs/%s.fasta' %ID, '-out', '%s' %alifile]
+        muscle_commands = ['muscle', '-in', 'data/FASTAs/%s.fasta' %ID, '-out', '%s' %alifile, '-quiet']
         #os.system('muscle -in data/FASTAs/%s.fasta -out %s' %(ID, alifile))
         subprocess.check_call(muscle_commands)
         os.system('rm data/FASTAs/%s.fasta' %ID)
@@ -94,7 +95,7 @@ else:                             ### In case we have multiple templates for thi
         if id_count > max_id:
             max_id = id_count
         score_dict[ID] = id_count
-        print('ID COUNT:  ', id_count)
+        #print('ID COUNT:  ', id_count)
     for key in score_dict:
         if score_dict[key] == max_id:
             putative_templates.append(key)
@@ -110,7 +111,7 @@ else:                             ### In case we have multiple templates for thi
     print('')
     print(templates_dict)
     #template_ID = templates_dict[int(input())]
-    template_ID = templates_dict[19]
+    template_ID = templates_dict[3]
     #template_ID = choice(putative_templates)
     peptide_seq = ID_seqs_dict[template_ID]
     
@@ -121,6 +122,9 @@ else:                             ### In case we have multiple templates for thi
     cutoff = 5
 
 ### Writing a final .ali file with Template sequence / template pept sequence ; Target sequence / target pept sequence ###
+    
+os.system('pdb_reres -1 data/PDBs/%s_MP.pdb > data/PDBs/%s_MP_reres.pdb' %(template_ID, template_ID))  # Renumbering the residues
+
 final_alifile_name = 'data/Alignments/%s.ali' %template_ID
 final_alifile = open(final_alifile_name, 'w')
 i = 0
@@ -128,7 +132,7 @@ for line in open('data/Alignments/%s.afa' %template_ID, 'r'):
     #print(line)
     if line.startswith('>') and i == 0:
         final_alifile.write('>P1;' + line.split(' ')[0].strip('>') + '\n')
-        final_alifile.write('structure:data/PDBs/%s_MP.pdb:1:M:9:P::::\n' %template_ID)
+        final_alifile.write('structure:data/PDBs/%s_MP_reres.pdb:1:M:9:P::::\n' %template_ID)
         i += 1
     elif line.startswith('>') and i == 1:
         final_alifile.write('/' + peptide_seq + '*')
@@ -140,18 +144,20 @@ for line in open('data/Alignments/%s.afa' %template_ID, 'r'):
 final_alifile.write('/' + str(P_target.seq) + '*')
 final_alifile.close()
 
+#final_alifile_name = 'data/Alignments/1k5n_1ogt.ali'
+
 os.system('rm data/Alignments/*.afa')
 
 # Calculating all Atom contacts
-os.system('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP.pdb %s > data/all_contacts_%s.list' %(template_ID, cutoff, template_ID))
+os.system('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP_reres.pdb %s > data/all_contacts_%s.list' %(template_ID, cutoff, template_ID))
 
 #Selecting only the anchors contacts
 print('##############################')
-print('Please input, ore per time, the anchor positions (only the int number)')
+print('Please input, one per time, the anchor positions (only the int number)')
 print('##############################')
 print('')
-anchor_1 = 2
-anchor_2 = 9
+anchor_1 = 278
+anchor_2 = 285
 
 with open( 'data/all_contacts_%s.list' %template_ID, 'r') as contacts:
     with open('data/contacts_P%i_P%i.list' %(anchor_1, anchor_2), 'w') as output:
@@ -164,13 +170,10 @@ with open( 'data/all_contacts_%s.list' %template_ID, 'r') as contacts:
                 '''
                 if len(m_aa_id) == 4:
                     print(m_aa_id)
-                    for i, a in enumerate(line):
-                        print(i, a) 
-                    del m_aa_id[1]
-                    print(m_aa_id)
                     output.write(line[0:7] + line[8:])
                 else:
                 '''
+                #output.write(line[:32] + str((int(line[32]) + 276)) + line[34:])
                 output.write(line)
             
 #Finally launching Modeller. Hopefully.
@@ -183,8 +186,10 @@ with open( 'data/all_contacts_%s.list' %template_ID, 'r') as contacts:
 #print(proc)
 #print(command)
 #os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py').read()
-os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s %s 5XMF' %(final_alifile_name, template_ID)).read()
 
+os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s %s 1OGT' %(final_alifile_name, template_ID)).read()
+
+#os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s 1k5n_MP query_1ogt_MP' %final_alifile_name).read()
 
 
 

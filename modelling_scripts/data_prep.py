@@ -167,6 +167,7 @@ def imgt_retrieve_clean(ids_filename):
 
     IDd = open("data/IDs_ChainsCounts_dict.pkl", "wb")
     pickle.dump(IDs_dict, IDd)
+    pickle.dump(bad_IDs, IDd)
     IDd.close()
     print('BAD IDs:')
     print(bad_IDs)
@@ -178,7 +179,7 @@ def imgt_retrieve_clean(ids_filename):
                 if chain_ID != 'allele':
                     tsv_writer.writerow([ID, chain_ID, IDs_dict[ID][chain_ID], IDs_dict[ID]['allele']])
     
-    return IDs_dict
+    return IDs_dict, bad_IDs
 
 def get_pdb_seq(IDs):
     sequences = []

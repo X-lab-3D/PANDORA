@@ -6,11 +6,12 @@ env = M.environ()
 class MyLoop(MA.loopmodel):
     def special_patches(self, aln):
         # Rename both chains and renumber the residues in each
-        self.rename_segments(segment_ids=['M', 'P'],
-                             renumber_residues=[1,1])
+        self.rename_segments(segment_ids=['M', 'P'])#, renumber_residues=[1,1])
+        self.write(file = 'rename_try.pdb')
+        
     def select_loop_atoms(self):
         # Two residue ranges (both will be refined simultaneously)
-        return M.selection(self.residue_range('3:P', '8:P'))
+        return M.selection(self.residue_range('278:P', '285:P'))
         # note: the residue numbers and chain IDs refer to the built model, not to the template(s).
 
     def special_restraints(self, aln):
@@ -18,9 +19,10 @@ class MyLoop(MA.loopmodel):
         atoms = self.atoms
         
         # need to add more distance restraints later :)
-        contact_file = open('data/contacts_P2_P9.list', 'r')
+        contact_file = open('data/contacts_P278_P285.list', 'r')
         for contact_data_line in contact_file:
-            contact_data = contact_data_line.split('\t')
+            contact_data = (contact_data_line.replace(' ', '')).split('\t')
+            print(contact_data[3], contact_data[2], contact_data[1], contact_data[8], contact_data[7], contact_data[6], contact_data[10])
             rsr.add(M.forms.gaussian(group=M.physical.xy_distance,feature=M.features.distance(atoms['%s:%s:%s' %(contact_data[3], contact_data[2], contact_data[1])], atoms['%s:%s:%s' %(contact_data[8], contact_data[7], contact_data[6])]),mean=float(contact_data[10]), stdev=0.1))
 
         contact_file.close()
