@@ -1,7 +1,6 @@
 
 ###    ###
 from modelling_scripts import data_prep
-#from modelling_scripts import cmd_modeller
 import pickle
 from Bio import SeqIO
 import subprocess
@@ -9,8 +8,9 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 import os
+import glob
 import time
-from random import choice
+#from random import choice
 
 #IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
 
@@ -42,17 +42,22 @@ print('##############################')
 print('')
 print('')
 print(allele_ID.keys())
-#allele = input()
+allele = input()
 #allele, inseq_file = 'FLA-E*01801', 'data/5xmf.fasta'
-allele, inseq_file = 'HLA-B*27:09', 'data/1ogt.fasta'
+#allele, inseq_file = 'HLA-B*27:09', 'data/1ogt.fasta'
 
 print('##############################')
 print('Please select your sequence file.')
 print('##############################')
 print('')
 
+for file in glob.glob(os.getcwd() + '/data/Targets/*.fasta'):
+    print(file.split('/')[-1].split('.')[0])
+
 #inseq_file = 'data/5xmf.fasta'
 #inseq_file = 'data/1tom.fasta'
+target_name = input()
+inseq_file = 'data/Targets/%s.fasta' %target_name
 inseqs = list(SeqIO.parse(inseq_file, 'fasta'))
 A_target = inseqs[0]
 P_target = inseqs[1]
@@ -63,12 +68,12 @@ ID_seqs_dict = {}
 for i, ID in enumerate(allele_ID[allele]):
     template = SeqRecord(Seq(sequences[i]['M'], IUPAC.protein), id=ID, name = allele + ID)
     SeqIO.write((template, A_target), "data/FASTAs/%s.fasta" %ID, "fasta")
-    ID_seqs_dict[ID] = (sequences[i]['P'])
+    ID_seqs_dict[ID] = ((sequences[i]['P'], len(sequences[i]['M'])))
 
 ### Identifying the template ID and its peptide sequence ### 
 if len(allele_ID[allele]) == 1:   ### In case we have only one template for this allele ###
     template_ID = allele_ID[allele][0]
-    peptide_seq = ID_seqs_dict[template_ID]
+    peptide_seq = ID_seqs_dict[template_ID][0]
     #subprocess.check_call(['muscle', '-in %s.fasta -clw' %template_ID])
     t1 = time.time()
     os.system('muscle -in data/FASTAs/%s.fasta -out data/Alignments/%s.afa' %(ID, ID))
@@ -110,10 +115,10 @@ else:                             ### In case we have multiple templates for thi
     print('')
     print('')
     print(templates_dict)
-    #template_ID = templates_dict[int(input())]
-    template_ID = templates_dict[3]
+    template_ID = templates_dict[int(input())]
+    #template_ID = templates_dict[3]
     #template_ID = choice(putative_templates)
-    peptide_seq = ID_seqs_dict[template_ID]
+    peptide_seq = ID_seqs_dict[template_ID][0]
     
     print('##############################')
     print('Please input one restrain distance cutoff')
@@ -149,15 +154,18 @@ final_alifile.close()
 os.system('rm data/Alignments/*.afa')
 
 # Calculating all Atom contacts
-os.system('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP_reres.pdb %s > data/all_contacts_%s.list' %(template_ID, cutoff, template_ID))
+os.popen('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP_reres.pdb %s > data/all_contacts_%s.list' %(template_ID, cutoff, template_ID)).read()
 
 #Selecting only the anchors contacts
 print('##############################')
 print('Please input, one per time, the anchor positions (only the int number)')
 print('##############################')
 print('')
-anchor_1 = 278
-anchor_2 = 285
+print('The peptide of the selected template is %i residue long' %len(peptide_seq))
+print('ANCHOR 1:')
+anchor_1 = int(input()) + ID_seqs_dict[template_ID][1]
+print('ANCHOR 2:')
+anchor_2 = int(input()) + ID_seqs_dict[template_ID][1]
 
 with open( 'data/all_contacts_%s.list' %template_ID, 'r') as contacts:
     with open('data/contacts_P%i_P%i.list' %(anchor_1, anchor_2), 'w') as output:
@@ -176,18 +184,19 @@ with open( 'data/all_contacts_%s.list' %template_ID, 'r') as contacts:
                 #output.write(line[:32] + str((int(line[32]) + 276)) + line[34:])
                 output.write(line)
             
+with open('data/instructions.txt', 'w') as instr_file:
+    instr_file.write(str(anchor_1) + '\n')
+    instr_file.write(str(anchor_2))
+    
 #Finally launching Modeller. Hopefully.
+                
 #command = ['python', 'modelling_scripts/cmd_modeller.py', final_alifile_name, template_ID, '>3ROO:A']
-#command = ['mod9.23', 'modelling_scripts/cmd_modeller.py']
-#modeller_output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
-#print(modeller_output)
+
 #proc = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 #(out, err) = proc.communicate()
-#print(proc)
-#print(command)
-#os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py').read()
-
-os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s %s 1OGT' %(final_alifile_name, template_ID)).read()
+                
+#raise Exception('OK.')
+os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s %s %s' %(final_alifile_name, template_ID, target_name.upper())).read()
 
 #os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s 1k5n_MP query_1ogt_MP' %final_alifile_name).read()
 
