@@ -161,28 +161,45 @@ print('##############################')
 print('Please input, one per time, the anchor positions (only the int number)')
 print('##############################')
 print('')
-print('The peptide of the selected template is %i residue long' %len(peptide_seq))
+print('The peptide of the selected template is %i residue long. The target one is %i residue long' %(len(str(peptide_seq)), len(str(P_target.seq))))
+print('')
+print('The template peptide sequence is %s, the target peptide seuqnce is %s' %(str(peptide_seq), str(P_target.seq)))
 print('ANCHOR 1:')
 anchor_1 = int(input()) + ID_seqs_dict[template_ID][1]
 print('ANCHOR 2:')
 anchor_2 = int(input()) + ID_seqs_dict[template_ID][1]
+real_anchor_2 = None
 
+if anchor_2 > (len(str(peptide_seq)) + ID_seqs_dict[template_ID][1]):
+    real_anchor_2 = (len(str(peptide_seq)) + ID_seqs_dict[template_ID][1])
+'''
+print('')
+print('############################################################')
+print('WARNING: you are selecting all the restrains, not only CA or CB')
+print('############################################################')
+print('')
+'''
 with open( 'data/all_contacts_%s.list' %template_ID, 'r') as contacts:
     with open('data/contacts_P%i_P%i.list' %(anchor_1, anchor_2), 'w') as output:
-        for line in contacts:
-            #print(line.split("\t"))
-            p_aa_id = line.split("\t")[7]
-            p_atom = line.split("\t")[8]
-            m_aa_id = (line.split("\t")[2]).split(' ')[0]
-            if (int(p_aa_id) == anchor_1 or int(p_aa_id) == anchor_2) and ('CA' in p_atom or 'CB' in p_atom):
-                '''
-                if len(m_aa_id) == 4:
-                    print(m_aa_id)
-                    output.write(line[0:7] + line[8:])
-                else:
-                '''
-                #output.write(line[:32] + str((int(line[32]) + 276)) + line[34:])
-                output.write(line)
+        if real_anchor_2:
+            for line in contacts:
+                #print(line[30:33])
+                p_aa_id = line.split("\t")[7]
+                p_atom = line.split("\t")[8]
+                m_aa_id = (line.split("\t")[2]).split(' ')[0]
+                if int(p_aa_id) == anchor_1 and ('CA' in p_atom or 'CB' in p_atom):
+                    output.write(line)
+                elif int(p_aa_id) == real_anchor_2 and ('CA' in p_atom or 'CB' in p_atom):
+                    output.write(line[:30] + str(anchor_2) + line[34:])
+        else:
+            for line in contacts:
+                #print(line.split("\t"))
+                p_aa_id = line.split("\t")[7]
+                p_atom = line.split("\t")[8]
+                m_aa_id = (line.split("\t")[2]).split(' ')[0]
+                if (int(p_aa_id) == anchor_1 or int(p_aa_id) == anchor_2) and ('CA' in p_atom or 'CB' in p_atom):
+                    output.write(line)
+
             
 with open('data/instructions.txt', 'w') as instr_file:
     instr_file.write(str(anchor_1) + '\n')
