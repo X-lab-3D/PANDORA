@@ -6,45 +6,43 @@ import subprocess
 import csv
 import gzip
 import shutil
-import re
-import string
 import pickle
 from Bio.PDB import PDBParser
 from Bio.Data.SCOPData import protein_letters_3to1 as to_one_letter_code
 
 ### OPEN CSV FILE WITH PDB CODES ###
 
-def imgt_retrieve_clean(ids_filename):
+def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter):
 
     IDs = []
     with open(ids_filename, 'r') as idsfile:
-        spamreader = csv.reader(idsfile, delimiter='\t')
+        spamreader = csv.reader(idsfile, delimiter=delimiter)
         for i, row in enumerate(spamreader):
             if i == 0:
                 pass
             else:
-                ID = row[3]
-                allele = row[4]
+                ID = row[id_clmn]
+                allele = row[allele_clmn]
                 IDs.append((ID, allele))
 
     cwd = os.getcwd()
     #print('CWD:', cwd)
     bad_IDs = []
     IDs_dict = {}
+    print('Started fetching URLs')
     for entry in IDs:
         ID = entry[0]
         ID = ID.upper()
         ID = ID.rstrip()
         url = 'http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-%s.pdb.gz' %ID
         filepath = '%s/data/PDBs/%s.pdb' %(cwd, ID)
-        print('Fetching ', url)
+        #print('Fetching ', url)
 
         try:
             urllib.request.urlretrieve( url, filepath + '.gz')
         except: #urllib.error.HTTPError:
             bad_IDs.append(ID)
-            print('##################################')
-            print('URL not found. Added to Bad_ID')
+            print('URL not found. %s added to Bad_IDs' %ID)
             print('##################################')
             continue
         with gzip.open('data/PDBs/%s.pdb.gz' %ID, 'rb') as f_in:
@@ -67,77 +65,40 @@ def imgt_retrieve_clean(ids_filename):
         count_dict = {}
         #alphabet = list(string.ascii_uppercase)
         
-        seqs = get_seqs(pdbf)
+        try:
+            seqs = get_seqs(pdbf)
+        except IndexError:
+            bad_IDs.append(ID)
+            print('Something went wrong with PDBParser. %s added to Bad_IDs' %ID)
+            print('##################################')
+            subprocess.check_call(['rm', 'data/PDBs/%s.pdb' %ID])
+            continue
         for chain in seqs:
             length = len(seqs[chain])
             if chain != ' ':
                 count_dict[chain] = length
             if length > 250 and length < 300 and not aID:
                 aID = chain
-                print('aID : ', aID)
-                print('length : ', length)
+                #print('aID : ', aID)
+                #print('length : ', length)
             elif length > 7 and length < 25 and not pID:
                 pID = chain
-                print('pID : ', pID)
-                print('length : ', length)
-        '''
-        aID = list(count_dict)[0]
-        if count_dict[aID] < 269 or count_dict[aID] > 300:
-            print(count_dict)
-            print('########################################################################################################')
-            print('Watch out! The selected chain as alpha MHC chain seems to be too long or too short! Is %s aminoacids long!' %count_dict[aID])
-            print('########################################################################################################')
-        pID = min(count_dict, key=count_dict.get)
-        if count_dict[pID] > 16:
-            print('Watch out! The selected chain as peptide seems to be too long! Is %s aminoacids long!' %count_dict[pID])
-        '''
-        '''
-        for i, line in enumerate(pdb):
-            last_ca = -10
-            if not aID:
-                if 'COMPND' in line and 'MOLECULE' in line:
-                    aflag = True
-                    continue
-            if not pID:
-                if 'COMPND' in line and 'PEPTIDE' in line and not 'PEPTIDE BINDING':
-                    pflag = True
-                    continue
-            if aflag:
-                if 'COMPND' in line and 'CHAIN:' in line:
-                    newline = line.split(':')[1]
-                    aID = re.split("[^a-zA-Z]*", newline)[2]
-                    print('aID:', aID)
-                    aflag = False
-            if pflag:
-                if 'COMPND' in line and 'CHAIN:' in line:
-                    newline = line.split(':')[1]
-                    pID = re.split("[^a-zA-Z]*", newline)[2]
-                    print('pID:', pID)
-                    pFlag = False
-            if line.startswith('ATOM') and 'CA' in line:
-                if i == last_ca+1:
-                    pass
-                else:
-                    cID = (re.split("[^a-zA-Z]*", line))[13]
-                    if cID in alphabet:
-                        if cID in count_dict:
-                            count_dict[cID] += 1
-                        else:
-                            count_dict[cID] = 1
-                    else:
-                        cID = (re.split("[^a-zA-Z]*", line))[14]
-                        if cID in count_dict:
-                            count_dict[cID] += 1
-                        else:
-                            count_dict[cID] = 1
-                last_ca = i
-        
-        exflag = True
-        if exflag:
-            pID = min(count_dict, key=count_dict.get)
-            print(count_dict)
-            print('pID:', pID)
-        '''
+                #print('pID : ', pID)
+                #print('length : ', length)
+        try:
+            if aID.islower() or pID.islower():
+                bad_IDs.append(ID)
+                print('Lower case chain ID. %s added to Bad_IDs' %ID)
+                print('##################################')
+                subprocess.check_call(['rm', 'data/PDBs/%s.pdb' %ID])
+                continue
+        except AttributeError:
+            bad_IDs.append(ID)
+            print('False in chain ID, one chain does not respect settled lenght criteria. %s added to Bad_IDs' %ID)
+            print('##################################')
+            subprocess.check_call(['rm', 'data/PDBs/%s.pdb' %ID])
+            continue
+
         count_dict['allele'] = entry[1]
         if ((len(count_dict)-1) %3) == 0:
             IDs_dict[ID] = count_dict
@@ -150,6 +111,9 @@ def imgt_retrieve_clean(ids_filename):
                 os.system('pdb_rplchain -%s:P %s > %s' %(pID, a_renamed_filepath, new_filepath))
         else:
             bad_IDs.append(ID)
+            print('Chain number not multiple of three. %s added to Bad_IDs' %ID)
+            print('##################################')
+            continue
         try:
             subprocess.check_call(['rm', 'data/PDBs/%s.pdb' %ID])
         except:
@@ -162,8 +126,6 @@ def imgt_retrieve_clean(ids_filename):
             subprocess.check_call(['rm', 'data/PDBs/%s_MC.pdb' %ID])
         except:
             pass
-        aID = None
-        pID = None
 
     IDd = open("data/IDs_ChainsCounts_dict.pkl", "wb")
     pickle.dump(IDs_dict, IDd)
@@ -183,11 +145,16 @@ def imgt_retrieve_clean(ids_filename):
 
 def get_pdb_seq(IDs):
     sequences = []
+    empty_seqs = []
     for ID in IDs:
         pdbf = 'data/PDBs/%s_MP.pdb' %ID
         seqs = get_seqs(pdbf)
-        sequences.append(seqs)
-    return sequences
+        if seqs != {}:
+            sequences.append(seqs)
+        else:
+            empty_seqs.append(ID)
+    #return sequences1, sequences2, empty_seqs
+    return sequences, empty_seqs
 
 def get_seqs(pdbf):
     seqs = {}

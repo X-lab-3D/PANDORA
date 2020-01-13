@@ -6,7 +6,6 @@ import modeller.automodel as MA
 from MyLoop import MyLoop
 import sys
 
-print(sys.argv)
 global anchor_1
 global anchor_2
 alifile = sys.argv[1]
@@ -15,10 +14,6 @@ query = sys.argv[3]
 #anchor_1 = sys.argv[4]
 #anchor_2 = sys.argv[5]
 #alifile, ID, query = 'data/Alignments/4PGB.ali', '4PGB', '>3ROO:A'
-
-print(alifile)
-print(ID)
-print(query)
 
 M.log.verbose()                                # request verbose output
 env = M.environ()                              # create a new MODELLER environment to build this model in
