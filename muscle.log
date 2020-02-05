@@ -1,3 +1,0 @@
-Started Tue Jan  7 10:43:19 2020
-muscle -in data/FASTAs/4PGE.fasta -out data/Alignments/4PGE.afa -log muscle.log 
-Finished Tue Jan  7 10:43:19 2020

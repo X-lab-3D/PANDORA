@@ -1,4 +1,3 @@
-
 # 23-Aug-2018 14:36
 
 import modeller as M
@@ -6,8 +5,6 @@ import modeller.automodel as MA
 from MyLoop import MyLoop
 import sys
 
-global anchor_1
-global anchor_2
 alifile = sys.argv[1]
 ID = sys.argv[2]
 query = sys.argv[3]
