@@ -24,7 +24,7 @@ from random import choice
 ##IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
 #IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/mhc_ligand_table_export_1578913026.csv', 76, 80, ',')
 
-IDD_file = open('data/IDs_ChainsCounts_dict.pkl', 'rb')
+IDD_file = open('data/csv_pkl_files/IDs_ChainsCounts_dict.pkl', 'rb')
 IDD = pickle.load(IDD_file)
 bad_IDs = pickle.load(IDD_file)
 IDD_file.close()
@@ -38,11 +38,10 @@ for key in IDD:
         except KeyError:
             allele_ID[IDD[key]['allele']] = [key]
 
-pept_seqs = data_prep.get_peptides_from_csv('data/table_1_AnAnalysisofNaturalTCellResponsestoPredictedTumorNeoepitopes.csv', 1, 4, ',')
+pept_seqs = data_prep.get_peptides_from_csv('data/csv_pkl_files/table_1_AnAnalysisofNaturalTCellResponsestoPredictedTumorNeoepitopes.csv', 1, 4, ',')
 
 ## for pept in pept_seqs: ### TODO later, parallelized on Cartesius
 
-counts_dict = {'A1&A2' : 0, 'A1' : 0, 'A2' : 0, 'pos' : 0}
 anch_dict = { 8: (1, 7), 9 : (1, 8), 10 : (1, 9), 
               11 : (1, 10), 12 : (1, 10)}
 cutoff = 5
@@ -189,7 +188,7 @@ for k, pept_seq in enumerate(pept_seqs):
     os.system('rm data/Alignments/*.afa')
     
     # Calculating all Atom contacts
-    os.popen('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP_reres.pdb %s > data/all_contacts_%s.list' %(template_ID, cutoff, template_ID)).read()
+    os.popen('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP_reres.pdb %s > data/temp/all_contacts_%s.list' %(template_ID, cutoff, template_ID)).read()
     
     #Selecting only the anchors contacts
     
@@ -211,8 +210,8 @@ for k, pept_seq in enumerate(pept_seqs):
     
     ### Writing anchors contact list ###
     
-    with open( 'data/all_contacts_%s.list' %template_ID, 'r') as contacts:
-        with open('data/contacts_%s.list' %template_ID, 'w') as output:
+    with open( 'data/temp/all_contacts_%s.list' %template_ID, 'r') as contacts:
+        with open('data/temp/contacts_%s.list' %template_ID, 'w') as output:
             if real_anchor_2:                                                                     ### If the target peptide is longer than the templtate peptide
                 for line in contacts:
                     #print(line[30:33])
@@ -253,7 +252,7 @@ for k, pept_seq in enumerate(pept_seqs):
                     #        output.write(line)
     
     
-    with open('data/instructions.txt', 'w') as instr_file:
+    with open('data/temp/instructions.txt', 'w') as instr_file:
         instr_file.write(template_ID + ' ' + str(anch_1) + ' ' + str(anch_2) + ' ' + str(modeller_renum))
     
     #Finally launching Modeller. Hopefully.

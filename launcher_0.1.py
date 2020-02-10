@@ -24,7 +24,7 @@ import time
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
-IDD_file = open('data/IDs_ChainsCounts_dict.pkl', 'rb')
+IDD_file = open('data/csv_pkl_files/IDs_ChainsCounts_dict.pkl', 'rb')
 IDD = pickle.load(IDD_file)
 bad_IDs = pickle.load(IDD_file)
 IDD_file.close()
@@ -212,7 +212,7 @@ final_alifile.close()
 
 os.system('rm data/Alignments/*.afa')
 # Calculating all Atom contacts
-os.popen('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP_reres.pdb %s > data/all_contacts_%s.list' %(template_ID, cutoff, template_ID)).read()
+os.popen('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP_reres.pdb %s > data/temp/all_contacts_%s.list' %(template_ID, cutoff, template_ID)).read()
 
 #Selecting only the anchors contacts
 print('##############################')
@@ -254,8 +254,8 @@ print('')
 t1 = time.time()
 ### Writing anchors contact list ###
 
-with open( 'data/all_contacts_%s.list' %template_ID, 'r') as contacts:
-    with open('data/contacts_%s.list' %template_ID, 'w') as output:
+with open( 'data/temp/all_contacts_%s.list' %template_ID, 'r') as contacts:
+    with open('data/temp/contacts_%s.list' %template_ID, 'w') as output:
         if real_anchor_2:                                                                     ### If the target peptide is longer than the templtate peptide
             for line in contacts:
                 #print(line[30:33])
@@ -296,7 +296,7 @@ with open( 'data/all_contacts_%s.list' %template_ID, 'r') as contacts:
                 #        output.write(line)
 
 
-with open('data/instructions.txt', 'w') as instr_file:
+with open('data/temp/instructions.txt', 'w') as instr_file:
     instr_file.write(template_ID + ' ' + str(anchor_1) + ' ' + str(anchor_2) + ' ' + str(modeller_renum))
     
     

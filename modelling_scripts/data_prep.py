@@ -188,13 +188,13 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
 
     bad_IDs['errors'] = {'#1': err_1, '#2': err_2, '#3': err_3,
                          '#4': err_4, '#5': err_5, '#6': err_6,}
-    IDd = open("data/IDs_ChainsCounts_dict.pkl", "wb")
+    IDd = open("data/csv_files/IDs_ChainsCounts_dict.pkl", "wb")
     pickle.dump(IDs_dict, IDd)
     pickle.dump(bad_IDs, IDd)
     IDd.close()
     print('BAD IDs:')
     print(bad_IDs)
-    with open('data/IDs_dict.tsv', 'wt') as outfile:
+    with open('data/csv_files/IDs_dict.tsv', 'wt') as outfile:
         tsv_writer = csv.writer(outfile, delimiter='\t')
         tsv_writer.writerow(['PDB_ID', 'CHAIN_ID', 'LENGTH', 'ALLELE'])
         for ID in IDs_dict:
