@@ -82,7 +82,7 @@ if len(allele_ID[allele]) == 1:   ### In case we have only one template for this
         if ID == template_ID:
             template = SeqRecord(Seq(sequences[i]['M'], IUPAC.protein), id=ID, name = allele + ID)
             SeqIO.write((template, A_target), "data/FASTAs/%s.fasta" %ID, "fasta")
-    peptide_seq = ID_seqs_dict[template_ID][0]
+    template_pept = ID_seqs_dict[template_ID][0]
     #subprocess.check_call(['muscle', '-in %s.fasta -clw' %template_ID])
     t1 = time.time()
     os.system('muscle -in data/FASTAs/%s.fasta -out data/Alignments/%s.afa' %(template_ID, template_ID))
@@ -147,7 +147,7 @@ else:                             ### In case we have multiple templates for thi
     subprocess.check_call(muscle_commands)
     os.system('rm data/FASTAs/%s.fasta' %template_ID)
 
-    peptide_seq = ID_seqs_dict[template_ID][0]
+    template_pept = ID_seqs_dict[template_ID][0]
 
 print('##############################')
 print('Please input one restrain distance cutoff')
@@ -184,7 +184,7 @@ for line in open('data/Alignments/%s.afa' %template_ID, 'r'):
         template_ini_flag = True
         i += 1
     elif line.startswith('>') and i == 1:
-        final_alifile.write('/' + peptide_seq + '*')
+        final_alifile.write('/' + template_pept + '*')
         final_alifile.write('\n')
         final_alifile.write('\n>P1;' + line.split(':')[0].strip('>') + '\n')
         final_alifile.write('sequence:::::::::\n')
@@ -210,8 +210,6 @@ for line in open('data/Alignments/%s.afa' %template_ID, 'r'):
 final_alifile.write('/' + str(P_target.seq) + '*')
 final_alifile.close()
 
-#final_alifile_name = 'data/Alignments/1k5n_1ogt.ali'
-
 os.system('rm data/Alignments/*.afa')
 # Calculating all Atom contacts
 os.popen('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP_reres.pdb %s > data/all_contacts_%s.list' %(template_ID, cutoff, template_ID)).read()
@@ -221,9 +219,9 @@ print('##############################')
 print('Please input, one per time, the anchor positions (only the int number)')
 print('##############################')
 print('')
-print('The peptide of the selected template is %i residue long. The target one is %i residue long' %(len(str(peptide_seq)), len(str(P_target.seq))))
+print('The peptide of the selected template is %i residue long. The target one is %i residue long' %(len(str(template_pept)), len(str(P_target.seq))))
 print('')
-print('The template peptide sequence is %s, the target peptide seuqnce is %s' %(str(peptide_seq), str(P_target.seq)))
+print('The template peptide sequence is %s, the target peptide seuqnce is %s' %(str(template_pept), str(P_target.seq)))
 print('ANCHOR 1:')
 anchor_1 = int(input())
 #anchor_1 = int(anch_1_in) + ID_seqs_dict[template_ID][1]
@@ -235,17 +233,17 @@ real_anchor_2 = None
 anch_1_same = False
 anch_2_same = False
 
-if peptide_seq[anchor_1-1] == P_target.seq[anchor_1-1]:
+if template_pept[anchor_1-1] == P_target.seq[anchor_1-1]:
     anch_1_same = True
 if anchor_2 == len(P_target.seq):
-    if peptide_seq[anchor_2-1] == P_target.seq[anchor_2-1]:
+    if template_pept[anchor_2-1] == P_target.seq[anchor_2-1]:
         anch_2_same = True
 else:
-    if peptide_seq[-1] == P_target.seq[anchor_2-1]:
+    if template_pept[-1] == P_target.seq[anchor_2-1]:
         anch_2_same = True
 
-if anchor_2 > (len(str(peptide_seq)) + ID_seqs_dict[template_ID][1]):
-    real_anchor_2 = (len(str(peptide_seq)) + ID_seqs_dict[template_ID][1])
+if anchor_2 > (len(str(template_pept)) + ID_seqs_dict[template_ID][1]):
+    real_anchor_2 = (len(str(template_pept)) + ID_seqs_dict[template_ID][1])
 '''
 print('')
 print('############################################################')
@@ -317,8 +315,8 @@ except FileExistsError:
     print('WARNING: You are writing in an existing directory.')
     pass
 
-#os.chdir(outdir)
-#os.popen('/usr/bin/python2.7 ../../modelling_scripts/cmd_modeller.py ../../%s %s %s' %(final_alifile_name, template_ID, target_name.upper())).read()
+os.chdir(outdir)
+os.popen('/usr/bin/python2.7 ../../modelling_scripts/cmd_modeller.py ../../%s %s %s' %(final_alifile_name, template_ID, target_name.upper())).read()
 
 #os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s 1k5n_MP query_1ogt_MP' %final_alifile_name).read()
 

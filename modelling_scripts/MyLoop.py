@@ -21,6 +21,11 @@ class MyLoop(MA.loopmodel):
         # Rename both chains and renumber the residues in each
         self.rename_segments(segment_ids=['M', 'P'], renumber_residues=[renum,1])
         
+    ### Skipping randomness in Initial modelling. Uncomment this funtion only if you specifically mean it. 
+    def build_ini_loop(self, atmsel):
+        pass
+    ###
+    
     def select_loop_atoms(self):
         # Two residue ranges (both will be refined simultaneously)
         return M.selection(self.residue_range('%i:P' %(anchor_1 +1), '%i:P' %(anchor_2-1)))
