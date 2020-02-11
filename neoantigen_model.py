@@ -3,13 +3,12 @@
 from modelling_scripts import data_prep
 import pickle
 from Bio import SeqIO
-import subprocess
+#import subprocess
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 import os
-import glob
-import time
+#import time
 from Bio.SubsMat import MatrixInfo
 from random import choice 
 
@@ -38,6 +37,8 @@ pept_seqs = data_prep.get_peptides_from_csv('data/csv_pkl_files/table_1_AnAnalys
 
 anch_dict = { 8: (1, 7), 9 : (1, 8), 10 : (1, 9), 
               11 : (1, 10), 12 : (1, 10)}
+
+remove_temp_outputs = True
 cutoff = 5
 
 maxs = []
@@ -110,37 +111,38 @@ for k, pept_seq in enumerate(pept_seqs):
         print('')
         print('####################################################')
 
+    ###################################
+    #   CHANGING WORKING DIRECTORY
+    ###################################
 
-    ### Producing a Fasta file for each putative template-target alignment ###
     sequences, empty_seqs = data_prep.get_pdb_seq([template_ID])
+    
+    outdir = ('outputs/%s_%s' %(template_ID.lower(), query))
+    try:
+        os.mkdir(outdir)
+    except FileExistsError:
+        print('WARNING: You are writing in an existing directory.')
+        pass
+    os.chdir(outdir)
     
     template_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=template_ID, name = 'HLA' + ID)
     target_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=query, name = 'HLA_' + query)
-    SeqIO.write((template_seqr, target_seqr), "data/FASTAs/%s.fasta" %template_ID, "fasta")
+    SeqIO.write((template_seqr, target_seqr), "%s.fasta" %template_ID, "fasta")
     
-    os.system('muscle -in data/FASTAs/%s.fasta -out data/Alignments/%s.afa' %(template_ID, template_ID))
-    os.system('rm data/FASTAs/%s.fasta' %template_ID)
-    
-    os.system('pdb_splitchain data/PDBs/%s_MP.pdb' %template_ID)
-    for chain in ['M', 'P']:
-        os.system('mv %s_MP_%s.pdb data/PDBs/%s_MP_%s.pdb' %(template_ID, chain, template_ID, chain))
-        os.system('pdb_reres -1 data/PDBs/%s_MP_%s.pdb > data/PDBs/%s_MP_%s.pdb.renum' %(template_ID, chain, template_ID, chain))
-    os.system('pdb_merge data/PDBs/%s_MP_*.pdb.renum > data/PDBs/%s_MP_reres.pdb' %(template_ID, template_ID))
-    os.system('rm -f data/PDBs/%s_MP_[A-Z].pdb' %template_ID)
-    os.system('rm data/PDBs/*.pdb.renum')
-    
-    
-    final_alifile_name = 'data/Alignments/%s.ali' %template_ID
+    os.system('muscle -in %s.fasta -out %s.afa' %(template_ID, template_ID))
+    os.system('rm %s.fasta' %template_ID)
+
+    final_alifile_name = '%s.ali' %template_ID
     final_alifile = open(final_alifile_name, 'w')
     i = 0
     target_ini_flag = False
     template_ini_flag = False
     modeller_renum = 1
-    for line in open('data/Alignments/%s.afa' %template_ID, 'r'):
+    for line in open('%s.afa' %template_ID, 'r'):
         #print(line)
         if line.startswith('>') and i == 0:
             final_alifile.write('>P1;' + line.split(' ')[0].strip('>') + '\n')
-            final_alifile.write('structure:../../data/PDBs/%s_MP_reres.pdb:1:M:9:P::::\n' %template_ID)
+            final_alifile.write('structure:../../data/PDBs/%s_MP.pdb:1:M:9:P::::\n' %template_ID)
             template_ini_flag = True
             i += 1
         elif line.startswith('>') and i == 1:
@@ -151,29 +153,18 @@ for k, pept_seq in enumerate(pept_seqs):
             target_ini_flag = True
         else:
             final_alifile.write(line.rstrip())
-            if template_ini_flag == True:
-                if line.startswith('-'):
-                    print('template start with gap')
-                    gap_count = line[:10].count('-')
-                    modeller_renum = gap_count - 1
-                else:
-                    pass
-                template_ini_flag = False
-            if target_ini_flag == True:
-                if line.startswith('-'):
-                    print('target start with gap')
-                    gap_count = line[:10].count('-')
-                    modeller_renum = gap_count + 1
-                else:
-                    pass
-                target_ini_flag = False
     final_alifile.write('/' + str(pept) + '*')
     final_alifile.close()
     
-    os.system('rm data/Alignments/*.afa')
+    if remove_temp_outputs:
+        os.system('rm *.afa')
+    
+    with open('instructions.txt', 'w') as instr_file:
+        instr_file.write(template_ID + ' ' + str(1) + ' ' + str(9))
+    os.popen('/usr/bin/python2.7 ../../modelling_scripts/cmd_modeller_ini.py %s %s %s' %(final_alifile_name, template_ID, query)).read()
     
     # Calculating all Atom contacts
-    os.popen('modelling_scripts/contact-chainID_allAtoms data/PDBs/%s_MP_reres.pdb %s > data/temp/all_contacts_%s.list' %(template_ID, cutoff, template_ID)).read()
+    os.popen('../../modelling_scripts/contact-chainID_allAtoms %s.ini %s > all_contacts_%s.list' %(query, cutoff, template_ID)).read()
     
     #Selecting only the anchors contacts
     
@@ -195,8 +186,8 @@ for k, pept_seq in enumerate(pept_seqs):
     
     ### Writing anchors contact list ###
     
-    with open( 'data/temp/all_contacts_%s.list' %template_ID, 'r') as contacts:
-        with open('data/temp/contacts_%s.list' %template_ID, 'w') as output:
+    with open( 'all_contacts_%s.list' %template_ID, 'r') as contacts:
+        with open('contacts_%s.list' %template_ID, 'w') as output:
             if real_anchor_2:                                                                     ### If the target peptide is longer than the templtate peptide
                 for line in contacts:
                     #print(line[30:33])
@@ -236,21 +227,15 @@ for k, pept_seq in enumerate(pept_seqs):
                     #if (int(p_aa_id) == anch_1 or int(p_aa_id) == anch_2) and ('CA' in p_atom or 'CB' in p_atom):
                     #        output.write(line)
     
+    if remove_temp_outputs:
+        os.system('rm all_contacts_%s.list' %template_ID)
     
-    with open('data/temp/instructions.txt', 'w') as instr_file:
+    with open('instructions.txt', 'w') as instr_file:
         instr_file.write(template_ID + ' ' + str(anch_1) + ' ' + str(anch_2) + ' ' + str(modeller_renum))
     
     #Finally launching Modeller. Hopefully.
     
-    outdir = ('outputs/%s_%s' %(template_ID.lower(), query))
-    try:
-        os.mkdir(outdir)
-    except FileExistsError:
-        print('WARNING: You are writing in an existing directory.')
-        pass
-    
-    os.chdir(outdir)
-    os.popen('/usr/bin/python2.7 ../../modelling_scripts/cmd_modeller.py ../../%s %s %s' %(final_alifile_name, template_ID, query)).read()
+    os.popen('/usr/bin/python2.7 ../../modelling_scripts/cmd_modeller.py %s %s %s' %(final_alifile_name, template_ID, query)).read()
     
     break
     #os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s 1k5n_MP query_1ogt_MP' %final_alifile_name).read()

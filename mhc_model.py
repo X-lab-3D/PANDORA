@@ -134,8 +134,6 @@ else:                             ### In case we have multiple templates for thi
     template_pept = ID_seqs_dict[template_ID][0]
 
 ### Writing a final .ali file with Template sequence / template pept sequence ; Target sequence / target pept sequence ###
-    
-#TODO: Add header to ID_MP_reres.pdb
 
 #os.system('pdb_reres -1 data/PDBs/%s_MP.pdb > data/PDBs/%s_MP_reres.pdb' %(template_ID, template_ID))  # Renumbering the residues
 
