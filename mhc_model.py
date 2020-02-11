@@ -88,13 +88,9 @@ if len(allele_ID[allele]) == 1:   ### In case we have only one template for this
             template = SeqRecord(Seq(sequences[i]['M'], IUPAC.protein), id=ID, name = allele + ID)
             SeqIO.write((template, A_target), "%s.fasta" %ID, "fasta")
     template_pept = ID_seqs_dict[template_ID][0]
-    #subprocess.check_call(['muscle', '-in %s.fasta -clw' %template_ID])
-    t1 = time.time()
     os.system('muscle -in %s.fasta -out %s.afa' %(template_ID, template_ID))
     os.system('rm %s.fasta' %template_ID)
-    tf = time.time() - t1
-    print('IT TOOK: ')
-    print(tf)
+
 else:                             ### In case we have multiple templates for this allele ###
     score_dict = {}
     max_id = 0
@@ -134,18 +130,6 @@ else:                             ### In case we have multiple templates for thi
     template_pept = ID_seqs_dict[template_ID][0]
 
 ### Writing a final .ali file with Template sequence / template pept sequence ; Target sequence / target pept sequence ###
-
-#os.system('pdb_reres -1 data/PDBs/%s_MP.pdb > data/PDBs/%s_MP_reres.pdb' %(template_ID, template_ID))  # Renumbering the residues
-
-'''
-os.system('pdb_splitchain data/PDBs/%s_MP.pdb' %template_ID)
-for chain in ['M', 'P']:
-    os.system('mv %s_MP_%s.pdb data/PDBs/%s_MP_%s.pdb' %(template_ID, chain, template_ID, chain))
-    os.system('pdb_reres -1 data/PDBs/%s_MP_%s.pdb > data/PDBs/%s_MP_%s.pdb.renum' %(template_ID, chain, template_ID, chain))
-os.system('pdb_merge data/PDBs/%s_MP_*.pdb.renum > data/PDBs/%s_MP_reres.pdb' %(template_ID, template_ID))
-os.system('rm -f data/PDBs/%s_MP_[A-Z].pdb' %template_ID)
-os.system('rm data/PDBs/*.pdb.renum')
-'''
 
 final_alifile_name = '%s.ali' %template_ID
 final_alifile = open(final_alifile_name, 'w')
@@ -213,7 +197,6 @@ else:
 if anchor_2 > (len(str(template_pept)) + ID_seqs_dict[template_ID][1]):
     real_anchor_2 = (len(str(template_pept)) + ID_seqs_dict[template_ID][1])
 
-t1 = time.time()
 ### Writing anchors contact list ###
 
 with open( 'all_contacts_%s.list' %template_ID, 'r') as contacts:
@@ -263,11 +246,13 @@ if remove_temp_outputs:
 with open('instructions.txt', 'w') as instr_file:
     instr_file.write(template_ID + ' ' + str(anchor_1) + ' ' + str(anchor_2))
     
+t1 = time.time()
+
 os.popen('/usr/bin/python2.7 ../../modelling_scripts/cmd_modeller.py %s %s %s' %(final_alifile_name, template_ID, target_name.upper())).read()
 
 
 t2 = time.time()
 tf = t2 - t1
 
-print('It took %i seconds' %tf)
+print('The modelling took %i seconds' %tf)
 

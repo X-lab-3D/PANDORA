@@ -1,2 +1,0 @@
-launcher_0.1.py : First version. Given a target fasta sequence, an allele, a template and the anchors positions runs cmd_modeller.
-launcher_0.2.py : Designed for modelling Neoantigens from 1,948 paper on Cartesius

@@ -8,7 +8,7 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
 import os
-#import time
+import time
 from Bio.SubsMat import MatrixInfo
 from random import choice 
 
@@ -129,7 +129,7 @@ for k, pept_seq in enumerate(pept_seqs):
     target_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=query, name = 'HLA_' + query)
     SeqIO.write((template_seqr, target_seqr), "%s.fasta" %template_ID, "fasta")
     
-    os.system('muscle -in %s.fasta -out %s.afa' %(template_ID, template_ID))
+    os.system('muscle -in %s.fasta -out %s.afa -quiet' %(template_ID, template_ID))
     os.system('rm %s.fasta' %template_ID)
 
     final_alifile_name = '%s.ali' %template_ID
@@ -235,7 +235,14 @@ for k, pept_seq in enumerate(pept_seqs):
     
     #Finally launching Modeller. Hopefully.
     
+    t1 = time.time()
+    
     os.popen('/usr/bin/python2.7 ../../modelling_scripts/cmd_modeller.py %s %s %s' %(final_alifile_name, template_ID, query)).read()
+    
+    t2 = time.time()
+    tf = t2 - t1
+    
+    print('The modelling took %i seconds' %tf)
     
     break
     #os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s 1k5n_MP query_1ogt_MP' %final_alifile_name).read()
