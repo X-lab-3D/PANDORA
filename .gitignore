@@ -1,12 +1,13 @@
-# Datas folder. Tracking only csv_pkl_files.
+# Datas folder. Tracking only csv_pkl_files and crucial (empty) folders.
 /data/Alignments
 /data/FASTAs
-/data/PDBs
+/data/PDBs/*
 /data/temp
-/data/Targets
-/outputs
+/data/Targets/*
+/outputs/*
 
 
 # Misc
 .DS_Store
 /modelling_scripts/.DS_Store
+/modelling_scripts/contact-chainID_allAtoms

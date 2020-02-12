@@ -161,9 +161,11 @@ for k, pept_seq in enumerate(pept_seqs):
     
     with open('instructions.txt', 'w') as instr_file:
         instr_file.write(template_ID + ' ' + str(1) + ' ' + str(9))
-    os.popen('/usr/bin/python2.7 ../../modelling_scripts/cmd_modeller_ini.py %s %s %s' %(final_alifile_name, template_ID, query)).read()
+    os.popen('python2.7 ../../modelling_scripts/cmd_modeller_ini.py %s %s %s' %(final_alifile_name, template_ID, query)).read()
     
     # Calculating all Atom contacts
+    if "contact-chainID_allAtoms" not in os.listdir('../../modelling_scripts'):
+        os.popen('g++ ../../modelling_scripts/contact-chainID_allAtoms.cpp -o ../../modelling_scripts/contact-chainID_allAtoms').read()
     os.popen('../../modelling_scripts/contact-chainID_allAtoms %s.ini %s > all_contacts_%s.list' %(query, cutoff, template_ID)).read()
     
     #Selecting only the anchors contacts
@@ -237,7 +239,7 @@ for k, pept_seq in enumerate(pept_seqs):
     
     t1 = time.time()
     
-    os.popen('/usr/bin/python2.7 ../../modelling_scripts/cmd_modeller.py %s %s %s' %(final_alifile_name, template_ID, query)).read()
+    os.popen('python2.7 ../../modelling_scripts/cmd_modeller.py %s %s %s' %(final_alifile_name, template_ID, query)).read()
     
     t2 = time.time()
     tf = t2 - t1

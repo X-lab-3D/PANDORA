@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# Li Xue
 # 23-Aug-2018 14:36
 
 import modeller as M
