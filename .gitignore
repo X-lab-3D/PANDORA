@@ -10,3 +10,5 @@
 # Misc
 .DS_Store
 /modelling_scripts/.DS_Store
+/modelling_scripts/contact-chainID_allAtoms
+/modelling_scripts/*.pyc
