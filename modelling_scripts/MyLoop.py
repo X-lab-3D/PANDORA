@@ -7,7 +7,6 @@ class MyLoop(MA.loopmodel):
     global anchor_1
     global anchor_2
     global ID
-    global renum
     with open('instructions.txt', 'r') as instr_file: #'../../data/temp/instructions.txt'
         line = instr_file.readline()
         instructions = line.split(' ')
