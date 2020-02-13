@@ -15,7 +15,7 @@ from random import choice
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
 ##IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
-#IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/mhc_ligand_table_export_1578913026.csv', 76, 80, ',')
+#IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/csv_pkl_files/mhc_ligand_table_export_1578913026.csv', 76, 80, ',')
 
 IDD_file = open('data/csv_pkl_files/IDs_ChainsCounts_dict.pkl', 'rb')
 IDD = pickle.load(IDD_file)
@@ -38,14 +38,16 @@ pept_seqs = data_prep.get_peptides_from_csv('data/csv_pkl_files/table_1_AnAnalys
 anch_dict = { 8: (1, 7), 9 : (1, 8), 10 : (1, 9), 
               11 : (1, 10), 12 : (1, 10)}
 
-remove_temp_outputs = True
+remove_temp_outputs = False
 cutoff = 5
 
 maxs = []
 maxsl = []
 print_results = False
 
-for k, pept_seq in enumerate(pept_seqs):
+for k, pept_seq in enumerate(pept_seqs[:20]):
+    if k != 0:
+        os.chdir('../../')
     query = 'query_' + str(k + 1)
     
     pept = pept_seq[0]
@@ -161,6 +163,16 @@ for k, pept_seq in enumerate(pept_seqs):
     
     with open('instructions.txt', 'w') as instr_file:
         instr_file.write(template_ID + ' ' + str(1) + ' ' + str(9))
+    
+    '''
+    os.system('pdb_splitchain ../../data/PDBs/%s_MP.pdb' %template_ID)
+    for chain in ['M', 'P']:
+        os.system('mv %s_MP_%s.pdb ../../data/PDBs/%s_MP_%s.pdb' %(template_ID, chain, template_ID, chain))
+        os.system('pdb_reres -1 ../../data/PDBs/%s_MP_%s.pdb > ../../data/PDBs/%s_MP_%s.pdb.renum' %(template_ID, chain, template_ID, chain))
+    os.system('pdb_merge ../../data/PDBs/%s_MP_*.pdb.renum > ../../data/PDBs/%s_MP_reres.pdb' %(template_ID, template_ID))
+    os.system('rm -f data/PDBs/%s_MP_[A-Z].pdb' %template_ID)
+    os.system('rm -f ../../data/PDBs/*.pdb.renum')
+    '''
     os.popen('python2.7 ../../modelling_scripts/cmd_modeller_ini.py %s %s %s' %(final_alifile_name, template_ID, query)).read()
     
     # Calculating all Atom contacts
@@ -239,14 +251,13 @@ for k, pept_seq in enumerate(pept_seqs):
     
     t1 = time.time()
     
-    os.popen('python2.7 ../../modelling_scripts/cmd_modeller.py %s %s %s' %(final_alifile_name, template_ID, query)).read()
+    #os.popen('python2.7 ../../modelling_scripts/cmd_modeller.py %s %s %s' %(final_alifile_name, template_ID, query)).read()
     
     t2 = time.time()
     tf = t2 - t1
     
     print('The modelling took %i seconds' %tf)
     
-    break
     #os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s 1k5n_MP query_1ogt_MP' %final_alifile_name).read()
 
 
