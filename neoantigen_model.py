@@ -7,15 +7,24 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
+from Bio.PDB import PDBParser
 import os
 import time
 from Bio.SubsMat import MatrixInfo
-from random import choice 
+from random import choice
+import csv
+import sys
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
 ##IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
 #IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/csv_pkl_files/mhc_ligand_table_export_1578913026.csv', 76, 80, ',')
+
+outdir_name = sys.argv[1]
+modeller_log =sys.argv[2]
+
+###########################################
+### Organizing dicts ###
 
 IDD_file = open('data/csv_pkl_files/IDs_ChainsCounts_dict.pkl', 'rb')
 IDD = pickle.load(IDD_file)
@@ -31,25 +40,29 @@ for key in IDD:
         except KeyError:
             allele_ID[IDD[key]['allele']] = [key]
 
-pept_seqs = data_prep.get_peptides_from_csv('data/csv_pkl_files/table_1_AnAnalysisofNaturalTCellResponsestoPredictedTumorNeoepitopes.csv', 1, 4, ',')
+###########################################
+###  Setting variables 
 
-## for pept in pept_seqs: ### TODO later, parallelized on Cartesius
+pept_seqs = data_prep.get_peptides_from_csv('data/csv_pkl_files/table_1_AnAnalysisofNaturalTCellResponsestoPredictedTumorNeoepitopes.csv', 3, 4, ',')
+
 
 anch_dict = { 8: (1, 7), 9 : (1, 8), 10 : (1, 9), 
-              11 : (1, 10), 12 : (1, 10)}
+              11 : (1, 10), 12 : (1, 11)}
 
 remove_temp_outputs = False
 cutoff = 5
 
 maxs = []
 maxsl = []
+non_modelled = []
 print_results = False
 
-for k, pept_seq in enumerate(pept_seqs[:20]):
-    if k != 0:
-        os.chdir('../../')
+###########################################
+
+
+for k, pept_seq in enumerate(pept_seqs[29:30]):
     query = 'query_' + str(k + 1)
-    
+    print( '## Wokring on %s ##' %query)
     pept = pept_seq[0]
     allele = pept_seq[1]
     length = len(pept)
@@ -67,11 +80,11 @@ for k, pept_seq in enumerate(pept_seqs[:20]):
         allele = allele[:6]
         
     for ID in IDD:
-        if allele in IDD[ID]['allele']:                      ## Same Allele
+        if allele in IDD[ID]['allele']:                       ## Same Allele
             score = 0
             temp_pept = IDD[ID]['pept_seq']
             min_len = min([length, len(temp_pept)])
-            score -= abs(length - len(temp_pept))
+            score -= (abs(length - len(temp_pept)) * 20)      ## Penalty for gaps
             for (aa, bb) in zip(pept[:min_len], temp_pept[:min_len]):
                 try:
                     score += MatrixInfo.pam30[aa, bb]
@@ -95,8 +108,11 @@ for k, pept_seq in enumerate(pept_seqs[:20]):
             max_list.append(pos)
     maxs.append(max_pos)
     maxsl.append(len(max_list))
-
-    if len(max_list) == 1:
+    
+    if len(max_list) == 0:
+        non_modelled.append((query, pept, allele, "NA", "NA", "NA"))
+        continue
+    elif len(max_list) == 1:
         template = max_list[0]
         template_ID = template[2]
         template_pept = template[1]
@@ -119,14 +135,16 @@ for k, pept_seq in enumerate(pept_seqs[:20]):
 
     sequences, empty_seqs = data_prep.get_pdb_seq([template_ID])
     
-    outdir = ('outputs/%s_%s' %(template_ID.lower(), query))
+    outdir = ('outputs/%s/%s_%s' %(outdir_name, template_ID.lower(), query))
     try:
         os.mkdir(outdir)
     except FileExistsError:
-        print('WARNING: You are writing in an existing directory.')
-        pass
+        print('WARNING: Existing directory.')
+        continue
     os.chdir(outdir)
     
+    #Preparing template and target sequences for the .ali file, launching Muscle
+
     template_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=template_ID, name = 'HLA' + ID)
     target_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=query, name = 'HLA_' + query)
     SeqIO.write((template_seqr, target_seqr), "%s.fasta" %template_ID, "fasta")
@@ -144,7 +162,7 @@ for k, pept_seq in enumerate(pept_seqs[:20]):
         #print(line)
         if line.startswith('>') and i == 0:
             final_alifile.write('>P1;' + line.split(' ')[0].strip('>') + '\n')
-            final_alifile.write('structure:../../data/PDBs/%s_MP.pdb:1:M:9:P::::\n' %template_ID)
+            final_alifile.write('structure:../../../data/PDBs/%s_MP.pdb:%s:M:%s:P::::\n' %(template_ID, str(sequences[0]['M_st_ID']), str(len(template_pept))))
             template_ini_flag = True
             i += 1
         elif line.startswith('>') and i == 1:
@@ -161,8 +179,8 @@ for k, pept_seq in enumerate(pept_seqs[:20]):
     if remove_temp_outputs:
         os.system('rm *.afa')
     
-    with open('instructions.txt', 'w') as instr_file:
-        instr_file.write(template_ID + ' ' + str(1) + ' ' + str(9))
+    #with open('instructions.txt', 'w') as instr_file:
+    #    instr_file.write(template_ID + ' ' + str(1) + ' ' + str(9))
     
     '''
     os.system('pdb_splitchain ../../data/PDBs/%s_MP.pdb' %template_ID)
@@ -173,12 +191,41 @@ for k, pept_seq in enumerate(pept_seqs[:20]):
     os.system('rm -f data/PDBs/%s_MP_[A-Z].pdb' %template_ID)
     os.system('rm -f ../../data/PDBs/*.pdb.renum')
     '''
-    os.popen('python2.7 ../../modelling_scripts/cmd_modeller_ini.py %s %s %s' %(final_alifile_name, template_ID, query)).read()
+    
+    with open('MyLoop.py', 'w') as myloopscript:
+        MyL_temp = open('../../../modelling_scripts/MyLoop_template.py', 'r')
+        for line in MyL_temp:
+            
+            if 'self.residue_range' in line:
+                myloopscript.write(line %(anch_1 + 2, anch_2))
+            elif 'SPECIAL_RESTRAINTS_BREAK' in line:
+                break
+            elif 'contact_file = open' in line:
+                myloopscript.write(line %template_ID)
+            else:
+                myloopscript.write(line)
+        MyL_temp.close()
+    
+    with open('cmd_modeller_ini.py', 'w') as modscript:
+        cmd_m_temp = open('../../../modelling_scripts/cmd_modeller_ini.py', 'r')
+        for line in cmd_m_temp:
+            if 'alnfile' in line:
+                modscript.write(line %final_alifile_name)
+            elif 'knowns' in line:
+                modscript.write(line %(template_ID, query))
+            else:
+                modscript.write(line)
+        cmd_m_temp.close()
+    
+    os.popen('python3 cmd_modeller_ini.py').read()
+    
+    if remove_temp_outputs:
+        os.system('rm cmd_modeller_ini.py')
     
     # Calculating all Atom contacts
-    if "contact-chainID_allAtoms" not in os.listdir('../../modelling_scripts'):
-        os.popen('g++ ../../modelling_scripts/contact-chainID_allAtoms.cpp -o ../../modelling_scripts/contact-chainID_allAtoms').read()
-    os.popen('../../modelling_scripts/contact-chainID_allAtoms %s.ini %s > all_contacts_%s.list' %(query, cutoff, template_ID)).read()
+    if "contact-chainID_allAtoms" not in os.listdir('../../../modelling_scripts'):
+        os.popen('g++ ../../../modelling_scripts/contact-chainID_allAtoms.cpp -o ../../../modelling_scripts/contact-chainID_allAtoms').read()
+    os.popen('../../../modelling_scripts/contact-chainID_allAtoms %s.ini %s > all_contacts_%s.list' %(query, cutoff, template_ID)).read()
     
     #Selecting only the anchors contacts
     
@@ -196,7 +243,7 @@ for k, pept_seq in enumerate(pept_seqs[:20]):
             anch_2_same = True
     
     if anch_2 > len(template_pept):
-        real_anchor_2 = (anch_2 + len(temp_pept))
+        real_anchor_2 = (anch_2 + len(template_pept))
     
     ### Writing anchors contact list ###
     
@@ -244,20 +291,50 @@ for k, pept_seq in enumerate(pept_seqs[:20]):
     if remove_temp_outputs:
         os.system('rm all_contacts_%s.list' %template_ID)
     
-    with open('instructions.txt', 'w') as instr_file:
-        instr_file.write(template_ID + ' ' + str(anch_1) + ' ' + str(anch_2) + ' ' + str(modeller_renum))
+    with open('MyLoop.py', 'w') as myloopscript:
+        MyL_temp = open('../../../modelling_scripts/MyLoop_template.py', 'r')
+        for line in MyL_temp:
+            if 'self.residue_range' in line:
+                myloopscript.write(line %(anch_1 + 2, anch_2))
+            elif 'contact_file = open' in line:
+                myloopscript.write(line %template_ID)
+            else:
+                myloopscript.write(line)
+        MyL_temp.close()
+        
+    #    with open('instructions.txt', 'w') as instr_file:
+    #        instr_file.write(template_ID + ' ' + str(anch_1) + ' ' + str(anch_2) + ' ' + str(modeller_renum))
     
     #Finally launching Modeller. Hopefully.
     
     t1 = time.time()
     
-    #os.popen('python2.7 ../../modelling_scripts/cmd_modeller.py %s %s %s' %(final_alifile_name, template_ID, query)).read()
+    with open('cmd_modeller.py', 'w') as modscript:
+        cmd_m_temp = open('../../../modelling_scripts/cmd_modeller_template.py', 'r')
+        for line in cmd_m_temp:
+            if 'alnfile' in line:
+                modscript.write(line %final_alifile_name)
+            elif 'knowns' in line:
+                modscript.write(line %(template_ID, query))
+            else:
+                modscript.write(line)
+        cmd_m_temp.close()
+    
+    os.popen('python3 cmd_modeller.py > modeller.log').read()
     
     t2 = time.time()
     tf = t2 - t1
     
     print('The modelling took %i seconds' %tf)
-    
-    #os.popen('/usr/bin/python2.7 modelling_scripts/cmd_modeller.py %s 1k5n_MP query_1ogt_MP' %final_alifile_name).read()
 
+    if tf < 3:
+        non_modelled.append((query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele']))
+    
+    os.chdir('../../../')
+
+with open('outputs/non_modelled.csv', 'wt') as outfile:
+    tsv_writer = csv.writer(outfile, delimiter='\t')
+    tsv_writer.writerow(['QUERY', 'NEOANTIGEN', 'QUERY ALLELE', 'TEMPLATE ID', 'TEMPLATE PEPTIDE', 'TEMPLATE ALLELE'])
+    for query in non_modelled:
+        tsv_writer.writerow(query)
 
