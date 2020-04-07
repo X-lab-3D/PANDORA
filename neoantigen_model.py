@@ -13,15 +13,16 @@ import time
 from Bio.SubsMat import MatrixInfo
 from random import choice
 import csv
-import sys
+#import sys
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
 ##IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
 #IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/csv_pkl_files/mhc_ligand_table_export_1578913026.csv', 76, 80, ',')
 
-outdir_name = sys.argv[1]
-modeller_log =sys.argv[2]
+#outdir_name = sys.argv[1]
+
+outdir_name = 'wildtype'
 
 ###########################################
 ### Organizing dicts ###
@@ -60,9 +61,20 @@ print_results = False
 ###########################################
 
 
-for k, pept_seq in enumerate(pept_seqs[29:30]):
+for k, pept_seq in enumerate(pept_seqs):
+    ext_flag = False
     query = 'query_' + str(k + 1)
     print( '## Wokring on %s ##' %query)
+    for folder in os.listdir('outputs/%s' %outdir_name):
+        if 'query' in folder:
+            if str(k+1) == folder.split('_')[2]:
+                print('WARNING: Existing directory for this query. Moving on.')
+                ext_flag = True
+                break
+    if ext_flag == True:
+        print('Exiting here. This is only a DEBUG message')
+        continue
+
     pept = pept_seq[0]
     allele = pept_seq[1]
     length = len(pept)
@@ -332,7 +344,7 @@ for k, pept_seq in enumerate(pept_seqs[29:30]):
     
     os.chdir('../../../')
 
-with open('outputs/non_modelled.csv', 'wt') as outfile:
+with open('outputs/%s/non_modelled.csv' %outdir_name, 'wt') as outfile:
     tsv_writer = csv.writer(outfile, delimiter='\t')
     tsv_writer.writerow(['QUERY', 'NEOANTIGEN', 'QUERY ALLELE', 'TEMPLATE ID', 'TEMPLATE PEPTIDE', 'TEMPLATE ALLELE'])
     for query in non_modelled:

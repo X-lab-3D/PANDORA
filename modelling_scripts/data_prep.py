@@ -223,11 +223,14 @@ def get_seqs(pdbf):
     structure = P.get_structure('s', pdbf)
     for chain in structure.get_chains():
         sequence = ''
-        for res in chain:
-          try:
-            aa = to_one_letter_code[res.resname]
-          except KeyError:
-            aa= '.'
-          sequence += aa
+        for i, res in enumerate(chain):
+            if i == 0:
+                start_ID = res.id[1]
+            try:
+                aa = to_one_letter_code[res.resname]
+            except KeyError:
+                aa= '.'
+            sequence += aa
         seqs[chain.id] = sequence
+        seqs['%s_st_ID' %chain.id] = start_ID
     return seqs
