@@ -79,7 +79,7 @@ for k, pept_seq in enumerate(pept_seqs):
     allele = pept_seq[1]
     length = len(pept)
         
-    max_pos = -100
+    max_pos = -200
     pos_list = []
     
     anch_1, anch_2 = anch_dict[length]

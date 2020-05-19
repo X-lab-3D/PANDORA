@@ -14,7 +14,7 @@ import time
 
 ###IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/csv_pkl_files/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
 
-IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/csv_pkl_files/mhcI_structures_IEDB.csv', 42, 43, ';', [0,1])
+#IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/csv_pkl_files/mhcI_structures_IEDB.csv', 42, 43, ';', [0,1])
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
@@ -25,7 +25,7 @@ IDD_file.close()
 
 remove_temp_outputs = False
 cutoff = 5
-outdir_name = 'table_1'
+outdir_name = 'table_1_v2'
 
 ### Organizing Allele IDs in a dictionary ###
 allele_ID = {}
@@ -35,7 +35,6 @@ for key in IDD:
     except KeyError:
         allele_ID[IDD[key]['allele']] = [key]
 
-raise Exception('OK.')
 run_dict = {0: ('HLA-A*02:01', '1duz', '3MRB', '2', '9'), 1: ('HLA-A*02:01', '1tvb', '3MRB', '2', '9'), 
             2: ('HLA-A*02:01', '2v2w', '3MRB', '2', '9'), 3: ('HLA-A*02:01', '3pwn', '3MRB', '2', '9'),
             4: ('HLA-A*02:01', '4k7f', '3MRB', '2', '9'), 5: ('HLA-B*27:09', '1ogt', '1K5N', '2', '9'),

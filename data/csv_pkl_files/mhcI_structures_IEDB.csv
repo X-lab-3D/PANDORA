@@ -779,3 +779,7 @@ MHC ligand ID;Reference ID;Type;PubMed ID;Authors;Journal;Date;Title;Submission 
 6279276;1035741;Literature;31555277;"Timothy P Riley; Grant L J Keller; Angela R Smith; Lauren M Davancaze; Alyssa G Arbuiso; Jason R Devlin; Brian M Baker";Front Immunol;2019;Structure Based Prediction of Neoantigen Immunogenicity.;;710995;Linear peptide;ILNAMITKI;154;162;;HAUS augmin-like complex subunit 3;HAUS augmin-like complex subunit 3;Q68CZ6;Homo sapiens;Homo sapiens;9606;;;;;;;;;;;;;human (Homo sapiens);9606;Table 1, Figure 2 and PDB 6PTE;x-ray crystallography;3D structure;angstroms;Positive;=;1.9;6PTE;HLA-A*02:01;I;The crystal structure of the epitope/HLA-A*0201 complex was determined.
 6279277;;;;;;;;;;;VMAPRALL;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;3BZF;HLA-E*01:01;;
 6279278;;;;;;;;;;;VMAPRTLIL;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2ESV;HLA-E*01:01;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1KPR;HLA-E*01:01;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1KTL;HLA-E*01:01;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;3AM8;HLA-E*01:01;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;3BZE;HLA-E*01:01;;

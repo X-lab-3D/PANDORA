@@ -13,7 +13,7 @@ query = sys.argv[3]
 
 
 j = MP.job() #MP.job(modeller_path="../../modelling_scripts/modslave.py")
-for i in range(6):         ## Use 8 CPUs in a parallel job on this machine
+for i in range(20):         ## Use 8 CPUs in a parallel job on this machine
     j.append(MP.local_slave())
 
 M.log.verbose()                                # request verbose output

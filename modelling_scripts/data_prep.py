@@ -25,8 +25,11 @@ def get_peptides_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter):
             else:
                 seq = row[pept_clmn]
                 allele = row[allele_clmn]
-                star_allele = (allele[0:5]+'*'+allele[5:])
-                seqs.append((seq, star_allele))
+                if 'HLA' in allele:
+                    star_allele = (allele[0:5]+'*'+allele[5:])
+                    seqs.append((seq, star_allele))
+                else:
+                    seqs.appen((seq, allele))
     return seqs
 
 
@@ -99,17 +102,18 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
             subprocess.check_call(['rm', 'data/PDBs/%s.pdb' %ID])
             continue
         for chain in seqs:
-            length = len(seqs[chain])
-            if chain != ' ':
-                count_dict[chain] = length
-            if length > 250 and length < 300 and not aID:
-                aID = chain
-                #print('aID : ', aID)
-                #print('length : ', length)
-            elif length > 7 and length < 25 and not pID:
-                pID = chain
-                #print('pID : ', pID)
-                #print('length : ', length)
+            if type(seqs[chain]) == str:
+                length = len(seqs[chain])
+                if chain != ' ':               #This might be removed, since get_seqs() is  not outputting anymore with empty chain ids
+                    count_dict[chain] = length
+                if length > 250 and length < 300 and not aID:
+                    aID = chain
+                    #print('aID : ', aID)
+                    #print('length : ', length)
+                elif length > 7 and length < 25 and not pID:
+                    pID = chain
+                    #print('pID : ', pID)
+                    #print('length : ', length)
         try:
             if aID.islower() or pID.islower():
                 bad_IDs[ID] = '#3'
@@ -222,6 +226,8 @@ def get_seqs(pdbf):
     P = PDBParser(QUIET=1)
     structure = P.get_structure('s', pdbf)
     for chain in structure.get_chains():
+        if chain.id == ' ':
+            continue
         sequence = ''
         for i, res in enumerate(chain):
             if i == 0:
