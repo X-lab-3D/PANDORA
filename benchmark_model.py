@@ -50,7 +50,7 @@ for key in IDD:
 # pept_seqs = data_prep.get_peptides_from_csv('benchmark/cross_validation_set.tsv', 3, 4, '\t') ### This can be the input requested for the benchmark function
 
 pept_seqs = []
-with open('benchmark/cross_validation_set.tsv', 'r') as peptsfile:
+with open('benchmark/PANDORA_benchmark_dataset.tsv', 'r') as peptsfile:
     spamreader = csv.reader(peptsfile, delimiter='\t')
     for i, row in enumerate(spamreader):
         if i == 0:
@@ -380,13 +380,20 @@ for k, pept_seq in enumerate(pept_seqs):
     if tf < 3:
         non_modelled.append((query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele']))
         
+    ########################
+    # BENCHMARKING #
     #TODO: 
     # [V] extract molpdf score, 
-    # []  match all models with target .pdb, 
+    # [0]  (optional) match all models with target .pdb, 
     # []  calculate iRMSD,
     # []  add molpdf and RMSD to a .tsv file
     
+    #extracting molpdf and DOPE scores from modeller.log
     os.system('python ../../../modelling_scripts/get_molpdf_dope_scores.py modeller.log')
+    
+    #Calculatin RMSD with target real structure
+    os.system('python ../../../tools/make_file_lists_for_rmsd.py')
+    os.system('bash ../../../tools/l-rmsd-calc.csh ../../../data/PDBs/%s_MP.pdb file.list' %target_id)
     
     os.chdir('../../../')
 
@@ -398,4 +405,4 @@ with open('outputs/%s/non_modelled.csv' %outdir_name, 'wt') as outfile:
 
 final_time = time.time()
 total_time = final_time - start_time
-print('The whole pipeline took: ', total_time)
+print('The whole benchmark took: ', total_time)
