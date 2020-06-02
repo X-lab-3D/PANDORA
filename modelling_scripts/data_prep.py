@@ -101,6 +101,10 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
             err_2 += 1
             subprocess.check_call(['rm', 'data/PDBs/%s.pdb' %ID])
             continue
+        
+        ### Selecting Alpha chain and peptide chain
+        
+        putative_pID = {}
         for chain in seqs:
             if type(seqs[chain]) == str:
                 length = len(seqs[chain])
@@ -110,10 +114,26 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
                     aID = chain
                     #print('aID : ', aID)
                     #print('length : ', length)
-                elif length > 7 and length < 25 and not pID:
-                    pID = chain
+                elif length > 7 and length < 25:
+                    putative_pID[chain] = 0
                     #print('pID : ', pID)
                     #print('length : ', length)
+        if len(putative_pID) == 1:
+            pID = list(putative_pID.keys())[0]
+        elif len(putative_pID) > 1:
+            os.system('./modelling_scripts/contact-chainID_allAtoms %s 5 > temp.dist' %pdbf)
+            contacts = []
+            for line in open('./temp.dist', 'r'):
+                contact = (line.split('\t')[1], line.split('\t')[6])
+                contacts.append(contact)
+            for candidate in putative_pID:
+                for contact in contacts:
+                    if contact[0] == aID:
+                        if contact[1] == candidate:
+                            putative_pID[candidate] += 1
+            pID = (sorted(putative_pID.items(), key=lambda x: x[1], reverse = True))[0][0]
+                
+                    
         try:
             if aID.islower() or pID.islower():
                 bad_IDs[ID] = '#3'
