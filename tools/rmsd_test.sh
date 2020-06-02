@@ -2,7 +2,7 @@
 ref_FN=$1
 mob_FN=$2
 
-profit<< END
+/home/dariomarzella/ProFitV3.3/bin/profit<< END
         reference $ref_FN
         mobile $mob_FN
         atom CA,C,N,O

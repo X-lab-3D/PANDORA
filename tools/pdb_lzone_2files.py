@@ -3,7 +3,6 @@
 #  4-Mar-2020 11:57
 
 import sys
-import re
 from Bio.PDB import PDBParser
 
 ref_pdbf = sys.argv[1]

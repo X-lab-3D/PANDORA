@@ -76,6 +76,8 @@ maxsl = []
 non_modelled = []
 print_results = False
 
+best_rmsds = []
+
 ###########################################
 
 
@@ -379,21 +381,48 @@ for k, pept_seq in enumerate(pept_seqs):
 
     if tf < 3:
         non_modelled.append((query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele']))
+    else:
+        ########################
+        # BENCHMARKING #
+        #TODO: 
+        # [V] extract molpdf score, 
+        # [0]  (optional) match all models with target .pdb, 
+        # [V]  calculate lRMSD,
+        # []  add molpdf and RMSD to a .tsv file
         
-    ########################
-    # BENCHMARKING #
-    #TODO: 
-    # [V] extract molpdf score, 
-    # [0]  (optional) match all models with target .pdb, 
-    # []  calculate iRMSD,
-    # []  add molpdf and RMSD to a .tsv file
-    
-    #extracting molpdf and DOPE scores from modeller.log
-    os.system('python ../../../modelling_scripts/get_molpdf_dope_scores.py modeller.log')
-    
-    #Calculatin RMSD with target real structure
-    os.system('python ../../../tools/make_file_lists_for_rmsd.py')
-    os.system('bash ../../../tools/l-rmsd-calc.csh ../../../data/PDBs/%s_MP.pdb file.list' %target_id)
+        #extracting molpdf and DOPE scores from modeller.log
+        os.system('python ../../../modelling_scripts/get_molpdf_dope_scores.py modeller.log')
+        
+        #Calculatin RMSD with target real structure
+        os.system('python ../../../tools/make_file_lists_for_rmsd.py')
+        os.system('ln -s ../../../data/PDBs/%s_MP.pdb ./' %target_id)
+        os.system('python ../../../tools/pdb_lzone_2files.py %s_MP.pdb %s.BL00010001.pdb' %(target_id, query))
+        os.system('mv ref.lzone %s_MP.lzone' %target_id)
+        os.system('../../../tools/l-rmsd-calc.csh %s_MP file.list' %target_id)
+        #os.system('unlink %s_MP.pdb' %target_id)
+        
+        models_dict = {}
+        with open('molpdf_DOPE.tsv', 'r') as molfile:
+            spamreader = csv.reader(molfile, delimiter='\t')
+            for i, row in enumerate(spamreader):
+                if i != 0:
+                    models_dict[row[0]] = [float(row[1]), float(row[2])]
+        with open('l-RMSD.dat', 'r') as rmsdfile:
+            for line in rmsdfile:
+                row = line.split(' ')
+                models_dict[row[0]].append(float(row[1]))
+        
+        with open('final_scores.tsv', 'wt') as scoreout:
+            tsv_writer = csv.writer(scoreout, delimiter='\t')
+            tsv_writer.writerow(['Model', 'molpdf', 'DOPE', 'l-RMSD'])
+            for model in models_dict:
+                tsv_writer.writerow([model, models_dict[model][0], models_dict[model][1], models_dict[model][2]])
+        
+        molsort = sorted(models_dict.items(), key=lambda x:x[1][0])
+        bestmol = sum(x[1][2] for x in molsort[0:5])/5.0
+        dopesort = sorted(models_dict.items(), key=lambda x:x[1][1])
+        bestdope = sum(x[1][2] for x in dopesort[0:5])/5.0
+        best_rmsds.append([target_id, bestmol, bestdope])
     
     os.chdir('../../../')
 
@@ -402,6 +431,12 @@ with open('outputs/%s/non_modelled.csv' %outdir_name, 'wt') as outfile:
     tsv_writer.writerow(['QUERY', 'NEOANTIGEN', 'QUERY ALLELE', 'TEMPLATE ID', 'TEMPLATE PEPTIDE', 'TEMPLATE ALLELE'])
     for query in non_modelled:
         tsv_writer.writerow(query)
+        
+with open('outputs/%s/best_RMSDs.tsv' %outdir_name, 'wt') as outfile:
+    tw = csv.writer(outfile, delimiter='\t')
+    tw.writerow(['Target ID', 'Top 5 molpdf RMDS', 'Top 5 DOPE RMDS'])
+    for query in best_rmsds:
+        tw.writerow(query)
 
 final_time = time.time()
 total_time = final_time - start_time
