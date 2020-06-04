@@ -84,7 +84,7 @@ for run in range(25):
     A_target = inseqs[0]
     P_target = inseqs[1]
     
-    ### Producing a Fasta file for each putetive template-target alignment ###
+    ### Producing a Fasta file for each putative template-target alignment ###
     sequences, empty_seqs = data_prep.get_pdb_seq(allele_ID[allele])
     for bad_ID in empty_seqs:
         del IDD[bad_ID]

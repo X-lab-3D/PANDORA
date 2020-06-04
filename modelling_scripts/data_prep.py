@@ -225,7 +225,8 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
             for chain_ID in IDs_dict[ID]:
                 if chain_ID != 'allele':
                     tsv_writer.writerow([ID, chain_ID, IDs_dict[ID][chain_ID], IDs_dict[ID]['allele']])
-
+    ### ADD CORRECTION FOR SEP, F2F, etc.
+    os.system('python ./tools/change_sep_in_ser.py ./')
     return IDs_dict, bad_IDs
 
 def get_pdb_seq(IDs):
