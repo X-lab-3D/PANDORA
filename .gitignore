@@ -3,6 +3,7 @@
 /data/FASTAs
 /data/PDBs/*
 /data/temp
+/data/bkup_PDBs
 /data/Targets/*
 /outputs/*
 
