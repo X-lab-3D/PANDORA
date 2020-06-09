@@ -8,7 +8,7 @@ IDD_file.close()
 
 
 
-with open('cross_validation_set.tsv', 'wt') as outfile:
+with open('PANDORA_benchmark_dataset.tsv', 'wt') as outfile:
     tsv_writer = csv.writer(outfile, delimiter='\t')
     tsv_writer.writerow(['TARGET_ID', 'PEPT_SEQ', 'ALLELE'])
     for ID in IDD:

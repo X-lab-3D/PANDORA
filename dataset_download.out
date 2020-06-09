@@ -1,0 +1,994 @@
+Started fetching URLs
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1T0M.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1WBX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1WBY.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1WBZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1OGT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1OF2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1S9W.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1S9Y.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1S9X.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1XH3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1B0R.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 1B0R added to Bad_IDs
+{'A': 269, 'B': 100, 'C': 7}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1YN6.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1YN7.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1X7Q.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1ZT1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1ZT7.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1N5A.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1N59.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1S7V.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1S7R.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1S7W.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1S7S.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1HOC.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1HHI.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1HHJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1HHG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1HHK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1HHH.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1OGA.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2BSR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2BSS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2BST.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1FFN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1FFP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1FFO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1FG2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1JPF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1JPG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2FWO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1N3N.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1A1O.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1A1M.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1M05.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2FYY.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 2FYY added to Bad_IDs
+{'A': 276, 'B': 99, 'C': 7}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2FZ3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1XR8.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1XR9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1MI5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2AXF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2AXG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1ZSD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1RK0.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1RK1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2HN7.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2CII.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 2CII added to Bad_IDs
+{'A': 275, 'B': 99, 'C': 4}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1CE6.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1QLF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1ZHK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1ZHL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2MHA.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3C9N.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BEV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BEW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2VAA.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2VAB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1NAN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BW9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BWA.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1OSZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1VGK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2VLL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1IM3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BUY.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1A9E.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1A9B.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1ZHB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2ZOK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2ZOL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2NW3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2VE6.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1UXS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1UXW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2GIT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1QQD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1LK2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1JGD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1SYV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1SYS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3DX6.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3DX7.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3DX8.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3CPL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2FO4.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1I4F.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2CIK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2A83.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1ED3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1TVB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1TVH.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1DUY.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1DUZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1EEZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1EEY.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1QR1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1I7R.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1I7U.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1I7T.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1JGE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1K5N.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1LD9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1VAC.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1VAD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1HSA.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1BZ9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1KJM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1KJV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2CLR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2H6P.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1Q94.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1QVO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2QRI.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 2QRI added to Bad_IDs
+{'A': 398, 'B': 398}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1LDP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1LDP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2GUO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2GTZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2GTW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2GT9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1KBG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1TMC.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 1TMC added to Bad_IDs
+{'A': 175, 'B': 99, 'C': 10}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1INQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1JUF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1JHT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1JF1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1G7Q.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1G7P.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1W0V.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1W0W.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1M6O.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1N2R.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2RFX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2BCK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3ERY.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 3ERY added to Bad_IDs
+{'A': 174, 'B': 149, 'P': 9, 'Q': 9}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2ZSV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2ZSW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2GUO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2GTZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1KJ3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1LEG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3B6S.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3B3I.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3GSO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3H7B.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3GSQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3GSR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3GSU.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3GSV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3GSW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3GSX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3L3H.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MGO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MGT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FOL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FOM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FON.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1G6R.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1AO7.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1B0G.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3D25.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3KPL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3KPN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3KPP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3KPM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3KPQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3KPO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BXN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BP4.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BP7.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2PYE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2P5E.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2P5W.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1QSE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1QRN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1QSF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2NX5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3DXA.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1BD2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1LP9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2CKB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2GJ6.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1FO0.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1KJ2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1NAM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2VLJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2VLK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2VLR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FFC.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2AK4.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2AK4.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2F54.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2F54.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2F53.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3E3Q.pdb.gz
+ERROR TYPE #1: URL not found. 3E3Q added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3E2H.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 3E2H added to Bad_IDs
+{'A': 175, 'Q': 9, 'B': 109, 'C': 110}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2BNR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2BNQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2F74.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2OI9.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 2OI9 added to Bad_IDs
+{'A': 175, 'B': 110, 'C': 111, 'Q': 9}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2E7L.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 2E7L added to Bad_IDs
+{'A': 112, 'B': 110, 'C': 112, 'D': 112, 'E': 175, 'F': 175, 'P': 9, 'Q': 9}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1ED3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FT2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FT3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FT4.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1EFX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1IM9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1P7Q.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3C8K.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3ECB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3DMM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2XFX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1P1Z.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3I6L.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3LKN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3LKO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3LKP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3LKQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3LKS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3LKR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FTG.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 3FTG added to Bad_IDs
+{'A': 247, 'B': 100, 'C': 9}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2XPG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3PWV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3PQY.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3LN4.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3LN5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3OX8.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3OXR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3OXS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1P4L.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2X4N.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 2X4N added to Bad_IDs
+{'A': 275, 'B': 100, 'C': 6, 'D': 275, 'E': 100, 'F': 6}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2X70.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2X4O.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2X4U.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2X4R.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2X4S.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2X4P.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3I6G.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3I6K.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3PWL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3PWN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3PWJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3LV3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3NWM.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 3NWM added to Bad_IDs
+{'A': 384}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3O4L.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3HPJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FQW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FQX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FQN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FQR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FQT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3FQU.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BGM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BH8.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BH9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BHB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3CH1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3CCH.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3CC5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3KLA.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BO8.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3QQ4.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3QQ3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3P9L.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3PAB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3P9M.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3PWP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3HG1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1EEZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3O3A.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3O3B.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3O3D.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3O3E.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VCL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3UTQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3ROO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3ROL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3REW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3PWU.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3SJV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3SKM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3H9S.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2X4Q.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2X4T.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VRJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VRI.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VRJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VRI.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4GKS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4GKN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3UPR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4F7M.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4F7P.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 4F7P added to Bad_IDs
+{'A': 274, 'B': 99, 'C': 7}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4F7T.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3UPR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3P4M.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3P4N.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3P4O.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3LV3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4G43.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4G42.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4E0R.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3QUK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3QUL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4E5X.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1AKJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1A1N.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4HKJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2YPK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2YPL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4I4W.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1QO3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VH8.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2V2X.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2V2W.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3W39.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1,00E+27.pdb.gz
+ERROR TYPE #1: URL not found. 1,00E+27 added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1,00E+28.pdb.gz
+ERROR TYPE #1: URL not found. 1,00E+28 added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4HUW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4HUV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4HUU.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3D39.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3D3V.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4G9D.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3QFJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4G8I.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1BII.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1DDH.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1I1Y.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1I1F.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1AGD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1AGE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1AGC.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1AGF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1AGB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4I48.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4HX1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4HWZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4JRX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4JRY.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4JFF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4JFP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4K7F.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4JFE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4JFO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4JFQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2HJK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2HJL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4JQV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4JQX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4FTV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1HSB.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 1HSB added to Bad_IDs
+{'A': 270, 'B': 99, 'C': 3, '1': 2}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1T21.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1T22.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1T20.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1T1W.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1T1X.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1S8D.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1T1Y.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1T1Z.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1ZVS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2C7U.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3E6F.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3E6H.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2BVP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2BVO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2BVQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3GIV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4JFD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1S7Q.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1S7U.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1S7T.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1S7X.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3TF7.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 3TF7 added to Bad_IDs
+{'E': 175, 'F': 9, 'C': 232, 'A': 175, 'B': 9, 'G': 224, 'I': 228, 'K': 220}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3TPU.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 3TPU added to Bad_IDs
+{'A': 205, 'B': 240, 'I': 173, 'J': 9, 'C': 204, 'D': 240, 'E': 175, 'F': 9, 'G': 202, 'H': 240, 'K': 175, 'L': 9, 'M': 204, 'N': 240, 'Q': 176, 'R': 9}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3TFK.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 3TFK added to Bad_IDs
+{'A': 174, 'B': 9, 'C': 201, 'D': 239, '1': 1}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3TJH.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 3TJH added to Bad_IDs
+{'A': 175, 'B': 9, 'C': 201, 'D': 239}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3TIE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3TID.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VXN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VXO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VXP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4MNQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4L29.pdb.gz
+ERROR TYPE #3: Lower case chain ID. 4L29 added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4L3C.pdb.gz
+ERROR TYPE #3: Lower case chain ID. 4L3C added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4QRU.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4QRS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4QRT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4N8V.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NQV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NQX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3L3D.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3L3G.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3L3I.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3L3J.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3L3K.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MV7.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MV8.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MV9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PV9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PV8.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4MJI.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3WL9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3WLB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PRN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PRB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PR5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PRD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PRA.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PRE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PRI.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4O2E.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4O2C.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4O2F.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NT6.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3WS3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3WS6.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4L3E.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3QDM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3QDG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3QEQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3QDJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PG2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4WJ5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PRH.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 4PRH added to Bad_IDs
+{'A': 240, 'B': 86, 'C': 11, 'D': 202, 'E': 240}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PRP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4QRQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4QRP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4QOK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4QRR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4U6X.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4U6Y.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRC.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRH.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PG9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PGB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PGC.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PGD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4PGE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4UQ2.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 4UQ2 added to Bad_IDs
+{'A': 275, 'B': 99, 'C': 275, 'D': 99, 'E': 7, 'G': 7}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4UQ3.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 4UQ3 added to Bad_IDs
+{'A': 275, 'B': 100, 'C': 275, 'D': 100, 'E': 6, 'F': 6}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4U1H.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4U1I.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4U1J.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4U1K.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4U1L.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4U1M.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4U1N.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4U1S.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4XXC.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4D0B.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4D0C.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4CVZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2YEZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4CVX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4D0D.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4CW1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4L8D.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4L8C.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4L8B.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VFR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VFS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VFT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VFU.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VFV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VFW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VFN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VFM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VFO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VFP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4Z78.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4WDI.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4Z76.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5D2L.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5D2N.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4WUU.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4ZFZ.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 4ZFZ added to Bad_IDs
+{'A': 277, 'B': 100, 'C': 5, 'D': 277, 'E': 100, 'F': 5, 'G': 277, 'H': 100, 'I': 5, 'J': 277, 'K': 100, 'L': 5, '1': 1, '2': 1, '3': 1, '4': 1}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5DEF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5DEG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5E8N.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5E8P.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5E8O.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5BRZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5BS0.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5EU6.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5EU3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5EU4.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5EU5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5DDH.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5D9S.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5EO0.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5EO1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5B38.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5B39.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5HHP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5HHQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5HHN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5HHO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5HHM.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 5HHM added to Bad_IDs
+{'A': 212, 'B': 98, 'C': 9, 'D': 194, 'E': 240, 'F': 212, 'G': 98, 'H': 9, 'I': 196, 'J': 240}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5H94.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5E9D.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5C0G.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5C0D.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5C0J.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5C0F.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5C0E.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5C0I.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5C0A.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5C09.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5HYJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5C0C.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5C08.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5C07.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5C0B.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5IRO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5IM7.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5IND.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5INC.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4ZUV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4ZUT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4ZUS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4ZUW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4ZUU.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5SWQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5SWZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5SWS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5MEN.pdb.gz
+ERROR TYPE #1: URL not found. 5MEN added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5MEO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5MEP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5MEQ.pdb.gz
+ERROR TYPE #1: URL not found. 5MEQ added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5MER.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4MJ5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4MJ6.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5F1I.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5F1N.pdb.gz
+ERROR TYPE #1: URL not found. 5F1N added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5ISZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5JHD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5ENW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5F7D.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5FA3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5EOT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5F9J.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5FDW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5FA4.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5T70.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5T6X.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5T6W.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5T6Z.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5T6Y.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5EUO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5E6I.pdb.gz
+ERROR TYPE #1: URL not found. 5E6I added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5N1Y.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5GSV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5GSR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5GSX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5GR7.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5GSB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NNX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NNY.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NO2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NO0.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NO3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NO5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5IEK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5IEH.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5V5L.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5V5M.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5JZI.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5U98.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5U98.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5IVX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5GRD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5GSD.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 5GSD added to Bad_IDs
+{'A': 274, 'B': 99, 'C': 7}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5GRG.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 5GRG added to Bad_IDs
+{'A': 274, 'B': 99, 'C': 6, 'D': 4}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5VGD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5VGE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5W6A.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5W69.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5XS3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3QFD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NNX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NNY.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NO2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NO0.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NO3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NO5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5W67.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3RGV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5TEZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WJL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WKF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WJN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WKH.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WES.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 5WES added to Bad_IDs
+{'A': 273, 'B': 99, 'P': 5, '1': 2}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WET.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 5WET added to Bad_IDs
+{'A': 273, 'B': 99, 'P': 6, '1': 2}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WEU.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5N6B.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5NME.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5NMF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5NMG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5NMH.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5NMK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5JWE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5JWD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5XOV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5XOT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5XOS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WLI.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WLG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5KD7.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5KD4.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5T7G.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5TXS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5VZ5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6AT9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5XMF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6BXP.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 6BXP added to Bad_IDs
+{'A': 275, 'B': 99, 'C': 6}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6BXQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6AT5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6AVF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6AVG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5MZM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5OQF.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 5OQF added to Bad_IDs
+{'A': 388, 'B': 388}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WMO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WMN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WMP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3SPV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WMQ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WMR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5NQ0.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5NPZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5NQ2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5NQ1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5NQ3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6EI2.pdb.gz
+ERROR TYPE #2: Something went wrong with PDBParser. 6EI2 added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6BJ2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6BJ3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6BJ8.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WWU.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WXD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WXC.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 5WXC added to Bad_IDs
+{'A': 274, 'B': 99, 'C': 274, 'D': 100, 'E': 5, 'F': 7}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5WSH.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5,00E+00.pdb.gz
+ERROR TYPE #1: URL not found. 5,00E+00 added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3UTT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3UTS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MR9.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3GSN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3RWE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3RWC.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3RWD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3RWF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3RWG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3RWH.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3RWI.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3RWJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3MRI.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3NFN.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3QZW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3RL1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3RL2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4G8G.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4G9F.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VXR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VXM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VXU.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3W0W.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3VXS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1W72.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4NSK.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3HCV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3DTX.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3JTT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3JTS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4LNR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4N5E.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 4N5E added to Bad_IDs
+{'C': 199, 'D': 239, 'A': 174, 'B': 9}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4MVB.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 4MVB added to Bad_IDs
+{'C': 199, 'D': 239, 'A': 174, 'B': 9}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4MS8.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 4MS8 added to Bad_IDs
+{'C': 196, 'D': 239, 'A': 162, 'B': 9}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4MXQ.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 4MXQ added to Bad_IDs
+{'C': 199, 'D': 239, 'A': 174, 'B': 9}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4N0C.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 4N0C added to Bad_IDs
+{'A': 173, 'B': 9, 'C': 195, 'D': 239, 'E': 174, 'F': 9, 'G': 197, 'H': 239}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3CZF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5AD0.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4D0C.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-4D0B.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5ACZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3TBS.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3TBT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3TBV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3TBW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3TBY.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6AMT.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6AMU.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6AM5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6EWA.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6EWO.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6EWC.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5YMW.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5YMV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6MP0.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 6MP0 added to Bad_IDs
+{'A': 388}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6MP1.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 6MP1 added to Bad_IDs
+{'A': 385}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5VUF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5VWF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5VUD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5VVP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5VUE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5VWD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5VWH.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5VWJ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6D7G.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 6D7G added to Bad_IDs
+{'A': 386, 'D': 198, 'E': 208}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6MT6.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6MT3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6MTL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6MTM.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6MTL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6MT4.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6MT5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6GB6.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 6GB6 added to Bad_IDs
+{'A': 273, 'D': 276, 'E': 100, 'B': 100, 'F': 2, 'C': 2}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6GB5.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 6GB5 added to Bad_IDs
+{'A': 274, 'B': 99, 'C': 275, 'D': 99, 'E': 7, 'F': 7, 'G': 2, 'H': 2}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6GB5.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 6GB5 added to Bad_IDs
+{'A': 274, 'B': 99, 'C': 275, 'D': 99, 'E': 7, 'F': 7, 'G': 2, 'H': 2}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6GB7.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 6GB7 added to Bad_IDs
+{'A': 271, 'B': 100, 'C': 273, 'D': 100, 'E': 270, 'F': 99, 'G': 270, 'H': 100, 'I': 7, 'J': 7, 'K': 7, 'L': 7, 'P': 4, 'R': 5}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6GB7.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 6GB7 added to Bad_IDs
+{'A': 271, 'B': 100, 'C': 273, 'D': 100, 'E': 270, 'F': 99, 'G': 270, 'H': 100, 'I': 7, 'J': 7, 'K': 7, 'L': 7, 'P': 4, 'R': 5}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6D2T.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6D2R.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6D29.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6D2B.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6D78.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6DKP.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6G3J.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6EQA.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6EQB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6ILC.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6ILE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6ILF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6ILG.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6Q3K.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5IB1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5IB2.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5IB3.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5IB4.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5IB5.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6IWG.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 6IWG added to Bad_IDs
+{'A': 276, 'B': 100, 'C': 5, '1': 1, '2': 1, '3': 1}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6IWH.pdb.gz
+ERROR TYPE #4: False in chain ID, one chain does not respect settled lenght criteria. 6IWH added to Bad_IDs
+{'A': 276, 'B': 100, 'C': 5}
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6J1W.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6J2A.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6J29.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6J1V.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6J2D.pdb.gz
+ERROR TYPE #1: URL not found. 6J2D added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6J2H.pdb.gz
+ERROR TYPE #1: URL not found. 6J2H added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6J2I.pdb.gz
+ERROR TYPE #1: URL not found. 6J2I added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6J2F.pdb.gz
+ERROR TYPE #1: URL not found. 6J2F added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6K7T.pdb.gz
+ERROR TYPE #1: URL not found. 6K7T added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6J2E.pdb.gz
+ERROR TYPE #1: URL not found. 6J2E added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6J2G.pdb.gz
+ERROR TYPE #1: URL not found. 6J2G added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6J2J.pdb.gz
+ERROR TYPE #1: URL not found. 6J2J added to Bad_IDs
+##################################
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5TS1.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-5TRZ.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6PTB.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6OPD.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-6PTE.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BZF.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-2ESV.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1KPR.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-1KTL.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3AM8.pdb.gz
+Fetching  http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-3BZE.pdb.gz
+Removing uncommon residue files
+ABA P 2ZSV_MP.pdb
+ABA P 2ZSW_MP.pdb
+CIR P 3B6S_MP.pdb
+CIR P 3B3I_MP.pdb
+ABA P 2ZOK_MP.pdb
+ABA P 2ZOL_MP.pdb
+PRQ P 2VE6_MP.pdb
+ESC P 1KBG_MP.pdb
+CIR P 3FT2_MP.pdb
+PRV P 2X70_MP.pdb
+MSE P 2X4P_MP.pdb
+BAL P 3O3A_MP.pdb
+GIC P 3O3B_MP.pdb
+TIG P 3O3D_MP.pdb
+BAL P 3O3E_MP.pdb
+NIY P 3ROL_MP.pdb
+MSE P 2X4Q_MP.pdb
+PRW P 2X4T_MP.pdb
+PFF P 3D39_MP.pdb
+ABA P 4PV9_MP.pdb
+ABA P 4PV8_MP.pdb
+ACE P 4O2C_MP.pdb
+GRN P 4WJ5_MP.pdb
+TYI P 4PGC_MP.pdb
+NLE P 5E8P_MP.pdb
+ABA P 5E8O_MP.pdb
+CIR P 3HCV_MP.pdb
+Something wrong in the parsing. Check .1OGT_MP.pdb.swp.temp
+ABA P 5W67_MP.pdb
+CIR P 3DTX_MP.pdb
+BAD IDs:
+{'1B0R': '#4', '2FYY': '#4', '2CII': '#4', '2QRI': '#4', '1TMC': '#4', '3ERY': '#4', '3E3Q': '#1', '3E2H': '#4', '2OI9': '#4', '2E7L': '#4', '3FTG': '#4', '2X4N': '#4', '3NWM': '#4', '4F7P': '#4', '1,00E+27': '#1', '1,00E+28': '#1', '1HSB': '#4', '3TF7': '#4', '3TPU': '#4', '3TFK': '#4', '3TJH': '#4', '4L29': '#3', '4L3C': '#3', '4PRH': '#4', '4UQ2': '#4', '4UQ3': '#4', '4ZFZ': '#4', '5HHM': '#4', '5MEN': '#1', '5MEQ': '#1', '5F1N': '#1', '5E6I': '#1', '5GSD': '#4', '5GRG': '#4', '5WES': '#4', '5WET': '#4', '6BXP': '#4', '5OQF': '#4', '6EI2': '#2', '5WXC': '#4', '5,00E+00': '#1', '4N5E': '#4', '4MVB': '#4', '4MS8': '#4', '4MXQ': '#4', '4N0C': '#4', '6MP0': '#4', '6MP1': '#4', '6D7G': '#4', '6GB6': '#4', '6GB5': '#4', '6GB7': '#4', '6IWG': '#4', '6IWH': '#4', '6J2D': '#1', '6J2H': '#1', '6J2I': '#1', '6J2F': '#1', '6K7T': '#1', '6J2E': '#1', '6J2G': '#1', '6J2J': '#1', '2X4T': '#7', '2VE6': '#7', '3B3I': '#7', '5E8P': '#7', '3DTX': '#7', '5E8O': '#7', '3HCV': '#7', '4PV8': '#7', '2ZSV': '#7', '3D39': '#7', '2X70': '#7', '1KBG': '#7', '3FT2': '#7', '4PGC': '#7', '3B6S': '#7', '2ZSW': '#7', '4WJ5': '#7', '2X4P': '#7', '3O3A': '#7', '4PV9': '#7', '2X4Q': '#7', '3O3D': '#7', '2ZOK': '#7', '3O3E': '#7', '5W67': '#7', '4O2C': '#7', '3O3B': '#7', '3ROL': '#7', '2ZOL': '#7', 'errors': {'#1': 16, '#2': 1, '#3': 2, '#4': 45, '#5': 0, '#6': 0, '#7': 29}}
+Traceback (most recent call last):
+  File "benchmark_model.py", line 36, in <module>
+    raise Exception('OK')
+Exception: OK

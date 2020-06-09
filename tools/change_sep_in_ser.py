@@ -9,7 +9,7 @@ for pdbfile in os.listdir(indir):
     for line in open(indir + pdbfile, 'r'):
         s = line.split(' ')
         l = [x for x in s if x != '']
-        if len(l) >= 4:
+        if line.startswith('ATOM') or line.startswith('HETATM'):
             if ('SEP' in l[3] or 'SEP' in l[2]) and l[2] not in ['P', 'O1P', 'O2P', 'O3P', 'HA', 'HB2', 'HB3']:
                 outfile.write(line.replace('HETATM', 'ATOM  ').replace('SEP', 'SER'))
             elif ('SEP' in l[3] or 'SEP' in l[2]) and l[2] in ['P', 'O1P', 'O2P', 'O3P', 'HA', 'HB2', 'HB3']:

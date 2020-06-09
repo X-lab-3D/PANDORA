@@ -1,6 +1,7 @@
 
 #!/usr/bin/python
 ###    ###
+import copy
 from modelling_scripts import data_prep
 import pickle
 from Bio import SeqIO
@@ -23,17 +24,16 @@ import csv
 #outdir_name = sys.argv[1]
 
 start_time = time.time()
-outdir_name = 'benchmark'
+outdir_name = 'benchmark_prize_20200608'  #TODO: set prize/no_prize as argument/variable
 
 ###########################################
 ### Organizing dicts ###
 
 IDD_file = open('data/csv_pkl_files/IDs_ChainsCounts_dict.pkl', 'rb')
+#IDD_file = open('data/csv_pkl_files/fake_db.pkl', 'rb')
 main_IDD = pickle.load(IDD_file)
 bad_IDs = pickle.load(IDD_file)
 IDD_file.close()
-
-raise Exception('OK')
 
 '''
 ### Organizing Allele IDs in a dictionary ###
@@ -100,17 +100,16 @@ for k, pept_seq in enumerate(pept_seqs):
         print('###')
         continue
     
-    IDD = main_IDD
+    IDD = copy.deepcopy(main_IDD)
     del IDD[target_id]
     
     ### Organizing Allele IDs in a dictionary ###
     allele_ID = {}
     for key in IDD:
-        if 'HLA' in IDD[key]['allele']:
-            try:
-                allele_ID[IDD[key]['allele']].append(key)
-            except KeyError:
-                allele_ID[IDD[key]['allele']] = [key]
+        try:
+            allele_ID[IDD[key]['allele']].append(key)
+        except KeyError:
+            allele_ID[IDD[key]['allele']] = [key]
     
     ext_flag = False
     query = 'query_' + str(k + 1)
@@ -118,17 +117,18 @@ for k, pept_seq in enumerate(pept_seqs):
     for folder in os.listdir('outputs/%s' %outdir_name):
         if target_id in folder:
             print('WARNING: Existing directory for this query.')
-            ext_flag = True
-            break
+            #ext_flag = True
+            #break
     if ext_flag == True:
         print('Exiting here. This is only a DEBUG message')
         continue
         
-    max_pos = -200
+    max_pos = -500
     pos_list = []
     
     anch_1, anch_2 = anch_dict[length]
     
+    homolog_allele = '--NONE--'
     if allele.startswith('HLA'):      # Human
         if allele in allele_ID.keys():
             pass
@@ -137,13 +137,15 @@ for k, pept_seq in enumerate(pept_seqs):
         else:
             allele = allele[:6]
     elif allele.startswith('H2'):    # Mouse
+        homolog_allele = 'RT1'
         if allele in allele_ID.keys():
             pass
         elif allele[:4] in allele_ID.keys(): 
             allele = allele[:4]
         else:
             allele = allele[:3]
-    elif allele.startswith('RT1'):
+    elif allele.startswith('RT1'):          # Rat
+        homolog_allele = 'H2'
         if allele in allele_ID.keys():
             pass
         elif allele[:5] in allele_ID.keys():
@@ -195,16 +197,17 @@ for k, pept_seq in enumerate(pept_seqs):
             allele = allele[:5]
         
     for ID in IDD:
-        if allele in IDD[ID]['allele']:                       ## Same Allele
+        if allele in IDD[ID]['allele'] or homolog_allele in IDD[ID]['allele']:                       ## Same Allele
             score = 0
             temp_pept = IDD[ID]['pept_seq']
             min_len = min([length, len(temp_pept)])
-            score -= (abs(length - len(temp_pept)) * 20)      ## Penalty for gaps
+            #score -= (abs(length - len(temp_pept)) * 20)      ## Penalty for gaps
+            score -= int(2.5 ** (2 + abs(length - len(temp_pept))))
             for i, (aa, bb) in enumerate(zip(pept[:min_len], temp_pept[:min_len])):
                 if i == anch_1 and aa == bb:           # Identity prize 
-                    score += 3
+                    score += 4
                 elif i == anch_2 and aa == bb:         # Identity prize
-                    score += 1
+                    score += 2
                 try:
                     gain = MatrixInfo.pam30[aa, bb]
                     if gain > 0:
@@ -368,10 +371,15 @@ for k, pept_seq in enumerate(pept_seqs):
         if template_pept[-1] == pept[anch_2]:
             anch_2_same = True
     
-    if anch_2 >= len(template_pept):
+    if (anch_2 + 1) == len(template_pept):
+        pass
+    elif (anch_2 + 1) > len(template_pept):
         real_anchor_2 = len(template_pept)  #????
-    
+    elif (anch_2 + 1) > len(template_pept):
+        pass
     ### Writing anchors contact list ###
+    
+    #TODO: check if template pept is longer than target pept it is hanlded properly
     
     with open( 'all_contacts_%s.list' %template_ID, 'r') as contacts:                             # Template contacts
         with open('contacts_%s.list' %template_ID, 'w') as output:
@@ -382,10 +390,10 @@ for k, pept_seq in enumerate(pept_seqs):
                     p_atom = line.split("\t")[8]                                                  ### atom name of the template peptide residue
                     m_aa_id = (line.split("\t")[2]).split(' ')[0]
                     if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
-                        if int(p_aa_id) == anch_1:
+                        if int(p_aa_id) == (anch_1+1):
                             output.write(line)
                     else:
-                        if int(p_aa_id) == anch_1 and ('CA' in p_atom or 'CB' in p_atom):
+                        if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
                             output.write(line)
                     if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
                         if int(p_aa_id) == real_anchor_2:
@@ -400,16 +408,16 @@ for k, pept_seq in enumerate(pept_seqs):
                     p_atom = line.split("\t")[8]
                     m_aa_id = (line.split("\t")[2]).split(' ')[0]
                     if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
-                        if int(p_aa_id) == anch_1:
+                        if int(p_aa_id) == (anch_1+1):
                             output.write(line)
                     else:
-                        if int(p_aa_id) == anch_1 and ('CA' in p_atom or 'CB' in p_atom):
+                        if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
                             output.write(line)
                     if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
-                        if int(p_aa_id) == anch_2:
+                        if int(p_aa_id) == (anch_2 + 1):
                             output.write(line)
                     else:
-                        if int(p_aa_id) == anch_2 and ('CA' in p_atom or 'CB' in p_atom):
+                        if int(p_aa_id) == (anch_2 + 1) and ('CA' in p_atom or 'CB' in p_atom):
                             output.write(line)
                     #if (int(p_aa_id) == anch_1 or int(p_aa_id) == anch_2) and ('CA' in p_atom or 'CB' in p_atom):
                     #        output.write(line)
@@ -467,13 +475,17 @@ for k, pept_seq in enumerate(pept_seqs):
         #extracting molpdf and DOPE scores from modeller.log
         os.system('python ../../../modelling_scripts/get_molpdf_dope_scores.py modeller.log')
         
-        #Calculatin RMSD with target real structure
+        #Calculating RMSD with target real structure
         
         #os.system('python ../../../tools/make_file_lists_for_rmsd.py')
         os.system('cp ../../../data/PDBs/%s_MP.pdb ./' %target_id)
         
         os.popen('pdb_reres -1 %s_MP.pdb > reres_%s.pdb' %(target_id, target_id)).read()
-        os.popen('bash ../../../tools/map_2_pdb.sh %s.BL00010001.pdb reres_%s.pdb > ref.pdb' %(target_id, target_id)).read()
+        
+        for f in os.listdir('./'):
+            if f.startswith(target_id+'.'+filename_start) and f.endswith(filename_end):
+                break
+        os.popen('bash ../../../tools/map_2_pdb.sh %s reres_%s.pdb > ref.pdb' %(f, target_id)).read()
         os.popen('python ../../../tools/pdb_fast_lzone_mhc.py ref.pdb').read()
         
         
@@ -494,84 +506,87 @@ for k, pept_seq in enumerate(pept_seqs):
         #os.system('../../../tools/l-rmsd-calc.csh %s_MP file.list' %target_id)
         #os.system('unlink %s_MP.pdb' %target_id)
         
-        models_dict = {}
-        header = ['Model', 'molpdf', 'DOPE']
-        with open('molpdf_DOPE.tsv', 'r') as molfile:
-            spamreader = csv.reader(molfile, delimiter='\t')
-            for i, row in enumerate(spamreader):
-                if i != 0:
-                    models_dict['matched_'+row[0]] = [float(row[1]), float(row[2])]
-                    
-        with open('./CA-l-RMSD.dat') as cafile:
-            r = csv.reader(cafile, delimiter=' ')
-            header.append('CA_l-RMSD')
-            for row in r:
-                models_dict[row[0]].append(float(row[1]))
-        
-        with open('./BB-l-RMSD.dat') as cafile:
-            r = csv.reader(cafile, delimiter=' ')
-            header.append('BB_l-RMSD')
-            for row in r:
-                models_dict[row[0]].append(float(row[1]))
-        
-        with open('./BB-CB-l-RMSD.dat') as cafile:
-            r = csv.reader(cafile, delimiter=' ')
-            header.append('BB_CB_l-RMSD')
-            for row in r:
-                try:
+        try:
+            models_dict = {}
+            header = ['Model', 'molpdf', 'DOPE']
+            with open('molpdf_DOPE.tsv', 'r') as molfile:
+                spamreader = csv.reader(molfile, delimiter='\t')
+                for i, row in enumerate(spamreader):
+                    if i != 0:
+                        models_dict['matched_'+row[0]] = [float(row[1]), float(row[2])]
+                        
+            with open('./CA-l-RMSD.dat') as cafile:
+                r = csv.reader(cafile, delimiter=' ')
+                header.append('CA_l-RMSD')
+                for row in r:
                     models_dict[row[0]].append(float(row[1]))
-                except:
-                    pass
-        '''
-        with open('l-RMSD.dat', 'r') as rmsdfile:
-            for line in rmsdfile:
-                row = line.split(' ')
-                models_dict[row[0]].append(float(row[1]))
-
-        
-        with open('final_scores.tsv', 'wt') as scoreout:
-            tsv_writer = csv.writer(scoreout, delimiter='\t')
-            tsv_writer.writerow(['Model', 'molpdf', 'DOPE', 'l-RMSD'])
-            for model in models_dict:
-                tsv_writer.writerow([model, models_dict[model][0], models_dict[model][1], models_dict[model][2]])
-        '''
-        
-        with open('./rmsds_and_final_scores.tsv', 'wt') as outfile:
-            tw = csv.writer(outfile, delimiter='\t')
-            tw.writerow(header)
-            for key in models_dict:
-                try:
-                    tw.writerow([key, models_dict[key][0], models_dict[key][1], models_dict[key][2],
-                                  models_dict[key][3], models_dict[key][4]])
-                except:
-                    tw.writerow([key, models_dict[key][0], models_dict[key][1], models_dict[key][2],
-                                  models_dict[key][3], 'N/A'])
+            
+            with open('./BB-l-RMSD.dat') as cafile:
+                r = csv.reader(cafile, delimiter=' ')
+                header.append('BB_l-RMSD')
+                for row in r:
+                    models_dict[row[0]].append(float(row[1]))
+            
+            with open('./BB-CB-l-RMSD.dat') as cafile:
+                r = csv.reader(cafile, delimiter=' ')
+                header.append('BB_CB_l-RMSD')
+                for row in r:
+                    try:
+                        models_dict[row[0]].append(float(row[1]))
+                    except:
+                        pass
+            '''
+            with open('l-RMSD.dat', 'r') as rmsdfile:
+                for line in rmsdfile:
+                    row = line.split(' ')
+                    models_dict[row[0]].append(float(row[1]))
     
-        '''
-        molsort = sorted(models_dict.items(), key=lambda x:x[1][0])
-        bestmol = sum(x[1][2] for x in molsort[0:5])/5.0
-        dopesort = sorted(models_dict.items(), key=lambda x:x[1][1])
-        bestdope = sum(x[1][2] for x in dopesort[0:5])/5.0
-        best_rmsds.append([target_id, bestmol, bestdope])
-        '''
-        molsort = sorted(models_dict.items(), key=lambda x:x[1][0])
-        bb_bestmol = sum(x[1][2] for x in molsort[0:5])/5.0
-        ca_bestmol = sum(x[1][3] for x in molsort[0:5])/5.0
-        try:
-            ca_bb_cb_bestmol = sum(x[1][4] for x in molsort[0:5])/5.0
-        except:
-            ca_bb_cb_bestmol = 'N/A'
+            
+            with open('final_scores.tsv', 'wt') as scoreout:
+                tsv_writer = csv.writer(scoreout, delimiter='\t')
+                tsv_writer.writerow(['Model', 'molpdf', 'DOPE', 'l-RMSD'])
+                for model in models_dict:
+                    tsv_writer.writerow([model, models_dict[model][0], models_dict[model][1], models_dict[model][2]])
+            '''
+            
+            with open('./rmsds_and_final_scores.tsv', 'wt') as outfile:
+                tw = csv.writer(outfile, delimiter='\t')
+                tw.writerow(header)
+                for key in models_dict:
+                    try:
+                        tw.writerow([key, models_dict[key][0], models_dict[key][1], models_dict[key][2],
+                                      models_dict[key][3], models_dict[key][4]])
+                    except:
+                        tw.writerow([key, models_dict[key][0], models_dict[key][1], models_dict[key][2],
+                                      models_dict[key][3], 'N/A'])
         
-        dopesort = sorted(models_dict.items(), key=lambda x:x[1][1])
-        bb_bestdope = sum(x[1][2] for x in dopesort[0:5])/5.0
-        ca_bestdope = sum(x[1][3] for x in dopesort[0:5])/5.0
-        try:
-            ca_bb_cb_bestdope = sum(x[1][4] for x in dopesort[0:5])/5.0
+            '''
+            molsort = sorted(models_dict.items(), key=lambda x:x[1][0])
+            bestmol = sum(x[1][2] for x in molsort[0:5])/5.0
+            dopesort = sorted(models_dict.items(), key=lambda x:x[1][1])
+            bestdope = sum(x[1][2] for x in dopesort[0:5])/5.0
+            best_rmsds.append([target_id, bestmol, bestdope])
+            '''
+            molsort = sorted(models_dict.items(), key=lambda x:x[1][0])
+            bb_bestmol = sum(x[1][2] for x in molsort[0:5])/5.0
+            ca_bestmol = sum(x[1][3] for x in molsort[0:5])/5.0
+            try:
+                ca_bb_cb_bestmol = sum(x[1][4] for x in molsort[0:5])/5.0
+            except:
+                ca_bb_cb_bestmol = 'N/A'
+            
+            dopesort = sorted(models_dict.items(), key=lambda x:x[1][1])
+            bb_bestdope = sum(x[1][2] for x in dopesort[0:5])/5.0
+            ca_bestdope = sum(x[1][3] for x in dopesort[0:5])/5.0
+            try:
+                ca_bb_cb_bestdope = sum(x[1][4] for x in dopesort[0:5])/5.0
+            except:
+                ca_bb_cb_bestdope = 'N/A'
+    
+            best_rmsds[target_id] = [ca_bestmol, bb_bestmol, ca_bb_cb_bestmol, ca_bestdope, bb_bestdope, ca_bb_cb_bestdope, tf]
+
         except:
-            ca_bb_cb_bestdope = 'N/A'
-
-        best_rmsds[target_id] = [ca_bestmol, bb_bestmol, ca_bb_cb_bestmol, ca_bestdope, bb_bestdope, ca_bb_cb_bestdope, tf]
-
+            print('Warning: something when wrong in parsing RMSD ouputs of target %s . Moving on.' %target_id)
     os.chdir('../../../')
     
 

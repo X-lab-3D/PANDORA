@@ -9,6 +9,7 @@ import shutil
 import pickle
 from Bio.PDB import PDBParser
 from Bio.Data.SCOPData import protein_letters_3to1 as to_one_letter_code
+from modelling_scripts import del_uncommon_residues_pdbs as durp
 
 ### OPEN CSV FILE WITH PDB CODES ###
 #def pdb_reres_allchains(pdb_file)
@@ -54,6 +55,7 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
     err_4 = 0
     err_5 = 0
     err_6 = 0
+    err_7 = 0
     IDs_dict = {}
     print('Started fetching URLs')
     for entry in IDs:
@@ -62,7 +64,7 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
         ID = ID.rstrip()
         url = 'http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-%s.pdb.gz' %ID
         filepath = '%s/data/PDBs/%s.pdb' %(cwd, ID)
-        #print('Fetching ', url)
+        print('Fetching ', url)
 
         try:
             urllib.request.urlretrieve( url, filepath + '.gz')
@@ -210,8 +212,17 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
         except:
             pass
 
+    ### ADD CORRECTION FOR SEP, F2F, etc.
+    os.system('python ./tools/change_sep_in_ser.py ./data/PDBs/')
+    print('Removing uncommon residue files')
+    uncommon_pdbs = durp.del_uncommon_pdbf('./data/PDBs/')
+    for u_pdb in uncommon_pdbs:
+        del IDs_dict[u_pdb]
+        bad_IDs[u_pdb] = '#7'
+        err_7 += 1
+    
     bad_IDs['errors'] = {'#1': err_1, '#2': err_2, '#3': err_3,
-                         '#4': err_4, '#5': err_5, '#6': err_6,}
+                         '#4': err_4, '#5': err_5, '#6': err_6, '#7': err_7}
     IDd = open("data/csv_pkl_files/IDs_ChainsCounts_dict.pkl", "wb")
     pickle.dump(IDs_dict, IDd)
     pickle.dump(bad_IDs, IDd)
@@ -225,8 +236,7 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
             for chain_ID in IDs_dict[ID]:
                 if chain_ID != 'allele':
                     tsv_writer.writerow([ID, chain_ID, IDs_dict[ID][chain_ID], IDs_dict[ID]['allele']])
-    ### ADD CORRECTION FOR SEP, F2F, etc.
-    os.system('python ./tools/change_sep_in_ser.py ./')
+
     return IDs_dict, bad_IDs
 
 def get_pdb_seq(IDs):

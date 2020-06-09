@@ -1,10 +1,10 @@
 import csv
 
 flag = False
-with open('GradDock_benchmark_dataset.tsv', 'wt') as out:
+with open('GradDock_complete_dataset.tsv', 'wt') as out:
     tsv_writer = csv.writer(out, delimiter='\t')
     tsv_writer.writerow(['Organism', 'Allele', 'Structure ID'])
-    with open('GradDock_benchmarck_dataset.txt', 'r') as f:
+    with open('GradDock_complete_dataset.txt', 'r') as f:
         prev_line = []
         lines = []
         for i, line in enumerate(f):

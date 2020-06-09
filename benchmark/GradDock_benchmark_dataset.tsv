@@ -1,477 +1,107 @@
-Organism	Allele	Structure ID
-Human	HLA-A*02	1akj
-Human	HLA-A*02	1ao7
-Human	HLA-A*02	1b0g
-Human	HLA-A*02	1bd2
-Human	HLA-A*02	1duz
-Human	HLA-A*02	1eey
-Human	HLA-A*02	1eez
-Human	HLA-A*02	1hhg
-Human	HLA-A*02	1hhh
-Human	HLA-A*02	1hhi
-Human	HLA-A*02	1hhj
-Human	HLA-A*02	1hhk
-Human	HLA-A*02	1i1f
-Human	HLA-A*02	1i1y
-Human	HLA-A*02	1i4f
-Human	HLA-A*02	1i7r
-Human	HLA-A*02	1i7t
-Human	HLA-A*02	1i7u
-Human	HLA-A*02	1im3
-Human	HLA-A*02	1jht
-Human	HLA-A*02	1lp9
-Human	HLA-A*02	1oga
-Human	HLA-A*02	1p7q
-Human	HLA-A*02	1qew
-Human	HLA-A*02	1qr1
-Human	HLA-A*02	1qrn
-Human	HLA-A*02	1qse
-Human	HLA-A*02	1qsf
-Human	HLA-A*02	1s8d
-Human	HLA-A*02	1s9w
-Human	HLA-A*02	1s9x
-Human	HLA-A*02	1s9y
-Human	HLA-A*02	1t1w
-Human	HLA-A*02	1t1x
-Human	HLA-A*02	1t1y
-Human	HLA-A*02	1t1z
-Human	HLA-A*02	1t20
-Human	HLA-A*02	1t21
-Human	HLA-A*02	1t22
-Human	HLA-A*02	1tvb
-Human	HLA-A*02	1tvh
-Human	HLA-A*02	2bnq
-Human	HLA-A*02	2bnr
-Human	HLA-A*02	2c7u
-Human	HLA-A*02	2clr
-Human	HLA-A*02	2f53
-Human	HLA-A*02	2f54
-Human	HLA-A*02	2git
-Human	HLA-A*02	2gj6
-Human	HLA-A*02	2gtz
-Human	HLA-A*02	2guo
-Human	HLA-A*02	2p5e
-Human	HLA-A*02	2p5w
-Human	HLA-A*02	2pye
-Human	HLA-A*02	2v2w
-Human	HLA-A*02	2v2x
-Human	HLA-A*02	2vlj
-Human	HLA-A*02	2vlk
-Human	HLA-A*02	2vll
-Human	HLA-A*02	2vlr
-Human	HLA-A*02	2x4o
-Human	HLA-A*02	2x4r
-Human	HLA-A*02	2x4s
-Human	HLA-A*02	2x4u
-Human	HLA-A*02	3d25
-Human	HLA-A*02	3fqt
-Human	HLA-A*02	3fqw
-Human	HLA-A*02	3ft3
-Human	HLA-A*02	3ft4
-Human	HLA-A*02	3giv
-Human	HLA-A*02	3gjf
-Human	HLA-A*02	3gsn
-Human	HLA-A*02	3gso
-Human	HLA-A*02	3gsq
-Human	HLA-A*02	3gsr
-Human	HLA-A*02	3gsu
-Human	HLA-A*02	3gsv
-Human	HLA-A*02	3gsw
-Human	HLA-A*02	3gsx
-Human	HLA-A*02	3h7b
-Human	HLA-A*02	3h9s
-Human	HLA-A*02	3hae
-Human	HLA-A*02	3hg1
-Human	HLA-A*02	3hpj
-Human	HLA-A*02	3kla
-Human	HLA-A*02	3mgt
-Human	HLA-A*02	3mr9
-Human	HLA-A*02	3mrb
-Human	HLA-A*02	3mrc
-Human	HLA-A*02	3mrd
-Human	HLA-A*02	3mre
-Human	HLA-A*02	3mrf
-Human	HLA-A*02	3mrg
-Human	HLA-A*02	3mrh
-Human	HLA-A*02	3mri
-Human	HLA-A*02	3mrj
-Human	HLA-A*02	3mrk
-Human	HLA-A*02	3mrl
-Human	HLA-A*02	3mrm
-Human	HLA-A*02	3mrn
-Human	HLA-A*02	3mro
-Human	HLA-A*02	3mrp
-Human	HLA-A*02	3mrq
-Human	HLA-A*02	3mrr
-Human	HLA-A*02	3myj
-Human	HLA-A*02	3o4l
-Human	HLA-A*02	3pwj
-Human	HLA-A*02	3pwl
-Human	HLA-A*02	3pwn
-Human	HLA-A*02	3pwp
-Human	HLA-A*02	3qdg
-Human	HLA-A*02	3qdj
-Human	HLA-A*02	3qdm
-Human	HLA-A*02	3qeq
-Human	HLA-A*02	3qfd
-Human	HLA-A*02	3qfj
-Human	HLA-A*02	3rew
-Human	HLA-A*02	3to2
-Human	HLA-A*02	3utq
-Human	HLA-A*02	3uts
-Human	HLA-A*02	3utt
-Human	HLA-A*02	3v5d
-Human	HLA-A*02	3v5h
-Human	HLA-A*02	3v5k
-Human	HLA-A*02	4e5x
-Human	HLA-A*02	4eup
-Human	HLA-A*02	4ftv
-Human	HLA-A*02	4gkn
-Human	HLA-A*02	4gks
-Human	HLA-A*02	4i4w
-Human	HLA-A*02	4jfd
-Human	HLA-A*02	4jfe
-Human	HLA-A*02	4jff
-Human	HLA-A*02	4jfo
-Human	HLA-A*02	4jfp
-Human	HLA-A*02	4jfq
-Human	HLA-A*02	4k7f
-Human	HLA-A*02	4l29
-Human	HLA-A*02	4l3c
-Human	HLA-A*02	4l3e
-Human	HLA-A*02	4mnq
-Mouse	H2	1ce6
-Mouse	H2	1fg2
-Mouse	H2	1hoc
-Mouse	H2	1inq
-Mouse	H2	1jpf
-Mouse	H2	1jpg
-Mouse	H2	1juf
-Mouse	H2	1n3n
-Mouse	H2	1n5a
-Mouse	H2	1qlf
-Mouse	H2	1s7u
-Mouse	H2	1s7v
-Mouse	H2	1s7w
-Mouse	H2	1s7x
-Mouse	H2	1wbx
-Mouse	H2	1wby
-Mouse	H2	1zhb
-Mouse	H2	2f74
-Mouse	H2	3cc5
-Mouse	H2	3cch
-Mouse	H2	3ch1
-Mouse	H2	3cpl
-Mouse	H2	3ftg
-Mouse	H2	3quk
-Mouse	H2	3qul
-Mouse	H2	3tbs
-Mouse	H2	3tbt
-Mouse	H2	3tbv
-Mouse	H2	3tbw
-Mouse	H2	3tby
-Mouse	H2	4huu
-Mouse	H2	4huv
-Mouse	H2	4huw
-Mouse	H2	4l8b
-Mouse	H2	4l8c
-Mouse	H2	4l8d
-Mouse	H2	4nsk
-Mouse	H2	1bqh
-Mouse	H2	1fo0
-Mouse	H2	1g6r
-Mouse	H2	1g7p
-Mouse	H2	1g7q
-Mouse	H2	1kj2
-Mouse	H2	1kj3
-Mouse	H2	1kpu
-Mouse	H2	1kpv
-Mouse	H2	1leg
-Mouse	H2	1lk2
-Mouse	H2	1nam
-Mouse	H2	1nan
-Mouse	H2	1osz
-Mouse	H2	1p4l
-Mouse	H2	1rk0
-Mouse	H2	1rk1
-Mouse	H2	1t0m
-Mouse	H2	1vac
-Mouse	H2	1vad
-Mouse	H2	1wbz
-Mouse	H2	2ckb
-Mouse	H2	2fo4
-Mouse	H2	2mha
-Mouse	H2	2vaa
-Mouse	H2	2vab
-Mouse	H2	3c8k
-Mouse	H2	3cvh
-Mouse	H2	3p4m
-Mouse	H2	3p4n
-Mouse	H2	3p4o
-Mouse	H2	3p9l
-Mouse	H2	3p9m
-Mouse	H2	3pab
-Mouse	H2	3roo
-Mouse	H2	4hkj
-Human	HLA-B*35	1a9b
-Human	HLA-B*35	1a9e
-Human	HLA-B*35	1xh3
-Human	HLA-B*35	1zhk
-Human	HLA-B*35	1zsd
-Human	HLA-B*35	2axg
-Human	HLA-B*35	2cik
-Human	HLA-B*35	2h6p
-Human	HLA-B*35	2nx5
-Human	HLA-B*35	3lkn
-Human	HLA-B*35	3lko
-Human	HLA-B*35	3lkp
-Human	HLA-B*35	3lkq
-Human	HLA-B*35	3lkr
-Human	HLA-B*35	3lks
-Human	HLA-B*35	3mv7
-Human	HLA-B*35	3mv8
-Human	HLA-B*35	3mv9
-Human	HLA-B*35	4pr5
-Human	HLA-B*35	4pra
-Human	HLA-B*35	4prn
-Human	HLA-B*35	4prp
-Human	HLA-B*35	1zhl
-Human	HLA-B*35	2ak4
-Human	HLA-B*35	2axf
-Human	HLA-B*35	2fz3
-Human	HLA-B*35	2nw3
-Human	HLA-B*35	3bw9
-Human	HLA-B*35	3bwa
-Human	HLA-B*35	3vfr
-Human	HLA-B*35	3vfs
-Human	HLA-B*35	3vft
-Human	HLA-B*35	3vfu
-Human	HLA-B*35	3vfv
-Human	HLA-B*35	3vfw
-Human	HLA-B*35	4jrx
-Human	HLA-B*35	4jry
-Human	HLA-B*35	4prb
-Human	HLA-B*35	4prd
-Human	HLA-B*35	4pre
-Human	HLA-B*35	4pri
-Human	HLA-A*24	2bck
-Human	HLA-A*24	3i6l
-Human	HLA-A*24	3nfn
-Human	HLA-A*24	3qzw
-Human	HLA-A*24	3vxm
-Human	HLA-A*24	3vxn
-Human	HLA-A*24	3vxo
-Human	HLA-A*24	3vxp
-Human	HLA-A*24	3vxr
-Human	HLA-A*24	3vxs
-Human	HLA-A*24	3vxu
-Human	HLA-A*24	3w0w
-Human	HLA-A*24	3wl9
-Human	HLA-A*24	3wlb
-Human	HLA-A*24	4f7m
-Human	HLA-A*24	4f7t
-Human	HLA-B*27	1hsa
-Human	HLA-B*27	1jge
-Human	HLA-B*27	1ogt
-Human	HLA-B*27	1uxs
-Human	HLA-B*27	1w0v
-Human	HLA-B*27	2a83
-Human	HLA-B*27	2bst
-Human	HLA-B*27	3bp4
-Human	HLA-B*27	3lv3
-Human	HLA-B*27	4g8g
-Human	HLA-B*27	4g8i
-Human	HLA-B*27	4g9d
-Human	HLA-B*27	4g9f
-Mouse	H2	1bz9
-Mouse	H2	1ffn
-Mouse	H2	1ffo
-Mouse	H2	1ffp
-Mouse	H2	1yn6
-Mouse	H2	1yn7
-Mouse	H2	3buy
-Mouse	H2	3l3h
-Mouse	H2	3pqy
-Mouse	H2	3ws3
-Mouse	H2	3ws6
-Human	HLA-B*08	1agb
-Human	HLA-B*08	1agc
-Human	HLA-B*08	1agd
-Human	HLA-B*08	1age
-Human	HLA-B*08	1agf
-Human	HLA-B*08	1m05
-Human	HLA-B*08	1mi5
-Human	HLA-B*08	3ffc
-Human	HLA-B*08	3sjv
-Human	HLA-B*08	3spv
-Human	HLA-B*44	1m6o
-Human	HLA-B*44	3dx6
-Human	HLA-B*44	3kpl
-Human	HLA-B*44	3kpm
-Human	HLA-B*44	3l3d
-Human	HLA-B*44	3l3g
-Human	HLA-B*44	3l3i
-Human	HLA-B*44	3l3j
-Human	HLA-B*44	3l3k
-Mouse	H2	1fzm
-Mouse	H2	1fzo
-Mouse	H2	1rjy
-Mouse	H2	1rjz
-Mouse	H2	1t0n
-Mouse	H2	2clv
-Mouse	H2	2clz
-Mouse	H2	2ol3
-Human	HLA-B*27:09	1jgd
-Human	HLA-B*27:09	1k5n
-Human	HLA-B*27:09	1of2
-Human	HLA-B*27:09	1uxw
-Human	HLA-B*27:09	1w0w
-Human	HLA-B*27:09	3bp7
-Human	HLA-B*27:09	3czf
-Human	HLA-B*27:09	3d18
-Human	HLA-B*44:05	1syv
-Human	HLA-B*44:05	3dx8
-Human	HLA-B*44:05	3dxa
-Human	HLA-B*44:05	3kpp
-Human	HLA-B*44:05	3kpq
-Human	HLA-B*44:05	3kpr
-Human	HLA-B*44:05	3kps
-Human	HLA-B*44:03	1n2r
-Human	HLA-B*44:03	1sys
-Human	HLA-B*44:03	3dx7
-Human	HLA-B*44:03	3kpn
-Human	HLA-B*44:03	3kpo
-Human	HLA-B*44:03	4jqx
-Human	HLA-B*57	2rfx
-Human	HLA-B*57	2ypk
-Human	HLA-B*57	3upr
-Human	HLA-B*57	3vh8
-Human	HLA-B*57	3vri
-Human	HLA-B*57	3vrj
-Chicken	b21	2yez
-Chicken	b21	2yf1
-Chicken	b21	2yf5
-Chicken	b21	2yf6
-Chicken	b21	3bev
-Chicken	b21	3bew
-Monkey	Mamu-B*17	3rwc
-Monkey	Mamu-B*17	3rwd
-Monkey	Mamu-B*17	3rwe
-Monkey	Mamu-B*17	3rwf
-Monkey	Mamu-B*17	3rwg
-Monkey	Mamu-B*17	3rwh
-Human	HLA-A*11	1q94
-Human	HLA-A*11	1qvo
-Human	HLA-A*11	1x7q
-Human	HLA-A*11	2hn7
-Human	HLA-A*11	4n8v
-Mouse	H2	1qo3
-Mouse	H2	3dmm
-Mouse	H2	3e6f
-Mouse	H2	3e6h
-Mouse	H2	3ecb
-Human	HLA-A*01	1w72
-Human	HLA-A*01	3bo8
-Human	HLA-A*01	4nqv
-Human	HLA-A*01	4nqx
-Human	HLA-B*35:08	3vfm
-Human	HLA-B*35:08	3vfn
-Human	HLA-B*35:08	3vfo
-Human	HLA-B*35:08	4prh
-Human	HLA-E*01	2esv
-Human	HLA-E*01	3bze
-Human	HLA-E*01	3cdg
-Human	HLA-E*01	3cii
-Human	HLA-E*01	1mhe
-Human	HLA-E*01	3am8
-Human	HLA-E*01	3bzf
-Human	HLA-B*15	1xr8
-Human	HLA-B*15	1xr9
-Human	HLA-B*15	3c9n
-Human	HLA-A*03	2xpg
-Human	HLA-A*03	3rl1
-Human	HLA-A*03	3rl2
-Mouse	H2	3fol
-Mouse	H2	3fom
-Mouse	H2	3fon
-Chicken	BF2*0401	4e0r
-Chicken	BF2*0401	4g42
-Chicken	BF2*0401	4g43
-Human	HLA-B*53	1a1m
-Human	HLA-B*53	1a1o
-Human	HLA-B*51	1e27
-Human	HLA-B*51	4mji
-Rat	RT1-A	1ed3
-Rat	RT1-A	1kjm
-Mouse	H2	1fzj
-Mouse	H2	1fzk
-Human	HLA-E*01	1kpr
-Human	HLA-E*01	1ktl
-Mouse	H2	1ld9
-Mouse	H2	1ldp
-Mouse	H2	1lek
-Mouse	H2	1mwa
-Mouse	H2	1vgk
-Mouse	H2	2fwo
-Human	HLA-G	1ydp
-Human	HLA-G	3kyo
-Mouse	H2	1zt1
-Mouse	H2	1zt7
-Human	HLA-A*02	2av7
-Human	HLA-A*02	2j8u
-Human	HLA-B*27:05	2bsr
-Human	HLA-B*27:05	2bss
-Human	HLA-B*57:03	2bvo
-Human	HLA-B*57:03	2bvp
-Human	HLA-B*57:06	2hjk
-Human	HLA-B*57:06	2hjl
-Human	HLA-B*14:02	3bvn
-Human	HLA-B*14:02	3bxn
-Human	HLA-A*02:01	(A150P)
-Human	HLA-A*02:01	3h9h
-Human	HLA-A*02:01	3ixa
-Monkey	Mamu-A*02	3jts
-Monkey	Mamu-A*02	3jtt
-Human	HLA-B*35:08	3kww
-Human	HLA-B*35:08	3kxf
-Cow	BoLA-A11	3pwu
-Cow	BoLA-A11	3pwv
-Pig	SLA-1	3qq3
-Pig	SLA-1	3qq4
-Mouse	H2	3tid
-Mouse	H2	3tie
-Mouse	H2	4hux
-Mouse	H2	4hv8
-Human	HLA-A*68:02	4hx1
-Human	HLA-A*68:02	4i48
-Human	HLA-B*51:01	1e28
-Human	HLA-B*3501	1a1n
-Mouse	H2	1bii
-Human	HLA-B*35:01	1cg9
-Mouse	H2	1ddh
-Human	HLA-Cw3	1efx
-Human	HLA-Cw4	1im9
-Mouse	H2	1k8d
-Rat	RT1-A	1kjv
-Human	HLA-Cw4	1qqd
-Monkey	Mamu-A*01	1zvs
-Human	HLA-A2	2av1
-Human	HLA-G	2d31
-Human	HLA-G	2dyp
-Human	HLA-A2	2jcc
-Human	HLA-A2	2uwe
-Human	HLA-B-57	2ypl
-Human	HLA-G	3kyn
-Human	HLA-B*4104	3ln5
-Human	HLA-A*02:03	3ox8
-Human	HLA-A*02:06	3oxr
-Human	HLA-A*02:07	3oxs
-Mouse	H2	3rgv
-Human	HLA-B7	3vcl
-Mouse	H2	3vj6
-Human	HLA-B*52:01	3w39
-Human	HLA-B*57:01	3wuw
-Mouse	H2	4hs3
-Human	HLA-A68	4hwz
-Mouse	H2	4iho
-Human	HLA-B*18:01	4jqv
+1 4f7t-D RYGFVANF 3wlb-A NYTPGPGTRF
+2 1a1n-A VPLRPMTY N/A
+3 2mha-C RGYVYQGL 1vad-A SRDHSRTPM
+4 4g43-A IDWFEGKE N/A
+5 1mwa-I EQYKFYSV N/A
+6 4mji-A TAFTIPSI N/A
+7 1zt1-A FEANGNLI N/A
+8 3rwh-A MRHVLEPF 3rwd-A IRYPKTFGWLW
+9 4g42-D IDWFDGKD N/A
+10 3w39-D TAFTIPSI N/A
+11 3bwa-A FPTKDVAL 2nw3-A EPLPQGQLTAY
+12 2fo4-A SAPDFRPL 1leg-A EQYKFYSV
+13 3p4n-D YTVKFPNM 3pab-A EIINFEKL
+14 3fon-C VNDIFEAI 3fom-A IQQSIERI
+15 4e0r-A IDWFDGKE N/A
+16 4eup-A ALGIGILTV 1i1y-A YLKEPVHGV
+17 1a9b-A LPPLDITPY 3mv7-A HPVGEADYFEY
+18 1vgk-A SYVNTNMGL N/A
+19 1ydp-A RIIPRHLQL 3kyo-A KLPAQFYIL
+20 2c7u-D SLFNTIAVL 4jfp-A ELAAIGILTV
+21 1bz9-A FAPGVFPYM N/A
+22 1a1m-A TPYDINQML N/A
+23 3bp7-A IRAAPPPLF 1of2-A RRKWRRWHL
+24 3jtt-G YTSGPGIRY N/A
+25 1ld9-A YPNVNIHNF 1ldp-H QLSPFPFDL
+26 4nqx-K CTELKLNDY 1w72-D EADPTGHSY
+27 1p7q-A ILKEPVHGV 3d25-A VLHDDLLEA
+28 3bzf-A VMAPRALLL N/A
+29 3rwg-A MHPAQTSQW 3rwf-A QTSQWDDPW
+20 3tbw-G KGPSNFATM 1jpf-A SGVENPGGYCL
+31 3kps-A EEYLQAFTY 3dxa-A EENLLDFVRF
+32 1xr9-A ILGPPGSVY 3c9n-A VQQESSFVM
+33 1qqd-A QYDDAVYKL N/A
+34 1q94-D AIFQSSMTK 1qvo-A QVPLRPMTYK
+35 1zt7-C SEFLLEKRI N/A
+36 1e27-A LPPVVAKEI N/A
+37 3pwv-A IPAYGVLTI N/A
+38 2vlr-F GILGFVFTL 1hhk-A LLFGYPVYV
+39 4lcy-F FTMRLLSPV N/A
+40 4i48-A TLTSCNTSV N/A
+41 2vab-A FAPGNYPAL 3roo-A AVYNFATM
+42 1im9-E QYDDAVYKL N/A
+43 4hx1-A SVYDFFVWL N/A
+44 2cik-A KPIVVLHGY 3lkr-A LPFERATVM
+45 3jts-A GSENLKSLY N/A
+46 4l29-O YLLMWITQV 1qew-A FLWGPRALV
+47 3bxn-A IRAAPPPLF 3bvn-A RRRWRRLTV
+48 2bck-A VYGFVRACL 3i6l-D QFKDNVILL
+49 1fzo-A FAPGNYPAL 1rjz-A SEIEFARL
+50 3am8-B VMGPRTLIL N/A
+51 1eez-D ILSALVGIL 1i1f-A FLKEPVHGV
+52 3qeq-A AAGIGILTV 4l29-O YLLMWITQV
+53 1w72-D EADPTGHSY 4nqx-K CTELKLNDY
+54 1sys-A EEPTVIKKY 4jqx-A EECDSELEIKRY
+55 3e6f-A IGPGRAFYA N/A
+56 3upr-C HSITYLLPV 3vrj-A LTTKLTNTNI
+57 2v2x-D SLFNTVATL 1hhi-A GILGFVFTL
+58 3bvn-A RRRWRRLTV N/A
+69 3lkr-A LPFERATVM 2cik-A KPIVVLHGY
+60 3qq3-D NSDTVGWSW N/A
+61 3l3d-A EEAGRAFSF N/A
+62 2xpg-A KLIETYFSK 3rl2-A QVPLRPMTYK
+63 1kjv-A NPRAMQALL N/A
+64 3rwf-A QTSQWDDPW 3rwg-A MHPAQTSQW
+65 3fqt-A GLLGSPVRA 2pye-A SLLMWITQC
+66 1jpg-A FQPQNGQFI 1s7x-A KAVFNFATM
+67 1wbz-C SSYRRPVGI 3p4m-A YTVKYPNL
+68 2x4s-A AMDSNTLEL 1im3-A LLFGYPVYV
+69 2bvp-A ISPRTLDAW N/A
+70 3ffc-F FLRGRAYGL N/A
+71 4l8d-C ASNEDMETM 3tbw-A KGPSNFATM
+72 1ldp-H QLSPFPFDL 1ld9-A YPNVNIHNF
+73 1ogt-A RRKWRRWHL 4g8g-A KRWIILGLNK
+74 3mrc-A NLVPMCATV 1qr1-A IISAVVGIL
+75 3czf-A RRRWHRWRL 3bp7-A IRAAPPPLF
+76 1i1y-A YLKEPVHGV 4eup-A ALGIGILTV
+77 3gsw-A NLVPMVAAV 3giv-A SLFNTVATLY
+78 2fwo-A TYQRTRALV N/A
+79 1cg9-A LPPLDITPY N/A
+80 3to2-A LACFVLAAV 4gkn-A FATGIGIITV
+81 1xr8-A LEKARGSTY 3c9n-A VQQESSFVM
+82 1efx-A GAVDPLLAL N/A
+83 1ce6-A FAPGNYPAL 3quk-A KAVANFATM
+84 3hg1-A ELAGIGILTV 1eey-A ILSALVGIV
+85 1ddh-A RGPGRAFVTI N/A
+86 2yf5-A TAGQSNYDRL 3bew-A REVDEQLLSV
+87 2axf-A APQPAPENAY 3vft-A LPEPLAQGQLTAY
+88 4g9f-A KRWIIMGLNK 1jge-A GRFAAAIAK
+89 3giv-D SLFNTVATLY 2gj6-A LLFGKPVYV
+90 3vxr-A RYPLTFGWCF 4f7m-D LYASPQLEGF
+91 1qvo-A QVPLRPMTYK 1q94-D AIFQSSMTK
+92 4f7m-D LYASPQLEGF 3vxr-A RYPLTFGWCF
+93 1i4f-A GVYDGREHTV 1jht-A ALGIGILTV
+94 3vrj-A LTTKLTNTNI 3upr-C HSITYLLPV
+95 3oxs-A FLPSDFFPSV N/A
+96 1n3n-A SALQNAASIA 4huv-A ASNENWETM
+97 3utt-F ALWGPDPAAA 3mrp-A ELAGLGINTV
+98 3mgt-A KLYQNPTTYI 2git-A LLFGKPVYV
+99 1jgd-A RRLLRGHNQY 3bp4-A IRAAPPPLF
+100 3vxp-D RYPLTLGWCF N/A
+101 3vxu-A RFPLTFGWCF N/A
+102 3wlb-A NYTPGPGTRF 4f7t-D RYGFVANF
+103 2axg-A APQPAPENAY 3mv7-A HPVGEADYFEY
+104 2hn7-A AIMPARFYPK 1q94-D AIFQSSMTK
+105 3bew-D REVDEQLLSV 2yf5-A TAGQSNYDRL
+106 3dxa-K EENLLDFVRF 1syv-A EEFGRAFSF
+107 2clr-D MLLSVPLLLG 3mgt-A KLYQNPTTYI

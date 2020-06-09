@@ -21,29 +21,28 @@ for fol in os.listdir('./'):
         print('Working on '+ fol)
         os.chdir('./'+fol)
         brk_flag = False
-        if os.path.isfile('./final_scores.tsv'):
-            query = fol[5:]
-            target_id = IDs[query]
+        if os.path.isfile('./molpdf_DOPE.tsv'):
+            target_id = fol.split('_')[1]
             final_scores = {}
                 
             
             os.popen('cp ../../../data/PDBs/%s_MP.pdb ./' %target_id).read()
             
             os.popen('pdb_reres -1 %s_MP.pdb > reres_%s.pdb' %(target_id, target_id)).read()
-            os.popen('bash ../../../tools/map_2_pdb.sh %s.BL00010001.pdb reres_%s_MP.pdb > ref.pdb' %(query, target_id)).read()
+            os.popen('bash ../../../tools/map_2_pdb.sh %s.BL00050001.pdb reres_%s.pdb > ref.pdb' %(target_id, target_id)).read()
             os.popen('python ../../../tools/pdb_fast_lzone_mhc.py ref.pdb').read()
             
             with open('file.list', 'w') as out:
                 for f in os.listdir('./'):
-                    if f.startswith(query+'.'+filename_start) and f.endswith(filename_end):
+                    if f.startswith(target_id+'.'+filename_start) and f.endswith(filename_end):
                         out.write('matched_'+ f + '\n')
                         os.popen('bash ../../../tools/map_2_pdb.sh ref.pdb %s >  matched_%s' %(f,f)).read()
             
-            os.popen('../../../tools/CA_backbone_l-rmsd-calc.csh ref file.list').read()
             os.popen('../../../tools/CA_l-rmsd-calc.csh ref file.list').read()
+            os.popen('../../../tools/CA_backbone_l-rmsd-calc.csh ref file.list').read()
             os.popen('../../../tools/CA_backbone_CB_l-rmsd-calc.csh ref file.list').read()
             
-            with open('./final_scores.tsv', 'r') as infile:
+            with open('./molpdf_DOPE.tsv', 'r') as infile:
                 r = csv.reader(infile, delimiter='\t')
                 for i, row in enumerate(r):
                     if i == 0:
@@ -51,15 +50,15 @@ for fol in os.listdir('./'):
                     else:
                         final_scores['matched_'+row[0]] = [float(row[1]), float(row[2])]#, float(row[3])]
             
-            with open('./BB-l-RMSD.dat') as cafile:
-                r = csv.reader(cafile, delimiter=' ')
-                header.append('BB_l-RMSD')
-                for row in r:
-                    final_scores[row[0]].append(float(row[1]))
-                    
             with open('./CA-l-RMSD.dat') as cafile:
                 r = csv.reader(cafile, delimiter=' ')
                 header.append('CA_l-RMSD')
+                for row in r:
+                    final_scores[row[0]].append(float(row[1]))
+            
+            with open('./BB-l-RMSD.dat') as cafile:
+                r = csv.reader(cafile, delimiter=' ')
+                header.append('BB_l-RMSD')
                 for row in r:
                     final_scores[row[0]].append(float(row[1]))
             
@@ -73,7 +72,7 @@ for fol in os.listdir('./'):
                         pass
                 
                     
-            with open('./all_rmsds_and_final_scores.tsv', 'wt') as outfile:
+            with open('./rmsds_and_final_scores.tsv', 'wt') as outfile:
                 tw = csv.writer(outfile, delimiter='\t')
                 tw.writerow(header)
                 for key in final_scores:
