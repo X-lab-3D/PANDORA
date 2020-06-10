@@ -35,11 +35,11 @@ IDD_file.close()
 ### Organizing Allele IDs in a dictionary ###
 allele_ID = {}
 for key in IDD:
-    if 'HLA' in IDD[key]['allele']:
-        try:
-            allele_ID[IDD[key]['allele']].append(key)
-        except KeyError:
-            allele_ID[IDD[key]['allele']] = [key]
+    #if 'HLA' in IDD[key]['allele']:
+    try:
+        allele_ID[IDD[key]['allele']].append(key)
+    except KeyError:
+        allele_ID[IDD[key]['allele']] = [key]
 
 ###########################################
 ###  Setting variables 
@@ -62,6 +62,7 @@ print_results = False
 
 
 for k, pept_seq in enumerate(pept_seqs):
+    t1 = time.time()
     ext_flag = False
     query = 'query_' + str(k + 1)
     print( '## Wokring on %s ##' %query)
@@ -79,24 +80,86 @@ for k, pept_seq in enumerate(pept_seqs):
     allele = pept_seq[1]
     length = len(pept)
         
-    max_pos = -200
+    max_pos = -500
     pos_list = []
     
     anch_1, anch_2 = anch_dict[length]
     
-    if allele in allele_ID.keys():
-        pass
-    elif allele[:9] in allele_ID.keys():
-        allele = allele[:9]
-    else:
-        allele = allele[:6]
+    homolog_allele = '--NONE--'
+    if allele.startswith('HLA'):      # Human
+        if allele in allele_ID.keys():
+            pass
+        elif allele[:9] in allele_ID.keys():
+            allele = allele[:9]
+        else:
+            allele = allele[:6]
+    elif allele.startswith('H2'):    # Mouse
+        homolog_allele = 'RT1'
+        if allele in allele_ID.keys():
+            pass
+        elif allele[:4] in allele_ID.keys(): 
+            allele = allele[:4]
+        else:
+            allele = allele[:3]
+    elif allele.startswith('RT1'):          # Rat
+        homolog_allele = 'H2'
+        if allele in allele_ID.keys():
+            pass
+        elif allele[:5] in allele_ID.keys():
+            allele = allele[:5]
+        else: 
+            allele = allele[:4]
+    elif allele.startswith('BoLA'):        # Bovine
+        if allele in allele_ID.keys():
+            pass
+        elif allele[:10] in allele_ID.keys():
+            allele = allele[:10]
+        elif allele[:7] in allele_ID.keys():
+            allele = allele[:7]
+        else: 
+            allele = allele[:5]
+    elif allele.startswith('SLA'):        # Suine
+        if allele in allele_ID.keys():
+            pass
+        elif allele[:9] in allele_ID.keys():
+            allele = allele[:9]
+        elif allele[:6] in allele_ID.keys():
+            allele = allele[:6]
+        else: 
+            allele = allele[:4]
+    elif allele.startswith('BF2'):        # Chicken
+        if allele in allele_ID.keys():
+            pass
+        elif allele[:6] in allele_ID.keys():
+            allele = allele[:6]
+        else:
+            allele = allele[:4]
+    elif allele.startswith('Mamu'):       # Monkey
+        if allele in allele_ID.keys():
+            pass
+        elif allele[:13] in allele_ID.keys():
+            allele = allele[:13]
+        elif allele[:9] in allele_ID.keys():
+            allele = allele[:9]
+        else: 
+            allele = allele[:5]
+    elif allele.startswith('Eqca'):        # Horse
+        if allele in allele_ID.keys():
+            pass
+        elif allele[:10] in allele_ID.keys():
+            allele = allele[:10]
+        elif allele[:7] in allele_ID.keys():
+            allele = allele[:7]
+        else: 
+            allele = allele[:5]
         
     for ID in IDD:
-        if allele in IDD[ID]['allele']:                       ## Same Allele
+        if allele in IDD[ID]['allele'] or homolog_allele in IDD[ID]['allele']:                       ## Same Allele
             score = 0
             temp_pept = IDD[ID]['pept_seq']
             min_len = min([length, len(temp_pept)])
-            score -= (abs(length - len(temp_pept)) * 20)      ## Penalty for gaps
+            #score -= (abs(length - len(temp_pept)) * 20)      ## Penalty for gaps
+            score -= int(2.5 ** (2 + abs(length - len(temp_pept))))
             for (aa, bb) in zip(pept[:min_len], temp_pept[:min_len]):
                 try:
                     score += MatrixInfo.pam30[aa, bb]
@@ -157,8 +220,8 @@ for k, pept_seq in enumerate(pept_seqs):
     
     #Preparing template and target sequences for the .ali file, launching Muscle
 
-    template_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=template_ID, name = 'HLA' + ID)
-    target_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=query, name = 'HLA_' + query)
+    template_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=template_ID, name = template_ID)
+    target_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=query, name = query) 
     SeqIO.write((template_seqr, target_seqr), "%s.fasta" %template_ID, "fasta")
     
     os.system('muscle -in %s.fasta -out %s.afa -quiet' %(template_ID, template_ID))
@@ -247,15 +310,19 @@ for k, pept_seq in enumerate(pept_seqs):
     
     if template_pept[anch_1-1] == pept[anch_1-1]:
         anch_1_same = True
-    if anch_2 == len(pept):
-        if template_pept[anch_2-1] == pept[anch_2-1]:
+    if (anch_2 + 1) == len(template_pept):
+        if template_pept[anch_2] == pept[anch_2]:
             anch_2_same = True
     else:
-        if template_pept[-1] == pept[anch_2-1]:
+        if template_pept[-1] == pept[anch_2]:
             anch_2_same = True
     
-    if anch_2 > len(template_pept):
-        real_anchor_2 = (anch_2 + len(template_pept))
+    if (anch_2 + 1) == len(template_pept):
+        pass
+    elif (anch_2 + 1) > len(template_pept):
+        real_anchor_2 = len(template_pept)  #????
+    elif (anch_2 + 1) > len(template_pept):
+        pass
     
     ### Writing anchors contact list ###
     
@@ -286,16 +353,16 @@ for k, pept_seq in enumerate(pept_seqs):
                     p_atom = line.split("\t")[8]
                     m_aa_id = (line.split("\t")[2]).split(' ')[0]
                     if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
-                        if int(p_aa_id) == anch_1:
+                        if int(p_aa_id) == (anch_1+1):
                             output.write(line)
                     else:
-                        if int(p_aa_id) == anch_1 and ('CA' in p_atom or 'CB' in p_atom):
+                        if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
                             output.write(line)
                     if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
-                        if int(p_aa_id) == anch_2:
+                        if int(p_aa_id) == (anch_2+1):
                             output.write(line)
                     else:
-                        if int(p_aa_id) == anch_2 and ('CA' in p_atom or 'CB' in p_atom):
+                        if int(p_aa_id) == (anch_2+1) and ('CA' in p_atom or 'CB' in p_atom):
                             output.write(line)
                     #if (int(p_aa_id) == anch_1 or int(p_aa_id) == anch_2) and ('CA' in p_atom or 'CB' in p_atom):
                     #        output.write(line)
@@ -319,7 +386,7 @@ for k, pept_seq in enumerate(pept_seqs):
     
     #Finally launching Modeller. Hopefully.
     
-    t1 = time.time()
+    smt = time.time()
     
     with open('cmd_modeller.py', 'w') as modscript:
         cmd_m_temp = open('../../../modelling_scripts/cmd_modeller_template.py', 'r')
@@ -335,11 +402,13 @@ for k, pept_seq in enumerate(pept_seqs):
     os.popen('python3 cmd_modeller.py > modeller.log').read()
     
     t2 = time.time()
+    mt = t2 - smt
     tf = t2 - t1
     
-    print('The modelling took %i seconds' %tf)
-
-    if tf < 3:
+    print('The modelling took %i seconds' %mt)
+    print('The whole case took %i seconds' %tf)
+    
+    if mt < 3:
         non_modelled.append((query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele']))
     
     os.chdir('../../../')

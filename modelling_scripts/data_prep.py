@@ -30,7 +30,7 @@ def get_peptides_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter):
                     star_allele = (allele[0:5]+'*'+allele[5:])
                     seqs.append((seq, star_allele))
                 else:
-                    seqs.appen((seq, allele))
+                    seqs.append((seq, allele))
     return seqs
 
 

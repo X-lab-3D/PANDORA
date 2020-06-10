@@ -414,10 +414,10 @@ for k, pept_seq in enumerate(pept_seqs):
                         if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
                             output.write(line)
                     if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
-                        if int(p_aa_id) == (anch_2 + 1):
+                        if int(p_aa_id) == (anch_2+1):
                             output.write(line)
                     else:
-                        if int(p_aa_id) == (anch_2 + 1) and ('CA' in p_atom or 'CB' in p_atom):
+                        if int(p_aa_id) == (anch_2+1) and ('CA' in p_atom or 'CB' in p_atom):
                             output.write(line)
                     #if (int(p_aa_id) == anch_1 or int(p_aa_id) == anch_2) and ('CA' in p_atom or 'CB' in p_atom):
                     #        output.write(line)
