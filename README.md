@@ -1,5 +1,16 @@
 # pMHC_modelling
 
+## Requirements
+
+Python 3 (Prefered)
+BioPython
+Modeller 9.23 or later
+pdb_tools
+muscle
+profit (only for RMSD calculation)
+pdb2sql (only for RMSD calculation)
+
+
 ## mhc_model.py
 Updated version of old_launcher_0.1.py.
 Contact list generated from modeller .ini file.

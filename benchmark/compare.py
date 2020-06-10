@@ -9,7 +9,8 @@ import pickle
 from matplotlib import pyplot as plt
 
 
-outdir = 'no_prize/'
+outdir = sys.argv[1]
+#outdir = 'no_prize/'
 
 ### PANDORA
 with open('all_best_RMSDs.pkl', 'rb') as infile:
