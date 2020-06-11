@@ -48,7 +48,7 @@ pept_seqs = data_prep.get_peptides_from_csv('data/csv_pkl_files/table_1_AnAnalys
 
 
 ###
-pept_seqs = pept_seqs[:2]
+pept_seqs = pept_seqs[:4]
 ###
 outdir_name = sys.argv[1]
 
@@ -66,11 +66,14 @@ taskID = int(sys.argv[2])
 n_tasks = int(sys.argv[3])
 
 step_width = len(pept_seqs)/n_tasks
-pepts_start = step_width * (taskID-1)
-pepts_end = step_width * taskID
+pepts_start = int(step_width * (taskID-1))
+pepts_end = int(step_width * taskID)
 
 print('######################################')
 print(taskID)
+print(n_tasks)
+print(pepts_start)
+print(pepts_end)
 print('######################################')
 
 anch_dict = { 8: (1, 7), 9 : (1, 8), 10 : (1, 9), 
@@ -87,7 +90,7 @@ print_results = False
 ###########################################
 
 
-for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]):
+for k, pept_seq in zip(range(pepts_start, pepts_end), pept_seqs[pepts_start:pepts_end]):
     t1 = time.time()
     ext_flag = False
     query = 'query_' + str(k + 1)
@@ -333,22 +336,29 @@ for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]):
     real_anchor_2 = None
     anch_1_same = False
     anch_2_same = False
+
+    '''
+    if (anch_2 + 1) == len(template_pept):
+        pass
+    elif (anch_2 + 1) > len(template_pept):
+        real_anchor_2 = len(template_pept)  
+    elif (anch_2 + 1) < len(template_pept):
+        pass                                #?
+    '''
     
-    if template_pept[anch_1-1] == pept[anch_1-1]:
+    if template_pept[anch_1] == pept[anch_1]:
         anch_1_same = True
+
     if (anch_2 + 1) == len(template_pept):
         if template_pept[anch_2] == pept[anch_2]:
             anch_2_same = True
-    else:
+    elif (anch_2 + 1) > len(template_pept):
+        real_anchor_2 = len(template_pept) 
         if template_pept[-1] == pept[anch_2]:
             anch_2_same = True
-    
-    if (anch_2 + 1) == len(template_pept):
-        pass
-    elif (anch_2 + 1) > len(template_pept):
-        real_anchor_2 = len(template_pept)  #????
-    elif (anch_2 + 1) > len(template_pept):
-        pass
+    elif (anch_2 + 1) < len(template_pept):
+        if template_pept[-1] == pept[anch_2]:
+            anch_2_same = True
     
     ### Writing anchors contact list ###
     
@@ -361,17 +371,17 @@ for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]):
                     p_atom = line.split("\t")[8]                                                  ### atom name of the template peptide residue
                     m_aa_id = (line.split("\t")[2]).split(' ')[0]
                     if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
-                        if int(p_aa_id) == anch_1:
+                        if int(p_aa_id) == (anch_1+1):
                             output.write(line)
                     else:
-                        if int(p_aa_id) == anch_1 and ('CA' in p_atom or 'CB' in p_atom):
+                        if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
                             output.write(line)
-                    if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
-                        if int(p_aa_id) == real_anchor_2:
-                            output.write(line[:30] + str(anch_2) + line[34:])
-                    else:
-                        if int(p_aa_id) == real_anchor_2 and ('CA' in p_atom or 'CB' in p_atom):
-                            output.write(line[:30] + str(anch_2) + line[34:])
+                    #if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
+                    #    if int(p_aa_id) == real_anchor_2:
+                    #        output.write(line[:30] + str(anch_2+1) + line[34:])
+                    #else:
+                    if int(p_aa_id) == real_anchor_2 and ('CA' in p_atom or 'CB' in p_atom):
+                        output.write(line[:30] + str(anch_2+1) + line[34:])
             else:
                 for line in contacts:
                     #print(line.split("\t"))
