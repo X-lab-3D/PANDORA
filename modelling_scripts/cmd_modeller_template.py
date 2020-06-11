@@ -7,7 +7,7 @@ from MyLoop import MyLoop
 
 
 j = MP.job() 
-for i in range(20):         ## Use 6 CPUs in a parallel job on this machine
+for i in range(24):         ## Use 24 CPUs in a parallel job on this machine
     j.append(MP.local_slave())
 
 M.log.verbose()                                # request verbose output

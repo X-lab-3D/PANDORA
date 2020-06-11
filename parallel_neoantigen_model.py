@@ -14,13 +14,13 @@ from Bio.SubsMat import MatrixInfo
 from random import choice
 import csv
 import sys
+from joblib import Parallel, delayed
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
 ##IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
-#IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/csv_pkl_files/mhc_ligand_table_export_1578913026.csv', 76, 80, ',')
+#IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/csv_pkl_files/mhc_ligand_table_export_1578913026.csv', 76, 80, ',') ### DO NOT DELETE
 
-#outdir_name = sys.argv[1]
 
 #outdir_name = 'wildtype'
 
@@ -46,13 +46,7 @@ for key in IDD:
 
 pept_seqs = data_prep.get_peptides_from_csv('data/csv_pkl_files/table_1_AnAnalysisofNaturalTCellResponsestoPredictedTumorNeoepitopes.csv', 3, 4, ',')
 
-
-###
-pept_seqs = pept_seqs[:2]
-###
 outdir_name = sys.argv[1]
-
-'''
 try:
     pepts_start = int(sys.argv[2])
 except:
@@ -61,17 +55,7 @@ try:
     pepts_end = int(sys.argv[3])
 except:
     pepts_end = len(pept_seqs)
-'''
-taskID = int(sys.argv[2])
-n_tasks = int(sys.argv[3])
 
-step_width = len(pept_seqs)/n_tasks
-pepts_start = step_width * (taskID-1)
-pepts_end = step_width * taskID
-
-print('######################################')
-print(taskID)
-print('######################################')
 
 anch_dict = { 8: (1, 7), 9 : (1, 8), 10 : (1, 9), 
               11 : (1, 10), 12 : (1, 11)}
@@ -84,23 +68,23 @@ maxsl = []
 non_modelled = []
 print_results = False
 
-###########################################
+######################################################################################################
+######################################################################################################
 
-
-for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]):
+def na_model(k, pept_seq):
     t1 = time.time()
-    ext_flag = False
+    #ext_flag = False
     query = 'query_' + str(k + 1)
     print( '## Wokring on %s ##' %query)
-    for folder in os.listdir('outputs/%s' %outdir_name):
-        if 'query' in folder:
-            if str(k+1) == folder.split('_')[2]:
-                print('WARNING: Existing directory for this query. Moving on.')
-                ext_flag = True
-                break
-    if ext_flag == True:
-        print('Exiting here. This is only a DEBUG message')
-        continue
+    #for folder in os.listdir('outputs/%s' %outdir_name):
+    #    if 'query' in folder:
+    #        if str(k+1) == folder.split('_')[2]:
+    #            print('WARNING: Existing directory for this query. Moving on.')
+    #            ext_flag = True
+    #            break
+    #if ext_flag == True:
+    #    print('Exiting here. This is only a DEBUG message')
+    #    return None
 
     pept = pept_seq[0]
     allele = pept_seq[1]
@@ -211,8 +195,7 @@ for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]):
     maxsl.append(len(max_list))
     
     if len(max_list) == 0:
-        non_modelled.append((query, pept, allele, "NA", "NA", "NA", "No positive scoring template peptides"))
-        continue
+        return (query, pept, allele, "NA", "NA", "NA", "No positive scoring template peptides")
     elif len(max_list) == 1:
         template = max_list[0]
         template_ID = template[2]
@@ -237,12 +220,13 @@ for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]):
     sequences, empty_seqs = data_prep.get_pdb_seq([template_ID])
     
     outdir = ('outputs/%s/%s_%s' %(outdir_name, template_ID.lower(), query))
-    #try:
-    os.mkdir(outdir)
-    #except FileExistsError:
-    #    print('WARNING: Existing directory.')
+    try:
+        os.mkdir(outdir)
+    except FileExistsError:
+        print('WARNING: Existing directory.')
     #    continue
     os.chdir(outdir)
+    print(os.getcwd())
     
     #Preparing template and target sequences for the .ali file, launching Muscle
 
@@ -256,22 +240,22 @@ for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]):
     final_alifile_name = '%s.ali' %template_ID
     final_alifile = open(final_alifile_name, 'w')
     i = 0
-    target_ini_flag = False
-    template_ini_flag = False
-    modeller_renum = 1
+    #target_ini_flag = False
+    #template_ini_flag = False
+    #modeller_renum = 1
     for line in open('%s.afa' %template_ID, 'r'):
         #print(line)
         if line.startswith('>') and i == 0:
             final_alifile.write('>P1;' + line.split(' ')[0].strip('>') + '\n')
             final_alifile.write('structure:../../../data/PDBs/%s_MP.pdb:%s:M:%s:P::::\n' %(template_ID, str(sequences[0]['M_st_ID']), str(len(template_pept))))
-            template_ini_flag = True
+            #template_ini_flag = True
             i += 1
         elif line.startswith('>') and i == 1:
             final_alifile.write('/' + template_pept + '*')
             final_alifile.write('\n')
             final_alifile.write('\n>P1;' + line.split(':')[0].strip('>'))
             final_alifile.write('sequence:::::::::\n')
-            target_ini_flag = True
+            #target_ini_flag = True
         else:
             final_alifile.write(line.rstrip())
     final_alifile.write('/' + str(pept) + '*')
@@ -318,7 +302,7 @@ for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]):
                 modscript.write(line)
         cmd_m_temp.close()
     
-    os.popen('python3 cmd_modeller_ini.py').read()
+    os.popen('python cmd_modeller_ini.py').read()
     
     if remove_temp_outputs:
         os.system('rm cmd_modeller_ini.py')
@@ -359,7 +343,7 @@ for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]):
                     #print(line[30:33])
                     p_aa_id = line.split("\t")[7]                                                 ### position id of the template peptide residue
                     p_atom = line.split("\t")[8]                                                  ### atom name of the template peptide residue
-                    m_aa_id = (line.split("\t")[2]).split(' ')[0]
+                    #m_aa_id = (line.split("\t")[2]).split(' ')[0]
                     if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
                         if int(p_aa_id) == anch_1:
                             output.write(line)
@@ -377,7 +361,7 @@ for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]):
                     #print(line.split("\t"))
                     p_aa_id = line.split("\t")[7]
                     p_atom = line.split("\t")[8]
-                    m_aa_id = (line.split("\t")[2]).split(' ')[0]
+                    #m_aa_id = (line.split("\t")[2]).split(' ')[0]
                     if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
                         if int(p_aa_id) == (anch_1+1):
                             output.write(line)
@@ -425,7 +409,7 @@ for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]):
                 modscript.write(line)
         cmd_m_temp.close()
     
-    os.popen('python3 cmd_modeller.py > modeller.log').read()
+    os.popen('python cmd_modeller.py > modeller.log').read()
     
     t2 = time.time()
     mt = t2 - smt
@@ -435,11 +419,20 @@ for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]):
     print('The whole case took %i seconds' %tf)
     
     if mt < 3:
-        non_modelled.append((query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in the modelling'))
+        return (query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in the modelling')
     
     os.chdir('../../../')
 
-with open('outputs/%s/non_modelled_%s.csv' %(outdir_name, taskID), 'wt') as outfile:
+######################################################################################################
+######################################################################################################
+
+non_modelled = Parallel(n_jobs = 4)(delayed(na_model)(k, pept_seq) for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]))
+#for k, pept_seq in enumerate(pept_seqs):
+    #Parallel(backend = 'multiprocessing', n_jobs = -1)(delayed(fitness_scoring)(obj, rs) for obj in obj_list)
+    #na_model(k, pept_seqs)    
+    
+
+with open('outputs/%s/non_modelled.csv' %outdir_name, 'wt') as outfile:
     tsv_writer = csv.writer(outfile, delimiter='\t')
     tsv_writer.writerow(['QUERY', 'NEOANTIGEN', 'QUERY ALLELE', 'TEMPLATE ID', 'TEMPLATE PEPTIDE', 'TEMPLATE ALLELE', 'ERROR'])
     for query in non_modelled:
