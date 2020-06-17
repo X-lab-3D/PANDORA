@@ -7,8 +7,8 @@ from MyLoop import MyLoop
 
 
 j = MP.job() 
-for i in range(24):         ## Use 24 CPUs in a parallel job on this machine
-    j.append(MP.local_slave())
+#for i in range(20):         ## Use 24 CPUs in a parallel job on this machine
+#    j.append(MP.local_slave())
 
 M.log.verbose()                                # request verbose output
 env = M.environ()                              # create a new MODELLER environment to build this model in
@@ -38,7 +38,7 @@ a.max_molpdf = 1e6                            # do not stop unless obj.func. > 1
 # Loop Modelling
 
 a.loop.starting_model = 1           # First loop model
-a.loop.ending_model   = 24          # Last loop model
+a.loop.ending_model   = 20          # Last loop model
 a.loop.md_level       = MA.refine.slow # Loop model refinement level
 
 #MD
@@ -47,5 +47,5 @@ a.md_level = MA.refine.slow                      # model refinement level
 # Repeat the whole cycle 2 times
 #a.repeat_optimization = 2
 
-a.use_parallel_job(j) 
+#a.use_parallel_job(j) 
 a.make()                                     # do the actual homology modeling

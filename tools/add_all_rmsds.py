@@ -30,7 +30,7 @@ for fol in os.listdir('./'):
             
             os.popen('pdb_reres -1 %s_MP.pdb > reres_%s.pdb' %(target_id, target_id)).read()
             os.popen('bash ../../../tools/map_2_pdb.sh %s.BL00050001.pdb reres_%s.pdb > ref.pdb' %(target_id, target_id)).read()
-            os.popen('python ../../../tools/pdb_fast_lzone_mhc.py ref.pdb').read()
+            os.popen('python ../../../tools/pdb_fast_lzone_mhc_fitG.py ref.pdb').read()
             
             with open('file.list', 'w') as out:
                 for f in os.listdir('./'):

@@ -9,7 +9,7 @@
 set WDIR = $PWD
 set refe = $WDIR/$argv[1].pdb
 set lzone = $WDIR/$argv[1].lzone
-set atoms = 'CA,CB,C,O,N'
+set atoms = 'CA'
 
 #foreach i ($argv[2])
 #  pdb_segxchain $i >$i:r.tmp1
@@ -25,7 +25,6 @@ foreach i (` cat $argv[2] `)
     mobi $i
     atom $atoms
     `cat $lzone`
-    fit
     quit
 _Eod_
 

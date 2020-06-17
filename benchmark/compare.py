@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 
 
 outdir = sys.argv[1]
+label = int(sys.argv[2])
 #outdir = 'no_prize/'
 
 ### PANDORA
@@ -24,8 +25,11 @@ with open('../../benchmark/PANDORA_benchmark_dataset.tsv', 'r') as cvfile:
                 best_rmsds[row[0]].append(len(row[1]))
             except:
                 pass
-            
-bests = []
+
+
+#%%
+### APE-Gen
+bests = {}
 for fol in os.listdir('./'):
     if os.path.isdir('./' + fol):
         try:
@@ -36,22 +40,55 @@ for fol in os.listdir('./'):
                 for i, line in enumerate(infile):
                     if i != 0:
                         rmsds.append(float(line.split('\t')[3]))
-            bests.append((length, min(rmsds)))
+            bests[ID] = min(rmsds)
         except:
             pass
         
-#%%
-### APE-Gen
+with open('../../benchmark/' +'APE-Gen_dataset.csv', 'r') as agfile:
+    ag = {}
+    for i, line in enumerate(agfile):
+        if i != 0:
+            row = line.split(',')
+            ag[row[0].upper()] = float(row[2])
 
-AG_comparison = [x for x in bests if x[0] < 12]
+ag_comparison = {}
+print('Missing cases with APE-Gen:')
+print(ag)
+print(bests)
+for key in ag:
+    try:
+        ag_comparison[key] = ((bests[key], ag[key]))
+    except:
+        print(key)
 
-with open('../../benchmark/' + outdir + 'APE-Gen_comparison.txt', 'w') as outfile:
-    print(outfile)
-    for i in [9, 10, 11]:
-        l = [x[1] for x in bests if x[0] == i]
-        outfile.write('%s-mers AVG best CA RMSD: ' %str(i) + str(sum(l)/len(l)) + '\n')
-    outfile.write('Overall AVG best CA RMSD: ' + str(sum([x[1] for x in AG_comparison])/len([x[1] for x in AG_comparison])))
-    outfile.close()
+#AG_comparison = [x for x in bests if x[0] < 12]
+
+#with open('../../benchmark/' + outdir + 'APE-Gen_comparison.txt', 'w') as outfile:
+#    print(outfile)
+#    for i in [9, 10, 11]:
+#        l = [x[1] for x in bests if x[0] == i]
+#        outfile.write('%s-mers AVG best CA RMSD: ' %str(i) + str(sum(l)/len(l)) + '\n')
+#    outfile.write('Overall AVG best CA RMSD: ' + str(sum([x[1] for x in AG_comparison])/len([x[1] for x in AG_comparison])))
+#    outfile.close()
+
+plt.plot([ag_comparison[x][0] for x in ag_comparison], [ag_comparison[y][1] for y in ag_comparison], 'o')
+if label:
+    for key in ag_comparison:
+        plt.annotate(key, (ag_comparison[key][0], ag_comparison[key][1]))
+plt.plot([0, 2, 4], [0, 2, 4], 'g-')
+plt.xlabel('PANDORA')
+plt.ylabel(' APE-Gen ' )
+plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_vs_APE-Gen.jpg')
+plt.show()
+plt.clf()
+
+plt.hist([ag_comparison[x][0] - ag_comparison[x][1] for x in ag_comparison], bins=50)
+plt.xlabel('PANDORA - APE-Gen')
+plt.ylabel(' Quantity ' )
+plt.axvline(0, color= 'r')
+plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_vs_APE-Gen_hist.jpg')
+plt.show()
+plt.clf()
 
 
 #%%
@@ -74,8 +111,9 @@ for key in dt:
 
 
 plt.plot([dt_comparison[x][0][0] for x in dt_comparison], [dt_comparison[y][0][1] for y in dt_comparison], 'o')
-#for key in dt_comparison:
-#    plt.annotate(key, (dt_comparison[key][0][0], dt_comparison[key][0][1]))
+if label:
+    for key in dt_comparison:
+        plt.annotate(key, (dt_comparison[key][0][0], dt_comparison[key][0][1]))
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA molpdf')
 plt.ylabel(' DockTope ' )
@@ -92,8 +130,9 @@ plt.show()
 plt.clf()
 
 plt.plot([dt_comparison[x][1][0] for x in dt_comparison], [dt_comparison[y][1][1] for y in dt_comparison], 'o')
-#for key in dt_comparison:
-#    plt.annotate(key, (dt_comparison[key][1][0], dt_comparison[key][1][1]))
+if label:
+    for key in dt_comparison:
+        plt.annotate(key, (dt_comparison[key][1][0], dt_comparison[key][1][1]))
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA DOPE')
 plt.ylabel(' DockTope ' )
@@ -163,8 +202,9 @@ for key in GD_names:
 
 
 plt.plot([gd_comparison[x][0][0] for x in gd_comparison], [gd_comparison[y][0][1] for y in gd_comparison], 'o')
-#for key in dt_comparison:
-#    plt.annotate(key, (dt_comparison[key][0][0], dt_comparison[key][0][1]))
+if label:
+    for key in gd_comparison:
+        plt.annotate(key, (gd_comparison[key][0][0], gd_comparison[key][0][1]))
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA molpdf')
 plt.ylabel(' GradDock ' )
@@ -181,8 +221,9 @@ plt.show()
 plt.clf()
 
 plt.plot([gd_comparison[x][1][0] for x in gd_comparison], [gd_comparison[y][1][1] for y in gd_comparison], 'o')
-#for key in dt_comparison:
-#    plt.annotate(key, (dt_comparison[key][1][0], dt_comparison[key][1][1]))
+if label:
+    for key in gd_comparison:
+        plt.annotate(key, (gd_comparison[key][1][0], gd_comparison[key][1][1]))
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA DOPE')
 plt.ylabel(' GradDock ' )

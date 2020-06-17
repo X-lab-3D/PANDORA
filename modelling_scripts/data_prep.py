@@ -62,6 +62,8 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
         ID = entry[0]
         ID = ID.upper()
         ID = ID.rstrip()
+        #if '%s_MP.pdb' %ID in os.listdir('%s/data/PDBs/' %cwd):
+        #    continue
         url = 'http://www.imgt.org/3Dstructure-DB/IMGT-FILE/IMGT-%s.pdb.gz' %ID
         filepath = '%s/data/PDBs/%s.pdb' %(cwd, ID)
         print('Fetching ', url)

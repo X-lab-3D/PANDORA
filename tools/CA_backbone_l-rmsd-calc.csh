@@ -26,7 +26,6 @@ foreach i (` cat $argv[2] `)
     ratoms $atoms
     atom $atoms
     `cat $lzone`
-    fit
     quit
 _Eod_
 

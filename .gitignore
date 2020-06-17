@@ -5,6 +5,7 @@
 /data/temp
 /data/bkup_PDBs
 /data/Targets/*
+/data/unused_templates/*
 /outputs/*
 
 
@@ -13,4 +14,4 @@
 /modelling_scripts/.DS_Store
 /modelling_scripts/contact-chainID_allAtoms
 /modelling_scripts/*.pyc
-/data/non_canonical_res_PDBs
+/modelling_scripts/__pycache__
