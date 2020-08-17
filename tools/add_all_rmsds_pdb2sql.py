@@ -3,7 +3,10 @@
 import csv
 import os
 import pickle
+import sys
 from pdb2sql import StructureSimilarity
+from joblib import Parallel, delayed
+from multiprocessing import Manager
 
 def pdb2sql_rmsd(model, ref, atoms):
     sim = StructureSimilarity(model,ref)
@@ -12,9 +15,10 @@ def pdb2sql_rmsd(model, ref, atoms):
     return lrmsd
 
 
+n_cores = int(sys.argv[1])
 
-
-best_rmsds = {}
+manager = Manager()
+best_rmsds = manager.dict()
 IDs = {}
 
 filename_start = 'BL00'
@@ -25,12 +29,12 @@ with open('../../benchmark/PANDORA_benchmark_dataset.tsv', 'r') as idfile:
         query = 'query_'+str(i)
         IDs[query]=row[0]
     
-    
-for fol in os.listdir('./'):
+def add_rmsds(fol, best_rmsds):
+#for fol in os.listdir('./'):
     if os.path.isdir('./'+fol):
         print('Working on '+ fol)
         os.chdir('./'+fol)
-        brk_flag = False
+        #brk_flag = False
         if os.path.isfile('./molpdf_DOPE.tsv'):
             target_id = fol.split('_')[1]
             final_scores = {}
@@ -42,13 +46,14 @@ for fol in os.listdir('./'):
                         header = row[:-1]
                     else:
                         final_scores['matched_'+row[0]] = [float(row[1]), float(row[2])]#, float(row[3])]
+            os.system('python ../../../../tools/pdb_selalt.py ref.py > ref_alt.pdb)
             try:
                 with open('file.list', 'r') as inlist:
                     for line in inlist:
                         model = line.rstrip()
-                        final_scores[model].append(pdb2sql_rmsd(model, 'ref.pdb', 'CA'))
-                        final_scores[model].append(pdb2sql_rmsd(model, 'ref.pdb', 'CA, C, O, N'))
-                        final_scores[model].append(pdb2sql_rmsd(model, 'ref.pdb', 'CA, CB, C, O, N'))
+                        final_scores[model].append(pdb2sql_rmsd(model, 'ref_alt.pdb', 'CA'))
+                        final_scores[model].append(pdb2sql_rmsd(model, 'ref_alt.pdb', 'CA, C, O, N'))
+                        final_scores[model].append(pdb2sql_rmsd(model, 'ref_alt.pdb', 'CA, CB, C, O, N'))
                     
                 with open('./pdb2sql_rmsds_and_final_scores.tsv', 'wt') as outfile:
                     tw = csv.writer(outfile, delimiter='\t')
@@ -80,8 +85,13 @@ for fol in os.listdir('./'):
                 best_rmsds[target_id] = [ca_bestmol, bb_bestmol, ca_bb_cb_bestmol, ca_bestdope, bb_bestdope, ca_bb_cb_bestdope]
             except:
                 print('Something went wrong in %s. Moving on' %fol)
+                os.chdir('../')
+                return None
         os.chdir('../')
-
+        return None
+    
+Nones = Parallel(n_jobs = n_cores)(delayed(add_rmsds)(fol, best_rmsds) for fol in os.listdir('./'))
+best_rmsds = dict(best_rmsds)
 dictfile = open("./pdb2sql_all_best_RMSDs.pkl", "wb")
 pickle.dump(best_rmsds, dictfile)
 dictfile.close()

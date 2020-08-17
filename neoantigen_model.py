@@ -14,6 +14,7 @@ from Bio.SubsMat import MatrixInfo
 from random import choice
 import csv
 import sys
+from joblib import Parallel, delayed
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
@@ -511,7 +512,7 @@ def na_model(k, pept_seq):
 
 ######################################################################################################
 ######################################################################################################
-non_modelled = Parallel(n_jobs = n_cores)(delayed(na_model)(k, pept_seq, best_rmsds) for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]))
+non_modelled = Parallel(n_jobs = n_cores)(delayed(na_model)(k, pept_seq) for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]))
 non_modelled = filter(None, non_modelled)
 
 with open('outputs/%s/non_modelled_%s.csv' %(outdir_name, taskID), 'wt') as outfile:

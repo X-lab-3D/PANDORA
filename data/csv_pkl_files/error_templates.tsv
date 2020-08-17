@@ -1,14 +1,18 @@
-ID	ERROR	ACTION
-3BHB	SEP in Chain P #4	SEP changed to SER
-4WJ5	multiple non-canonical peptides in Chain P #1,2,10	Removed from dataset
-3BH8	SEP in Chain P #4	SEP changed to SER
-3BH9	SEP in Chain P #4	SEP changed to SER
-3FQR	SEP in Chain P #4	SEP changed to SER
-3BGM	SEP in Chain P #4	SEP changed to SER
-5W67	ABA in Chain P #6	Removed from dataset
-4NO3	SEP in Chain P #4	SEP changed to SER
-3FQX	SEP in Chain P #4	SEP changed to SER
-3FT2	CIR in Chain P #3	Removed from dataset
-6Q3K	ALA 1A and GLY 1 in Chain M	ALA 1A removed
-3D39	PFF in Chain P #5	Removed from dataset
-3FQU	SEP in Chain P #5	SEP changed to SER
+ID	ERROR_ID	ERROR	ACTION
+4WJ5	#7	multiple non-canonical peptides in Chain P #1,2,10	Removed from dataset
+5W67	#7	ABA in Chain P #6	Removed from dataset
+3FT2	#7	CIR in Chain P #3	Removed from dataset
+6Q3K	#8	ALA 1A and GLY 1 in Chain M	ALA 1A manually removed
+3D39	#7	PFF in Chain P #5	Removed from dataset
+5V5M	#9	anch_1 is P3 instead of P2	Removed from dataset
+5TRZ	#9	anch_1 is P1 instead of P2	Removed from dataset
+1S7R	#9	anch_1 is P1 instead of P2	Removed from dataset
+1DUY	#9	anch_1 is P1 instead of P2	Removed from dataset
+6D78	#9	anch_1 is P1 instead of P2	Removed from dataset
+3GIV	#9	anch_2 is P9 instead of P10	Removed from dataset
+4MJ5	#9	anch_1 is P1 instead of P2	Removed from dataset
+1XR8	#10	GOL molecule in the binding pocket	Removed from dataset
+3UPR	#10	1KX molecule in the binding pocket	Removed from dataset
+2GTW	#10	FMT molecule in the binding pocket	Removed from dataset
+1QO3	#10	EDO molecule in the binding pocket	Removed from dataset
+5FA4	#10	GOL molecule in the binding pocket	Removed from dataset

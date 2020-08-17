@@ -3,10 +3,11 @@
 
 #%%
 import os
-import csv
+#import csv
 import sys
 import pickle
 from matplotlib import pyplot as plt
+#from plt import figure
 
 
 outdir = sys.argv[1]
@@ -53,8 +54,6 @@ with open('../../benchmark/' +'APE-Gen_dataset.csv', 'r') as agfile:
 
 ag_comparison = {}
 print('Missing cases with APE-Gen:')
-print(ag)
-print(bests)
 for key in ag:
     try:
         ag_comparison[key] = ((bests[key], ag[key]))
@@ -236,5 +235,43 @@ plt.xlabel('PANDORA DOPE - GradDock')
 plt.ylabel(' Quantity ' )
 plt.axvline(0, color= 'r')
 plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_DOPE_vs_GradDock_hist.jpg')
+plt.show()
+plt.clf()
+
+
+#%%
+
+plt.figure(num=None, figsize=(20, 20), dpi=80, facecolor='w', edgecolor='k')
+plt.plot([x[1] for x in best_rmsds.values()], [x[4] for x in best_rmsds.values()], 'o')
+for key in best_rmsds:
+    plt.annotate(key, (best_rmsds[key][1], best_rmsds[key][4]), size = 8)
+plt.xticks([0.25*x for x in range(20)])
+plt.yticks([0.25*x for x in range(20)])
+plt.axvline(2, color='r')
+plt.axhline(2, color='r')
+plt.xlabel('molpdf top 5')
+plt.ylabel('DOPE top 5')
+plt.plot([0, 2, 4, 5], [0, 2, 4, 5], 'g-')
+plt.savefig('../../benchmark/' + outdir + 'PANDORA_CA_molpdf_vs_DOPE.jpg')
+plt.show()
+plt.clf()
+
+plt.figure(num=None, figsize=(20, 20), dpi=80, facecolor='w', edgecolor='k')
+plt.plot([x for x in bests.values()], [x for x in bests.values()], 'o')
+for key in bests:
+    plt.annotate(key, (bests[key], bests[key]), size = 8)
+plt.xticks([0.25*x for x in range(20)])
+plt.yticks([0.25*x for x in range(20)])
+plt.axvline(2, color='r')
+plt.axhline(2, color='r')
+plt.xlabel('best RMSD model')
+plt.ylabel('best RMSD model')
+plt.plot([0, 2, 4, 5], [0, 2, 4, 5], 'g-')
+plt.savefig('../../benchmark/' + outdir + 'PANDORA_CA_best_rmsd.jpg')
+plt.show()
+plt.clf()
+
+plt.hist([x for x in bests.values()], bins = 50)
+plt.savefig('../../benchmark/' + outdir + 'PANDORA_CA_best_rmsd_hist.jpg')
 plt.show()
 plt.clf()

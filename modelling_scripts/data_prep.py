@@ -1,4 +1,4 @@
- #!/usr/bin/python
+#!/usr/bin/python
 
 import urllib.request
 import os
@@ -14,6 +14,8 @@ from modelling_scripts import del_uncommon_residues_pdbs as durp
 ### OPEN CSV FILE WITH PDB CODES ###
 #def pdb_reres_allchains(pdb_file)
 
+# https://www.iedb.org/downloader.php?file_name=doc/iedb_3d_full.zip
+# https://www.iedb.org/downloader.php?file_name=doc/mhc_ligand_full.zip
 
 def get_peptides_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter):
 
@@ -35,7 +37,8 @@ def get_peptides_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter):
 
 
 def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_rows = [0]):
-
+    
+    
     IDs = []
     with open(ids_filename, 'r') as idsfile:
         spamreader = csv.reader(idsfile, delimiter=delimiter)
@@ -47,6 +50,9 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
                 allele = row[allele_clmn]
                 IDs.append((ID, allele))
     cwd = os.getcwd()
+    
+    if "contact-chainID_allAtoms" not in os.listdir('%s/modelling_scripts' %cwd):
+        os.popen('g++ %s/modelling_scripts/contact-chainID_allAtoms.cpp -o %s/modelling_scripts/contact-chainID_allAtoms' %(cwd, cwd)).read()
     #print('CWD:', cwd)
     bad_IDs = {}
     err_1 = 0
@@ -223,6 +229,13 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
         bad_IDs[u_pdb] = '#7'
         err_7 += 1
     
+    ### New Errors to be fixed: 
+    ### #8: Residue 1A
+    ### 
+    ### New Errors to be removed from dataset:
+    ### #9: Atipycal anchor position (e.g. P1 instead of P2)
+    ### #10: Small Molecule in the binding pocket    
+    
     bad_IDs['errors'] = {'#1': err_1, '#2': err_2, '#3': err_3,
                          '#4': err_4, '#5': err_5, '#6': err_6, '#7': err_7}
     IDd = open("data/csv_pkl_files/IDs_ChainsCounts_dict.pkl", "wb")
@@ -231,6 +244,7 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
     IDd.close()
     print('BAD IDs:')
     print(bad_IDs)
+    '''
     with open('data/csv_pkl_files/IDs_dict.tsv', 'wt') as outfile:
         tsv_writer = csv.writer(outfile, delimiter='\t')
         tsv_writer.writerow(['PDB_ID', 'CHAIN_ID', 'LENGTH', 'ALLELE'])
@@ -238,8 +252,36 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
             for chain_ID in IDs_dict[ID]:
                 if chain_ID != 'allele':
                     tsv_writer.writerow([ID, chain_ID, IDs_dict[ID][chain_ID], IDs_dict[ID]['allele']])
-
+    '''
+    remove_error_templates()
     return IDs_dict, bad_IDs
+
+def remove_error_templates():
+    try:
+        os.system('mkdir data/unused_templates')
+    except:
+        pass
+    with open('data/csv_pkl_files/IDs_ChainsCounts_dict.pkl', 'rb') as inpkl:
+        IDD = pickle.load(inpkl)
+        bad_IDs = pickle.load(inpkl)
+        inpkl.close()
+    with open('data/csv_pkl_files/error_templates.tsv') as infile:
+        r = csv.reader(infile, delimiter='\t')
+        for i, row in enumerate(r):
+            if i != 0:
+                try:
+                    del IDD[row[0]]
+                    bad_IDs[row[0]] = row[1]
+                    os.system('mv data/PDBs/%s_MP.pdb data/unused_templates/' %row[0])
+                except:
+                    pass
+        infile.close()
+    with open("data/csv_pkl_files/IDs_ChainsCounts_dict.pkl", "wb") as outpkl:
+        pickle.dump(IDD, outpkl)
+        pickle.dump(bad_IDs, outpkl)
+        outpkl.close()
+        return IDD, bad_IDs
+    
 
 def get_pdb_seq(IDs):
     sequences = []

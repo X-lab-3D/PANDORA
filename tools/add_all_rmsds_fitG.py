@@ -3,8 +3,14 @@
 import csv
 import os
 import pickle
+import sys
+from joblib import Parallel, delayed
+from multiprocessing import Manager
 
-best_rmsds = {}
+n_cores = int(sys.argv[1])
+
+manager = Manager()
+best_rmsds = manager.dict()
 IDs = {}
 
 filename_start = 'BL00'
@@ -15,12 +21,13 @@ with open('../../benchmark/PANDORA_benchmark_dataset.tsv', 'r') as idfile:
         query = 'query_'+str(i)
         IDs[query]=row[0]
     
-    
-for fol in os.listdir('./'):
+
+def add_rmsds(fol, best_rmsds):
+#for fol in os.listdir('./'):
     if os.path.isdir('./'+fol):
         print('Working on '+ fol)
         os.chdir('./'+fol)
-        brk_flag = False
+        #brk_flag = False
         if os.path.isfile('./molpdf_DOPE.tsv'):
             target_id = fol.split('_')[1]
             final_scores = {}
@@ -118,8 +125,12 @@ for fol in os.listdir('./'):
                 ca_bb_cb_bestdope = 'N/A'
             
             best_rmsds[target_id] = [ca_bestmol, bb_bestmol, ca_bb_cb_bestmol, ca_bestdope, bb_bestdope, ca_bb_cb_bestdope]
+        
         os.chdir('../')
+        return None
 
+Nones = Parallel(n_jobs = n_cores)(delayed(add_rmsds)(fol, best_rmsds) for fol in os.listdir('./'))
+best_rmsds = dict(best_rmsds)
 dictfile = open("./all_best_RMSDs.pkl", "wb")
 pickle.dump(best_rmsds, dictfile)
 dictfile.close()

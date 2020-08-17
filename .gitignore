@@ -6,6 +6,7 @@
 /data/bkup_PDBs
 /data/Targets/*
 /data/unused_templates/*
+/data/allele_profiles/*
 /outputs/*
 
 
@@ -15,3 +16,6 @@
 /modelling_scripts/contact-chainID_allAtoms
 /modelling_scripts/*.pyc
 /modelling_scripts/__pycache__
+._*
+*.out
+*.swp

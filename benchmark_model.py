@@ -237,20 +237,20 @@ def na_model(k, pept_seq, best_rmsds):
             #    pass
             score -= ((abs(length - len(temp_pept)) ** 2.4))
             for i, (aa, bb) in enumerate(zip(pept[:min_len], temp_pept[:min_len])):
-                if i == anch_1 and aa == bb:           # Identity prize
-                    score += 4
-                elif i == anch_2 and aa == bb:         # Identity prize
-                    score += 2
+                #if i == anch_1 and aa == bb:           # Identity prize
+                #    score += 4
+                #elif i == anch_2 and aa == bb:         # Identity prize
+                #    score += 2
                 try:
                     gain = MatrixInfo.pam30[aa, bb]
-                    if gain > 0:
-                        gain += 2                      #This is summed on the top of the identity prize abobe
+                    #if gain > 0:
+                    #    gain += 2                      #This is summed on the top of the identity prize abobe
                     score += gain
                 except KeyError:
                     try:
                         gain = MatrixInfo.pam30[bb, aa]
-                        if gain > 0:
-                            gain += 2                      #This is summed on the top of the identity prize abobe
+                        #if gain > 0:
+                        #    gain += 2                      #This is summed on the top of the identity prize abobe
                         score += gain
                     except KeyError:
                         #print('Broken peptide in IDD. Passing over.')
@@ -562,7 +562,7 @@ def na_model(k, pept_seq, best_rmsds):
             if f.startswith(target_id+'.'+filename_start) and f.endswith(filename_end):
                 break
         os.popen('bash ../../../tools/map_2_pdb.sh %s reres_%s.pdb > ref.pdb' %(f, target_id)).read()
-        os.popen('python ../../../tools/pdb_fast_lzone_mhc.py ref.pdb').read()
+        os.popen('python ../../../tools/pdb_fast_lzone_mhc_fitG.py ref.pdb').read()
 
 
         #TODO: Add here Haddock protocol on structures matching
@@ -673,6 +673,7 @@ def na_model(k, pept_seq, best_rmsds):
 non_modelled = Parallel(n_jobs = n_cores)(delayed(na_model)(k, pept_seq, best_rmsds) for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]))
 non_modelled = filter(None, non_modelled)
 
+best_rmsds = dict(best_rmsds)
 dictfile = open("outputs/%s/all_best_RMSDs.pkl" %outdir_name, "wb")
 pickle.dump(best_rmsds, dictfile)
 dictfile.close()
