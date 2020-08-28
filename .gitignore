@@ -9,6 +9,8 @@
 /data/allele_profiles/*
 /outputs/*
 
+#Secondary projects
+/william
 
 # Misc
 .DS_Store

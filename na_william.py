@@ -72,12 +72,13 @@ for allele in allele_ID:
         common_alleles.append((allele, al))
 print(common_alleles, len(common_alleles))
 
+leads = []
 for case in os.listdir('./william/fasta/targets/'):
     NMP_outdir = case.split('.')[0]
     try:
-        os.mkdir('./fasta/netMHCpanI_outputs/' + NMP_outdir)
+        os.mkdir('./william/fasta/netMHCpanI_outputs/' + NMP_outdir)
     except FileExistsError:
-        return None
+        pass
 
 
     for allele in common_alleles:
@@ -86,7 +87,6 @@ for case in os.listdir('./william/fasta/targets/'):
         print(allele[1] + ' DONE')
 
     hits = []
-    leads = []
     for filename in os.listdir('./william/fasta/netMHCpanI_outputs/' + NMP_outdir):
         with open('./william/fasta/netMHCpanI_outputs/' + NMP_outdir + '/' + filename) as infile:
             for line in infile:
@@ -96,9 +96,9 @@ for case in os.listdir('./william/fasta/targets/'):
                     if int(fline[0]) < 12 and (int(fline[0]) + len(fline[9])) > 12:
                         #print(filename, fline)
                         #print('MUTATION IN PEPTIDE')
-                        leads.append((fline[9], fline[1]))
+                        leads.append((fline[9], fline[1], NMP_outdir))
 
-    print('LEADS\n')
+    print('case %s LEADS\n' %case)
     print(leads)
 ######################################################################################################
 ######################################################################################################
@@ -194,7 +194,8 @@ def na_model(k, pept_seq, outdirname_add = None):
     '''
     pept = pept_seq[0]
     allele = pept_seq[1]
-    outdirname_add = copy.deepcopy(allele)
+    outdirname_add = pept_seq[2]
+    #outdirname_add = copy.deepcopy(allele)
     length = len(pept)
 
     max_pos = -1000
@@ -326,7 +327,7 @@ def na_model(k, pept_seq, outdirname_add = None):
 
     sequences, empty_seqs = data_prep.get_pdb_seq([template_ID])
 
-    outdir = ('outputs/%s/%s_%s_%s' %(outdir_name, outdirname_add, template_ID.lower(), query))
+    outdir = ('outputs/%s/%s_%s_%s_%s' %(outdir_name, outdirname_add, allele, template_ID.lower(), query))
     try:
         os.mkdir(outdir)
     except FileExistsError:
