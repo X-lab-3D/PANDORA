@@ -16,10 +16,14 @@ with open(modeller_output_file) as result_file:
             models=new_parts[0].splitlines()[3:-2]
         else:
             models=parts[-1].splitlines()[3:-1]
-             
+
         with open('molpdf_DOPE.tsv',"wt") as f:
             tsv_writer = csv.writer(f, delimiter='\t')
             tsv_writer.writerow(['MODEL', 'molpdf', 'DOPE'])
-            for line in models: 
+            to_be_written = []
+            for line in models:
                 row = [x for x in line.split(' ') if x != '']
+                to_be_written.append((float(row[1]),row))
+            to_be_written = sorted(to_be_written)
+            for row in to_be_written:
                 tsv_writer.writerow(row)

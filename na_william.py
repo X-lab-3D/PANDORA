@@ -74,32 +74,33 @@ print(common_alleles, len(common_alleles))
 
 leads = []
 for case in os.listdir('./william/fasta/targets/'):
-    NMP_outdir = case.split('.')[0]
-    try:
-        os.mkdir('./william/fasta/netMHCpanI_outputs/' + NMP_outdir)
-    except FileExistsError:
-        pass
+    if not case.startswith('.'):
+        NMP_outdir = case.split('.')[0]
+        try:
+            os.mkdir('./william/fasta/netMHCpanI_outputs/' + NMP_outdir)
+        except FileExistsError:
+            pass
 
 
-    for allele in common_alleles:
-        os.system('$netMHCpanI -a %s ./william/fasta/targets/%s > ./william/fasta/netMHCpanI_outputs/%s/%s_%s'
-                  %(allele[1], case, NMP_outdir, allele[1], case)) #allele[1].replace('-','').replace(':','')))
-        print(allele[1] + ' DONE')
+        for allele in common_alleles:
+            os.system('$netMHCpanI -a %s ./william/fasta/targets/%s > ./william/fasta/netMHCpanI_outputs/%s/%s_%s'
+                      %(allele[1], case, NMP_outdir, allele[1], case)) #allele[1].replace('-','').replace(':','')))
+            print(allele[1] + ' DONE')
 
-    hits = []
-    for filename in os.listdir('./william/fasta/netMHCpanI_outputs/' + NMP_outdir):
-        with open('./william/fasta/netMHCpanI_outputs/' + NMP_outdir + '/' + filename) as infile:
-            for line in infile:
-                if '<=' in line:
-                    fline = [x for x in line.split(' ') if x != '']
-                    hits.append((filename, fline))
-                    if int(fline[0]) < 12 and (int(fline[0]) + len(fline[9])) > 12:
-                        #print(filename, fline)
-                        #print('MUTATION IN PEPTIDE')
-                        leads.append((fline[9], fline[1], NMP_outdir))
+        hits = []
+        for filename in os.listdir('./william/fasta/netMHCpanI_outputs/' + NMP_outdir):
+            with open('./william/fasta/netMHCpanI_outputs/' + NMP_outdir + '/' + filename) as infile:
+                for line in infile:
+                    if '<=' in line:
+                        fline = [x for x in line.split(' ') if x != '']
+                        hits.append((filename, fline))
+                        if int(fline[0]) < 12 and (int(fline[0]) + len(fline[9])) > 12:
+                            #print(filename, fline)
+                            #print('MUTATION IN PEPTIDE')
+                            leads.append((fline[9], fline[1], NMP_outdir))
 
-    print('case %s LEADS\n' %case)
-    print(leads)
+        print('case %s LEADS\n' %case)
+        print(leads)
 ######################################################################################################
 ######################################################################################################
 ######################################################################################################
@@ -577,6 +578,8 @@ def na_model(k, pept_seq, outdirname_add = None):
         os.chdir('../../../')
         return (query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in the modelling')
 
+    os.system('python ../../../modelling_scripts/get_molpdf_dope_scores.py modeller.log')
+    
     os.chdir('../../../')
     return None
 
