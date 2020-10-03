@@ -14,16 +14,14 @@ from modelling_scripts import del_uncommon_residues_pdbs as durp
 ### OPEN CSV FILE WITH PDB CODES ###
 #def pdb_reres_allchains(pdb_file)
 
-# https://www.iedb.org/downloader.php?file_name=doc/iedb_3d_full.zip
-# https://www.iedb.org/downloader.php?file_name=doc/mhc_ligand_full.zip
 
-def get_peptides_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter):
+def get_peptides_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter, skip_first_line = True):
 
     seqs = []
     with open(pepts_filename, 'r') as peptsfile:
         spamreader = csv.reader(peptsfile, delimiter=delimiter)
         for i, row in enumerate(spamreader):
-            if i == 0:
+            if i == 0 and skip_first_line:
                 pass
             else:
                 seq = row[pept_clmn]
@@ -37,8 +35,8 @@ def get_peptides_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter):
 
 
 def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_rows = [0]):
-    
-    
+
+
     IDs = []
     with open(ids_filename, 'r') as idsfile:
         spamreader = csv.reader(idsfile, delimiter=delimiter)
@@ -50,7 +48,7 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
                 allele = row[allele_clmn]
                 IDs.append((ID, allele))
     cwd = os.getcwd()
-    
+
     if "contact-chainID_allAtoms" not in os.listdir('%s/modelling_scripts' %cwd):
         os.popen('g++ %s/modelling_scripts/contact-chainID_allAtoms.cpp -o %s/modelling_scripts/contact-chainID_allAtoms' %(cwd, cwd)).read()
     #print('CWD:', cwd)
@@ -111,9 +109,9 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
             err_2 += 1
             subprocess.check_call(['rm', 'data/PDBs/%s.pdb' %ID])
             continue
-        
+
         ### Selecting Alpha chain and peptide chain
-        
+
         putative_pID = {}
         for chain in seqs:
             if type(seqs[chain]) == str:
@@ -142,8 +140,8 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
                         if contact[1] == candidate:
                             putative_pID[candidate] += 1
             pID = (sorted(putative_pID.items(), key=lambda x: x[1], reverse = True))[0][0]
-                
-                    
+
+
         try:
             if aID.islower() or pID.islower():
                 bad_IDs[ID] = '#3'
@@ -228,14 +226,14 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
         del IDs_dict[u_pdb]
         bad_IDs[u_pdb] = '#7'
         err_7 += 1
-    
-    ### New Errors to be fixed: 
+
+    ### New Errors to be fixed:
     ### #8: Residue 1A
-    ### 
+    ###
     ### New Errors to be removed from dataset:
     ### #9: Atipycal anchor position (e.g. P1 instead of P2)
-    ### #10: Small Molecule in the binding pocket    
-    
+    ### #10: Small Molecule in the binding pocket
+
     bad_IDs['errors'] = {'#1': err_1, '#2': err_2, '#3': err_3,
                          '#4': err_4, '#5': err_5, '#6': err_6, '#7': err_7}
     IDd = open("data/csv_pkl_files/IDs_ChainsCounts_dict.pkl", "wb")
@@ -281,7 +279,7 @@ def remove_error_templates():
         pickle.dump(bad_IDs, outpkl)
         outpkl.close()
         return IDD, bad_IDs
-    
+
 
 def get_pdb_seq(IDs):
     sequences = []
