@@ -9,11 +9,12 @@ import pickle
 from matplotlib import pyplot as plt
 #from plt import figure
 
-
+#%%
 outdir = sys.argv[1]
 label = int(sys.argv[2])
 #outdir = 'no_prize/'
 
+#%%
 ### PANDORA
 with open('all_best_RMSDs.pkl', 'rb') as infile:
     best_rmsds = pickle.load(infile)
@@ -44,7 +45,8 @@ for fol in os.listdir('./'):
             bests[ID] = min(rmsds)
         except:
             pass
-        
+
+#%%
 with open('../../benchmark/' +'APE-Gen_dataset.csv', 'r') as agfile:
     ag = {}
     for i, line in enumerate(agfile):
@@ -77,15 +79,15 @@ if label:
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA')
 plt.ylabel(' APE-Gen ' )
-plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_vs_APE-Gen.jpg')
+plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_vs_APE-Gen.pdf')
 plt.show()
 plt.clf()
 
 plt.hist([ag_comparison[x][0] - ag_comparison[x][1] for x in ag_comparison], bins=50)
 plt.xlabel('PANDORA - APE-Gen')
-plt.ylabel(' Quantity ' )
+plt.ylabel(' # of cases ' )
 plt.axvline(0, color= 'r')
-plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_vs_APE-Gen_hist.jpg')
+plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_vs_APE-Gen_hist.pdf')
 plt.show()
 plt.clf()
 
@@ -116,15 +118,15 @@ if label:
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA molpdf')
 plt.ylabel(' DockTope ' )
-plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_molpdf_vs_DockTope.jpg')
+plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_molpdf_vs_DockTope.pdf')
 plt.show()
 plt.clf()
 
 plt.hist([dt_comparison[x][0][0] - dt_comparison[x][0][1] for x in dt_comparison], bins=50)
 plt.xlabel('PANDORA molpdf - DockTope')
-plt.ylabel(' Quantity ' )
+plt.ylabel(' # of cases ' )
 plt.axvline(0, color= 'r')
-plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_molpdf_vs_DockTope_hist.jpg')
+plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_molpdf_vs_DockTope_hist.pdf')
 plt.show()
 plt.clf()
 
@@ -135,15 +137,15 @@ if label:
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA DOPE')
 plt.ylabel(' DockTope ' )
-plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_DOPE_vs_DockTope.jpg')
+plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_DOPE_vs_DockTope.pdf')
 plt.show()
 plt.clf()
 
 plt.hist([dt_comparison[x][1][0] - dt_comparison[x][1][1] for x in dt_comparison], bins=50)
 plt.xlabel('PANDORA molpdf - DockTope')
-plt.ylabel(' Quantity ' )
+plt.ylabel(' # of cases ' )
 plt.axvline(0, color= 'r')
-plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_DOPE_vs_DockTope_hist.jpg')
+plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_DOPE_vs_DockTope_hist.pdf')
 plt.show()
 plt.clf()
 
@@ -207,15 +209,15 @@ if label:
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA molpdf')
 plt.ylabel(' GradDock ' )
-plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_molpdf_vs_GradDock.jpg')
+plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_molpdf_vs_GradDock.pdf')
 plt.show()
 plt.clf()
 
 plt.hist([gd_comparison[x][0][0] - gd_comparison[x][0][1] for x in gd_comparison], bins=50)
 plt.xlabel('PANDORA molpdf - GradDock')
-plt.ylabel(' Quantity ' )
+plt.ylabel(' # of cases ' )
 plt.axvline(0, color= 'r')
-plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_molpdf_vs_GradDock_hist.jpg')
+plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_molpdf_vs_GradDock_hist.pdf')
 plt.show()
 plt.clf()
 
@@ -226,15 +228,15 @@ if label:
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA DOPE')
 plt.ylabel(' GradDock ' )
-plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_DOPE_vs_DockTope.jpg')
+plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_DOPE_vs_GradDock.pdf')
 plt.show()
 plt.clf()
 
 plt.hist([gd_comparison[x][1][0] - gd_comparison[x][1][1] for x in gd_comparison], bins=50)
 plt.xlabel('PANDORA DOPE - GradDock')
-plt.ylabel(' Quantity ' )
+plt.ylabel(' # of cases ' )
 plt.axvline(0, color= 'r')
-plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_DOPE_vs_GradDock_hist.jpg')
+plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_DOPE_vs_GradDock_hist.pdf')
 plt.show()
 plt.clf()
 
@@ -243,8 +245,9 @@ plt.clf()
 
 plt.figure(num=None, figsize=(20, 20), dpi=80, facecolor='w', edgecolor='k')
 plt.plot([x[1] for x in best_rmsds.values()], [x[4] for x in best_rmsds.values()], 'o')
-for key in best_rmsds:
-    plt.annotate(key, (best_rmsds[key][1], best_rmsds[key][4]), size = 8)
+if label:
+    for key in best_rmsds:
+        plt.annotate(key, (best_rmsds[key][1], best_rmsds[key][4]), size = 8)
 plt.xticks([0.25*x for x in range(20)])
 plt.yticks([0.25*x for x in range(20)])
 plt.axvline(2, color='r')
@@ -252,14 +255,15 @@ plt.axhline(2, color='r')
 plt.xlabel('molpdf top 5')
 plt.ylabel('DOPE top 5')
 plt.plot([0, 2, 4, 5], [0, 2, 4, 5], 'g-')
-plt.savefig('../../benchmark/' + outdir + 'PANDORA_CA_molpdf_vs_DOPE.jpg')
+plt.savefig('../../benchmark/' + outdir + 'PANDORA_CA_molpdf_vs_DOPE.pdf')
 plt.show()
 plt.clf()
 
 plt.figure(num=None, figsize=(20, 20), dpi=80, facecolor='w', edgecolor='k')
 plt.plot([x for x in bests.values()], [x for x in bests.values()], 'o')
-for key in bests:
-    plt.annotate(key, (bests[key], bests[key]), size = 8)
+if label:
+    for key in bests:
+        plt.annotate(key, (bests[key], bests[key]), size = 8)
 plt.xticks([0.25*x for x in range(20)])
 plt.yticks([0.25*x for x in range(20)])
 plt.axvline(2, color='r')
@@ -267,11 +271,14 @@ plt.axhline(2, color='r')
 plt.xlabel('best RMSD model')
 plt.ylabel('best RMSD model')
 plt.plot([0, 2, 4, 5], [0, 2, 4, 5], 'g-')
-plt.savefig('../../benchmark/' + outdir + 'PANDORA_CA_best_rmsd.jpg')
+plt.savefig('../../benchmark/' + outdir + 'PANDORA_CA_best_rmsd.pdf')
 plt.show()
 plt.clf()
 
 plt.hist([x for x in bests.values()], bins = 50)
-plt.savefig('../../benchmark/' + outdir + 'PANDORA_CA_best_rmsd_hist.jpg')
+plt.axvline(2, color='r')
+plt.xlabel('Best model i-RMSD')
+plt.ylabel('# of cases')
+plt.savefig('../../benchmark/' + outdir + 'PANDORA_CA_best_rmsd_hist.pdf')
 plt.show()
 plt.clf()

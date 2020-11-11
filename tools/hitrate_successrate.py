@@ -94,16 +94,18 @@ N = 20
 
 # plot hs
 plt.fill_between(x[:N],hs_a[:N], hs_b[:N], color='#3279a8', alpha=0.5)
-plt.plot(x[:N], hs_mean[:N], color='#3279a8', label='Haddock')
+plt.plot(x[:N], hs_mean[:N], color='#3279a8')
 
 # plot dr
 plt.fill_between(x[:N],dr_a[:N], dr_b[:N], color='#e88700', alpha=0.5)
-plt.plot(x[:N], dr_mean[:N], color='#e88700', label='DeepRank')
+plt.plot(x[:N], dr_mean[:N], color='#e88700')
 
 # label and stuff
+plt.grid(b=1, which='major', axis='both')
+plt.xticks([1, 5, 10, 15, 20])
 plt.xlabel('Top N', **axis_font)
 plt.ylabel('Hitrate', **axis_font)
-plt.title('Hitrate 2A')
+plt.title('Hitrate 2Å')
 
 # text
 # plt.text(400,0.7,'DeepRank',color = '#e88700', fontsize=14)
@@ -114,8 +116,8 @@ plt.title('Hitrate 2A')
 
 # plot
 plt.subplots_adjust(bottom=0.15)
-plt.savefig('./Hitrate.png')
-plt.show()
+plt.savefig('./Hitrate.pdf')
+#plt.show()
 plt.clf()
 
 #%%
@@ -140,20 +142,22 @@ x = np.arange(1, len(successrate_dr) + 1)
 
 # fig
 fig = plt.figure(num=None, figsize=(5, 3), dpi=80, facecolor='w', edgecolor='k')
-N = 10
+N = 20
 
 # plot hs
 #plt.fill_between(x[:N],hs_a[:N], hs_b[:N], color='#3279a8', alpha=0.5)
-plt.plot(x[:N], successrate_hs[:N], color='#3279a8', label='Haddock')
+plt.plot(x[:N], successrate_hs[:N], color='#3279a8')
 
 # plot dr
 #plt.fill_between(x[:N],dr_a[:N], dr_b[:N], color='#e88700', alpha=0.5)
-plt.plot(x[:N], successrate_dr[:N], color='#e88700', label='DeepRank')
+plt.plot(x[:N], successrate_dr[:N], color='#e88700')
 
 # label and stuff
+plt.grid(b=1, which='major', axis='both')
+plt.xticks([1, 5, 10, 15, 20])
 plt.xlabel('Top N', **axis_font)
 plt.ylabel('Successrate', **axis_font)
-plt.title('Successrate 2A')
+plt.title('Successrate 2Å')
 
 # text
 # plt.text(400,0.7,'DeepRank',color = '#e88700', fontsize=14)
@@ -164,8 +168,8 @@ plt.title('Successrate 2A')
 
 # plot
 plt.subplots_adjust(bottom=0.15)
-plt.savefig('./Successrate.png')
-plt.show()
+plt.savefig('./Successrate.pdf')
+#plt.show()
 plt.clf()
 
 
