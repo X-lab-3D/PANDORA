@@ -263,7 +263,7 @@ def remove_error_templates():
         IDD = pickle.load(inpkl)
         bad_IDs = pickle.load(inpkl)
         inpkl.close()
-    with open('data/csv_pkl_files/error_templates.tsv') as infile:
+    with open('data/csv_pkl_files/error_templates.tsv') as infile: #To be removed later
         r = csv.reader(infile, delimiter='\t')
         for i, row in enumerate(r):
             if i != 0:
