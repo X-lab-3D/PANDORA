@@ -210,7 +210,7 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
                 os.system('pdb_rplchain -%s:P %s > %s' %(pID, a_renamed_filepath, new_filepath))
             
             #IF chain P comes before chain M
-            if list(seqs.keys()).index('P') < list(seqs.keys()).index('M'):
+            if list(seqs.keys()).index(pID) < list(seqs.keys()).index(aID):
             
                 #test_filepath = './test_MP.pdb'
                 #onlyM_filepath = './test_M.pdb'
@@ -245,6 +245,19 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
                         inPpdb.close()
                     outpdb.write('END')
                     outpdb.close()
+                    
+                try:
+                    subprocess.check_call(['rm', 'data/PDBs/%s_header.pdb' %ID])
+                except:
+                    pass
+                try:
+                    subprocess.check_call(['rm', 'data/PDBs/%s_M.pdb' %ID])
+                except:
+                    pass
+                try:
+                    subprocess.check_call(['rm', 'data/PDBs/%s_P.pdb' %ID])
+                except:
+                    pass
                 
         try:
             subprocess.check_call(['rm', 'data/PDBs/%s.pdb' %ID])
