@@ -87,6 +87,9 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
         selected_chains_filepath = '%s/data/PDBs/%s_AC.pdb'%(cwd, ID)
         a_renamed_filepath = '%s/data/PDBs/%s_MC.pdb'%(cwd, ID)
         new_filepath = '%s/data/PDBs/%s_MP.pdb'%(cwd, ID)
+        header_filepath = '%s/data/PDBs/%s_header.pdb'%(cwd, ID)
+        onlyM_filepath = '%s/data/PDBs/%s_M.pdb'%(cwd, ID)
+        onlyP_filepath = '%s/data/PDBs/%s_P.pdb'%(cwd, ID)
 
 
         #print('Opening %s' %ID)
@@ -205,6 +208,57 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
             else:
                 os.system('pdb_rplchain -%s:M %s > %s' %(aID, selected_chains_filepath, a_renamed_filepath))
                 os.system('pdb_rplchain -%s:P %s > %s' %(pID, a_renamed_filepath, new_filepath))
+            
+            #IF chain P comes before chain M
+            if list(seqs.keys()).index(pID) < list(seqs.keys()).index(aID):
+            
+                #test_filepath = './test_MP.pdb'
+                #onlyM_filepath = './test_M.pdb'
+                #onlyP_filepath = './test_P.pdb'
+                with open(new_filepath, 'r') as inpdb:
+                    with open(header_filepath, 'w') as outheader:
+                        for line in inpdb:
+                            if line.startswith('ATOM'):
+                                break
+                            else:
+                                outheader.write(line)
+                        outheader.close()
+                    inpdb.close()
+                
+                os.system('pdb_selchain -M %s > %s' %(new_filepath, onlyM_filepath))
+                os.system('pdb_selchain -P %s > %s' %(new_filepath, onlyP_filepath))
+                
+                with open(new_filepath, 'w') as outpdb:
+                    with open(header_filepath, 'r') as inheader:
+                        for line in inheader:
+                            outpdb.write(line)
+                        inheader.close()
+                    with open(onlyM_filepath, 'r') as inMpdb:
+                        for line in inMpdb:
+                            if line.startswith('ATOM') or line.startswith('TER'): 
+                                outpdb.write(line)
+                        inMpdb.close()
+                    with open(onlyP_filepath, 'r') as inPpdb:
+                        for line in inPpdb:
+                            if line.startswith('ATOM') or line.startswith('TER'): 
+                                outpdb.write(line)
+                        inPpdb.close()
+                    outpdb.write('END')
+                    outpdb.close()
+                    
+                try:
+                    subprocess.check_call(['rm', 'data/PDBs/%s_header.pdb' %ID])
+                except:
+                    pass
+                try:
+                    subprocess.check_call(['rm', 'data/PDBs/%s_M.pdb' %ID])
+                except:
+                    pass
+                try:
+                    subprocess.check_call(['rm', 'data/PDBs/%s_P.pdb' %ID])
+                except:
+                    pass
+                
         try:
             subprocess.check_call(['rm', 'data/PDBs/%s.pdb' %ID])
         except:
