@@ -161,8 +161,10 @@ def na_model(k, pept_seq, best_rmsds):
             pass
         elif allele[:9] in allele_ID.keys():
             allele = allele[:9]
-        else:
+        elif allele[:6] in allele_ID.keys():
             allele = allele[:6]
+        else:
+            allele = allele[:4]
     elif allele.startswith('H2'):    # Mouse
         #homolog_allele = 'RT1'
         if allele in allele_ID.keys():
