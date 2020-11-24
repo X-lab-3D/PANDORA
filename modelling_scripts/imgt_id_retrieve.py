@@ -9,6 +9,7 @@ import sys
 import urllib.parse
 import urllib.request
 from html.parser import HTMLParser
+from pyparsing import nestedExpr
 
 ### DONE Block 1: get all the IDs from html.
 ### DONE Block 2: use IDs to access IMGT pages. Retrieve allele from "G-domain" AND "IMGT gene and allele name"
@@ -115,16 +116,22 @@ for ID in IDs_list:
                 descr = j
                 flag = True
     
+    percs = [{}, {}]
     for i, domain in enumerate(domains):
         domains[i] = domains[i].replace(',','').replace(';','').split('&nbsp')
+        for j, d in enumerate(domains[i]):
+            if '(' in d:
+                percs[i][domains[i][j-1]] = float((nestedExpr('(',')').parseString(d).asList())[0].replace('%',''))
         domains[i] = [x for x in domains[i] if '%' not in x]
+    
     
     # TODO: in future: in case of ambiguity, assign allele to the templates according to patient genotype?
     
-    common_alleles = set(domains[0]).intersection(*domains)
-    if len(common_alleles) != 1:
-        print(ID, common_alleles)
+    if len(domains) != 0:
+        common_alleles = set(domains[0]).intersection(*domains)
+        
             
+    ID_allele[ID] = percs #TODO: check if allele is in both domains
 
 
 #%%
