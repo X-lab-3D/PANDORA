@@ -4,39 +4,16 @@
 
 #python retrieve_IMGT_pmh1.py > output.html
 
-import sys
-
 import urllib.parse
 import urllib.request
-from html.parser import HTMLParser
 from pyparsing import nestedExpr
 from copy import deepcopy
 import pickle
 
 ### DONE Block 1: get all the IDs from html.
-### TODO
+### DONE Block 2: use IDs to access IMGT pages. Retrieve allele from "G-domain" AND "IMGT gene and allele name"
+### TODO Block 3: Assign one allele choosing the most common one
 
-
-'''
-class MyHTMLParser(HTMLParser):
-    flag = False
-    def handle_starttag(self, tag, attrs):
-        if tag == 'tr':
-            #print("Encountered a start tag:", tag)
-            pass
-
-    def handle_endtag(self, tag):
-        if tag == 'tr':
-            #print("Encountered an end tag :", tag)
-            pass
-
-    def handle_data(self, data):
-        print("Encountered some data  :", data)
-        if flag == True:
-            print('Is this what are you looking for? :', data)
-        if data == 'IMGT domain description':
-            flag = True
-'''
 #%%
 params = { 'ReceptorType' : 'peptide/MH1',
         'type-entry': 'PDB'}
@@ -59,29 +36,9 @@ with urllib.request.urlopen(req) as response:
         temp_outfile.write(text)
         temp_outfile.close()
 
-IDs_list=[]
-IDs_and_alleles=[]
-ID_i = None
-for i, line in enumerate(text):
-    if 'href' in line and 'pdbcode' in line:
-        ID_line = line
-        IDs_list.append(line)
-        ID_i = i
-    elif ID_i and i == ID_i+1:
-        IDs_and_alleles.append((ID_line, line))
-        
 IDs_list = [x for x in text if 'href' in x and 'pdbcode' in x]
 IDs_list = [x.split('"') for x in IDs_list]
 IDs_list = [x[3][-4:] for x in IDs_list]
-
-
-'''
-temp_outfile = open('../outputs/test/test_download/test.html', 'r')
-for line in temp_outfile:
-    if 'pdbcode' in line:
-        print(line)
-temp_outfile.close()
-'''
 
 #%%
 ID_allele = {}
@@ -108,8 +65,7 @@ for ID in IDs_list:
             continue
         if line == '<td class="titre_h" align="center" rowspan="6">G-DOMAIN</td>':
             domain_flag = True
-            #print(line)## DONE Block 2: use IDs to access IMGT pages. Retrieve allele from "G-domain" AND "IMGT gene and allele name"
-### TODO Block 3: Assign one allele choosing the most common one
+            #print(line)
         elif line =='\n' or line =='':
             domain_flag = False
             if domain != []:
@@ -144,16 +100,29 @@ for ID in IDs_list:
     
     # TODO: in future: in case of ambiguity, assign allele to the templates according to patient genotype?
     
-    if len(clean_domains) != 0:
-        common_alleles = set(clean_domains[0]).intersection(*clean_domains)
+    if percs != [{}, {}]:
+        set_percs = set(percs[0]).intersection(*percs)
         
             
-    ID_allele[ID] = percs #TODO: check if allele is in both domains
+    ID_allele[ID] = [set_percs, percs] #TODO: check if allele is in both domains
+    
 
 with open('../data/csv_pkl_files/IDs_and_alleles_identity_percs_from_imgt.pkl', 'wb') as outpkl:
     pickle.dump(ID_allele, outpkl)
-pass
 
+#%%
+with open('../data/csv_pkl_files/auto_generated_IDs_alleles_from_IMGT.tsv', 'w') as outtsv:
+    outtsv.write('PDB ID' + '\t' + 'Equal identity alleles' + '\n')
+    for ID in ID_allele:
+        if len(ID_allele[ID][0]) != 0:
+            outtsv.write(ID + '\t' + (';').join([x for x in ID_allele[ID][0]]) +'\n')
+        elif len(ID_allele[ID][0]) == 0:
+            to_write = []
+            for x in ID_allele[ID][1]:
+                to_write += list(x.keys())
+            to_write = list(set(to_write))
+            outtsv.write(ID + '\t' + (';').join(to_write) +'\n')
+pass
 #%%
 #samplestr = '<tr><td class="titre_h">IMGT gene and allele name</td><td class="data_h">HLA-A*0206&nbsp;(100%)(human),&nbsp;HLA-A*0210&nbsp;(100%)(human),&nbsp;HLA-A*0251&nbsp;(100%)(human),&nbsp;HLA-A*0257&nbsp;(100%)(human),&nbsp;HLA-A*0279&nbsp;(100%)(human)<a href="AliDetail.cgi?regcode=6UJOAR01"><em>Alignment details</em></a></td></tr>'
 #samplestr = domains[0]
