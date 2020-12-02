@@ -1,4 +1,3 @@
-
 #!/usr/bin/python
 ###    ###
 import copy
@@ -27,7 +26,7 @@ from multiprocessing import Manager
 
 #raise Exception('OK.')
 start_time = time.time()
-#outdir_name = 'benchmark_prize_20200608'  #TODO: set prize/no_prize as argument/variable
+#outdir_name = 'benchmark_prize_20200608'
 outdir_name = sys.argv[1]
 
 ###########################################
@@ -39,16 +38,6 @@ main_IDD = pickle.load(IDD_file)
 bad_IDs = pickle.load(IDD_file)
 IDD_file.close()
 
-'''
-### Organizing Allele IDs in a dictionary ###
-allele_ID = {}
-for key in IDD:
-    #if 'HLA' in IDD[key]['allele']:
-    try:
-        allele_ID[IDD[key]['allele']].append(key)
-    except KeyError:
-        allele_ID[IDD[key]['allele']] = [key]
-'''
 ###########################################
 ###  Setting variables
 
@@ -132,12 +121,16 @@ def na_model(k, pept_seq, best_rmsds):
     del IDD[target_id]
 
     ### Organizing Allele IDs in a dictionary ###
-    allele_ID = {}
+    allele_list = []
     for key in IDD:
-        try:
-            allele_ID[IDD[key]['allele']].append(key)
-        except KeyError:
-            allele_ID[IDD[key]['allele']] = [key]
+        #if 'HLA' in IDD[key]['allele']:
+        allele_list += IDD[key]['allele']
+        allele_list = list(set(allele_list))
+    
+    allele_ID = {i : [] for i in allele_list}
+    for key in IDD:
+        for multi_allele in IDD[key]['allele']:
+            allele_ID[multi_allele].append(key)
 
     ext_flag = False
     print( '## Wokring on %s, structure %s ##' %(query, target_id))
@@ -223,45 +216,32 @@ def na_model(k, pept_seq, best_rmsds):
         else:
             allele = allele[:5]
 
+    putative_templates = []
     for ID in IDD:
         if allele in IDD[ID]['allele'] or homolog_allele in IDD[ID]['allele']:                       ## Same Allele
-            score = 0
-            temp_pept = IDD[ID]['pept_seq']
-            min_len = min([length, len(temp_pept)])
-            #score -= (abs(length - len(temp_pept)) * 20)      ## Penalty for gap
-            #if length > len(temp_pept):
-            #    score -= int(20 * abs(length - len(temp_pept)))
-            #elif length < len(temp_pept):
-            #    score -= int(200 * abs(length - len(temp_pept)))
-            #else:
-            #    pass
-            score -= ((abs(length - len(temp_pept)) ** 2.4))
-            for i, (aa, bb) in enumerate(zip(pept[:min_len], temp_pept[:min_len])):
-                #if i == anch_1 and aa == bb:           # Identity prize
-                #    score += 4
-                #elif i == anch_2 and aa == bb:         # Identity prize
-                #    score += 2
+            putative_templates.append(IDD)
+    putative_templates = list(set(putative_templates))
+    
+    for ID in putative_templates:
+        score = 0
+        temp_pept = IDD[ID]['pept_seq']
+        min_len = min([length, len(temp_pept)])
+        score -= ((abs(length - len(temp_pept)) ** 2.4)) #!!!  ## Penalty for gap
+        for i, (aa, bb) in enumerate(zip(pept[:min_len], temp_pept[:min_len])):
+            try:
+                gain = MatrixInfo.pam30[aa, bb]
+                score += gain
+            except KeyError:
                 try:
-                    gain = MatrixInfo.pam30[aa, bb]
-                    #if gain > 0:
-                    #    gain += 2                      #This is summed on the top of the identity prize abobe
+                    gain = MatrixInfo.pam30[bb, aa]
                     score += gain
                 except KeyError:
-                    try:
-                        gain = MatrixInfo.pam30[bb, aa]
-                        #if gain > 0:
-                        #    gain += 2                      #This is summed on the top of the identity prize abobe
-                        score += gain
-                    except KeyError:
-                        #print('Broken peptide in IDD. Passing over.')
-                        score = -50
-                        pass
+                    score = -50
+                    pass
 
-            if score > max_pos:
-                max_pos = score
-            pos_list.append((score, temp_pept, ID))
-        else:
-            pass
+        if score > max_pos:
+            max_pos = score
+        pos_list.append((score, temp_pept, ID))
 
     max_list = []
     for pos in pos_list:
