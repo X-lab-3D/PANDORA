@@ -210,7 +210,7 @@ def na_model(k, pept_seq):
     putative_templates = []
     for ID in IDD:
         if allele in IDD[ID]['allele'] or homolog_allele in IDD[ID]['allele']:                       ## Same Allele
-            putative_templates.append(IDD)
+            putative_templates.append(ID)
     putative_templates = list(set(putative_templates))
 
     for ID in putative_templates:

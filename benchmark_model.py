@@ -55,11 +55,14 @@ with open('benchmark/PANDORA_benchmark_dataset.tsv', 'r') as peptsfile:
             target_id = row[0]
             seq = row[1]
             allele = row[2]
+            pept_seqs.append((target_id, seq, allele))
+            '''
             if 'HLA' in allele:
                 star_allele = (allele[0:5]+'*'+allele[5:])
                 pept_seqs.append((target_id, seq, star_allele))
             else:
                 pept_seqs.append((target_id, seq, allele))
+            '''
 ##
 #!!!
 ##
@@ -147,79 +150,83 @@ def na_model(k, pept_seq, best_rmsds):
     pos_list = []
 
     anch_1, anch_2 = anch_dict[length]
-
-    homolog_allele = '--NONE--'
-    if allele.startswith('HLA'):      # Human
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:9] in allele_ID.keys():
-            allele = allele[:9]
-        else:
-            allele = allele[:6]
-    elif allele.startswith('H2'):    # Mouse
-        #homolog_allele = 'RT1'
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:4] in allele_ID.keys():
-            allele = allele[:4]
-        else:
-            allele = allele[:3]
-    elif allele.startswith('RT1'):          # Rat
-        homolog_allele = 'H2'
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:5] in allele_ID.keys():
-            allele = allele[:5]
-        else:
-            allele = allele[:4]
-    elif allele.startswith('BoLA'):        # Bovine
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:10] in allele_ID.keys():
-            allele = allele[:10]
-        elif allele[:7] in allele_ID.keys():
-            allele = allele[:7]
-        else:
-            allele = allele[:5]
-    elif allele.startswith('SLA'):        # Suine
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:9] in allele_ID.keys():
-            allele = allele[:9]
-        elif allele[:6] in allele_ID.keys():
-            allele = allele[:6]
-        else:
-            allele = allele[:4]
-    elif allele.startswith('BF2'):        # Chicken
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:6] in allele_ID.keys():
-            allele = allele[:6]
-        else:
-            allele = allele[:4]
-    elif allele.startswith('Mamu'):       # Monkey
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:13] in allele_ID.keys():
-            allele = allele[:13]
-        elif allele[:9] in allele_ID.keys():
-            allele = allele[:9]
-        else:
-            allele = allele[:5]
-    elif allele.startswith('Eqca'):        # Horse
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:10] in allele_ID.keys():
-            allele = allele[:10]
-        elif allele[:7] in allele_ID.keys():
-            allele = allele[:7]
-        else:
-            allele = allele[:5]
+    #if any("abc" in s for s in some_list):
+    #homolog_allele = '--NONE--'
+    for a in range(len(allele)):
+        if allele[a].startswith('HLA'):      # Human
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:8] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:8]
+            elif any(allele[a][:6] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:6]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('H2'):    # Mouse
+            #homolog_allele = 'RT1'
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:4] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:4]
+            else:
+                allele[a] = allele[a][:3]
+        elif allele[a].startswith('RT1'):          # Rat
+            #homolog_allele = 'H2'
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:5] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:5]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('BoLA'):        # Bovine
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:10] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:10]
+            elif any(allele[a][:7] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:7]
+            else:
+                allele[a] = allele[a][:5]
+        elif allele[a].startswith('SLA'):        # Suine
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:9] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:9]
+            elif any(allele[a][:6] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:6]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('BF2'):        # Chicken
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:6] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:6]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('Mamu'):       # Monkey
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:13] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:13]
+            elif any(allele[a][:9] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:9]
+            else:
+                allele[a] = allele[a][:5]
+        elif allele[a].startswith('Eqca'):        # Horse
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:10] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:10]
+            elif any(allele[a][:7] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:7]
+            else:
+                allele[a] = allele[a][:5]
 
     putative_templates = []
     for ID in IDD:
-        if allele in IDD[ID]['allele'] or homolog_allele in IDD[ID]['allele']:                       ## Same Allele
-            putative_templates.append(IDD)
+        for a in allele:
+            if any(a in key for key in IDD[ID]['allele']): #or homolog_allele in IDD[ID]['allele']:                       ## Same Allele
+                putative_templates.append(ID)
     putative_templates = list(set(putative_templates))
     
     for ID in putative_templates:

@@ -29,6 +29,20 @@ def get_peptides_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter, ski
             else:
                 seq = row[pept_clmn]
                 allele = row[allele_clmn]
+                seqs.append((seq, allele))
+    return seqs
+
+def get_peptides_w_star_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter, skip_first_line = True):
+
+    seqs = []
+    with open(pepts_filename, 'r') as peptsfile:
+        spamreader = csv.reader(peptsfile, delimiter=delimiter)
+        for i, row in enumerate(spamreader):
+            if i == 0 and skip_first_line:
+                pass
+            else:
+                seq = row[pept_clmn]
+                allele = row[allele_clmn]
                 if 'HLA' in allele:
                     star_allele = (allele[0:5]+'*'+allele[5:])
                     seqs.append((seq, star_allele))
@@ -39,8 +53,12 @@ def get_peptides_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter, ski
 def download_ids_alleles_imgt(out_tsv = 'auto_generated_IDs_alleles_from_IMGT.tsv', out_pkl = 'IDs_and_alleles_identity_percs_from_imgt.pkl', print_outfiles = False):
     cwd = os.getcwd()
     
+    '''
     params = { 'ReceptorType' : 'peptide/MH1',
             'type-entry': 'PDB'}
+    '''
+    params = { 'ReceptorType' : 'MH1',
+        'type-entry': 'PDB'}
     
     url = "http://www.imgt.org/3Dstructure-DB/cgi/3Dquery.cgi"
     

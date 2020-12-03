@@ -15,8 +15,13 @@ import pickle
 ### TODO Block 3: Assign one allele choosing the most common one
 
 #%%
+'''
 params = { 'ReceptorType' : 'peptide/MH1',
         'type-entry': 'PDB'}
+'''
+params = { 'ReceptorType' : 'MH1',
+        'type-entry': 'PDB'}
+
 print_outfiles = False
 
 url = "http://www.imgt.org/3Dstructure-DB/cgi/3Dquery.cgi"
