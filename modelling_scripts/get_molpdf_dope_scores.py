@@ -10,7 +10,6 @@ with open(modeller_output_file) as result_file:
     if '>> Summary of successfully produced loop models:' in out_file:
         parts= out_file.split('>> Summary of successfully produced loop models:')
 
-        print('*********************')
         if '>> Summary of failed loop models:' in parts[-1]:
             new_parts= parts[-1].split('>> Summary of failed loop models:')
             models=new_parts[0].splitlines()[3:-2]
@@ -26,4 +25,4 @@ with open(modeller_output_file) as result_file:
                 to_be_written.append((float(row[1]),row))
             to_be_written = sorted(to_be_written)
             for row in to_be_written:
-                tsv_writer.writerow(row)
+                tsv_writer.writerow(row[1])
