@@ -1,0 +1,5 @@
+wget http://www.imgt.org/download/3Dstructure-DB/IMGT3DFlatFiles.tgz
+gunzip IMGT3DFlatFiles.tgz 
+tar -xvf IMGT3DFlatFiles.tar
+rm IMGT3DFlatFiles/*.inn.gz
+rm IMGT3DFlatFiles/*.prot.gz
