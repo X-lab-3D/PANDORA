@@ -6,6 +6,7 @@
 /data/bkup_PDBs
 /data/Targets/*
 /data/unused_templates/*
+/data/dist_files/*
 /data/allele_profiles/*
 data/netMHCpan_set/*
 /outputs/*
