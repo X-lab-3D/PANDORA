@@ -232,7 +232,7 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
 
         try:
             seqs = get_seqs(pdbf)
-        except IndexError:
+        except (IndexError, ValueError):
             bad_IDs[ID] = '#2'
             print('ERROR TYPE #2: Something went wrong with PDBParser. %s added to Bad_IDs' %ID)
             print('##################################')
@@ -259,9 +259,9 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
         if len(putative_pID) == 1:
             pID = list(putative_pID.keys())[0]
         elif len(putative_pID) > 1:
-            os.system('./modelling_scripts/contact-chainID_allAtoms %s 5 > temp.dist' %pdbf)
+            os.system('./modelling_scripts/contact-chainID_allAtoms %s 5 > ./data/dist_files/%s.dist' %(pdbf, ID))
             contacts = []
-            for line in open('./temp.dist', 'r'):
+            for line in open('./data/dist_files/%s.dist' %ID, 'r'):
                 contact = (line.split('\t')[1], line.split('\t')[6])
                 contacts.append(contact)
             for candidate in putative_pID:
@@ -353,9 +353,12 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
     print('Removing uncommon residue files')
     uncommon_pdbs = durp.del_uncommon_pdbf('./data/PDBs/')
     for u_pdb in uncommon_pdbs:
-        del IDs_dict[u_pdb]
-        bad_IDs[u_pdb] = '#7'
-        err_7 += 1
+        try:
+            del IDs_dict[u_pdb]
+            bad_IDs[u_pdb] = '#7'
+            err_7 += 1
+        except KeyError:
+            print("Tried to delete %s from dataset error #7, error encountered" %u_pdb)
 
     ### New Errors to be fixed:
     ### #8: Residue 1A
