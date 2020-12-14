@@ -19,7 +19,7 @@ data/netMHCpan_set/*
 /modelling_scripts/.DS_Store
 /modelling_scripts/contact-chainID_allAtoms
 /modelling_scripts/*.pyc
-/modelling_scripts/__pycache__
+/modelling_scripts/__pycache__/
 ._*
 *.out
 *.swp

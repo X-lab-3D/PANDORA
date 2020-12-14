@@ -8,11 +8,123 @@ Created on Thu Dec 10 22:54:08 2020
 import os
 import gzip
 import shutil
+import pickle
+from copy import deepcopy
+from operator import xor
 
 ### TODO: Imports to be changed
-from data_prep import get_seqs
-from modelling_scripts import del_uncommon_residues_pdbs as durp
+from modelling_scripts.data_prep import get_seqs
+from modelling_scripts.data_prep import remove_error_templates
+import modelling_scripts.del_uncommon_residues_pdbs as durp
 
+def get_chainid_alleles_MHCI(pdbf):
+    #test: multiple chains 3GJG, multiple alleles 1AO7
+    ### Parsing file and extracting remarks
+    with open(pdbf) as infile:
+        remarks = []
+        for line in infile:
+            if line.startswith('REMARK 410'):
+                row = [x for x in line.rstrip().split(' ') if x != '']
+                del row[:2]
+                remarks.append(row)
+    remarks = [x for x in remarks if x != []]
+    
+    ### Dividing each remark section into a chains dictionary
+    chains = {}
+    flag = False
+    for row in remarks:
+        if row[0] == 'Chain' and row[1] == 'ID' and len(row)== 4:
+            chainID = row[2][-1]
+            chains[chainID] = []
+            chains[chainID].append(row)
+            flag = True
+        elif flag == True:
+            chains[chainID].append(row)
+    
+    ### Extracting MHC I Alpha chains
+    mhc_a = {}  # MHC I Alpha
+    for chain in chains:
+        try:
+            if chains[chain][1][3] == 'I-ALPHA':
+                mhc_a[chain] = chains[chain]
+        except:
+            pass
+    
+    ### Extracting alleles info
+    mhc_a_alleles = {}
+    for chain in mhc_a:
+        G_dom_alleles = {'G-ALPHA1': [], 'G-ALPHA2': []}
+        key = False
+        for row in mhc_a[chain]:
+            if row[0] == 'G-DOMAIN':
+                try:
+                    if row[3] == 'description' and row[4] == 'G-ALPHA1':
+                        key = 'G-ALPHA1'
+                    elif row[3] == 'description' and row[4] == 'G-ALPHA2':
+                        key = 'G-ALPHA2'
+                    elif key:
+                        if row[2] == 'gene' and row[3] == 'and' and row[4] == 'allele':
+                            G_dom_alleles[key] += row[5:]
+                        else:
+                            key = False
+                except IndexError:
+                    pass
+        mhc_a_alleles[chain] = deepcopy(G_dom_alleles)
+    
+    mhc_a_alleles_percs = {}
+    for chain in mhc_a_alleles:
+        mhc_a_alleles_percs[chain] = {}
+        for key in mhc_a_alleles[chain]:
+            mhc_a_alleles_percs[chain][key] = {}
+            ### Allele info are always given with four elements: Gender, Spieces, Allele, Percentage
+            for block in range(int(len(mhc_a_alleles[chain][key])/4)):  
+                allele = mhc_a_alleles[chain][key][2+(4*block)]
+                perc = float(mhc_a_alleles[chain][key][3+(4*block)].replace('(', '').replace('%)', '').replace(',',''))
+                mhc_a_alleles_percs[chain][key][allele] = perc
+    
+    return mhc_a_alleles_percs
+                    
+def select_alleles_set_MHCI(chain_alleles_percs):
+    # test = mhc_a_alleles_percs['A']
+    if xor(chain_alleles_percs['G-ALPHA1'] == {}, chain_alleles_percs['G-ALPHA2'] == {}):
+        if chain_alleles_percs['G-ALPHA1'] != {}:
+            non_empty = 'G-ALPHA1'
+            empty = 'G-ALPHA2'
+        elif chain_alleles_percs['G-ALPHA2'] != {}:
+            non_empty = 'G-ALPHA2'
+            empty = 'G-APLHA1'
+        top_perc = max(list(chain_alleles_percs[non_empty].values()))
+        to_delete = []
+        for allele in chain_alleles_percs[non_empty]:
+            # Checking if the percentace is the highest
+            if chain_alleles_percs[non_empty][allele] < top_perc:
+                to_delete.append(allele)
+        for allele in to_delete:
+            chain_alleles_percs[non_empty].pop(allele)
+        chain_alleles_percs.pop(empty)
+        
+    else:
+        for i, domain in enumerate(chain_alleles_percs):
+            other_domain = list(chain_alleles_percs.keys())[not i]
+            
+            top_perc = max(list(chain_alleles_percs[domain].values()))
+            to_delete = []
+            for allele in chain_alleles_percs[domain]:
+                # Checking if the percentace is the highest
+                if chain_alleles_percs[domain][allele] < top_perc:
+                    to_delete.append(allele)
+                # Checking if the allele is present in both domains
+                if allele not in chain_alleles_percs[other_domain]:
+                    to_delete.append(allele)
+            for allele in to_delete:
+                chain_alleles_percs[domain].pop(allele)
+        
+    selected_alleles = [chain_alleles_percs[dom] for dom in chain_alleles_percs] 
+    selected_alleles = [list(x.keys()) for x in selected_alleles]
+    selected_alleles = list(set(sum(selected_alleles, [])))
+    
+    return selected_alleles
+        
 
 def parse_pMHCI_pdbs(ids_list):
     
@@ -40,14 +152,22 @@ def parse_pMHCI_pdbs(ids_list):
     
     
     IDs_dict = {}
-    for entry in IDs:
-        ID = entry[0]
+    for ID in IDs:
         ID = ID.upper()
         ID = ID.rstrip()
-
-        with gzip.open('%s/IMGT-%s.pdb.gz' %(indir, ID), 'rb') as f_in:
-            with open('%s/%s.pdb' %(outdir, ID), 'wb') as f_out:
-                shutil.copyfileobj(f_in, f_out)
+        
+        try:
+            with gzip.open('%s/IMGT-%s.pdb.gz' %(indir, ID), 'rb') as f_in:
+                with open('%s/%s.pdb' %(outdir, ID), 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+        except FileNotFoundError:
+            bad_IDs[ID] = '#1 FileNotFound'
+            print('ERROR TYPE #1: File not found. %s added to Bad_IDs' %ID)
+            print('##################################')
+            err_1 += 1
+            os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
+            continue
+            
                 
         #Delete .gz file
         #os.popen('rm %s/%s.pdb.gz' %(outdir, ID)).read()
@@ -68,24 +188,25 @@ def parse_pMHCI_pdbs(ids_list):
         try:
             seqs = get_seqs(original_filepath)
         except (IndexError, ValueError):
-            bad_IDs[ID] = '#1 Parser'
-            print('ERROR TYPE #1: Something went wrong with PDBParser. %s added to Bad_IDs' %ID)
+            bad_IDs[ID] = '#2 Parser'
+            print('ERROR TYPE #2: Something went wrong with PDBParser. %s added to Bad_IDs' %ID)
             print('##################################')
-            err_1 += 1
-            os.system('mv %s/%s.pdb %s/parsing_error/ '%(outdir, ID ,unused_pdbs_dir))
+            err_2 += 1
+            os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
             continue
 
         ### Selecting Alpha chain and peptide chain
         ### TODO: parse REMARK info to get chain IDs and allele information
         
+        alpha_chains = get_chainid_alleles_MHCI(original_filepath)
+        
         putative_pID = {}
         for chain in seqs:
             if type(seqs[chain]) == str:
                 length = len(seqs[chain])
-                if chain != ' ':               #This might be removed, since get_seqs() is  not outputting anymore with empty chain ids
-                    count_dict[chain] = length
-                if length > 250 and length < 300 and not aID:
-                    aID = chain
+                count_dict[chain] = length
+                if (chain in list(alpha_chains.keys())): # and (not aID) and (length > 250 and length < 300)
+                    aID = chain                          # TODO: Try another putative aID if the first does not work
                 elif length > 7 and length < 25:
                     putative_pID[chain] = 0
         if len(putative_pID) == 1:
@@ -106,20 +227,20 @@ def parse_pMHCI_pdbs(ids_list):
         # Checking chainIDs
         try:
             if aID.islower() or pID.islower():
-                bad_IDs[ID] = '#2 Lowercase_chainID'
-                print('ERROR TYPE #2: Lower case chain ID. %s added to Bad_IDs' %ID)
+                bad_IDs[ID] = '#3 Lowercase_chainID'
+                print('ERROR TYPE #3: Lower case chain ID. %s added to Bad_IDs' %ID)
                 print('##################################')
-                err_2 += 1
+                err_3 += 1
                 os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
                 continue
             else:
                 pass
         except AttributeError:
-            bad_IDs[ID] = '#3'
-            print('ERROR TYPE #3: False in chain ID. %s added to Bad_IDs' %ID)
+            bad_IDs[ID] = '#4'
+            print('ERROR TYPE #4: False in chain ID. %s added to Bad_IDs' %ID)
             print(count_dict)
             print('##################################')
-            err_3 += 1
+            err_4 += 1
             os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
             continue
 
@@ -141,6 +262,7 @@ def parse_pMHCI_pdbs(ids_list):
                 Btcr += 1
             elif count_dict[key] > 250 or count_dict[key] < 300:
                 Amhc += 1
+            '''
             else:
                 bad_IDs[ID] = '#4 Unrecognized_chain_lenght'
                 print('ERROR TYPE #4: Unrecognized chain lenght. %s added to Bad_IDs' %ID)
@@ -148,6 +270,7 @@ def parse_pMHCI_pdbs(ids_list):
                 err_4 += 1
                 os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
                 continue
+            '''
         '''
         if Atcr != 0 or Btcr != 0:
             bad_IDs[ID] = '#5 TCR_inside'
@@ -160,7 +283,20 @@ def parse_pMHCI_pdbs(ids_list):
         ######
         else:
         '''
-        count_dict['allele'] = entry[1]
+        
+        #print(alpha_chains[aID])
+        if any([1 for key in alpha_chains[aID] if alpha_chains[aID][key] == {}]):
+            bad_IDs[ID] = '#5 No_alleles'
+            print('ERROR TYPE #5: No available alleles. %s added to Bad_IDs' %ID)
+            print('##################################')
+            err_5 += 1
+            os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
+            continue
+        else:
+            alleles = select_alleles_set_MHCI(alpha_chains[aID])
+        
+        
+        count_dict['allele'] = alleles
         count_dict['pept_seq'] = seqs[pID]
         IDs_dict[ID] = count_dict
         os.system('pdb_selchain -%s,%s %s > %s' %(aID, pID, original_filepath, selected_chains_filepath))
@@ -170,6 +306,54 @@ def parse_pMHCI_pdbs(ids_list):
         else:
             os.system('pdb_rplchain -%s:M %s > %s' %(aID, selected_chains_filepath, a_renamed_filepath))
             os.system('pdb_rplchain -%s:P %s > %s' %(pID, a_renamed_filepath, new_filepath))
+            
+        #IF chain P comes before chain M
+        if list(seqs.keys()).index(pID) < list(seqs.keys()).index(aID):
+            
+            with open(new_filepath, 'r') as inpdb:
+                with open(header_filepath, 'w') as outheader:
+                    for line in inpdb:
+                        if line.startswith('ATOM'):
+                            break
+                        else:
+                            outheader.write(line)
+                    outheader.close()
+                inpdb.close()
+            
+            os.system('pdb_selchain -M %s > %s' %(new_filepath, onlyM_filepath))
+            os.system('pdb_selchain -P %s > %s' %(new_filepath, onlyP_filepath))
+            
+            with open(new_filepath, 'w') as outpdb:
+                with open(header_filepath, 'r') as inheader:
+                    for line in inheader:
+                        outpdb.write(line)
+                    inheader.close()
+                with open(onlyM_filepath, 'r') as inMpdb:
+                    for line in inMpdb:
+                        if line.startswith('ATOM') or line.startswith('TER'): 
+                            outpdb.write(line)
+                    inMpdb.close()
+                with open(onlyP_filepath, 'r') as inPpdb:
+                    for line in inPpdb:
+                        if line.startswith('ATOM') or line.startswith('TER'): 
+                            outpdb.write(line)
+                    inPpdb.close()
+                outpdb.write('END')
+                outpdb.close()
+                
+            try:
+                os.system('rm %s' %header_filepath)
+            except:
+                pass
+            try:
+                os.system('rm %s' %onlyM_filepath)
+            except:
+                pass
+            try:
+                os.system('rm %s' %onlyP_filepath)
+            except:
+                pass
+            
         try:
             os.system('rm %s' %original_filepath)
         except:
@@ -186,7 +370,7 @@ def parse_pMHCI_pdbs(ids_list):
     ### ADD CORRECTION FOR SEP, F2F, etc.
     os.system('python ./tools/change_sep_in_ser.py %s' %outdir)
     print('Removing uncommon residue files')
-    uncommon_pdbs = durp.del_uncommon_pdbf(outdir, unused_pdbs_dir + '/non_canonical_res')
+    uncommon_pdbs = durp.move_uncommon_pdbf(outdir + '/', unused_pdbs_dir + '/non_canonical_res')
     for u_pdb in uncommon_pdbs:
         try:
             del IDs_dict[u_pdb]
@@ -205,26 +389,20 @@ def parse_pMHCI_pdbs(ids_list):
     bad_IDs['errors'] = {'#1': err_1, '#2': err_2, '#3': err_3,
                          '#4': err_4, '#5': err_5, '#6': err_6, '#7': err_7}
     
-    IDd = open("data/csv_pkl_files/IDs_ChainsCounts_dict.pkl", "wb")
+    IDd = open("data/csv_pkl_files/test_new_parsing.pkl", "wb")
     pickle.dump(IDs_dict, IDd)
     pickle.dump(bad_IDs, IDd)
+
     IDd.close()
     
     print('BAD IDs:')
     print(bad_IDs)
-    '''
-    with open('data/csv_pkl_files/IDs_dict.tsv', 'wt') as outfile:
-        tsv_writer = csv.writer(outfile, delimiter='\t')
-        tsv_writer.writerow(['PDB_ID', 'CHAIN_ID', 'LENGTH', 'ALLELE'])
-        for ID in IDs_dict:
-            for chain_ID in IDs_dict[ID]:
-                if chain_ID != 'allele':
-                    tsv_writer.writerow([ID, chain_ID, IDs_dict[ID][chain_ID], IDs_dict[ID]['allele']])
-    '''
+    
     #TODO: clean dist_files folder
-    remove_error_templates()
+    
+    #remove_error_templates()
+    
     return IDs_dict, bad_IDs
-    pass
 
 def parse_pMHCII_pdbs():
     pass
