@@ -351,7 +351,7 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
     ### ADD CORRECTION FOR SEP, F2F, etc.
     os.system('python ./tools/change_sep_in_ser.py ./data/PDBs/')
     print('Removing uncommon residue files')
-    uncommon_pdbs = durp.del_uncommon_pdbf('./data/PDBs/')
+    uncommon_pdbs = durp.move_uncommon_pdbf('./data/PDBs/')
     for u_pdb in uncommon_pdbs:
         try:
             del IDs_dict[u_pdb]

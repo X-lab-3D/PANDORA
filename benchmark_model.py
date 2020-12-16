@@ -1,7 +1,6 @@
 #!/usr/bin/python
 ###    ###
 import copy
-from modelling_scripts import data_prep
 import pickle
 from Bio import SeqIO
 #import subprocess
@@ -17,10 +16,12 @@ import sys
 from joblib import Parallel, delayed
 from multiprocessing import Manager
 
+from modelling_scripts import structures_parser
+from modelling_scripts import utils
+
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
-##IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
-#IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/csv_pkl_files/mhcI_structures_IEDB.csv', 42, 43, ';', empty_rows=[0,1])
+#IDD, bad_IDs = structures_parser.imgt_retrieve_clean('data/csv_pkl_files/mhcI_structures_IEDB.csv', 42, 43, ';', empty_rows=[0,1])
 
 #outdir_name = sys.argv[1]
 
@@ -42,7 +43,7 @@ IDD_file.close()
 ###  Setting variables
 
 # tsv with: Target ID, pept seq, allele
-# pept_seqs = data_prep.get_peptides_from_csv('benchmark/cross_validation_set.tsv', 3, 4, '\t') ### This can be the input requested for the benchmark function
+# pept_seqs = structures_parser.get_peptides_from_csv('benchmark/cross_validation_set.tsv', 3, 4, '\t') ### This can be the input requested for the benchmark function
 
 
 pept_seqs = []

@@ -13,8 +13,8 @@ from copy import deepcopy
 from operator import xor
 
 ### TODO: Imports to be changed
-from modelling_scripts.data_prep import get_seqs
-from modelling_scripts.data_prep import remove_error_templates
+from modelling_scripts.utils import get_seqs
+from modelling_scripts.utils import remove_error_templates
 import modelling_scripts.del_uncommon_residues_pdbs as durp
 
 def get_chainid_alleles_MHCI(pdbf):
@@ -403,6 +403,73 @@ def parse_pMHCI_pdbs(ids_list):
     #remove_error_templates()
     
     return IDs_dict, bad_IDs
+
+def get_chainid_alleles_MHCII(pdbf):
+    #test: multiple chains 3GJG, multiple alleles 1AO7
+    ### Parsing file and extracting remarks
+    with open(pdbf) as infile:
+        remarks = []
+        for line in infile:
+            if line.startswith('REMARK 410'):
+                row = [x for x in line.rstrip().split(' ') if x != '']
+                del row[:2]
+                remarks.append(row)
+    remarks = [x for x in remarks if x != []]
+    
+    ### Dividing each remark section into a chains dictionary
+    chains = {}
+    flag = False
+    for row in remarks:
+        if row[0] == 'Chain' and row[1] == 'ID' and len(row)== 4:
+            chainID = row[2][-1]
+            chains[chainID] = []
+            chains[chainID].append(row)
+            flag = True
+        elif flag == True:
+            chains[chainID].append(row)
+    
+    ### Extracting MHC I Alpha chains
+    mhc_a = {}  # MHC I Alpha
+    for chain in chains:
+        try:
+            if chains[chain][1][3] == 'I-ALPHA':
+                mhc_a[chain] = chains[chain]
+        except:
+            pass
+    
+    ### Extracting alleles info
+    mhc_a_alleles = {}
+    for chain in mhc_a:
+        G_dom_alleles = {'G-ALPHA1': [], 'G-ALPHA2': []}
+        key = False
+        for row in mhc_a[chain]:
+            if row[0] == 'G-DOMAIN':
+                try:
+                    if row[3] == 'description' and row[4] == 'G-ALPHA1':
+                        key = 'G-ALPHA1'
+                    elif row[3] == 'description' and row[4] == 'G-ALPHA2':
+                        key = 'G-ALPHA2'
+                    elif key:
+                        if row[2] == 'gene' and row[3] == 'and' and row[4] == 'allele':
+                            G_dom_alleles[key] += row[5:]
+                        else:
+                            key = False
+                except IndexError:
+                    pass
+        mhc_a_alleles[chain] = deepcopy(G_dom_alleles)
+    
+    mhc_a_alleles_percs = {}
+    for chain in mhc_a_alleles:
+        mhc_a_alleles_percs[chain] = {}
+        for key in mhc_a_alleles[chain]:
+            mhc_a_alleles_percs[chain][key] = {}
+            ### Allele info are always given with four elements: Gender, Spieces, Allele, Percentage
+            for block in range(int(len(mhc_a_alleles[chain][key])/4)):  
+                allele = mhc_a_alleles[chain][key][2+(4*block)]
+                perc = float(mhc_a_alleles[chain][key][3+(4*block)].replace('(', '').replace('%)', '').replace(',',''))
+                mhc_a_alleles_percs[chain][key][allele] = perc
+    
+    return mhc_a_alleles_percs
 
 def parse_pMHCII_pdbs():
     pass
