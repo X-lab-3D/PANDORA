@@ -23,3 +23,5 @@ data/netMHCpan_set/*
 ._*
 *.out
 *.swp
+*.sh.e*
+*.sh.o*
