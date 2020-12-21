@@ -391,7 +391,7 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
 
 def remove_error_templates():
     try:
-        os.system('mkdir data/unused_templates')
+        os.system('mkdir data/PDBs//unused_templates')
     except:
         pass
     with open('data/csv_pkl_files/IDs_ChainsCounts_dict.pkl', 'rb') as inpkl:
@@ -405,7 +405,7 @@ def remove_error_templates():
                 try:
                     del IDD[row[0]]
                     bad_IDs[row[0]] = row[1]
-                    os.system('mv data/PDBs/%s_MP.pdb data/unused_templates/' %row[0])
+                    os.system('mv data/PDBs/pMHCI/%s_MP.pdb data/unused_templates/' %row[0])
                 except:
                     pass
         infile.close()
@@ -420,7 +420,7 @@ def get_pdb_seq(IDs):
     sequences = []
     empty_seqs = []
     for ID in IDs:
-        pdbf = 'data/PDBs/%s_MP.pdb' %ID
+        pdbf = 'data/PDBs/pMHCI/%s_MP.pdb' %ID
         seqs = get_seqs(pdbf)
         if seqs != {}:
             sequences.append(seqs)

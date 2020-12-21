@@ -17,11 +17,13 @@ from joblib import Parallel, delayed
 from multiprocessing import Manager
 
 from modelling_scripts import structures_parser
+from modelling_scripts import url_protocols
 from modelling_scripts import utils
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
-#IDD, bad_IDs = structures_parser.imgt_retrieve_clean('data/csv_pkl_files/mhcI_structures_IEDB.csv', 42, 43, ';', empty_rows=[0,1])
+#IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
+#IDs_dict, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
 
 #outdir_name = sys.argv[1]
 
@@ -33,7 +35,7 @@ outdir_name = sys.argv[1]
 ###########################################
 ### Organizing dicts ###
 
-IDD_file = open('data/csv_pkl_files/IDs_ChainsCounts_dict.pkl', 'rb')
+IDD_file = open('data/csv_pkl_files/IDs_and_bad_IDs_dict.pkl', 'rb')
 #IDD_file = open('data/csv_pkl_files/fake_db.pkl', 'rb')
 main_IDD = pickle.load(IDD_file)
 bad_IDs = pickle.load(IDD_file)
@@ -45,6 +47,7 @@ IDD_file.close()
 # tsv with: Target ID, pept seq, allele
 # pept_seqs = structures_parser.get_peptides_from_csv('benchmark/cross_validation_set.tsv', 3, 4, '\t') ### This can be the input requested for the benchmark function
 
+os.system('python benchmark/get_cv_set.py')
 
 pept_seqs = []
 with open('benchmark/PANDORA_benchmark_dataset.tsv', 'r') as peptsfile:
@@ -113,7 +116,7 @@ def na_model(k, pept_seq, best_rmsds):
     pept = pept_seq[1]
     allele = pept_seq[2]
     length = len(pept)
-    M_chain = data_prep.get_seqs('./data/PDBs/%s_MP.pdb' %target_id)['M']
+    M_chain = utils.get_seqs('./data/PDBs/pMHCI/%s_MP.pdb' %target_id)['M']
 
     if length < 8 or length > 12:
         print('###')
@@ -281,7 +284,7 @@ def na_model(k, pept_seq, best_rmsds):
     #   CHANGING WORKING DIRECTORY
     ###################################
 
-    sequences, empty_seqs = data_prep.get_pdb_seq([template_ID])
+    sequences, empty_seqs = utils.get_pdb_seq([template_ID])
 
     outdir = ('outputs/%s/%s_%s' %(outdir_name, template_ID.lower(), target_id))
     try:
@@ -317,7 +320,7 @@ def na_model(k, pept_seq, best_rmsds):
         #print(line)
         if line.startswith('>') and i == 0:
             final_alifile.write('>P1;' + line.split(' ')[0].strip('>') + '\n')
-            final_alifile.write('structure:../../../data/PDBs/%s_MP.pdb:%s:M:%s:P::::\n' %(template_ID, str(sequences[0]['M_st_ID']), str(len(ali_template_pept))))
+            final_alifile.write('structure:../../../data/PDBs/pMHCI/%s_MP.pdb:%s:M:%s:P::::\n' %(template_ID, str(sequences[0]['M_st_ID']), str(len(ali_template_pept))))
             template_ini_flag = True
             i += 1
         elif line.startswith('>') and i == 1:
@@ -542,7 +545,7 @@ def na_model(k, pept_seq, best_rmsds):
         #Calculating RMSD with target real structure
 
         #os.system('python ../../../tools/make_file_lists_for_rmsd.py')
-        os.system('cp ../../../data/PDBs/%s_MP.pdb ./' %target_id)
+        os.system('cp ../../../data/PDBs/pMHCI/%s_MP.pdb ./' %target_id)
 
         os.popen('pdb_reres -1 %s_MP.pdb > reres_%s.pdb' %(target_id, target_id)).read()
 

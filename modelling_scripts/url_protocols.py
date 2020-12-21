@@ -15,6 +15,10 @@ def download_unzip_imgt_structures(del_inn_files = True, del_kabat_files = True)
     os.system('gunzip IMGT3DFlatFiles.tgz')
     os.system('tar -xvf IMGT3DFlatFiles.tar')
     
+    try:
+        os.system('rm IMGT3DFlatFiles.tgz')
+    except:
+        pass
     os.system('rm IMGT3DFlatFiles.tar')
     # Removing non-PDB files
     if del_inn_files:

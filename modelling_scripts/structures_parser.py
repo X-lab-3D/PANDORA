@@ -126,7 +126,7 @@ def select_alleles_set_MHCI(chain_alleles_percs):
     return selected_alleles
         
 
-def parse_pMHCI_pdbs(ids_list):
+def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
     
     ### Preparation
     
@@ -368,7 +368,7 @@ def parse_pMHCI_pdbs(ids_list):
             pass
 
     ### ADD CORRECTION FOR SEP, F2F, etc.
-    os.system('python ./tools/change_sep_in_ser.py %s' %outdir)
+    os.system('python ./tools/change_sep_in_ser.py %s/' %outdir)
     print('Removing uncommon residue files')
     uncommon_pdbs = durp.move_uncommon_pdbf(outdir + '/', unused_pdbs_dir + '/non_canonical_res')
     for u_pdb in uncommon_pdbs:
@@ -389,7 +389,7 @@ def parse_pMHCI_pdbs(ids_list):
     bad_IDs['errors'] = {'#1': err_1, '#2': err_2, '#3': err_3,
                          '#4': err_4, '#5': err_5, '#6': err_6, '#7': err_7}
     
-    IDd = open("data/csv_pkl_files/test_new_parsing.pkl", "wb")
+    IDd = open("data/csv_pkl_files/%s" %out_pkl, "wb")
     pickle.dump(IDs_dict, IDd)
     pickle.dump(bad_IDs, IDd)
 
@@ -428,36 +428,52 @@ def get_chainid_alleles_MHCII(pdbf):
         elif flag == True:
             chains[chainID].append(row)
     
-    ### Extracting MHC I Alpha chains
-    mhc_a = {}  # MHC I Alpha
+    ### Extracting MHC II Alpha and Beta chains
+    mhc_a = {}  # MHC II Alpha
+    mhc_b = {}  # MHC II Beta
     for chain in chains:
         try:
-            if chains[chain][1][3] == 'I-ALPHA':
+            if chains[chain][1][3] == 'II-ALPHA':
                 mhc_a[chain] = chains[chain]
+            elif chains[chain][1][3] == 'II-BETA':# or chains[chain][1][3] == 'II-BETA':
+                mhc_b[chain] = chains[chain]
         except:
             pass
     
     ### Extracting alleles info
     mhc_a_alleles = {}
+    mhc_b_alleles = {}
     for chain in mhc_a:
-        G_dom_alleles = {'G-ALPHA1': [], 'G-ALPHA2': []}
         key = False
         for row in mhc_a[chain]:
             if row[0] == 'G-DOMAIN':
                 try:
-                    if row[3] == 'description' and row[4] == 'G-ALPHA1':
-                        key = 'G-ALPHA1'
-                    elif row[3] == 'description' and row[4] == 'G-ALPHA2':
-                        key = 'G-ALPHA2'
+                    if row[3] == 'description' and row[4] == 'G-ALPHA':
+                        key = 'G-ALPHA'
                     elif key:
                         if row[2] == 'gene' and row[3] == 'and' and row[4] == 'allele':
-                            G_dom_alleles[key] += row[5:]
+                            mhc_a_alleles[key] += row[5:]
                         else:
                             key = False
                 except IndexError:
                     pass
-        mhc_a_alleles[chain] = deepcopy(G_dom_alleles)
-    
+
+    for chain in mhc_b:
+        key = False
+        for row in mhc_b[chain]:
+            if row[0] == 'G-DOMAIN':
+                try:
+                    if row[3] == 'description' and row[4] == 'G-BETA':
+                        key = 'G-ALPHA'
+                    elif key:
+                        if row[2] == 'gene' and row[3] == 'and' and row[4] == 'allele':
+                            mhc_b_alleles[key] += row[5:]
+                        else:
+                            key = False
+                except IndexError:
+                    pass
+
+    '''
     mhc_a_alleles_percs = {}
     for chain in mhc_a_alleles:
         mhc_a_alleles_percs[chain] = {}
@@ -468,11 +484,45 @@ def get_chainid_alleles_MHCII(pdbf):
                 allele = mhc_a_alleles[chain][key][2+(4*block)]
                 perc = float(mhc_a_alleles[chain][key][3+(4*block)].replace('(', '').replace('%)', '').replace(',',''))
                 mhc_a_alleles_percs[chain][key][allele] = perc
-    
-    return mhc_a_alleles_percs
+    '''
+    return {'Aplha': mhc_a_alleles, 'Beta': mhc_b_alleles}
 
-def parse_pMHCII_pdbs():
-    pass
+def parse_pMHCII_pdbs(ids_list):
+    
+    ### Preparation
+    
+    # Variables
+    IDs = ids_list
+    cwd = os.getcwd()
+    indir = 'data/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
+    outdir = 'data/PDBs/pMHCII'
+    unused_pdbs_dir = 'data/PDBs/unused_templates'
+    
+    bad_IDs = {}
+    err_1 = 0
+    
+    IDs_dict = {}
+    for ID in IDs:
+        ID = ID.upper()
+        ID = ID.rstrip()
+        
+        try:
+            with gzip.open('%s/IMGT-%s.pdb.gz' %(indir, ID), 'rb') as f_in:
+                with open('%s/%s.pdb' %(outdir, ID), 'wb') as f_out:
+                    shutil.copyfileobj(f_in, f_out)
+        except FileNotFoundError:
+            bad_IDs[ID] = '#1 FileNotFound'
+            print('ERROR TYPE #1: File not found. %s added to Bad_IDs' %ID)
+            print('##################################')
+            err_1 += 1
+            os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
+            continue
+        
+        original_filepath = '%s/%s.pdb' %(outdir, ID)
+        
+        IDs_dict[ID] = get_chainid_alleles_MHCII(ID)
+    
+    return IDs_dict, bad_IDs
 
 def parse_TCRpMHCI_pdbs():
     pass
