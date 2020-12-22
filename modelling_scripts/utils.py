@@ -217,6 +217,7 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
         selected_chains_filepath = '%s/data/PDBs/%s_AC.pdb'%(cwd, ID)
         a_renamed_filepath = '%s/data/PDBs/%s_MC.pdb'%(cwd, ID)
         new_filepath = '%s/data/PDBs/%s_MP.pdb'%(cwd, ID)
+        persian_filepath = '%s/data/PDBs/%s_persian.pdb'%(cwd, ID)
 
 
         #print('Opening %s' %ID)
@@ -328,6 +329,7 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
             count_dict['allele'] = entry[1]
             count_dict['pept_seq'] = seqs[pID]
             IDs_dict[ID] = count_dict
+            '''
             os.system('pdb_selchain -%s,%s %s > %s' %(aID, pID, filepath, selected_chains_filepath))
             if pID == 'M':
                 os.system('pdb_rplchain -%s:P %s > %s' %(pID, selected_chains_filepath, a_renamed_filepath))
@@ -335,6 +337,16 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
             else:
                 os.system('pdb_rplchain -%s:M %s > %s' %(aID, selected_chains_filepath, a_renamed_filepath))
                 os.system('pdb_rplchain -%s:P %s > %s' %(pID, a_renamed_filepath, new_filepath))
+            '''
+            os.system('pdb_rplchain -%s:پ %s > %s' %(pID, filepath, a_renamed_filepath))
+            os.system('pdb_rplchain -%s:م %s > %s' %(aID, a_renamed_filepath, selected_chains_filepath))
+            
+            os.system('pdb_selchain -%s,%s %s > %s' %(aID, pID, selected_chains_filepath, persian_filepath))
+            
+            os.system('pdb_rplchain -پ:P %s > %s' %(pID, persian_filepath, a_renamed_filepath))
+            os.system('pdb_rplchain -م:M %s > %s' %(aID, a_renamed_filepath, new_filepath))
+            
+            
         try:
             subprocess.check_call(['rm', 'data/PDBs/%s.pdb' %ID])
         except:
@@ -345,6 +357,10 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
             pass
         try:
             subprocess.check_call(['rm', 'data/PDBs/%s_MC.pdb' %ID])
+        except:
+            pass
+        try:
+            subprocess.check_call(['rm', 'data/PDBs/%s_persian.pdb' %ID])
         except:
             pass
 
@@ -389,12 +405,12 @@ def imgt_retrieve_clean(ids_filename, id_clmn, allele_clmn, delimiter, empty_row
     remove_error_templates()
     return IDs_dict, bad_IDs
 
-def remove_error_templates():
+def remove_error_templates(pklfile):
     try:
-        os.system('mkdir data/PDBs//unused_templates')
+        os.system('mkdir data/PDBs/unused_templates')
     except:
         pass
-    with open('data/csv_pkl_files/IDs_ChainsCounts_dict.pkl', 'rb') as inpkl:
+    with open('data/csv_pkl_files/%s' %pklfile, 'rb') as inpkl:
         IDD = pickle.load(inpkl)
         bad_IDs = pickle.load(inpkl)
         inpkl.close()
@@ -409,7 +425,7 @@ def remove_error_templates():
                 except:
                     pass
         infile.close()
-    with open("data/csv_pkl_files/IDs_ChainsCounts_dict.pkl", "wb") as outpkl:
+    with open("data/csv_pkl_files/%s" %pklfile, "wb") as outpkl:
         pickle.dump(IDD, outpkl)
         pickle.dump(bad_IDs, outpkl)
         outpkl.close()

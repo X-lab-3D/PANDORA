@@ -22,8 +22,8 @@ from modelling_scripts import utils
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
-#IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
-#IDs_dict, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
+IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
+IDs_dict, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
 
 #outdir_name = sys.argv[1]
 

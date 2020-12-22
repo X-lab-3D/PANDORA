@@ -179,6 +179,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
         header_filepath = '%s/%s_header.pdb'%(outdir, ID)
         onlyM_filepath = '%s/%s_M.pdb'%(outdir, ID)
         onlyP_filepath = '%s/%s_P.pdb'%(outdir, ID)
+        persian_filepath = '%s/%s_persian.pdb'%(outdir, ID)
 
         print('Parsing %s' %ID)
         aID = False
@@ -299,13 +300,22 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
         count_dict['allele'] = alleles
         count_dict['pept_seq'] = seqs[pID]
         IDs_dict[ID] = count_dict
-        os.system('pdb_selchain -%s,%s %s > %s' %(aID, pID, original_filepath, selected_chains_filepath))
-        if pID == 'M':
-            os.system('pdb_rplchain -%s:P %s > %s' %(pID, selected_chains_filepath, a_renamed_filepath))
-            os.system('pdb_rplchain -%s:M %s > %s' %(aID, a_renamed_filepath, new_filepath))
-        else:
-            os.system('pdb_rplchain -%s:M %s > %s' %(aID, selected_chains_filepath, a_renamed_filepath))
-            os.system('pdb_rplchain -%s:P %s > %s' %(pID, a_renamed_filepath, new_filepath))
+        '''
+            os.system('pdb_selchain -%s,%s %s > %s' %(aID, pID, original_filepath, selected_chains_filepath))
+            if pID == 'M':
+                os.system('pdb_rplchain -%s:P %s > %s' %(pID, selected_chains_filepath, a_renamed_filepath))
+                os.system('pdb_rplchain -%s:M %s > %s' %(aID, a_renamed_filepath, new_filepath))
+            else:
+                os.system('pdb_rplchain -%s:M %s > %s' %(aID, selected_chains_filepath, a_renamed_filepath))
+                os.system('pdb_rplchain -%s:P %s > %s' %(pID, a_renamed_filepath, new_filepath))
+        '''
+        os.system('pdb_rplchain -%s:پ %s > %s' %(pID, original_filepath, a_renamed_filepath))
+        os.system('pdb_rplchain -%s:م %s > %s' %(aID, a_renamed_filepath, selected_chains_filepath))
+        
+        os.system('pdb_selchain -م,پ %s > %s' %(selected_chains_filepath, persian_filepath))
+        
+        os.system('pdb_rplchain -پ:P %s > %s' %(persian_filepath, a_renamed_filepath))
+        os.system('pdb_rplchain -م:M %s > %s' %(a_renamed_filepath, new_filepath))
             
         #IF chain P comes before chain M
         if list(seqs.keys()).index(pID) < list(seqs.keys()).index(aID):
@@ -366,6 +376,10 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
             os.system('rm %s' %a_renamed_filepath)
         except:
             pass
+        try:
+            os.system('rm %s' %persian_filepath)
+        except:
+            pass
 
     ### ADD CORRECTION FOR SEP, F2F, etc.
     os.system('python ./tools/change_sep_in_ser.py %s/' %outdir)
@@ -389,18 +403,19 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
     bad_IDs['errors'] = {'#1': err_1, '#2': err_2, '#3': err_3,
                          '#4': err_4, '#5': err_5, '#6': err_6, '#7': err_7}
     
-    IDd = open("data/csv_pkl_files/%s" %out_pkl, "wb")
-    pickle.dump(IDs_dict, IDd)
-    pickle.dump(bad_IDs, IDd)
-
-    IDd.close()
+    if out_pkl:
+        IDd = open("data/csv_pkl_files/%s" %out_pkl, "wb")
+        pickle.dump(IDs_dict, IDd)
+        pickle.dump(bad_IDs, IDd)
+        IDd.close()
     
     print('BAD IDs:')
     print(bad_IDs)
     
     #TODO: clean dist_files folder
     
-    #remove_error_templates()
+    if out_pkl:
+        remove_error_templates(out_pkl)
     
     return IDs_dict, bad_IDs
 

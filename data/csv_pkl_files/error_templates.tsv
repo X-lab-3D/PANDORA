@@ -18,3 +18,4 @@ ID	ERROR_ID	ERROR	ACTION
 2GTW	#10	FMT molecule in the binding pocket	Removed from dataset
 1QO3	#10	EDO molecule in the binding pocket	Removed from dataset
 5FA4	#10	GOL molecule in the binding pocket	Removed from dataset
+6NCA	#3	Multiple lowercase and numbers in chain IDs	Removed from dataset
