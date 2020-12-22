@@ -19,11 +19,12 @@ from multiprocessing import Manager
 from modelling_scripts import structures_parser
 from modelling_scripts import url_protocols
 from modelling_scripts import utils
+from modelling_scripts.get_anchors_pMHC1 import get_anchors
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
-#IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
-#IDs_dict, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
+IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
+IDs_dict, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
 
 #outdir_name = sys.argv[1]
 
@@ -86,6 +87,7 @@ print(pepts_start)
 print(pepts_end)
 print('######################################')
 
+#TODO: remove this dictionary
 anch_dict = { 8: (1, 7), 9 : (1, 8), 10 : (1, 9),   #Python numbering 0-X
               11 : (1, 10), 12 : (1, 11)}
 
@@ -109,14 +111,18 @@ def na_model(k, pept_seq, best_rmsds):
     t1 = time.time()
     #for k, pept_seq in zip(range(pepts_start, pepts_end), pept_seqs[pepts_start:pepts_end]):
     #for k, pept_seq in enumerate(pept_seqs[575:576]):
-    t1 = time.time()
 
     query = 'query_' + str(k + 1)
     target_id = pept_seq[0]
     pept = pept_seq[1]
     allele = pept_seq[2]
     length = len(pept)
-    M_chain = utils.get_seqs('./data/PDBs/pMHCI/%s_MP.pdb' %target_id)['M']
+    try:
+        M_chain = utils.get_seqs('./data/PDBs/pMHCI/%s_MP.pdb' %target_id)['M']
+    except FileNotFoundError:
+        print('Error in retrieving M_chain, could not find PDB')
+        print('CWD: %s' %os.getcwd())
+        return (query, pept, allele, "NA", "NA", "NA", "Invalid Peptide Length")
 
     if length < 8 or length > 12:
         print('###')
@@ -153,6 +159,7 @@ def na_model(k, pept_seq, best_rmsds):
     max_pos = -1000
     pos_list = []
 
+    #TODO: Remove this anchor definement
     anch_1, anch_2 = anch_dict[length]
     #if any("abc" in s for s in some_list):
     #homolog_allele = '--NONE--'
@@ -294,6 +301,24 @@ def na_model(k, pept_seq, best_rmsds):
         return None
     os.chdir(outdir)
 
+    #Obtaining template anchor positions
+
+    try:
+        anch_1, anch_2 = get_anchors('../../../data/PDBs/pMHCI/%s_MP.pdb' %target_id, rm_outfile = True)
+        anch_1 -= 1
+        anch_2 -= 1
+    except:
+        os.chdir('../../../')
+        return (query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
+
+    try:
+        temp_anch_1, temp_anch_2 = get_anchors('../../../data/PDBs/pMHCI/%s_MP.pdb' %template_ID, rm_outfile = True)
+        temp_anch_1 -= 1
+        temp_anch_2 -= 1
+    except:
+        os.chdir('../../../')
+        return (query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
+
     #Preparing template and target sequences for the .ali file, launching Muscle
 
     template_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=template_ID, name = ID)
@@ -391,22 +416,22 @@ def na_model(k, pept_seq, best_rmsds):
     anch_1_same = False
     anch_2_same = False
 
-    if template_pept[anch_1] == pept[anch_1]:
+    if template_pept[temp_anch_1] == pept[anch_1]:
         anch_1_same = True
-    if len(template_pept) >= length:
-        if template_pept[anch_2] == pept[anch_2]:
-            anch_2_same = True
+    #if len(template_pept) >= length:
+    if template_pept[temp_anch_2] == pept[anch_2]:
+        anch_2_same = True
     #else:
     #    if template_pept[-1] == pept[anch_2]:
     #        anch_2_same = True
-
+    '''
     if (anch_2 + 1) == len(template_pept):
         pass
     elif (anch_2 + 1) > len(template_pept):
         real_anchor_2 = len(template_pept)  #????
     elif (anch_2 + 1) < len(template_pept):
         real_anchor_2 = len(template_pept)
-
+    '''
     if pept[anch_1] == 'G':
         first_gly = True
     else:
@@ -421,44 +446,44 @@ def na_model(k, pept_seq, best_rmsds):
 
     with open( 'all_contacts_%s.list' %template_ID, 'r') as contacts:                             # Template contacts
         with open('contacts_%s.list' %template_ID, 'w') as output:
-            if real_anchor_2:                                                                     ### If the target peptide is longer than the templtate peptide #TODO: This can be removed?
-                for line in contacts:
-                    #print(line[30:33])
-                    p_aa_id = line.split("\t")[7]                                                 ### position id of the template peptide residue
-                    p_atom = line.split("\t")[8]                                                  ### atom name of the template peptide residue
-                    #m_aa_id = (line.split("\t")[2]).split(' ')[0]
-                    if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
-                        if int(p_aa_id) == (anch_1+1):
-                            output.write(line)
-                    else:
-                        if int(p_aa_id) == (anch_1+1):
-                            if first_gly:
-                                if 'CA' in p_atom:
-                                    output.write(line)
-                            else:
-                                if 'CA' in p_atom or 'CB' in p_atom:
-                                    output.write(line)
-                    '''
-                    else:
-                        if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
-                            output.write(line)
-                    '''
-                    if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
-                        if int(p_aa_id) == real_anchor_2:
-                            output.write(line[:30] + str(anch_2+1) + line[34:])
-                    else:
-                        if int(p_aa_id) == (anch_2+1):
-                            if last_gly:
-                                if 'CA' in p_atom:
-                                    output.write(line[:30] + str(anch_2+1) + line[34:])
-                            else:
-                                if 'CA' in p_atom or 'CB' in p_atom:
-                                    output.write(line[:30] + str(anch_2+1) + line[34:])
-                    '''
-                    else:
-                        if int(p_aa_id) == real_anchor_2 and ('CA' in p_atom or 'CB' in p_atom):
-                            output.write(line[:30] + str(anch_2+1) + line[34:])
-                    '''
+            #if real_anchor_2:                                                                     ### If the target peptide is longer than the templtate peptide #TODO: This can be removed?
+            for line in contacts:
+                #print(line[30:33])
+                p_aa_id = line.split("\t")[7]                                                 ### position id of the template peptide residue
+                p_atom = line.split("\t")[8]                                                  ### atom name of the template peptide residue
+                #m_aa_id = (line.split("\t")[2]).split(' ')[0]
+                if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
+                    if int(p_aa_id) == (temp_anch_1+1):
+                        output.write(line[:30] + str(anch_1+1) + line[34:])
+                else:
+                    if int(p_aa_id) == (temp_anch_1+1):
+                        if first_gly:
+                            if 'CA' in p_atom:
+                                output.write(line[:30] + str(anch_1+1) + line[34:])
+                        else:
+                            if 'CA' in p_atom or 'CB' in p_atom:
+                                output.write(line[:30] + str(anch_1+1) + line[34:])
+                '''
+                else:
+                    if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
+                        output.write(line)
+                '''
+                if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
+                    if int(p_aa_id) == (temp_anch_2+1):
+                        output.write(line[:30] + str(anch_2+1) + line[34:])
+                else:
+                    if int(p_aa_id) == (temp_anch_2+1):
+                        if last_gly:
+                            if 'CA' in p_atom:
+                                output.write(line[:30] + str(anch_2+1) + line[34:])
+                        else:
+                            if 'CA' in p_atom or 'CB' in p_atom:
+                                output.write(line[:30] + str(anch_2+1) + line[34:])
+
+                #else:
+                #    if int(p_aa_id) == real_anchor_2 and ('CA' in p_atom or 'CB' in p_atom):
+                #        output.write(line[:30] + str(anch_2+1) + line[34:])
+            '''
             else:
                 for line in contacts:
                     #print(line.split("\t"))
@@ -476,11 +501,11 @@ def na_model(k, pept_seq, best_rmsds):
                             else:
                                 if 'CA' in p_atom or 'CB' in p_atom:
                                     output.write(line)
-                    '''
-                    else:
-                        if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
-                            output.write(line)
-                    '''
+
+                    #else:
+                    #    if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
+                    #        output.write(line)
+
                     if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
                         if int(p_aa_id) == real_anchor_2:
                             output.write(line[:30] + str(anch_2+1) + line[34:])
@@ -492,6 +517,7 @@ def na_model(k, pept_seq, best_rmsds):
                             else:
                                 if 'CA' in p_atom or 'CB' in p_atom:
                                     output.write(line)
+            '''
 
     if remove_temp_outputs:
         os.system('rm all_contacts_%s.list' %template_ID)
