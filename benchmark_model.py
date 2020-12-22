@@ -22,8 +22,8 @@ from modelling_scripts import utils
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
-IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
-IDs_dict, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
+#IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
+#IDs_dict, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
 
 #outdir_name = sys.argv[1]
 
@@ -133,7 +133,7 @@ def na_model(k, pept_seq, best_rmsds):
         #if 'HLA' in IDD[key]['allele']:
         allele_list += IDD[key]['allele']
         allele_list = list(set(allele_list))
-    
+
     allele_ID = {i : [] for i in allele_list}
     for key in IDD:
         for multi_allele in IDD[key]['allele']:
@@ -232,7 +232,7 @@ def na_model(k, pept_seq, best_rmsds):
             if any(a in key for key in IDD[ID]['allele']): #or homolog_allele in IDD[ID]['allele']:                       ## Same Allele
                 putative_templates.append(ID)
     putative_templates = list(set(putative_templates))
-    
+
     for ID in putative_templates:
         score = 0
         temp_pept = IDD[ID]['pept_seq']
