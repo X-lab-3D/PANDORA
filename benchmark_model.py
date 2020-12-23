@@ -457,32 +457,32 @@ def na_model(k, pept_seq, best_rmsds):
                 p_atom = line.split("\t")[8]                                                  ### atom name of the template peptide residue
                 #m_aa_id = (line.split("\t")[2]).split(' ')[0]
                 if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
-                    if int(p_aa_id) == (temp_anch_1+1):
-                        output.write(line[:30] + str(anch_1+1) + line[34:])
+                    if int(p_aa_id) == (anch_1+1):
+                        output.write(line)
                 else:
-                    if int(p_aa_id) == (temp_anch_1+1):
+                    if int(p_aa_id) == (anch_1+1):
                         if first_gly:
                             if 'CA' in p_atom:
-                                output.write(line[:30] + str(anch_1+1) + line[34:])
+                                output.write(line)
                         else:
                             if 'CA' in p_atom or 'CB' in p_atom:
-                                output.write(line[:30] + str(anch_1+1) + line[34:])
+                                output.write(line)
                 '''
                 else:
                     if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
                         output.write(line)
                 '''
                 if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
-                    if int(p_aa_id) == (temp_anch_2+1):
-                        output.write(line[:30] + str(anch_2+1) + line[34:])
+                    if int(p_aa_id) == (anch_2+1):
+                        output.write(line)
                 else:
-                    if int(p_aa_id) == (temp_anch_2+1):
+                    if int(p_aa_id) == (anch_2+1):
                         if last_gly:
                             if 'CA' in p_atom:
-                                output.write(line[:30] + str(anch_2+1) + line[34:])
+                                output.write(line)
                         else:
                             if 'CA' in p_atom or 'CB' in p_atom:
-                                output.write(line[:30] + str(anch_2+1) + line[34:])
+                                output.write(line)
 
                 #else:
                 #    if int(p_aa_id) == real_anchor_2 and ('CA' in p_atom or 'CB' in p_atom):
