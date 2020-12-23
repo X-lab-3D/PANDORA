@@ -23,8 +23,8 @@ from modelling_scripts.get_anchors_pMHC1 import get_anchors
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
-IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
-IDs_dict, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
+#IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
+#IDs_dict, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
 
 #outdir_name = sys.argv[1]
 
@@ -122,13 +122,13 @@ def na_model(k, pept_seq, best_rmsds):
     except FileNotFoundError:
         print('Error in retrieving M_chain, could not find PDB')
         print('CWD: %s' %os.getcwd())
-        return (query, pept, allele, "NA", "NA", "NA", "Invalid Peptide Length")
+        return (target_id, pept, allele, "NA", "NA", "NA", "Invalid Peptide Length")
 
     if length < 8 or length > 12:
         print('###')
         print('Invalid Peptide Length. Exiting here.')
         print('###')
-        return (query, pept, allele, "NA", "NA", "NA", "Invalid Peptide Length")
+        return (target_id, pept, allele, "NA", "NA", "NA", "Invalid Peptide Length")
 
     IDD = copy.deepcopy(main_IDD)
     del IDD[target_id]
@@ -269,7 +269,7 @@ def na_model(k, pept_seq, best_rmsds):
     maxsl.append(len(max_list))
 
     if len(max_list) == 0:
-        return (query, pept, allele, "NA", "NA", "NA", "No positive scoring template peptides")
+        return (target_id, pept, allele, "NA", "NA", "NA", "No positive scoring template peptides")
     elif len(max_list) == 1:
         template = max_list[0]
         template_ID = template[2]
@@ -309,7 +309,7 @@ def na_model(k, pept_seq, best_rmsds):
         anch_2 -= 1
     except:
         os.chdir('../../../')
-        return (query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
+        return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
 
     try:
         temp_anch_1, temp_anch_2 = get_anchors('../../../data/PDBs/pMHCI/%s_MP.pdb' %template_ID, rm_outfile = True)
@@ -317,10 +317,10 @@ def na_model(k, pept_seq, best_rmsds):
         temp_anch_2 -= 1
     except:
         os.chdir('../../../')
-        return (query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
+        return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
 
     #Preparing template and target sequences for the .ali file, launching Muscle
-
+    
     template_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=template_ID, name = ID)
     target_seqr = SeqRecord(Seq(M_chain, IUPAC.protein), id=target_id, name = target_id)
     #target_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=target_id, name =target_id) #FAKE NAME
@@ -329,12 +329,16 @@ def na_model(k, pept_seq, best_rmsds):
     os.system('muscle -in %s.fasta -out %s.afa -quiet' %(template_ID, template_ID))
     os.system('rm %s.fasta' %template_ID)
 
+    ali_template_pept, ali_target_pept = utils.align_peptides(template_pept, temp_anch_1, temp_anch_2, pept, anch_1, anch_2)
+    '''
     ali_template_pept = copy.deepcopy(template_pept)
     ali_target_pept = copy.deepcopy(pept)
     if len(template_pept) > length:
         ali_target_pept = pept[0:5] + ('-'*(len(template_pept)-length)) + pept[5:]
     elif length > len(template_pept):
         ali_template_pept = template_pept[0:5] + ('-'*(length-len(template_pept))) + template_pept[5:]
+    '''
+    
     final_alifile_name = '%s.ali' %template_ID
     final_alifile = open(final_alifile_name, 'w')
     i = 0
@@ -412,7 +416,7 @@ def na_model(k, pept_seq, best_rmsds):
 
     #Selecting only the anchors contacts
 
-    real_anchor_2 = None
+    #real_anchor_2 = None
     anch_1_same = False
     anch_2_same = False
 
@@ -560,7 +564,7 @@ def na_model(k, pept_seq, best_rmsds):
 
     if mt < 3:
         os.chdir('../../../')
-        return (query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in the modelling')
+        return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in the modelling')
     else:
         ########################
         # BENCHMARKING #

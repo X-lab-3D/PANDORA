@@ -85,7 +85,6 @@ def get_chainid_alleles_MHCI(pdbf):
     return mhc_a_alleles_percs
                     
 def select_alleles_set_MHCI(chain_alleles_percs):
-    # test = mhc_a_alleles_percs['A']
     if xor(chain_alleles_percs['G-ALPHA1'] == {}, chain_alleles_percs['G-ALPHA2'] == {}):
         if chain_alleles_percs['G-ALPHA1'] != {}:
             non_empty = 'G-ALPHA1'
@@ -286,7 +285,13 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
         '''
         
         #print(alpha_chains[aID])
-        if any([1 for key in alpha_chains[aID] if alpha_chains[aID][key] == {}]):
+        any_alleles = []
+        for I in alpha_chains[aID]:
+            if alpha_chains[aID][I] == {}:
+                any_alleles.append(1)
+            else:
+                any_alleles.append(0)
+        if not any(any_alleles):
             bad_IDs[ID] = '#5 No_alleles'
             print('ERROR TYPE #5: No available alleles. %s added to Bad_IDs' %ID)
             print('##################################')
