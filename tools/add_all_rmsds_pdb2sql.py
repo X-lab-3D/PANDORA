@@ -46,7 +46,7 @@ def add_rmsds(fol, best_rmsds):
                         header = row[:-1]
                     else:
                         final_scores['matched_'+row[0]] = [float(row[1]), float(row[2])]#, float(row[3])]
-            os.system('python ../../../../tools/pdb_selalt.py ref.py > ref_alt.pdb)
+            os.system('python ../../../../tools/pdb_selalt.py ref.py > ref_alt.pdb')
             try:
                 with open('file.list', 'r') as inlist:
                     for line in inlist:
