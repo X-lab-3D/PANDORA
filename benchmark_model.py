@@ -24,13 +24,15 @@ from modelling_scripts.get_anchors_pMHC1 import get_anchors
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
 #IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
-#IDs_dict, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
+IDs_list = []
+with open('data/csv_pkl_files/all_MH1_IDs.tsv', 'r') as infile:
+    next(infile)
+    for line in infile:
+        IDs_list.append(line.replace('\n',''))
+IDs_dict, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
 
-#outdir_name = sys.argv[1]
 
-#raise Exception('OK.')
 start_time = time.time()
-#outdir_name = 'benchmark_prize_20200608'
 outdir_name = sys.argv[1]
 
 ###########################################
@@ -207,6 +209,13 @@ def na_model(k, pept_seq, best_rmsds):
                 allele[a] = allele[a][:6]
             else:
                 allele[a] = allele[a][:4]
+        elif allele[a].startswith('MH1-B'):        # Chicken
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:8] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:8]
+            else:
+                allele[a] = allele[a][:6]
         elif allele[a].startswith('BF2'):        # Chicken
             if any(allele[a] in key for key in list(allele_ID.keys())):
                 pass

@@ -101,7 +101,7 @@ def remove_error_templates(pklfile):
                 try:
                     del IDD[row[0]]
                     bad_IDs[row[0]] = row[1]
-                    os.system('mv data/PDBs/pMHCI/%s_MP.pdb data/unused_templates/' %row[0])
+                    os.system('mv data/PDBs/pMHCI/%s_MP.pdb data/PDBs/unused_templates/' %row[0])
                 except:
                     pass
         infile.close()

@@ -7,4 +7,4 @@
 ## python ./benchmark_model_gap_ali.py $1 $SGE_TASK_ID $3 $4 > outputs/logs/log_bm_$1_$SGE_TASK_ID.log
 
 ## Usage example without array: qsub -q all.q@narrativum.umcn.nl octarine_run_benchmark.sh <output directory> <1> <1> <n_cores>
-python ./benchmark_model.py $1 $2 $3 $4 > outputs/logs/bm_$1.log
+python ./benchmark_model.py $1 $2 $3 $4 > outputs/logs/$1.log

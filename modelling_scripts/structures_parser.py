@@ -91,7 +91,7 @@ def select_alleles_set_MHCI(chain_alleles_percs):
             empty = 'G-ALPHA2'
         elif chain_alleles_percs['G-ALPHA2'] != {}:
             non_empty = 'G-ALPHA2'
-            empty = 'G-APLHA1'
+            empty = 'G-ALPHA1'
         top_perc = max(list(chain_alleles_percs[non_empty].values()))
         to_delete = []
         for allele in chain_alleles_percs[non_empty]:
@@ -101,7 +101,9 @@ def select_alleles_set_MHCI(chain_alleles_percs):
         for allele in to_delete:
             chain_alleles_percs[non_empty].pop(allele)
         chain_alleles_percs.pop(empty)
-        
+    
+    elif chain_alleles_percs['G-ALPHA1'] == {} and chain_alleles_percs['G-ALPHA2'] == {}:
+        return None
     else:
         for i, domain in enumerate(chain_alleles_percs):
             other_domain = list(chain_alleles_percs.keys())[not i]
@@ -285,12 +287,13 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
         '''
         
         #print(alpha_chains[aID])
+        '''
         any_alleles = []
         for I in alpha_chains[aID]:
             if alpha_chains[aID][I] == {}:
-                any_alleles.append(1)
-            else:
                 any_alleles.append(0)
+            else:
+                any_alleles.append(1)
         if not any(any_alleles):
             bad_IDs[ID] = '#5 No_alleles'
             print('ERROR TYPE #5: No available alleles. %s added to Bad_IDs' %ID)
@@ -300,6 +303,18 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
             continue
         else:
             alleles = select_alleles_set_MHCI(alpha_chains[aID])
+            #if alleles == None:
+        '''
+        alleles = select_alleles_set_MHCI(alpha_chains[aID])
+        if alleles == None:
+            bad_IDs[ID] = '#5 No_alleles'
+            print('ERROR TYPE #5: No available alleles. %s added to Bad_IDs' %ID)
+            print('##################################')
+            err_5 += 1
+            os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
+            continue
+        else:
+            pass
         
         
         count_dict['allele'] = alleles
