@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 
+### This file must be runned from the output directory
+### you want to retrieve the comparison from.
+### Usage: python ../../../benchmark/compare.py <no_prize/outdir/> <0 or 1>
 
 #%%
 import os

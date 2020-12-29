@@ -15,6 +15,7 @@ from random import choice
 import csv
 import sys
 from joblib import Parallel, delayed
+from copy import deepcopy
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
@@ -35,13 +36,16 @@ bad_IDs = pickle.load(IDD_file)
 IDD_file.close()
 
 ### Organizing Allele IDs in a dictionary ###
-allele_ID = {}
+allele_list = []
 for key in IDD:
     #if 'HLA' in IDD[key]['allele']:
-    try:
-        allele_ID[IDD[key]['allele']].append(key)
-    except KeyError:
-        allele_ID[IDD[key]['allele']] = [key]
+    allele_list += IDD[key]['allele']
+    allele_list = list(set(allele_list))
+
+allele_ID = {i : [] for i in allele_list}
+for key in IDD:
+    for multi_allele in IDD[key]['allele']:
+        allele_ID[multi_allele].append(key)
 
 ###########################################
 ###  Setting variables
@@ -203,29 +207,30 @@ def na_model(k, pept_seq):
         else:
             allele = allele[:5]
 
+    putative_templates = []
     for ID in IDD:
         if allele in IDD[ID]['allele'] or homolog_allele in IDD[ID]['allele']:                       ## Same Allele
-            score = 0
-            temp_pept = IDD[ID]['pept_seq']
-            min_len = min([length, len(temp_pept)])
-            #score -= (abs(length - len(temp_pept)) * 20)      ## Penalty for gaps
-            score -= int(2.4 ** (2 + abs(length - len(temp_pept))))
-            for (aa, bb) in zip(pept[:min_len], temp_pept[:min_len]):
-                try:
-                    score += MatrixInfo.pam30[aa, bb]
-                except KeyError:
-                    try:
-                        score += MatrixInfo.pam30[bb, aa]
-                    except KeyError:
-                        #print('Broken peptide in IDD. Passing over.')
-                        score = -50
-                        pass
+            putative_templates.append(ID)
+    putative_templates = list(set(putative_templates))
 
-            if score > max_pos:
-                max_pos = score
-            pos_list.append((score, temp_pept, ID))
-        else:
-            pass
+    for ID in putative_templates:
+        score = 0
+        temp_pept = IDD[ID]['pept_seq']
+        min_len = min([length, len(temp_pept)])
+        score -= ((abs(length - len(temp_pept)) ** 2.4))
+        for (aa, bb) in zip(pept[:min_len], temp_pept[:min_len]):
+            try:
+                score += MatrixInfo.pam30[aa, bb]
+            except KeyError:
+                try:
+                    score += MatrixInfo.pam30[bb, aa]
+                except KeyError:
+                    score = -50
+                    pass
+
+        if score > max_pos:
+            max_pos = score
+        pos_list.append((score, temp_pept, ID))
 
     max_list = []
     for pos in pos_list:
@@ -276,8 +281,8 @@ def na_model(k, pept_seq):
     os.system('muscle -in %s.fasta -out %s.afa -quiet' %(template_ID, template_ID))
     os.system('rm %s.fasta' %template_ID)
 
-    ali_template_pept = copy.deepcopy(template_pept)
-    ali_target_pept = copy.deepcopy(pept)
+    ali_template_pept = deepcopy(template_pept)
+    ali_target_pept = deepcopy(pept)
     if len(template_pept) > length:
         ali_target_pept = pept[0:5] + ('-'*(len(template_pept)-length)) + pept[5:]
     elif length > len(template_pept):
@@ -507,7 +512,7 @@ def na_model(k, pept_seq):
 
     if mt < 3:
         os.chdir('../../../')
-        return (query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in the modelling')
+        return (query, pept, allele, template_ID, template_pept, (';').join(IDD[template_ID]['allele']), 'Something gone wrong in the modelling')
 
     os.chdir('../../../')
     return None

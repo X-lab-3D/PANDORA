@@ -4,17 +4,11 @@ ID	ERROR_ID	ERROR	ACTION
 3FT2	#7	CIR in Chain P #3	Removed from dataset
 6Q3K	#8	ALA 1A and GLY 1 in Chain M	ALA 1A manually removed
 3D39	#7	PFF in Chain P #5	Removed from dataset
-5V5M	#9	anch_1 is P3 instead of P2	Removed from dataset
-5TRZ	#9	anch_1 is P1 instead of P2	Removed from dataset
-1S7R	#9	anch_1 is P1 instead of P2	Removed from dataset
-1DUY	#9	anch_1 is P1 instead of P2	Removed from dataset
-6D78	#9	anch_1 is P1 instead of P2	Removed from dataset
-3GIV	#9	anch_2 is P9 instead of P10	Removed from dataset
-4MJ5	#9	anch_1 is P1 instead of P2	Removed from dataset
-5EOT	#9	anch_2 is P9 instead of P11	Removed from dataset
-5DDH	#9	anch_2 is P11 instead of P12	Removed from dataset
 1XR8	#10	GOL molecule in the binding pocket	Removed from dataset
 3UPR	#10	1KX molecule in the binding pocket	Removed from dataset
 2GTW	#10	FMT molecule in the binding pocket	Removed from dataset
 1QO3	#10	EDO molecule in the binding pocket	Removed from dataset
 5FA4	#10	GOL molecule in the binding pocket	Removed from dataset
+6NCA	#3	Multiple lowercase and numbers in chain IDs	Removed from dataset
+5IUE	#11	Only structure for HLA-F*0101	Removed from dataset
+4Z78	#11	Different structures in the pdb	Removed from dataset

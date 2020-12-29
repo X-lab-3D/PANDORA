@@ -2,7 +2,7 @@
 from Bio.PDB import PDBParser
 import os
 
-def del_uncommon_pdbf(indir):
+def move_uncommon_pdbf(indir, outdir, delete_files = False):
     res_list = ['ALA', 'ILE', 'LEU', 'VAL', 'PHE', 'GLY', 'ARG', 'LYS', 'HIS', 'ASN',
                 'GLN', 'ASP', 'GLU', 'SER', 'THR', 'TYR', 'MET', 'CYS', 'TRP', 'PRO']
     
@@ -26,6 +26,9 @@ def del_uncommon_pdbf(indir):
             if flag:
                 break
         if flag:
-            os.system('rm %s%s' %(indir, pdbf))
+            if delete_files:
+                os.system('rm %s/%s' %(indir, pdbf))
+            else:
+                os.system('mv %s/%s %s' %(indir, pdbf, outdir))
     
     return list(set(uncommon_pdbs))

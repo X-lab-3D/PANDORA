@@ -1,8 +1,6 @@
-
 #!/usr/bin/python
 ###    ###
 import copy
-from modelling_scripts import data_prep
 import pickle
 from Bio import SeqIO
 #import subprocess
@@ -18,43 +16,41 @@ import sys
 from joblib import Parallel, delayed
 from multiprocessing import Manager
 
+from modelling_scripts import structures_parser
+from modelling_scripts import url_protocols
+from modelling_scripts import utils
+from modelling_scripts.get_anchors_pMHC1 import get_anchors
+
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
-##IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/final_mhc1_3d_structure_data_with_pdb_ids.tsv')
-#IDD, bad_IDs = data_prep.imgt_retrieve_clean('data/csv_pkl_files/mhcI_structures_IEDB.csv', 42, 43, ';', empty_rows=[0,1])
+#IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
+IDs_list = []
+with open('data/csv_pkl_files/all_MH1_IDs.tsv', 'r') as infile:
+    next(infile)
+    for line in infile:
+        IDs_list.append(line.replace('\n',''))
+IDs_dict, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
 
-#outdir_name = sys.argv[1]
 
-#raise Exception('OK.')
 start_time = time.time()
-#outdir_name = 'benchmark_prize_20200608'  #TODO: set prize/no_prize as argument/variable
 outdir_name = sys.argv[1]
 
 ###########################################
 ### Organizing dicts ###
 
-IDD_file = open('data/csv_pkl_files/IDs_ChainsCounts_dict.pkl', 'rb')
+IDD_file = open('data/csv_pkl_files/IDs_and_bad_IDs_dict.pkl', 'rb')
 #IDD_file = open('data/csv_pkl_files/fake_db.pkl', 'rb')
 main_IDD = pickle.load(IDD_file)
 bad_IDs = pickle.load(IDD_file)
 IDD_file.close()
 
-'''
-### Organizing Allele IDs in a dictionary ###
-allele_ID = {}
-for key in IDD:
-    #if 'HLA' in IDD[key]['allele']:
-    try:
-        allele_ID[IDD[key]['allele']].append(key)
-    except KeyError:
-        allele_ID[IDD[key]['allele']] = [key]
-'''
 ###########################################
 ###  Setting variables
 
 # tsv with: Target ID, pept seq, allele
-# pept_seqs = data_prep.get_peptides_from_csv('benchmark/cross_validation_set.tsv', 3, 4, '\t') ### This can be the input requested for the benchmark function
+# pept_seqs = structures_parser.get_peptides_from_csv('benchmark/cross_validation_set.tsv', 3, 4, '\t') ### This can be the input requested for the benchmark function
 
+os.system('python benchmark/get_cv_set.py')
 
 pept_seqs = []
 with open('benchmark/PANDORA_benchmark_dataset.tsv', 'r') as peptsfile:
@@ -66,11 +62,14 @@ with open('benchmark/PANDORA_benchmark_dataset.tsv', 'r') as peptsfile:
             target_id = row[0]
             seq = row[1]
             allele = row[2]
+            pept_seqs.append((target_id, seq, allele))
+            '''
             if 'HLA' in allele:
                 star_allele = (allele[0:5]+'*'+allele[5:])
                 pept_seqs.append((target_id, seq, star_allele))
             else:
                 pept_seqs.append((target_id, seq, allele))
+            '''
 ##
 #!!!
 ##
@@ -90,6 +89,7 @@ print(pepts_start)
 print(pepts_end)
 print('######################################')
 
+#TODO: remove this dictionary
 anch_dict = { 8: (1, 7), 9 : (1, 8), 10 : (1, 9),   #Python numbering 0-X
               11 : (1, 10), 12 : (1, 11)}
 
@@ -113,31 +113,39 @@ def na_model(k, pept_seq, best_rmsds):
     t1 = time.time()
     #for k, pept_seq in zip(range(pepts_start, pepts_end), pept_seqs[pepts_start:pepts_end]):
     #for k, pept_seq in enumerate(pept_seqs[575:576]):
-    t1 = time.time()
 
     query = 'query_' + str(k + 1)
     target_id = pept_seq[0]
     pept = pept_seq[1]
     allele = pept_seq[2]
     length = len(pept)
-    M_chain = data_prep.get_seqs('./data/PDBs/%s_MP.pdb' %target_id)['M']
+    try:
+        M_chain = utils.get_seqs('./data/PDBs/pMHCI/%s_MP.pdb' %target_id)['M']
+    except FileNotFoundError:
+        print('Error in retrieving M_chain, could not find PDB')
+        print('CWD: %s' %os.getcwd())
+        return (target_id, pept, allele, "NA", "NA", "NA", "Invalid Peptide Length")
 
     if length < 8 or length > 12:
         print('###')
         print('Invalid Peptide Length. Exiting here.')
         print('###')
-        return (query, pept, allele, "NA", "NA", "NA", "Invalid Peptide Length")
+        return (target_id, pept, allele, "NA", "NA", "NA", "Invalid Peptide Length")
 
     IDD = copy.deepcopy(main_IDD)
     del IDD[target_id]
 
     ### Organizing Allele IDs in a dictionary ###
-    allele_ID = {}
+    allele_list = []
     for key in IDD:
-        try:
-            allele_ID[IDD[key]['allele']].append(key)
-        except KeyError:
-            allele_ID[IDD[key]['allele']] = [key]
+        #if 'HLA' in IDD[key]['allele']:
+        allele_list += IDD[key]['allele']
+        allele_list = list(set(allele_list))
+
+    allele_ID = {i : [] for i in allele_list}
+    for key in IDD:
+        for multi_allele in IDD[key]['allele']:
+            allele_ID[multi_allele].append(key)
 
     ext_flag = False
     print( '## Wokring on %s, structure %s ##' %(query, target_id))
@@ -153,117 +161,114 @@ def na_model(k, pept_seq, best_rmsds):
     max_pos = -1000
     pos_list = []
 
+    #TODO: Remove this anchor definement
     anch_1, anch_2 = anch_dict[length]
+    #if any("abc" in s for s in some_list):
+    #homolog_allele = '--NONE--'
+    for a in range(len(allele)):
+        if allele[a].startswith('HLA'):      # Human
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:8] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:8]
+            elif any(allele[a][:6] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:6]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('H2'):    # Mouse
+            #homolog_allele = 'RT1'
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:4] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:4]
+            else:
+                allele[a] = allele[a][:3]
+        elif allele[a].startswith('RT1'):          # Rat
+            #homolog_allele = 'H2'
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:5] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:5]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('BoLA'):        # Bovine
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:10] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:10]
+            elif any(allele[a][:7] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:7]
+            else:
+                allele[a] = allele[a][:5]
+        elif allele[a].startswith('SLA'):        # Suine
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:9] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:9]
+            elif any(allele[a][:6] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:6]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('MH1-B'):        # Chicken
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:8] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:8]
+            else:
+                allele[a] = allele[a][:6]
+        elif allele[a].startswith('BF2'):        # Chicken
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:6] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:6]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('Mamu'):       # Monkey
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:13] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:13]
+            elif any(allele[a][:9] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:9]
+            else:
+                allele[a] = allele[a][:5]
+        elif allele[a].startswith('Eqca'):        # Horse
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:10] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:10]
+            elif any(allele[a][:7] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:7]
+            else:
+                allele[a] = allele[a][:5]
 
-    homolog_allele = '--NONE--'
-    if allele.startswith('HLA'):      # Human
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:9] in allele_ID.keys():
-            allele = allele[:9]
-        elif allele[:6] in allele_ID.keys():
-            allele = allele[:6]
-        else:
-            allele = allele[:4]
-    elif allele.startswith('H2'):    # Mouse
-        #homolog_allele = 'RT1'
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:4] in allele_ID.keys():
-            allele = allele[:4]
-        else:
-            allele = allele[:3]
-    elif allele.startswith('RT1'):          # Rat
-        homolog_allele = 'H2'
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:5] in allele_ID.keys():
-            allele = allele[:5]
-        else:
-            allele = allele[:4]
-    elif allele.startswith('BoLA'):        # Bovine
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:10] in allele_ID.keys():
-            allele = allele[:10]
-        elif allele[:7] in allele_ID.keys():
-            allele = allele[:7]
-        else:
-            allele = allele[:5]
-    elif allele.startswith('SLA'):        # Suine
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:9] in allele_ID.keys():
-            allele = allele[:9]
-        elif allele[:6] in allele_ID.keys():
-            allele = allele[:6]
-        else:
-            allele = allele[:4]
-    elif allele.startswith('BF2'):        # Chicken
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:6] in allele_ID.keys():
-            allele = allele[:6]
-        else:
-            allele = allele[:4]
-    elif allele.startswith('Mamu'):       # Monkey
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:13] in allele_ID.keys():
-            allele = allele[:13]
-        elif allele[:9] in allele_ID.keys():
-            allele = allele[:9]
-        else:
-            allele = allele[:5]
-    elif allele.startswith('Eqca'):        # Horse
-        if allele in allele_ID.keys():
-            pass
-        elif allele[:10] in allele_ID.keys():
-            allele = allele[:10]
-        elif allele[:7] in allele_ID.keys():
-            allele = allele[:7]
-        else:
-            allele = allele[:5]
-
+    putative_templates = []
     for ID in IDD:
-        if allele in IDD[ID]['allele'] or homolog_allele in IDD[ID]['allele']:                       ## Same Allele
-            score = 0
-            temp_pept = IDD[ID]['pept_seq']
-            min_len = min([length, len(temp_pept)])
-            #score -= (abs(length - len(temp_pept)) * 20)      ## Penalty for gap
-            #if length > len(temp_pept):
-            #    score -= int(20 * abs(length - len(temp_pept)))
-            #elif length < len(temp_pept):
-            #    score -= int(200 * abs(length - len(temp_pept)))
-            #else:
-            #    pass
-            score -= ((abs(length - len(temp_pept)) ** 2.4))
-            for i, (aa, bb) in enumerate(zip(pept[:min_len], temp_pept[:min_len])):
-                #if i == anch_1 and aa == bb:           # Identity prize
-                #    score += 4
-                #elif i == anch_2 and aa == bb:         # Identity prize
-                #    score += 2
+        for a in allele:
+            if any(a in key for key in IDD[ID]['allele']): #or homolog_allele in IDD[ID]['allele']:                       ## Same Allele
+                putative_templates.append(ID)
+    putative_templates = list(set(putative_templates))
+
+    for ID in putative_templates:
+        score = 0
+        temp_pept = IDD[ID]['pept_seq']
+        min_len = min([length, len(temp_pept)])
+        score -= ((abs(length - len(temp_pept)) ** 2.4)) #!!!  ## Penalty for gap
+        for i, (aa, bb) in enumerate(zip(pept[:min_len], temp_pept[:min_len])):
+            try:
+                gain = MatrixInfo.pam30[aa, bb]
+                score += gain
+            except KeyError:
                 try:
-                    gain = MatrixInfo.pam30[aa, bb]
-                    #if gain > 0:
-                    #    gain += 2                      #This is summed on the top of the identity prize abobe
+                    gain = MatrixInfo.pam30[bb, aa]
                     score += gain
                 except KeyError:
-                    try:
-                        gain = MatrixInfo.pam30[bb, aa]
-                        #if gain > 0:
-                        #    gain += 2                      #This is summed on the top of the identity prize abobe
-                        score += gain
-                    except KeyError:
-                        #print('Broken peptide in IDD. Passing over.')
-                        score = -50
-                        pass
+                    score = -50
+                    pass
 
-            if score > max_pos:
-                max_pos = score
-            pos_list.append((score, temp_pept, ID))
-        else:
-            pass
+        if score > max_pos:
+            max_pos = score
+        pos_list.append((score, temp_pept, ID))
 
     max_list = []
     for pos in pos_list:
@@ -273,7 +278,7 @@ def na_model(k, pept_seq, best_rmsds):
     maxsl.append(len(max_list))
 
     if len(max_list) == 0:
-        return (query, pept, allele, "NA", "NA", "NA", "No positive scoring template peptides")
+        return (target_id, pept, allele, "NA", "NA", "NA", "No positive scoring template peptides")
     elif len(max_list) == 1:
         template = max_list[0]
         template_ID = template[2]
@@ -295,7 +300,7 @@ def na_model(k, pept_seq, best_rmsds):
     #   CHANGING WORKING DIRECTORY
     ###################################
 
-    sequences, empty_seqs = data_prep.get_pdb_seq([template_ID])
+    sequences, empty_seqs = utils.get_pdb_seq([template_ID])
 
     outdir = ('outputs/%s/%s_%s' %(outdir_name, template_ID.lower(), target_id))
     try:
@@ -305,8 +310,26 @@ def na_model(k, pept_seq, best_rmsds):
         return None
     os.chdir(outdir)
 
-    #Preparing template and target sequences for the .ali file, launching Muscle
+    #Obtaining template anchor positions
 
+    try:
+        anch_1, anch_2 = get_anchors('../../../data/PDBs/pMHCI/%s_MP.pdb' %target_id, rm_outfile = True)
+        anch_1 -= 1
+        anch_2 -= 1
+    except:
+        os.chdir('../../../')
+        return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
+
+    try:
+        temp_anch_1, temp_anch_2 = get_anchors('../../../data/PDBs/pMHCI/%s_MP.pdb' %template_ID, rm_outfile = True)
+        temp_anch_1 -= 1
+        temp_anch_2 -= 1
+    except:
+        os.chdir('../../../')
+        return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
+
+    #Preparing template and target sequences for the .ali file, launching Muscle
+    
     template_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=template_ID, name = ID)
     target_seqr = SeqRecord(Seq(M_chain, IUPAC.protein), id=target_id, name = target_id)
     #target_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=target_id, name =target_id) #FAKE NAME
@@ -315,12 +338,16 @@ def na_model(k, pept_seq, best_rmsds):
     os.system('muscle -in %s.fasta -out %s.afa -quiet' %(template_ID, template_ID))
     os.system('rm %s.fasta' %template_ID)
 
+    ali_template_pept, ali_target_pept = utils.align_peptides(template_pept, temp_anch_1, temp_anch_2, pept, anch_1, anch_2)
+    '''
     ali_template_pept = copy.deepcopy(template_pept)
     ali_target_pept = copy.deepcopy(pept)
     if len(template_pept) > length:
         ali_target_pept = pept[0:5] + ('-'*(len(template_pept)-length)) + pept[5:]
     elif length > len(template_pept):
         ali_template_pept = template_pept[0:5] + ('-'*(length-len(template_pept))) + template_pept[5:]
+    '''
+    
     final_alifile_name = '%s.ali' %template_ID
     final_alifile = open(final_alifile_name, 'w')
     i = 0
@@ -331,7 +358,7 @@ def na_model(k, pept_seq, best_rmsds):
         #print(line)
         if line.startswith('>') and i == 0:
             final_alifile.write('>P1;' + line.split(' ')[0].strip('>') + '\n')
-            final_alifile.write('structure:../../../data/PDBs/%s_MP.pdb:%s:M:%s:P::::\n' %(template_ID, str(sequences[0]['M_st_ID']), str(len(ali_template_pept))))
+            final_alifile.write('structure:../../../data/PDBs/pMHCI/%s_MP.pdb:%s:M:%s:P::::\n' %(template_ID, str(sequences[0]['M_st_ID']), str(len(ali_template_pept))))
             template_ini_flag = True
             i += 1
         elif line.startswith('>') and i == 1:
@@ -398,26 +425,26 @@ def na_model(k, pept_seq, best_rmsds):
 
     #Selecting only the anchors contacts
 
-    real_anchor_2 = None
+    #real_anchor_2 = None
     anch_1_same = False
     anch_2_same = False
 
-    if template_pept[anch_1] == pept[anch_1]:
+    if template_pept[temp_anch_1] == pept[anch_1]:
         anch_1_same = True
-    if len(template_pept) >= length:
-        if template_pept[anch_2] == pept[anch_2]:
-            anch_2_same = True
+    #if len(template_pept) >= length:
+    if template_pept[temp_anch_2] == pept[anch_2]:
+        anch_2_same = True
     #else:
     #    if template_pept[-1] == pept[anch_2]:
     #        anch_2_same = True
-
+    '''
     if (anch_2 + 1) == len(template_pept):
         pass
     elif (anch_2 + 1) > len(template_pept):
         real_anchor_2 = len(template_pept)  #????
     elif (anch_2 + 1) < len(template_pept):
         real_anchor_2 = len(template_pept)
-
+    '''
     if pept[anch_1] == 'G':
         first_gly = True
     else:
@@ -432,44 +459,44 @@ def na_model(k, pept_seq, best_rmsds):
 
     with open( 'all_contacts_%s.list' %template_ID, 'r') as contacts:                             # Template contacts
         with open('contacts_%s.list' %template_ID, 'w') as output:
-            if real_anchor_2:                                                                     ### If the target peptide is longer than the templtate peptide #TODO: This can be removed?
-                for line in contacts:
-                    #print(line[30:33])
-                    p_aa_id = line.split("\t")[7]                                                 ### position id of the template peptide residue
-                    p_atom = line.split("\t")[8]                                                  ### atom name of the template peptide residue
-                    #m_aa_id = (line.split("\t")[2]).split(' ')[0]
-                    if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
-                        if int(p_aa_id) == (anch_1+1):
-                            output.write(line)
-                    else:
-                        if int(p_aa_id) == (anch_1+1):
-                            if first_gly:
-                                if 'CA' in p_atom:
-                                    output.write(line)
-                            else:
-                                if 'CA' in p_atom or 'CB' in p_atom:
-                                    output.write(line)
-                    '''
-                    else:
-                        if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
-                            output.write(line)
-                    '''
-                    if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
-                        if int(p_aa_id) == real_anchor_2:
-                            output.write(line[:30] + str(anch_2+1) + line[34:])
-                    else:
-                        if int(p_aa_id) == (anch_2+1):
-                            if last_gly:
-                                if 'CA' in p_atom:
-                                    output.write(line[:30] + str(anch_2+1) + line[34:])
-                            else:
-                                if 'CA' in p_atom or 'CB' in p_atom:
-                                    output.write(line[:30] + str(anch_2+1) + line[34:])
-                    '''
-                    else:
-                        if int(p_aa_id) == real_anchor_2 and ('CA' in p_atom or 'CB' in p_atom):
-                            output.write(line[:30] + str(anch_2+1) + line[34:])
-                    '''
+            #if real_anchor_2:                                                                     ### If the target peptide is longer than the templtate peptide #TODO: This can be removed?
+            for line in contacts:
+                #print(line[30:33])
+                p_aa_id = line.split("\t")[7]                                                 ### position id of the template peptide residue
+                p_atom = line.split("\t")[8]                                                  ### atom name of the template peptide residue
+                #m_aa_id = (line.split("\t")[2]).split(' ')[0]
+                if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
+                    if int(p_aa_id) == (anch_1+1):
+                        output.write(line)
+                else:
+                    if int(p_aa_id) == (anch_1+1):
+                        if first_gly:
+                            if 'CA' in p_atom:
+                                output.write(line)
+                        else:
+                            if 'CA' in p_atom or 'CB' in p_atom:
+                                output.write(line)
+                '''
+                else:
+                    if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
+                        output.write(line)
+                '''
+                if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
+                    if int(p_aa_id) == (anch_2+1):
+                        output.write(line)
+                else:
+                    if int(p_aa_id) == (anch_2+1):
+                        if last_gly:
+                            if 'CA' in p_atom:
+                                output.write(line)
+                        else:
+                            if 'CA' in p_atom or 'CB' in p_atom:
+                                output.write(line)
+
+                #else:
+                #    if int(p_aa_id) == real_anchor_2 and ('CA' in p_atom or 'CB' in p_atom):
+                #        output.write(line[:30] + str(anch_2+1) + line[34:])
+            '''
             else:
                 for line in contacts:
                     #print(line.split("\t"))
@@ -487,11 +514,11 @@ def na_model(k, pept_seq, best_rmsds):
                             else:
                                 if 'CA' in p_atom or 'CB' in p_atom:
                                     output.write(line)
-                    '''
-                    else:
-                        if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
-                            output.write(line)
-                    '''
+
+                    #else:
+                    #    if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
+                    #        output.write(line)
+
                     if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
                         if int(p_aa_id) == real_anchor_2:
                             output.write(line[:30] + str(anch_2+1) + line[34:])
@@ -503,6 +530,7 @@ def na_model(k, pept_seq, best_rmsds):
                             else:
                                 if 'CA' in p_atom or 'CB' in p_atom:
                                     output.write(line)
+            '''
 
     if remove_temp_outputs:
         os.system('rm all_contacts_%s.list' %template_ID)
@@ -545,7 +573,7 @@ def na_model(k, pept_seq, best_rmsds):
 
     if mt < 3:
         os.chdir('../../../')
-        return (query, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in the modelling')
+        return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in the modelling')
     else:
         ########################
         # BENCHMARKING #
@@ -556,7 +584,7 @@ def na_model(k, pept_seq, best_rmsds):
         #Calculating RMSD with target real structure
 
         #os.system('python ../../../tools/make_file_lists_for_rmsd.py')
-        os.system('cp ../../../data/PDBs/%s_MP.pdb ./' %target_id)
+        os.system('cp ../../../data/PDBs/pMHCI/%s_MP.pdb ./' %target_id)
 
         os.popen('pdb_reres -1 %s_MP.pdb > reres_%s.pdb' %(target_id, target_id)).read()
 
