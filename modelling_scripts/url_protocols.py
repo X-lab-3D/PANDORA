@@ -25,6 +25,7 @@ def download_unzip_imgt_structures(del_inn_files = True, del_kabat_files = True)
         os.system('rm IMGT3DFlatFiles/*.inn.gz')
     if del_kabat_files:
         os.system('rm IMGT3DFlatFiles/*.prot.gz')
+    os.chdir('../../../')
 
 def download_ids_imgt(ReceptorType, out_tsv = False):
     

@@ -522,7 +522,7 @@ def get_chainid_alleles_MHCII(pdbf):
     '''
     return {'Aplha': mhc_a_alleles, 'Beta': mhc_b_alleles}
 
-def parse_pMHCII_pdbs(ids_list):
+def parse_pMHCII_pdbs(ids_list, out_pkl = 'pMHC2_IDs_and_bad_IDs_dict.pkl'):
     
     ### Preparation
     
@@ -531,7 +531,7 @@ def parse_pMHCII_pdbs(ids_list):
     cwd = os.getcwd()
     indir = 'data/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
     outdir = 'data/PDBs/pMHCII'
-    unused_pdbs_dir = 'data/PDBs/unused_templates'
+    unused_pdbs_dir = 'data/unused_templates'
     
     bad_IDs = {}
     err_1 = 0
@@ -556,6 +556,10 @@ def parse_pMHCII_pdbs(ids_list):
         original_filepath = '%s/%s.pdb' %(outdir, ID)
         
         IDs_dict[ID] = get_chainid_alleles_MHCII(ID)
+
+    with open(out_pkl, 'rb') as outfile:
+        pickle.dump(IDs_dict, outfile)
+        pickle.dump(bad_IDs, outfile)
     
     return IDs_dict, bad_IDs
 

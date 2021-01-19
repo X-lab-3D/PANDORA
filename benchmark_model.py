@@ -23,7 +23,8 @@ from modelling_scripts.get_anchors_pMHC1 import get_anchors
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
-#IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
+url_protocols.download_unzip_imgt_structures(del_inn_files = True, del_kabat_files = True)
+IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
 IDs_list = []
 with open('data/csv_pkl_files/all_MH1_IDs.tsv', 'r') as infile:
     next(infile)
