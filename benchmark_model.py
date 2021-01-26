@@ -19,7 +19,7 @@ from multiprocessing import Manager
 from modelling_scripts import structures_parser
 from modelling_scripts import url_protocols
 from modelling_scripts import utils
-from modelling_scripts.get_anchors_pMHC1 import get_anchors
+from modelling_scripts.get_pMHC_anchors import get_anchors_pMHCI as get_anchors
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
@@ -330,7 +330,7 @@ def na_model(k, pept_seq, best_rmsds):
         return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
 
     #Preparing template and target sequences for the .ali file, launching Muscle
-    
+
     template_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=template_ID, name = ID)
     target_seqr = SeqRecord(Seq(M_chain, IUPAC.protein), id=target_id, name = target_id)
     #target_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=target_id, name =target_id) #FAKE NAME
@@ -348,7 +348,7 @@ def na_model(k, pept_seq, best_rmsds):
     elif length > len(template_pept):
         ali_template_pept = template_pept[0:5] + ('-'*(length-len(template_pept))) + template_pept[5:]
     '''
-    
+
     final_alifile_name = '%s.ali' %template_ID
     final_alifile = open(final_alifile_name, 'w')
     i = 0

@@ -16,6 +16,17 @@ from Bio.PDB import PDBParser
 from Bio.Data.SCOPData import protein_letters_3to1 as to_one_letter_code
 from modelling_scripts import del_uncommon_residues_pdbs as durp
 
+'''
+This file contains the following functions:
+    align_peptides(seq1, anch1_seq1, anch2_seq1, seq2, anch1_seq2, anch2_seq2)
+    get_peptides_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter, skip_first_line = True)
+    get_peptides_w_star_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter, skip_first_line = True)
+    remove_error_templates(pklfile)
+    get_pdb_seq(IDs)
+    get_seqs(pdbf)
+'''
+
+
 ### OPEN CSV FILE WITH PDB CODES ###
 #def pdb_reres_allchains(pdb_file)
 
