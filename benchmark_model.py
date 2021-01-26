@@ -1,25 +1,29 @@
 #!/usr/bin/python
+
 ###    ###
+
+import os
+import sys
+import time
 import copy
 import pickle
-from Bio import SeqIO
+import csv
 #import subprocess
+
+from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.Alphabet import IUPAC
-import os
-import time
 from Bio.SubsMat import MatrixInfo
+
 from random import choice
-import csv
-import sys
 from joblib import Parallel, delayed
 from multiprocessing import Manager
 
-from modelling_scripts import structures_parser
-from modelling_scripts import url_protocols
-from modelling_scripts import utils
-from modelling_scripts.get_pMHC_anchors import get_anchors_pMHCI as get_anchors
+from parsing import structures_parser
+from parsing import url_protocols
+from parsing import utils
+from parsing.get_pMHC_anchors import get_anchors_pMHCI as get_anchors
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
@@ -164,7 +168,6 @@ def na_model(k, pept_seq, best_rmsds):
 
     #TODO: Remove this anchor definement
     anch_1, anch_2 = anch_dict[length]
-    #if any("abc" in s for s in some_list):
     #homolog_allele = '--NONE--'
     for a in range(len(allele)):
         if allele[a].startswith('HLA'):      # Human
@@ -420,32 +423,19 @@ def na_model(k, pept_seq, best_rmsds):
         os.system('rm cmd_modeller_ini.py')
 
     # Calculating all Atom contacts
-    if "contact-chainID_allAtoms" not in os.listdir('../../../modelling_scripts'):
-        os.popen('g++ ../../../modelling_scripts/contact-chainID_allAtoms.cpp -o ../../../modelling_scripts/contact-chainID_allAtoms').read()
-    os.popen('../../../modelling_scripts/contact-chainID_allAtoms %s.ini %s > all_contacts_%s.list' %(target_id, cutoff, template_ID)).read()
+    if "contact-chainID_allAtoms" not in os.listdir('../../../tools'):
+        os.popen('g++ ../../../tools/contact-chainID_allAtoms.cpp -o ../../../tools/contact-chainID_allAtoms').read()
+    os.popen('../../../tools/contact-chainID_allAtoms %s.ini %s > all_contacts_%s.list' %(target_id, cutoff, template_ID)).read()
 
     #Selecting only the anchors contacts
 
-    #real_anchor_2 = None
     anch_1_same = False
     anch_2_same = False
 
     if template_pept[temp_anch_1] == pept[anch_1]:
         anch_1_same = True
-    #if len(template_pept) >= length:
     if template_pept[temp_anch_2] == pept[anch_2]:
         anch_2_same = True
-    #else:
-    #    if template_pept[-1] == pept[anch_2]:
-    #        anch_2_same = True
-    '''
-    if (anch_2 + 1) == len(template_pept):
-        pass
-    elif (anch_2 + 1) > len(template_pept):
-        real_anchor_2 = len(template_pept)  #????
-    elif (anch_2 + 1) < len(template_pept):
-        real_anchor_2 = len(template_pept)
-    '''
     if pept[anch_1] == 'G':
         first_gly = True
     else:
@@ -455,17 +445,11 @@ def na_model(k, pept_seq, best_rmsds):
     else:
         last_gly = False
     ### Writing anchors contact list ###
-
-    #TODO: check if template pept is longer than target pept it is hanlded properly
-
     with open( 'all_contacts_%s.list' %template_ID, 'r') as contacts:                             # Template contacts
-        with open('contacts_%s.list' %template_ID, 'w') as output:
-            #if real_anchor_2:                                                                     ### If the target peptide is longer than the templtate peptide #TODO: This can be removed?
+        with open('contacts_%s.list' %template_ID, 'w') as output:                                                                ### If the target peptide is longer than the templtate peptide #TODO: This can be removed?
             for line in contacts:
-                #print(line[30:33])
                 p_aa_id = line.split("\t")[7]                                                 ### position id of the template peptide residue
                 p_atom = line.split("\t")[8]                                                  ### atom name of the template peptide residue
-                #m_aa_id = (line.split("\t")[2]).split(' ')[0]
                 if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
                     if int(p_aa_id) == (anch_1+1):
                         output.write(line)
@@ -477,11 +461,6 @@ def na_model(k, pept_seq, best_rmsds):
                         else:
                             if 'CA' in p_atom or 'CB' in p_atom:
                                 output.write(line)
-                '''
-                else:
-                    if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
-                        output.write(line)
-                '''
                 if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
                     if int(p_aa_id) == (anch_2+1):
                         output.write(line)
@@ -493,45 +472,6 @@ def na_model(k, pept_seq, best_rmsds):
                         else:
                             if 'CA' in p_atom or 'CB' in p_atom:
                                 output.write(line)
-
-                #else:
-                #    if int(p_aa_id) == real_anchor_2 and ('CA' in p_atom or 'CB' in p_atom):
-                #        output.write(line[:30] + str(anch_2+1) + line[34:])
-            '''
-            else:
-                for line in contacts:
-                    #print(line.split("\t"))
-                    p_aa_id = line.split("\t")[7]
-                    p_atom = line.split("\t")[8]
-                    #m_aa_id = (line.split("\t")[2]).split(' ')[0]
-                    if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
-                        if int(p_aa_id) == (anch_1+1):
-                            output.write(line)
-                    else:
-                        if int(p_aa_id) == (anch_1+1):
-                            if first_gly:
-                                if 'CA' in p_atom:
-                                    output.write(line)
-                            else:
-                                if 'CA' in p_atom or 'CB' in p_atom:
-                                    output.write(line)
-
-                    #else:
-                    #    if int(p_aa_id) == (anch_1+1) and ('CA' in p_atom or 'CB' in p_atom):
-                    #        output.write(line)
-
-                    if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
-                        if int(p_aa_id) == real_anchor_2:
-                            output.write(line[:30] + str(anch_2+1) + line[34:])
-                    else:
-                        if int(p_aa_id) == (anch_2+1):
-                            if last_gly:
-                                if 'CA' in p_atom:
-                                    output.write(line)
-                            else:
-                                if 'CA' in p_atom or 'CB' in p_atom:
-                                    output.write(line)
-            '''
 
     if remove_temp_outputs:
         os.system('rm all_contacts_%s.list' %template_ID)
@@ -547,12 +487,6 @@ def na_model(k, pept_seq, best_rmsds):
                 myloopscript.write(line)
         MyL_temp.close()
 
-    #    with open('instructions.txt', 'w') as instr_file:
-    #        instr_file.write(template_ID + ' ' + str(anch_1) + ' ' + str(anch_2) + ' ' + str(modeller_renum))
-
-    #Finally launching Modeller. Hopefully.
-
-
     with open('cmd_modeller.py', 'w') as modscript:
         cmd_m_temp = open('../../../modelling_scripts/cmd_modeller_template.py', 'r')
         for line in cmd_m_temp:
@@ -564,6 +498,7 @@ def na_model(k, pept_seq, best_rmsds):
                 modscript.write(line)
         cmd_m_temp.close()
 
+    #Running MODELLER
     smt = time.time()
     os.popen('python3 cmd_modeller.py > modeller.log').read()
 
@@ -580,7 +515,7 @@ def na_model(k, pept_seq, best_rmsds):
         # BENCHMARKING #
 
         #extracting molpdf and DOPE scores from modeller.log
-        os.system('python ../../../modelling_scripts/get_molpdf_dope_scores.py modeller.log')
+        os.system('python ../../../parsing/get_molpdf_dope_scores.py modeller.log')
 
         #Calculating RMSD with target real structure
 
@@ -595,8 +530,6 @@ def na_model(k, pept_seq, best_rmsds):
         os.popen('bash ../../../tools/map_2_pdb.sh %s reres_%s.pdb > ref.pdb' %(f, target_id)).read()
         os.popen('python ../../../tools/pdb_fast_lzone_mhc_fitG.py ref.pdb').read()
 
-
-        #TODO: Add here Haddock protocol on structures matching
         with open('file.list', 'w') as out:
             for f in os.listdir('./'):
                 if f.startswith(target_id+'.'+filename_start) and f.endswith(filename_end):
@@ -606,12 +539,6 @@ def na_model(k, pept_seq, best_rmsds):
         os.popen('../../../tools/CA_l-rmsd-calc.csh ref file.list').read()
         os.popen('../../../tools/CA_backbone_l-rmsd-calc.csh ref file.list').read()
         os.popen('../../../tools/CA_backbone_CB_l-rmsd-calc.csh ref file.list').read()
-
-
-        #os.system('python ../../../tools/pdb_lzone_2files.py %s_MP.pdb %s.BL00010001.pdb' %(target_id, target_id))
-        #os.system('mv ref.lzone %s_MP.lzone' %target_id)
-        #os.system('../../../tools/l-rmsd-calc.csh %s_MP file.list' %target_id)
-        #os.system('unlink %s_MP.pdb' %target_id)
 
         try:
             models_dict = {}
@@ -642,19 +569,6 @@ def na_model(k, pept_seq, best_rmsds):
                         models_dict[row[0]].append(float(row[1]))
                     except:
                         pass
-            '''
-            with open('l-RMSD.dat', 'r') as rmsdfile:
-                for line in rmsdfile:
-                    row = line.split(' ')
-                    models_dict[row[0]].append(float(row[1]))
-
-
-            with open('final_scores.tsv', 'wt') as scoreout:
-                tsv_writer = csv.writer(scoreout, delimiter='\t')
-                tsv_writer.writerow(['Model', 'molpdf', 'DOPE', 'l-RMSD'])
-                for model in models_dict:
-                    tsv_writer.writerow([model, models_dict[model][0], models_dict[model][1], models_dict[model][2]])
-            '''
 
             with open('./rmsds_and_final_scores.tsv', 'wt') as outfile:
                 tw = csv.writer(outfile, delimiter='\t')
@@ -667,13 +581,6 @@ def na_model(k, pept_seq, best_rmsds):
                         tw.writerow([key, models_dict[key][0], models_dict[key][1], models_dict[key][2],
                                       models_dict[key][3], 'N/A'])
 
-            '''
-            molsort = sorted(models_dict.items(), key=lambda x:x[1][0])
-            bestmol = sum(x[1][2] for x in molsort[0:5])/5.0
-            dopesort = sorted(models_dict.items(), key=lambda x:x[1][1])
-            bestdope = sum(x[1][2] for x in dopesort[0:5])/5.0
-            best_rmsds.append([target_id, bestmol, bestdope])
-            '''
             molsort = sorted(models_dict.items(), key=lambda x:x[1][0])
             bb_bestmol = sum(x[1][2] for x in molsort[0:5])/5.0
             ca_bestmol = sum(x[1][3] for x in molsort[0:5])/5.0
@@ -724,14 +631,6 @@ with open('outputs/%s/non_modelled.csv' %outdir_name, 'wt') as outfile:
     tsv_writer.writerow(['QUERY', 'NEOANTIGEN', 'QUERY ALLELE', 'TEMPLATE ID', 'TEMPLATE PEPTIDE', 'TEMPLATE ALLELE', 'ERROR'])
     for query in non_modelled:
         tsv_writer.writerow(query)
-
-'''
-with open('outputs/%s/best_RMSDs.tsv' %outdir_name, 'wt') as outfile:
-    tw = csv.writer(outfile, delimiter='\t')
-    tw.writerow(['Target ID', 'Top 5 molpdf RMDS', 'Top 5 DOPE RMDS'])
-    for query in best_rmsds:
-        tw.writerow(query)
-'''
 
 final_time = time.time()
 total_time = final_time - start_time
