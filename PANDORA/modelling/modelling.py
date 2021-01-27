@@ -1,0 +1,248 @@
+#!/usr/bin/python
+###    ###
+
+import os
+import sys
+import time
+import copy
+import pickle
+import csv
+#import subprocess
+
+from Bio import SeqIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+from Bio.Alphabet import IUPAC
+from Bio.SubsMat import MatrixInfo
+
+from random import choice
+from joblib import Parallel, delayed
+from multiprocessing import Manager
+
+#PANDORA modules
+sys.path.append('/home/dariom/PANDORA_master/PANDORA') #TODO: change in final release
+from parsing import utils
+
+def check_model_existance(k, outdir_name, filename_start, filename_end):
+    ext_flag = False
+    for folder in os.listdir('PANDORA_files/outputs/%s' %outdir_name):
+        if 'query' in folder:
+            if str(k+1) == folder.split('_')[2]:
+                print('WARNING: Existing directory for this query.')
+                for name in os.listdir('PANDORA_files/outputs/%s/%s' %(outdir_name, folder)):
+                    if filename_start in name and filename_end in name:
+                        print('WARNING: This query has already been modelled. Moving on.')
+                        ext_flag = True
+                        break
+                if ext_flag == True:
+                    break
+
+    if ext_flag == True:
+        print('Exiting here.')
+        return True
+    else:
+        return False
+
+def allele_name_adapter(allele, allele_ID):
+    #homolog_allele = '--NONE--'
+    for a in range(len(allele)):
+        if allele[a].startswith('HLA'):      # Human
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:8] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:8]
+            elif any(allele[a][:6] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:6]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('H2'):    # Mouse
+            #homolog_allele = 'RT1'
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:4] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:4]
+            else:
+                allele[a] = allele[a][:3]
+        elif allele[a].startswith('RT1'):          # Rat
+            #homolog_allele = 'H2'
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:5] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:5]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('BoLA'):        # Bovine
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:10] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:10]
+            elif any(allele[a][:7] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:7]
+            else:
+                allele[a] = allele[a][:5]
+        elif allele[a].startswith('SLA'):        # Suine
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:9] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:9]
+            elif any(allele[a][:6] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:6]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('MH1-B'):        # Chicken
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:8] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:8]
+            else:
+                allele[a] = allele[a][:6]
+        elif allele[a].startswith('BF2'):        # Chicken
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:6] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:6]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('Mamu'):       # Monkey
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:13] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:13]
+            elif any(allele[a][:9] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:9]
+            else:
+                allele[a] = allele[a][:5]
+        elif allele[a].startswith('Eqca'):        # Horse
+            if any(allele[a] in key for key in list(allele_ID.keys())):
+                pass
+            elif any(allele[a][:10] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:10]
+            elif any(allele[a][:7] in key for key in list(allele_ID.keys())):
+                allele[a] = allele[a][:7]
+            else:
+                allele[a] = allele[a][:5]
+    return(allele)#, homolog_allele)
+
+def template_selector(IDD, allele, length, pept, print_results): #homolog_allele,
+    putative_templates = []
+    max_pos = -1000
+    pos_list = []
+
+    for ID in IDD:
+        for a in allele:
+            if any(a in key for key in IDD[ID]['allele']): #or homolog_allele in IDD[ID]['allele']:                       ## Same Allele
+                putative_templates.append(ID)
+    putative_templates = list(set(putative_templates))
+
+
+    for ID in putative_templates:
+        score = 0
+        temp_pept = IDD[ID]['pept_seq']
+        min_len = min([length, len(temp_pept)])
+        score -= ((abs(length - len(temp_pept)) ** 2.4)) #!!!  ## Gap Penalty
+        for i, (aa, bb) in enumerate(zip(pept[:min_len], temp_pept[:min_len])):
+            try:
+                gain = MatrixInfo.pam30[aa, bb]
+                score += gain
+            except KeyError:
+                try:
+                    gain = MatrixInfo.pam30[bb, aa]
+                    score += gain
+                except KeyError:
+                    score = -50
+                    pass
+
+        if score > max_pos:
+            max_pos = score
+        pos_list.append((score, temp_pept, ID))
+
+    max_list = []
+    for pos in pos_list:
+        if pos[0] == max_pos:
+            max_list.append(pos)
+    #maxs.append(max_pos)
+    #maxsl.append(len(max_list))
+
+    if len(max_list) == 0:
+        return (target_id, pept, allele, "NA", "NA", "NA", "No positive scoring template peptides")
+    elif len(max_list) == 1:
+        template = max_list[0]
+        template_ID = template[2]
+        template_pept = template[1]
+    else:
+        template = (choice(max_list))
+        template_ID = template[2]
+        template_pept = template[1]
+    if print_results:
+        print('####################################################')
+        print('')
+        print('Peptide:  ', template[1])
+        print('')
+        print('Pos:  ', template)
+        print('')
+        print('####################################################')
+
+    return((template, template_ID, template_pept))
+
+def make_ali_files(sequence, template_ID, query, template_pept, pept, length, remove_temp_outputs):
+    template_seqr = SeqRecord(Seq(sequence['M'], IUPAC.protein), id=template_ID, name = ID)
+    target_seqr = SeqRecord(Seq(M_chain, IUPAC.protein), id=query, name = query)
+    SeqIO.write((template_seqr, target_seqr), "%s.fasta" %template_ID, "fasta")
+
+    os.system('muscle -in %s.fasta -out %s.afa -quiet' %(template_ID, template_ID))
+    os.system('rm %s.fasta' %template_ID)
+
+    ali_template_pept, ali_target_pept = utils.align_peptides(template_pept, temp_anch_1, temp_anch_2, pept, anch_1, anch_2)
+
+    final_alifile_name = '%s.ali' %template_ID
+    final_alifile = open(final_alifile_name, 'w')
+    i = 0
+    target_ini_flag = False
+    template_ini_flag = False
+    modeller_renum = 1
+    for line in open('%s.afa' %template_ID, 'r'):
+        #print(line)
+        if line.startswith('>') and i == 0:
+            final_alifile.write('>P1;' + line.split(' ')[0].strip('>') + '\n')
+            final_alifile.write('structure:../../../data/PDBs/pMHCI/%s_MP.pdb:%s:M:%s:P::::\n' %(template_ID, str(sequences[0]['M_st_ID']), str(len(ali_template_pept))))
+            template_ini_flag = True
+            i += 1
+        elif line.startswith('>') and i == 1:
+            final_alifile.write('/' + ali_template_pept + '*')
+            final_alifile.write('\n')
+            final_alifile.write('\n>P1;' + line.split(':')[0].strip('>'))
+            final_alifile.write('sequence:::::::::\n')
+            target_ini_flag = True
+        else:
+            final_alifile.write(line.rstrip())
+    final_alifile.write('/' + str(ali_target_pept) + '*')
+    final_alifile.close()
+
+    if remove_temp_outputs:
+        os.system('rm *.afa')
+    return(final_alifile_name)
+
+def write_ini_scripts(anch_1, anch_2, template_ID, final_alifile_name, query):
+        with open('MyLoop.py', 'w') as myloopscript:
+            MyL_temp = open('../../../../PANDORA/modelling/MyLoop_template.py', 'r')
+            for line in MyL_temp:
+                if 'self.residue_range' in line:
+                    myloopscript.write(line %(anch_1 + 2, anch_2))
+                elif 'SPECIAL_RESTRAINTS_BREAK' in line:
+                    break
+                elif 'contact_file = open' in line:
+                    myloopscript.write(line %template_ID)
+                else:
+                    myloopscript.write(line)
+            MyL_temp.close()
+
+        with open('cmd_modeller_ini.py', 'w') as modscript:
+            cmd_m_temp = open('../../../../PANDORA/modelling/cmd_modeller_ini.py', 'r')
+            for line in cmd_m_temp:
+                if 'alnfile' in line:
+                    modscript.write(line %final_alifile_name)
+                elif 'knowns' in line:
+                    modscript.write(line %(template_ID, query))
+                else:
+                    modscript.write(line)
+            cmd_m_temp.close()

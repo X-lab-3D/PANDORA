@@ -24,6 +24,7 @@ from parsing import structures_parser
 from parsing import url_protocols
 from parsing import utils
 from parsing.get_pMHC_anchors import get_anchors_pMHCI as get_anchors
+from modelling import modelling
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
@@ -68,16 +69,6 @@ with open('benchmark/PANDORA_benchmark_dataset.tsv', 'r') as peptsfile:
             seq = row[1]
             allele = row[2]
             pept_seqs.append((target_id, seq, allele))
-            '''
-            if 'HLA' in allele:
-                star_allele = (allele[0:5]+'*'+allele[5:])
-                pept_seqs.append((target_id, seq, star_allele))
-            else:
-                pept_seqs.append((target_id, seq, allele))
-            '''
-##
-#!!!
-##
 
 taskID = int(sys.argv[2])
 n_tasks = int(sys.argv[3])
@@ -93,10 +84,6 @@ print(n_tasks)
 print(pepts_start)
 print(pepts_end)
 print('######################################')
-
-#TODO: remove this dictionary
-anch_dict = { 8: (1, 7), 9 : (1, 8), 10 : (1, 9),   #Python numbering 0-X
-              11 : (1, 10), 12 : (1, 11)}
 
 remove_temp_outputs = False
 cutoff = 5
@@ -143,7 +130,6 @@ def na_model(k, pept_seq, best_rmsds):
     ### Organizing Allele IDs in a dictionary ###
     allele_list = []
     for key in IDD:
-        #if 'HLA' in IDD[key]['allele']:
         allele_list += IDD[key]['allele']
         allele_list = list(set(allele_list))
 
@@ -152,153 +138,19 @@ def na_model(k, pept_seq, best_rmsds):
         for multi_allele in IDD[key]['allele']:
             allele_ID[multi_allele].append(key)
 
+    #Check if this query has been modelled already
     ext_flag = False
     print( '## Wokring on %s, structure %s ##' %(query, target_id))
-    for folder in os.listdir('outputs/%s' %outdir_name):
-        if target_id in folder:
-            print('WARNING: Existing directory for this query.')
-            #ext_flag = True
-            break
+    ext_flag = ext_flag = modelling.check_model_existance(k, outdir_name, filename_start, filename_end)
     if ext_flag == True:
         print('Exiting here. This is only a DEBUG message')
         return None
 
-    max_pos = -1000
-    pos_list = []
+    #Correct allele name depending on available alleles
+    allele = modelling.allele_name_adapter(allele, allele_ID)
 
-    #TODO: Remove this anchor definement
-    anch_1, anch_2 = anch_dict[length]
-    #homolog_allele = '--NONE--'
-    for a in range(len(allele)):
-        if allele[a].startswith('HLA'):      # Human
-            if any(allele[a] in key for key in list(allele_ID.keys())):
-                pass
-            elif any(allele[a][:8] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:8]
-            elif any(allele[a][:6] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:6]
-            else:
-                allele[a] = allele[a][:4]
-        elif allele[a].startswith('H2'):    # Mouse
-            #homolog_allele = 'RT1'
-            if any(allele[a] in key for key in list(allele_ID.keys())):
-                pass
-            elif any(allele[a][:4] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:4]
-            else:
-                allele[a] = allele[a][:3]
-        elif allele[a].startswith('RT1'):          # Rat
-            #homolog_allele = 'H2'
-            if any(allele[a] in key for key in list(allele_ID.keys())):
-                pass
-            elif any(allele[a][:5] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:5]
-            else:
-                allele[a] = allele[a][:4]
-        elif allele[a].startswith('BoLA'):        # Bovine
-            if any(allele[a] in key for key in list(allele_ID.keys())):
-                pass
-            elif any(allele[a][:10] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:10]
-            elif any(allele[a][:7] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:7]
-            else:
-                allele[a] = allele[a][:5]
-        elif allele[a].startswith('SLA'):        # Suine
-            if any(allele[a] in key for key in list(allele_ID.keys())):
-                pass
-            elif any(allele[a][:9] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:9]
-            elif any(allele[a][:6] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:6]
-            else:
-                allele[a] = allele[a][:4]
-        elif allele[a].startswith('MH1-B'):        # Chicken
-            if any(allele[a] in key for key in list(allele_ID.keys())):
-                pass
-            elif any(allele[a][:8] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:8]
-            else:
-                allele[a] = allele[a][:6]
-        elif allele[a].startswith('BF2'):        # Chicken
-            if any(allele[a] in key for key in list(allele_ID.keys())):
-                pass
-            elif any(allele[a][:6] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:6]
-            else:
-                allele[a] = allele[a][:4]
-        elif allele[a].startswith('Mamu'):       # Monkey
-            if any(allele[a] in key for key in list(allele_ID.keys())):
-                pass
-            elif any(allele[a][:13] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:13]
-            elif any(allele[a][:9] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:9]
-            else:
-                allele[a] = allele[a][:5]
-        elif allele[a].startswith('Eqca'):        # Horse
-            if any(allele[a] in key for key in list(allele_ID.keys())):
-                pass
-            elif any(allele[a][:10] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:10]
-            elif any(allele[a][:7] in key for key in list(allele_ID.keys())):
-                allele[a] = allele[a][:7]
-            else:
-                allele[a] = allele[a][:5]
-
-    putative_templates = []
-    for ID in IDD:
-        for a in allele:
-            if any(a in key for key in IDD[ID]['allele']): #or homolog_allele in IDD[ID]['allele']:                       ## Same Allele
-                putative_templates.append(ID)
-    putative_templates = list(set(putative_templates))
-
-    for ID in putative_templates:
-        score = 0
-        temp_pept = IDD[ID]['pept_seq']
-        min_len = min([length, len(temp_pept)])
-        score -= ((abs(length - len(temp_pept)) ** 2.4)) #!!!  ## Penalty for gap
-        for i, (aa, bb) in enumerate(zip(pept[:min_len], temp_pept[:min_len])):
-            try:
-                gain = MatrixInfo.pam30[aa, bb]
-                score += gain
-            except KeyError:
-                try:
-                    gain = MatrixInfo.pam30[bb, aa]
-                    score += gain
-                except KeyError:
-                    score = -50
-                    pass
-
-        if score > max_pos:
-            max_pos = score
-        pos_list.append((score, temp_pept, ID))
-
-    max_list = []
-    for pos in pos_list:
-        if pos[0] == max_pos:
-            max_list.append(pos)
-    maxs.append(max_pos)
-    maxsl.append(len(max_list))
-
-    if len(max_list) == 0:
-        return (target_id, pept, allele, "NA", "NA", "NA", "No positive scoring template peptides")
-    elif len(max_list) == 1:
-        template = max_list[0]
-        template_ID = template[2]
-        template_pept = template[1]
-    else:
-        template = (choice(max_list))
-        template_ID = template[2]
-        template_pept = template[1]
-    if print_results:
-        print('####################################################')
-        print('')
-        print('Peptide:  ', template[1])
-        print('')
-        print('Pos:  ', template)
-        print('')
-        print('####################################################')
+    #Select template
+    sel_template = modelling.template_selector(IDD, allele, homolog_allele, length, pept, print_results)
 
     ###################################
     #   CHANGING WORKING DIRECTORY
@@ -314,8 +166,7 @@ def na_model(k, pept_seq, best_rmsds):
         return None
     os.chdir(outdir)
 
-    #Obtaining template anchor positions
-
+    #Obtain template anchor positions
     try:
         anch_1, anch_2 = get_anchors('../../../data/PDBs/pMHCI/%s_MP.pdb' %target_id, rm_outfile = True)
         anch_1 -= 1
@@ -332,103 +183,23 @@ def na_model(k, pept_seq, best_rmsds):
         os.chdir('../../../')
         return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
 
-    #Preparing template and target sequences for the .ali file, launching Muscle
+    #Write alignment file.
+    final_alifile_name = modelling.make_ali_files(sequences[0], template_ID, query, template_pept, pept, length, remove_temp_outputs)
 
-    template_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=template_ID, name = ID)
-    target_seqr = SeqRecord(Seq(M_chain, IUPAC.protein), id=target_id, name = target_id)
-    #target_seqr = SeqRecord(Seq(sequences[0]['M'], IUPAC.protein), id=target_id, name =target_id) #FAKE NAME
-    SeqIO.write((template_seqr, target_seqr), "%s.fasta" %template_ID, "fasta")
-
-    os.system('muscle -in %s.fasta -out %s.afa -quiet' %(template_ID, template_ID))
-    os.system('rm %s.fasta' %template_ID)
-
-    ali_template_pept, ali_target_pept = utils.align_peptides(template_pept, temp_anch_1, temp_anch_2, pept, anch_1, anch_2)
-    '''
-    ali_template_pept = copy.deepcopy(template_pept)
-    ali_target_pept = copy.deepcopy(pept)
-    if len(template_pept) > length:
-        ali_target_pept = pept[0:5] + ('-'*(len(template_pept)-length)) + pept[5:]
-    elif length > len(template_pept):
-        ali_template_pept = template_pept[0:5] + ('-'*(length-len(template_pept))) + template_pept[5:]
-    '''
-
-    final_alifile_name = '%s.ali' %template_ID
-    final_alifile = open(final_alifile_name, 'w')
-    i = 0
-    target_ini_flag = False
-    template_ini_flag = False
-    modeller_renum = 1
-    for line in open('%s.afa' %template_ID, 'r'):
-        #print(line)
-        if line.startswith('>') and i == 0:
-            final_alifile.write('>P1;' + line.split(' ')[0].strip('>') + '\n')
-            final_alifile.write('structure:../../../data/PDBs/pMHCI/%s_MP.pdb:%s:M:%s:P::::\n' %(template_ID, str(sequences[0]['M_st_ID']), str(len(ali_template_pept))))
-            template_ini_flag = True
-            i += 1
-        elif line.startswith('>') and i == 1:
-            final_alifile.write('/' + ali_template_pept + '*')
-            final_alifile.write('\n')
-            final_alifile.write('\n>P1;' + line.split(':')[0].strip('>'))
-            final_alifile.write('sequence:::::::::\n')
-            target_ini_flag = True
-        else:
-            final_alifile.write(line.rstrip())
-    final_alifile.write('/' + str(ali_target_pept) + '*')
-    final_alifile.close()
-
-    if remove_temp_outputs:
-        os.system('rm *.afa')
-
-    #with open('instructions.txt', 'w') as instr_file:
-    #    instr_file.write(template_ID + ' ' + str(1) + ' ' + str(9))
-
-    '''
-    os.system('pdb_splitchain ../../data/PDBs/%s_MP.pdb' %template_ID)
-    for chain in ['M', 'P']:
-        os.system('mv %s_MP_%s.pdb ../../data/PDBs/%s_MP_%s.pdb' %(template_ID, chain, template_ID, chain))
-        os.system('pdb_reres -1 ../../data/PDBs/%s_MP_%s.pdb > ../../data/PDBs/%s_MP_%s.pdb.renum' %(template_ID, chain, template_ID, chain))
-    os.system('pdb_merge ../../data/PDBs/%s_MP_*.pdb.renum > ../../data/PDBs/%s_MP_reres.pdb' %(template_ID, template_ID))
-    os.system('rm -f data/PDBs/%s_MP_[A-Z].pdb' %template_ID)
-    os.system('rm -f ../../data/PDBs/*.pdb.renum')
-    '''
-
-    with open('MyLoop.py', 'w') as myloopscript:
-        MyL_temp = open('../../../modelling_scripts/MyLoop_template.py', 'r')
-        for line in MyL_temp:
-
-            if 'self.residue_range' in line:
-                myloopscript.write(line %(anch_1 + 2, anch_2))
-            elif 'SPECIAL_RESTRAINTS_BREAK' in line:
-                break
-            elif 'contact_file = open' in line:
-                myloopscript.write(line %template_ID)
-            else:
-                myloopscript.write(line)
-        MyL_temp.close()
-
-    with open('cmd_modeller_ini.py', 'w') as modscript:
-        cmd_m_temp = open('../../../modelling_scripts/cmd_modeller_ini.py', 'r')
-        for line in cmd_m_temp:
-            if 'alnfile' in line:
-                modscript.write(line %final_alifile_name)
-            elif 'knowns' in line:
-                modscript.write(line %(template_ID, target_id))
-            else:
-                modscript.write(line)
-        cmd_m_temp.close()
-
-    os.popen('python3 cmd_modeller_ini.py').read()
+    #Write and running MODELLER scripts to produce .ini file
+    modelling.write_ini_scripts(anch_1, anch_2, template_ID, final_alifile_name, query)
+    #If default python is not python3, change the following line
+    os.popen('python cmd_modeller_ini.py').read()
 
     if remove_temp_outputs:
         os.system('rm cmd_modeller_ini.py')
 
-    # Calculating all Atom contacts
+    # Calculate all Atom contacts
     if "contact-chainID_allAtoms" not in os.listdir('../../../tools'):
         os.popen('g++ ../../../tools/contact-chainID_allAtoms.cpp -o ../../../tools/contact-chainID_allAtoms').read()
     os.popen('../../../tools/contact-chainID_allAtoms %s.ini %s > all_contacts_%s.list' %(target_id, cutoff, template_ID)).read()
 
-    #Selecting only the anchors contacts
-
+    #Select only the anchors contacts
     anch_1_same = False
     anch_2_same = False
 
