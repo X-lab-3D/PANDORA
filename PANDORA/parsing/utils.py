@@ -14,7 +14,7 @@ import pickle
 from numpy import argmax
 from Bio.PDB import PDBParser
 from Bio.Data.SCOPData import protein_letters_3to1 as to_one_letter_code
-from modelling_scripts import del_uncommon_residues_pdbs as durp
+
 
 '''
 This file contains the following functions:
@@ -22,6 +22,7 @@ This file contains the following functions:
     get_peptides_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter, skip_first_line = True)
     get_peptides_w_star_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter, skip_first_line = True)
     remove_error_templates(pklfile)
+    change_sep_in_ser(indir)
     get_pdb_seq(IDs)
     get_seqs(pdbf)
 '''
@@ -35,7 +36,7 @@ def align_peptides(seq1, anch1_seq1, anch2_seq1, seq2, anch1_seq2, anch2_seq2):
     seq2_core = anch2_seq2 - anch1_seq2
     tail1 = [x for x in seq1[anch2_seq1:]]
     tail2 = [x for x in seq2[anch1_seq2:]]
-    
+
     list1 = [x for x in seq1]
     list2 = [x for x in seq2]
     #Adding gaps in cores
@@ -59,8 +60,8 @@ def align_peptides(seq1, anch1_seq1, anch2_seq1, seq2, anch1_seq2, anch2_seq2):
     elif len(tail1) < len(tail2):
         for x in range(len(tail1) - len(tail2)):
             list1.insert(-1, '-')
-    
-    
+
+
     return ('').join(list1), ('').join(list2)
     #return(ali_seq1, ali_seq2)
 
@@ -121,6 +122,34 @@ def remove_error_templates(pklfile):
         pickle.dump(bad_IDs, outpkl)
         outpkl.close()
         return IDD, bad_IDs
+
+def change_sep_in_ser(indir):
+    for pdbfile in os.listdir(indir):
+        outfile_name = indir + pdbfile + '.temp'
+        outfile = open(outfile_name, 'w')
+        for line in open(indir + pdbfile, 'r'):
+            s = line.split(' ')
+            l = [x for x in s if x != '']
+            if line.startswith('ATOM') or line.startswith('HETATM'):
+                if ('SEP' in l[3] or 'SEP' in l[2]) and l[2] not in ['P', 'O1P', 'O2P', 'O3P', 'HA', 'HB2', 'HB3']: #Lines to keep
+                    outfile.write(line.replace('HETATM', 'ATOM  ').replace('SEP', 'SER'))
+                elif ('SEP' in l[3] or 'SEP' in l[2]) and l[2] in ['P', 'O1P', 'O2P', 'O3P', 'HA', 'HB2', 'HB3']:   #Lines to delete
+                    pass
+                elif ('F2F' in l[3] or 'F2F' in l[2]) and l[2] not in ['F1', 'F2']:
+                    outfile.write(line.replace('HETATM', 'ATOM  ').replace('F2F', 'PHE'))
+                elif ('F2F' in l[3] or 'F2F' in l[2]) and l[2] in ['F1', 'F2']:
+                    pass
+                elif ('CSO' in l[3] or 'CSO' in l[2]) and l[2] not in ['OD']: #Lines to keep
+                    outfile.write(line.replace('HETATM', 'ATOM  ').replace('CSO', 'CYS'))
+                elif ('CSO' in l[3] or 'CSO' in l[2]) and l[2] in ['OD']:   #Lines to delete
+                    pass
+                else:
+                    outfile.write(line)
+            else:
+                outfile.write(line)
+        outfile.close()
+
+        os.system('mv %s %s' %(outfile_name, indir + pdbfile))
 
 
 def get_pdb_seq(IDs):

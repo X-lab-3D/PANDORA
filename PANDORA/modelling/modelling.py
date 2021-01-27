@@ -24,6 +24,9 @@ sys.path.append('/home/dariom/PANDORA_master/PANDORA') #TODO: change in final re
 from parsing import utils
 
 def check_model_existance(k, outdir_name, filename_start, filename_end):
+    '''
+    Checks if models have been already generated for the current run and case
+    '''
     ext_flag = False
     for folder in os.listdir('PANDORA_files/outputs/%s' %outdir_name):
         if 'query' in folder:
@@ -44,6 +47,14 @@ def check_model_existance(k, outdir_name, filename_start, filename_end):
         return False
 
 def allele_name_adapter(allele, allele_ID):
+    '''
+    Cuts the given allele name to make it consistent with the alleles in allele_ID.
+
+    Args:
+        allele(str) : Allele name
+
+        allele_ID(dict) : Dictionary of structure IDs (values) in the dataset for each allele (keys)
+    '''
     #homolog_allele = '--NONE--'
     for a in range(len(allele)):
         if allele[a].startswith('HLA'):      # Human
@@ -123,7 +134,23 @@ def allele_name_adapter(allele, allele_ID):
                 allele[a] = allele[a][:5]
     return(allele)#, homolog_allele)
 
-def template_selector(IDD, allele, length, pept, print_results): #homolog_allele,
+def select_template(IDD, allele, length, pept, print_results): #homolog_allele,
+    '''
+    Select template for p:MHC I Modelling.
+
+    Args:
+        IDD(dict) : dictionary containing all the templates ID and relative informations
+
+        allele(str) : target allele name
+
+        length(int) : target peptide length
+
+        pept(str) : target peptide sequence
+
+        print_result(bool) : if True prints out the selected template structure and peptide
+
+    '''
+
     putative_templates = []
     max_pos = -1000
     pos_list = []
@@ -184,9 +211,13 @@ def template_selector(IDD, allele, length, pept, print_results): #homolog_allele
 
     return((template, template_ID, template_pept))
 
-def make_ali_files(sequence, template_ID, query, template_pept, pept, length, remove_temp_outputs):
-    template_seqr = SeqRecord(Seq(sequence['M'], IUPAC.protein), id=template_ID, name = ID)
-    target_seqr = SeqRecord(Seq(M_chain, IUPAC.protein), id=query, name = query)
+def make_ali_files(templ_sequences, target_sequences, template_ID, query, template_pept, pept, length, remove_temp_outputs):
+    '''
+    Aligns target sequence and template sequence
+    '''
+
+    template_seqr = SeqRecord(Seq(templ_sequences['M'], IUPAC.protein), id=template_ID, name = ID)
+    target_seqr = SeqRecord(Seq(target_sequences, IUPAC.protein), id=query, name = query)
     SeqIO.write((template_seqr, target_seqr), "%s.fasta" %template_ID, "fasta")
 
     os.system('muscle -in %s.fasta -out %s.afa -quiet' %(template_ID, template_ID))
@@ -204,7 +235,7 @@ def make_ali_files(sequence, template_ID, query, template_pept, pept, length, re
         #print(line)
         if line.startswith('>') and i == 0:
             final_alifile.write('>P1;' + line.split(' ')[0].strip('>') + '\n')
-            final_alifile.write('structure:../../../data/PDBs/pMHCI/%s_MP.pdb:%s:M:%s:P::::\n' %(template_ID, str(sequences[0]['M_st_ID']), str(len(ali_template_pept))))
+            final_alifile.write('structure:../../../data/PDBs/pMHCI/%s_MP.pdb:%s:M:%s:P::::\n' %(template_ID, str(templ_sequences['M_st_ID']), str(len(ali_template_pept))))
             template_ini_flag = True
             i += 1
         elif line.startswith('>') and i == 1:
@@ -246,3 +277,33 @@ def write_ini_scripts(anch_1, anch_2, template_ID, final_alifile_name, query):
                 else:
                     modscript.write(line)
             cmd_m_temp.close()
+
+def write_contact_list(anch_1, anch_2, anch_1_same, anch_2_same):
+    
+    with open( 'all_contacts_%s.list' %template_ID, 'r') as contacts:                             # Template contacts
+        with open('contacts_%s.list' %template_ID, 'w') as output:                                                                ### If the target peptide is longer than the templtate peptide #TODO: This can be removed?
+            for line in contacts:
+                p_aa_id = line.split("\t")[7]                                                 ### position id of the template peptide residue
+                p_atom = line.split("\t")[8]                                                  ### atom name of the template peptide residue
+                if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
+                    if int(p_aa_id) == (anch_1+1):
+                        output.write(line)
+                else:
+                    if int(p_aa_id) == (anch_1+1):
+                        if first_gly:
+                            if 'CA' in p_atom:
+                                output.write(line)
+                        else:
+                            if 'CA' in p_atom or 'CB' in p_atom:
+                                output.write(line)
+                if anch_2_same == True:                                                       ### If the target anchor 2 residue is the same as the template anchor 2 residue
+                    if int(p_aa_id) == (anch_2+1):
+                        output.write(line)
+                else:
+                    if int(p_aa_id) == (anch_2+1):
+                        if last_gly:
+                            if 'CA' in p_atom:
+                                output.write(line)
+                        else:
+                            if 'CA' in p_atom or 'CB' in p_atom:
+                                output.write(line)

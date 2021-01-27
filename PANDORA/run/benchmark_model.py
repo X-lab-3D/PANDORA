@@ -31,7 +31,7 @@ from modelling import modelling
 url_protocols.download_unzip_imgt_structures(del_inn_files = True, del_kabat_files = True)
 IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
 IDs_list = []
-with open('data/csv_pkl_files/all_MH1_IDs.tsv', 'r') as infile:
+with open('PANDORA_files/data/csv_pkl_files/all_MH1_IDs.tsv', 'r') as infile:
     next(infile)
     for line in infile:
         IDs_list.append(line.replace('\n',''))
@@ -44,8 +44,8 @@ outdir_name = sys.argv[1]
 ###########################################
 ### Organizing dicts ###
 
-IDD_file = open('data/csv_pkl_files/IDs_and_bad_IDs_dict.pkl', 'rb')
-#IDD_file = open('data/csv_pkl_files/fake_db.pkl', 'rb')
+IDD_file = open('PANDORA_files/data/csv_pkl_files/IDs_and_bad_IDs_dict.pkl', 'rb')
+#IDD_file = open('PANDORA_files/data/csv_pkl_files/fake_db.pkl', 'rb')
 main_IDD = pickle.load(IDD_file)
 bad_IDs = pickle.load(IDD_file)
 IDD_file.close()
@@ -112,7 +112,7 @@ def na_model(k, pept_seq, best_rmsds):
     allele = pept_seq[2]
     length = len(pept)
     try:
-        M_chain = utils.get_seqs('./data/PDBs/pMHCI/%s_MP.pdb' %target_id)['M']
+        M_chain = utils.get_seqs('./PANDORA_files/data/PDBs/pMHCI/%s_MP.pdb' %target_id)['M']
     except FileNotFoundError:
         print('Error in retrieving M_chain, could not find PDB')
         print('CWD: %s' %os.getcwd())
@@ -150,7 +150,7 @@ def na_model(k, pept_seq, best_rmsds):
     allele = modelling.allele_name_adapter(allele, allele_ID)
 
     #Select template
-    sel_template = modelling.template_selector(IDD, allele, homolog_allele, length, pept, print_results)
+    sel_template = modelling.select_template(IDD, allele, homolog_allele, length, pept, print_results)
 
     ###################################
     #   CHANGING WORKING DIRECTORY
@@ -184,7 +184,7 @@ def na_model(k, pept_seq, best_rmsds):
         return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
 
     #Write alignment file.
-    final_alifile_name = modelling.make_ali_files(sequences[0], template_ID, query, template_pept, pept, length, remove_temp_outputs)
+    final_alifile_name = modelling.make_ali_files(sequences[0], M_chain, template_ID, query, template_pept, pept, length, remove_temp_outputs)
 
     #Write and running MODELLER scripts to produce .ini file
     modelling.write_ini_scripts(anch_1, anch_2, template_ID, final_alifile_name, query)
@@ -195,9 +195,7 @@ def na_model(k, pept_seq, best_rmsds):
         os.system('rm cmd_modeller_ini.py')
 
     # Calculate all Atom contacts
-    if "contact-chainID_allAtoms" not in os.listdir('../../../tools'):
-        os.popen('g++ ../../../tools/contact-chainID_allAtoms.cpp -o ../../../tools/contact-chainID_allAtoms').read()
-    os.popen('../../../tools/contact-chainID_allAtoms %s.ini %s > all_contacts_%s.list' %(target_id, cutoff, template_ID)).read()
+    os.popen('../../../../PANDORA/tools/contact-chainID_allAtoms %s.ini %s > all_contacts_%s.list' %(target_id, cutoff, template_ID)).read()
 
     #Select only the anchors contacts
     anch_1_same = False
@@ -216,6 +214,9 @@ def na_model(k, pept_seq, best_rmsds):
     else:
         last_gly = False
     ### Writing anchors contact list ###
+
+    modelling.write_contact_list(anch_1, anch_2, anch_1_same, anch_2_same)
+    '''
     with open( 'all_contacts_%s.list' %template_ID, 'r') as contacts:                             # Template contacts
         with open('contacts_%s.list' %template_ID, 'w') as output:                                                                ### If the target peptide is longer than the templtate peptide #TODO: This can be removed?
             for line in contacts:
@@ -243,12 +244,12 @@ def na_model(k, pept_seq, best_rmsds):
                         else:
                             if 'CA' in p_atom or 'CB' in p_atom:
                                 output.write(line)
-
+    '''
     if remove_temp_outputs:
         os.system('rm all_contacts_%s.list' %template_ID)
 
     with open('MyLoop.py', 'w') as myloopscript:
-        MyL_temp = open('../../../modelling_scripts/MyLoop_template.py', 'r')
+        MyL_temp = open('../../../../PANDORA/modelling/MyLoop_template.py', 'r')
         for line in MyL_temp:
             if 'self.residue_range' in line:
                 myloopscript.write(line %(anch_1 + 2, anch_2))
@@ -259,7 +260,7 @@ def na_model(k, pept_seq, best_rmsds):
         MyL_temp.close()
 
     with open('cmd_modeller.py', 'w') as modscript:
-        cmd_m_temp = open('../../../modelling_scripts/cmd_modeller_template.py', 'r')
+        cmd_m_temp = open('../../../../PANDORA/modelling/cmd_modeller_template.py', 'r')
         for line in cmd_m_temp:
             if 'alnfile' in line:
                 modscript.write(line %final_alifile_name)
@@ -379,7 +380,7 @@ def na_model(k, pept_seq, best_rmsds):
 ######################################################################################################
 ######################################################################################################
 
-non_modelled = Parallel(n_jobs = n_cores)(delayed(na_model)(k, pept_seq, best_rmsds) for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]))
+non_modelled = Parallel(n_jobs = n_cores)(delayed(na_model[:100])(k, pept_seq, best_rmsds) for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]))
 non_modelled = filter(None, non_modelled)
 
 best_rmsds = dict(best_rmsds)

@@ -3,7 +3,7 @@
 """
 Created on Thu Dec 10 22:54:08 2020
 
-@author: dario
+@author: Dario Marzella
 """
 import os
 import gzip
@@ -13,11 +13,21 @@ from copy import deepcopy
 from operator import xor
 
 ### TODO: Imports to be changed
-from modelling_scripts.utils import get_seqs
-from modelling_scripts.utils import remove_error_templates
-import modelling_scripts.del_uncommon_residues_pdbs as durp
+from PANDORA.parsing.utils import get_seqs
+from PANDORA.parsing.utils import remove_error_templates
+from PANDORA.parsing.utils import change_sep_in_ser
+import PANDORA.parsing.del_uncommon_residues_pdbs as durp
+
 
 def get_chainid_alleles_MHCI(pdbf):
+    '''
+    Takes as input an IMGT preprocessed PDB file of p:MHC I.
+    Returns a dictionary containing alleles andrelative identity scores for each
+    G-domain in the given pdb from the REMARK.
+
+    Args:
+        pdbf(str) : path to IMGT pdb file
+    '''
     #test: multiple chains 3GJG, multiple alleles 1AO7
     ### Parsing file and extracting remarks
     with open(pdbf) as infile:
@@ -28,7 +38,7 @@ def get_chainid_alleles_MHCI(pdbf):
                 del row[:2]
                 remarks.append(row)
     remarks = [x for x in remarks if x != []]
-    
+
     ### Dividing each remark section into a chains dictionary
     chains = {}
     flag = False
@@ -40,7 +50,7 @@ def get_chainid_alleles_MHCI(pdbf):
             flag = True
         elif flag == True:
             chains[chainID].append(row)
-    
+
     ### Extracting MHC I Alpha chains
     mhc_a = {}  # MHC I Alpha
     for chain in chains:
@@ -49,7 +59,7 @@ def get_chainid_alleles_MHCI(pdbf):
                 mhc_a[chain] = chains[chain]
         except:
             pass
-    
+
     ### Extracting alleles info
     mhc_a_alleles = {}
     for chain in mhc_a:
@@ -70,21 +80,36 @@ def get_chainid_alleles_MHCI(pdbf):
                 except IndexError:
                     pass
         mhc_a_alleles[chain] = deepcopy(G_dom_alleles)
-    
+
     mhc_a_alleles_percs = {}
     for chain in mhc_a_alleles:
         mhc_a_alleles_percs[chain] = {}
         for key in mhc_a_alleles[chain]:
             mhc_a_alleles_percs[chain][key] = {}
             ### Allele info are always given with four elements: Gender, Spieces, Allele, Percentage
-            for block in range(int(len(mhc_a_alleles[chain][key])/4)):  
+            for block in range(int(len(mhc_a_alleles[chain][key])/4)):
                 allele = mhc_a_alleles[chain][key][2+(4*block)]
                 perc = float(mhc_a_alleles[chain][key][3+(4*block)].replace('(', '').replace('%)', '').replace(',',''))
                 mhc_a_alleles_percs[chain][key][allele] = perc
-    
+
     return mhc_a_alleles_percs
-                    
+
 def select_alleles_set_MHCI(chain_alleles_percs):
+    '''
+    Takes as input an dictionary .
+    Returns the allele list and the identity scores for each
+    G-domain in the given pdb from the REMARK.
+
+    Args:
+        chain_alleles_percs(dict) : output dictionary of get_chainid_alleles_MHCI() for only one chain
+
+    Example:
+    >>> alleles = get_chainid_alleles_MHCI('PANDORA_files/data/PDBs/pMHCI/1K5N_MP.pdb')
+    >>> selected_alleles = select_alleles_set_MHCI(alleles['M'])
+
+    '''
+
+
     if xor(chain_alleles_percs['G-ALPHA1'] == {}, chain_alleles_percs['G-ALPHA2'] == {}):
         if chain_alleles_percs['G-ALPHA1'] != {}:
             non_empty = 'G-ALPHA1'
@@ -101,13 +126,13 @@ def select_alleles_set_MHCI(chain_alleles_percs):
         for allele in to_delete:
             chain_alleles_percs[non_empty].pop(allele)
         chain_alleles_percs.pop(empty)
-    
+
     elif chain_alleles_percs['G-ALPHA1'] == {} and chain_alleles_percs['G-ALPHA2'] == {}:
         return None
     else:
         for i, domain in enumerate(chain_alleles_percs):
             other_domain = list(chain_alleles_percs.keys())[not i]
-            
+
             top_perc = max(list(chain_alleles_percs[domain].values()))
             to_delete = []
             for allele in chain_alleles_percs[domain]:
@@ -119,25 +144,34 @@ def select_alleles_set_MHCI(chain_alleles_percs):
                     to_delete.append(allele)
             for allele in to_delete:
                 chain_alleles_percs[domain].pop(allele)
-        
-    selected_alleles = [chain_alleles_percs[dom] for dom in chain_alleles_percs] 
+
+    selected_alleles = [chain_alleles_percs[dom] for dom in chain_alleles_percs]
     selected_alleles = [list(x.keys()) for x in selected_alleles]
     selected_alleles = list(set(sum(selected_alleles, [])))
-    
+
     return selected_alleles
-        
+
 
 def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
-    
+    '''
+    Parses pMHCI structures for PANDORA in the following steps:
+    1. Uncompress and move every strcuture.
+    2. Indetify one Alpha Chain and its Peptide
+    3. Move Alpha Chain and Peptide to a new PDB file, name <ID>_MP.pdb containing only chain M (alpha chain) and P (peptide)
+    4. Modify all phosphorilates serines in serines
+    5. Remove from the clean dataset every structure containing non-canonical residues
+
+    '''
+
     ### Preparation
-    
+
     # Variables
     IDs = ids_list
     cwd = os.getcwd()
-    indir = 'data/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
-    outdir = 'data/PDBs/pMHCI'
-    unused_pdbs_dir = 'data/PDBs/unused_templates'
-    
+    indir = 'PANDORA_files/data/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
+    outdir = 'PANDORA_files/data/PDBs/pMHCI'
+    unused_pdbs_dir = 'PANDORA_files/data/PDBs/unused_templates'
+
     bad_IDs = {}
     err_1 = 0
     err_2 = 0
@@ -147,16 +181,11 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
     err_6 = 0
     err_7 = 0
 
-    # Distance c++ code
-    if "contact-chainID_allAtoms" not in os.listdir('%s/modelling_scripts' %cwd):
-        os.popen('g++ %s/modelling_scripts/contact-chainID_allAtoms.cpp -o %s/modelling_scripts/contact-chainID_allAtoms' %(cwd, cwd)).read()
-    
-    
     IDs_dict = {}
     for ID in IDs:
         ID = ID.upper()
         ID = ID.rstrip()
-        
+
         try:
             with gzip.open('%s/IMGT-%s.pdb.gz' %(indir, ID), 'rb') as f_in:
                 with open('%s/%s.pdb' %(outdir, ID), 'wb') as f_out:
@@ -168,8 +197,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
             err_1 += 1
             os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
             continue
-            
-                
+
         #Delete .gz file
         #os.popen('rm %s/%s.pdb.gz' %(outdir, ID)).read()
 
@@ -199,9 +227,9 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
 
         ### Selecting Alpha chain and peptide chain
         ### TODO: parse REMARK info to get chain IDs and allele information
-        
+
         alpha_chains = get_chainid_alleles_MHCI(original_filepath)
-        
+
         putative_pID = {}
         for chain in seqs:
             if type(seqs[chain]) == str:
@@ -214,9 +242,9 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
         if len(putative_pID) == 1:
             pID = list(putative_pID.keys())[0]
         elif len(putative_pID) > 1:
-            os.system('./modelling_scripts/contact-chainID_allAtoms %s 5 > ./data/dist_files/%s.dist' %(original_filepath, ID))
+            os.system('./PANDORA/tools/contact-chainID_allAtoms %s 5 > ./PANDORA_files/data/dist_files/%s.dist' %(original_filepath, ID))
             contacts = []
-            for line in open('./data/dist_files/%s.dist' %ID, 'r'):
+            for line in open('./PANDORA_files/data/dist_files/%s.dist' %ID, 'r'):
                 contact = (line.split('\t')[1], line.split('\t')[6])
                 contacts.append(contact)
             for candidate in putative_pID:
@@ -264,47 +292,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
                 Btcr += 1
             elif count_dict[key] > 250 or count_dict[key] < 300:
                 Amhc += 1
-            '''
-            else:
-                bad_IDs[ID] = '#4 Unrecognized_chain_lenght'
-                print('ERROR TYPE #4: Unrecognized chain lenght. %s added to Bad_IDs' %ID)
-                print('##################################')
-                err_4 += 1
-                os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
-                continue
-            '''
-        '''
-        if Atcr != 0 or Btcr != 0:
-            bad_IDs[ID] = '#5 TCR_inside'
-            print('ERROR TYPE #5: TCRs in structure. %s added to Bad_IDs' %ID)
-            print('##################################')
-            err_5 += 1
-            os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
-            continue
-        
-        ######
-        else:
-        '''
-        
-        #print(alpha_chains[aID])
-        '''
-        any_alleles = []
-        for I in alpha_chains[aID]:
-            if alpha_chains[aID][I] == {}:
-                any_alleles.append(0)
-            else:
-                any_alleles.append(1)
-        if not any(any_alleles):
-            bad_IDs[ID] = '#5 No_alleles'
-            print('ERROR TYPE #5: No available alleles. %s added to Bad_IDs' %ID)
-            print('##################################')
-            err_5 += 1
-            os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
-            continue
-        else:
-            alleles = select_alleles_set_MHCI(alpha_chains[aID])
-            #if alleles == None:
-        '''
+
         alleles = select_alleles_set_MHCI(alpha_chains[aID])
         if alleles == None:
             bad_IDs[ID] = '#5 No_alleles'
@@ -315,31 +303,22 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
             continue
         else:
             pass
-        
-        
+
+
         count_dict['allele'] = alleles
         count_dict['pept_seq'] = seqs[pID]
-        IDs_dict[ID] = count_dict
-        '''
-            os.system('pdb_selchain -%s,%s %s > %s' %(aID, pID, original_filepath, selected_chains_filepath))
-            if pID == 'M':
-                os.system('pdb_rplchain -%s:P %s > %s' %(pID, selected_chains_filepath, a_renamed_filepath))
-                os.system('pdb_rplchain -%s:M %s > %s' %(aID, a_renamed_filepath, new_filepath))
-            else:
-                os.system('pdb_rplchain -%s:M %s > %s' %(aID, selected_chains_filepath, a_renamed_filepath))
-                os.system('pdb_rplchain -%s:P %s > %s' %(pID, a_renamed_filepath, new_filepath))
-        '''
+
         os.system('pdb_rplchain -%s:پ %s > %s' %(pID, original_filepath, a_renamed_filepath))
         os.system('pdb_rplchain -%s:م %s > %s' %(aID, a_renamed_filepath, selected_chains_filepath))
-        
+
         os.system('pdb_selchain -م,پ %s > %s' %(selected_chains_filepath, persian_filepath))
-        
+
         os.system('pdb_rplchain -پ:P %s > %s' %(persian_filepath, a_renamed_filepath))
         os.system('pdb_rplchain -م:M %s > %s' %(a_renamed_filepath, new_filepath))
-            
+
         #IF chain P comes before chain M
         if list(seqs.keys()).index(pID) < list(seqs.keys()).index(aID):
-            
+
             with open(new_filepath, 'r') as inpdb:
                 with open(header_filepath, 'w') as outheader:
                     for line in inpdb:
@@ -349,10 +328,10 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
                             outheader.write(line)
                     outheader.close()
                 inpdb.close()
-            
+
             os.system('pdb_selchain -M %s > %s' %(new_filepath, onlyM_filepath))
             os.system('pdb_selchain -P %s > %s' %(new_filepath, onlyP_filepath))
-            
+
             with open(new_filepath, 'w') as outpdb:
                 with open(header_filepath, 'r') as inheader:
                     for line in inheader:
@@ -360,17 +339,17 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
                     inheader.close()
                 with open(onlyM_filepath, 'r') as inMpdb:
                     for line in inMpdb:
-                        if line.startswith('ATOM') or line.startswith('TER'): 
+                        if line.startswith('ATOM') or line.startswith('TER'):
                             outpdb.write(line)
                     inMpdb.close()
                 with open(onlyP_filepath, 'r') as inPpdb:
                     for line in inPpdb:
-                        if line.startswith('ATOM') or line.startswith('TER'): 
+                        if line.startswith('ATOM') or line.startswith('TER'):
                             outpdb.write(line)
                     inPpdb.close()
                 outpdb.write('END')
                 outpdb.close()
-                
+
             try:
                 os.system('rm %s' %header_filepath)
             except:
@@ -383,7 +362,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
                 os.system('rm %s' %onlyP_filepath)
             except:
                 pass
-            
+
         try:
             os.system('rm %s' %original_filepath)
         except:
@@ -402,7 +381,8 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
             pass
 
     ### ADD CORRECTION FOR SEP, F2F, etc.
-    os.system('python ./tools/change_sep_in_ser.py %s/' %outdir)
+    #os.system('python ./tools/change_sep_in_ser.py %s/' %outdir)
+    change_sep_in_ser(outdir)
     print('Removing uncommon residue files')
     uncommon_pdbs = durp.move_uncommon_pdbf(outdir + '/', unused_pdbs_dir + '/non_canonical_res')
     for u_pdb in uncommon_pdbs:
@@ -422,24 +402,32 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
 
     bad_IDs['errors'] = {'#1': err_1, '#2': err_2, '#3': err_3,
                          '#4': err_4, '#5': err_5, '#6': err_6, '#7': err_7}
-    
+
     if out_pkl:
         IDd = open("data/csv_pkl_files/%s" %out_pkl, "wb")
         pickle.dump(IDs_dict, IDd)
         pickle.dump(bad_IDs, IDd)
         IDd.close()
-    
+
     print('BAD IDs:')
     print(bad_IDs)
-    
+
     #TODO: clean dist_files folder
-    
+
     if out_pkl:
         remove_error_templates(out_pkl)
-    
+
     return IDs_dict, bad_IDs
 
 def get_chainid_alleles_MHCII(pdbf):
+    '''
+    Takes as input an IMGT preprocessed PDB file of p:MHC II.
+    Returns a dictionary containing alleles andrelative identity scores for each
+    G-domain in the given pdb from the REMARK.
+
+    Args:
+        pdbf(str) : path to IMGT pdb file
+    '''
     #test: multiple chains 3GJG, multiple alleles 1AO7
     ### Parsing file and extracting remarks
     with open(pdbf) as infile:
@@ -450,7 +438,7 @@ def get_chainid_alleles_MHCII(pdbf):
                 del row[:2]
                 remarks.append(row)
     remarks = [x for x in remarks if x != []]
-    
+
     ### Dividing each remark section into a chains dictionary
     chains = {}
     flag = False
@@ -462,7 +450,7 @@ def get_chainid_alleles_MHCII(pdbf):
             flag = True
         elif flag == True:
             chains[chainID].append(row)
-    
+
     ### Extracting MHC II Alpha and Beta chains
     mhc_a = {}  # MHC II Alpha
     mhc_b = {}  # MHC II Beta
@@ -474,7 +462,7 @@ def get_chainid_alleles_MHCII(pdbf):
                 mhc_b[chain] = chains[chain]
         except:
             pass
-    
+
     ### Extracting alleles info
     mhc_a_alleles = {}
     mhc_b_alleles = {}
@@ -515,7 +503,7 @@ def get_chainid_alleles_MHCII(pdbf):
         for key in mhc_a_alleles[chain]:
             mhc_a_alleles_percs[chain][key] = {}
             ### Allele info are always given with four elements: Gender, Spieces, Allele, Percentage
-            for block in range(int(len(mhc_a_alleles[chain][key])/4)):  
+            for block in range(int(len(mhc_a_alleles[chain][key])/4)):
                 allele = mhc_a_alleles[chain][key][2+(4*block)]
                 perc = float(mhc_a_alleles[chain][key][3+(4*block)].replace('(', '').replace('%)', '').replace(',',''))
                 mhc_a_alleles_percs[chain][key][allele] = perc
@@ -523,24 +511,35 @@ def get_chainid_alleles_MHCII(pdbf):
     return {'Aplha': mhc_a_alleles, 'Beta': mhc_b_alleles}
 
 def parse_pMHCII_pdbs(ids_list, out_pkl = 'pMHC2_IDs_and_bad_IDs_dict.pkl'):
-    
+    '''
+    Parses pMHCII structures for PANDORA in the following steps:
+    1. Uncompress and move every strcuture.
+
+    FOLLOWING STILL TO DEVELOP
+    2. Indetify one Alpha Chain and its Peptide
+    3. Move Alpha Chain and Peptide to a new PDB file, name <ID>_MP.pdb containing only chain M (alpha chain) and P (peptide)
+    4. Modify all phosphorilates serines in serines
+    5. Remove from the clean dataset every structure containing non-canonical residues
+
+    '''
+
     ### Preparation
-    
+
     # Variables
     IDs = ids_list
     cwd = os.getcwd()
     indir = 'data/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
     outdir = 'data/PDBs/pMHCII'
     unused_pdbs_dir = 'data/unused_templates'
-    
+
     bad_IDs = {}
     err_1 = 0
-    
+
     IDs_dict = {}
     for ID in IDs:
         ID = ID.upper()
         ID = ID.rstrip()
-        
+
         try:
             with gzip.open('%s/IMGT-%s.pdb.gz' %(indir, ID), 'rb') as f_in:
                 with open('%s/%s.pdb' %(outdir, ID), 'wb') as f_out:
@@ -552,15 +551,15 @@ def parse_pMHCII_pdbs(ids_list, out_pkl = 'pMHC2_IDs_and_bad_IDs_dict.pkl'):
             err_1 += 1
             os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
             continue
-        
+
         original_filepath = '%s/%s.pdb' %(outdir, ID)
-        
+
         IDs_dict[ID] = get_chainid_alleles_MHCII(ID)
 
     with open(out_pkl, 'rb') as outfile:
         pickle.dump(IDs_dict, outfile)
         pickle.dump(bad_IDs, outfile)
-    
+
     return IDs_dict, bad_IDs
 
 def parse_TCRpMHCI_pdbs():
