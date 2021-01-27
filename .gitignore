@@ -1,25 +1,29 @@
 # Datas folder. Tracking only csv_pkl_files and crucial (empty) folders.
-/data/Alignments
-/data/FASTAs
-/data/PDBs/*
-/data/temp
-/data/bkup_PDBs
-/data/Targets/*
-/data/unused_templates/*
-/data/dist_files/*
-/data/allele_profiles/*
-data/netMHCpan_set/*
-/outputs/*
+/PANDORA_files/data/Alignments
+/PANDORA_files/data/FASTAs
+/PANDORA_files/data/PDBs/*
+/PANDORA_files/data/temp
+/PANDORA_files/data/bkup_PDBs
+/PANDORA_files/data/Targets/*
+/PANDORA_files/data/unused_templates/*
+/PANDORA_files/data/dist_files/*
+/PANDORA_files/data/allele_profiles/*
+/PANDORA_files/data/netMHCpan_set/*
+/PANDORA_files/outputs/*
 
 #Secondary projects
 /william
 
 # Misc
 .DS_Store
-/modelling_scripts/.DS_Store
-/modelling_scripts/contact-chainID_allAtoms
-/modelling_scripts/*.pyc
-/modelling_scripts/__pycache__/
+/PANDORA/modelling/.DS_Store
+/PANDORA/tools/contact-chainID_allAtoms
+/PANDORA/modelling/*.pyc
+/PANDORA/modelling/__pycache__/
+/PANDORA/tools/*.pyc
+/PANDORA/tools/__pycache__/
+/PANDORA/parsing/*.pyc
+/PANDORA/parsing/__pycache__/
 ._*
 *.out
 *.swp
