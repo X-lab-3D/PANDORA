@@ -387,13 +387,23 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
             pass
 
         ### Check if there are small molecules in the binding cleft
-        small_molecule = utils.small_molecule(new_filepath)
+        try:
+            small_molecule = utils.small_molecule_MHCI(new_filepath)
+        except IndexError:
+            bad_IDs[ID] = '#4 chainID'
+            print('ERROR TYPE #4: False in chain ID. %s added to Bad_IDs' %ID)
+            print(count_dict)
+            print('##################################')
+            err_4 += 1
+            os.system('mv %s %s/parsing_errors/ '%(new_filepath,unused_pdbs_dir))
+            continue
+
         if small_molecule != None:
             bad_IDs[ID] = '#6 Small Molecule'
             print('ERROR TYPE #6: Small Molecule in the binding cleft. %s added to Bad_IDs' %ID)
             print('##################################')
             err_6 += 1
-            os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
+            os.system('mv %s %s/parsing_errors/ '%(new_filepath ,unused_pdbs_dir))
             continue
 
     ### Correct SEP, F2F, etc. residues into normal residues.
@@ -411,10 +421,6 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
 
     ### New Errors to be fixed:
     ### #8: Residue 1A
-    ###
-    ### New Errors to be removed from dataset:
-    ### #9: Atipycal anchor position (e.g. P1 instead of P2)
-    ### #10: Small Molecule in the binding pocket
 
     bad_IDs['errors'] = {'#1': err_1, '#2': err_2, '#3': err_3,
                          '#4': err_4, '#5': err_5, '#6': err_6, '#7': err_7}

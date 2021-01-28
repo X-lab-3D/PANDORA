@@ -11,7 +11,7 @@ import gzip
 import shutil
 import pickle
 
-from numpy import argmax
+import numpy as np
 from Bio.PDB import PDBParser
 from Bio.Data.SCOPData import protein_letters_3to1 as to_one_letter_code
 
@@ -23,6 +23,8 @@ This file contains the following functions:
     - get_peptides_w_star_from_csv(pepts_filename, pept_clmn, allele_clmn, delimiter, skip_first_line = True)
     - remove_error_templates(pklfile)
     - change_sep_in_ser(indir)
+    - move_uncommon_pdbf(indir, outdir, delete_files = False)
+    - small_molecule_MHCI(inputfile, chain_M='M', chain_P='P')
     - get_pdb_seq(IDs)
     - get_seqs(pdbf)
 '''
@@ -222,7 +224,7 @@ def small_molecule_MHCI(inputfile, chain_M='M', chain_P='P'):
 
     ### if the input is a pdb file, the contacts file is calculated
     if inputfile.endswith('.pdb'):
-        contactfile = 'all_contacts_%s.list' %inputfile.split('/')[-1].split('.')[0]
+        contactfile = './PANDORA_files/data/dist_files/all_contacts_%s.list' %inputfile.split('/')[-1].split('.')[0]
         os.popen('./PANDORA/tools/contact-chainID_allAtoms %s %s > %s ' %( inputfile, cutoff, contactfile)).read()
 
     ### if the contacts file list is used as input, it is used further in the script
@@ -233,7 +235,6 @@ def small_molecule_MHCI(inputfile, chain_M='M', chain_P='P'):
 
         molecule_in_pocket = []  #list where the name of small molecule(s) is/are appended when found in contact list
         count_molecule = [ 0, 0, 0, 0, 0]  #counter for the frequency of contacts between the small moelcule of corresponding index and the pocket
-
 
         ### For cases where numbering starts from 1000, we use the updated pocket residues
         line1=contacts.readline()
@@ -269,8 +270,8 @@ def small_molecule_MHCI(inputfile, chain_M='M', chain_P='P'):
                         except ValueError:
                             continue
 
-    if np_max(count_molecule)>0:
-        small_mol = molecule_in_pocket[np_argmax(count_molecule)]
+    if np.max(count_molecule)>0:
+        small_mol = molecule_in_pocket[np.argmax(count_molecule)]
         return small_mol
     else:
         return None

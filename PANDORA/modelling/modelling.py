@@ -12,7 +12,6 @@ import csv
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
 from Bio.SubsMat import MatrixInfo
 
 from random import choice
@@ -20,7 +19,7 @@ from joblib import Parallel, delayed
 from multiprocessing import Manager
 
 #PANDORA modules
-sys.path.append('/home/dariom/PANDORA_master/PANDORA') #TODO: change in final release
+sys.path.append('/home/dariom/PANDORA_master_to_package/PANDORA') #TODO: change in final release
 from parsing import utils
 
 def check_model_existance(k, outdir_name, filename_start, filename_end):
@@ -206,13 +205,13 @@ def select_template(IDD, allele, length, pept, print_results): #homolog_allele,
 
     return((template, template_ID, template_pept))
 
-def make_ali_files(templ_sequences, target_sequences, template_ID, query, template_pept, pept, length, remove_temp_outputs):
+def make_ali_files(templ_sequences, target_sequence, template_ID, query, template_pept, pept, length, remove_temp_outputs):
     '''
     Aligns target sequence and template sequence
     '''
 
-    template_seqr = SeqRecord(Seq(templ_sequences['M'], IUPAC.protein), id=template_ID, name = ID)
-    target_seqr = SeqRecord(Seq(target_sequences, IUPAC.protein), id=query, name = query)
+    template_seqr = SeqRecord(Seq(templ_sequences['M']), id=template_ID, name = ID)
+    target_seqr = SeqRecord(Seq(target_sequence), id=query, name = query)
     SeqIO.write((template_seqr, target_seqr), "%s.fasta" %template_ID, "fasta")
 
     os.system('muscle -in %s.fasta -out %s.afa -quiet' %(template_ID, template_ID))
@@ -227,7 +226,6 @@ def make_ali_files(templ_sequences, target_sequences, template_ID, query, templa
     template_ini_flag = False
     modeller_renum = 1
     for line in open('%s.afa' %template_ID, 'r'):
-        #print(line)
         if line.startswith('>') and i == 0:
             final_alifile.write('>P1;' + line.split(' ')[0].strip('>') + '\n')
             final_alifile.write('structure:../../../data/PDBs/pMHCI/%s_MP.pdb:%s:M:%s:P::::\n' %(template_ID, str(templ_sequences['M_st_ID']), str(len(ali_template_pept))))
