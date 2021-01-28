@@ -16,7 +16,8 @@ from operator import xor
 from PANDORA.parsing.utils import get_seqs
 from PANDORA.parsing.utils import remove_error_templates
 from PANDORA.parsing.utils import change_sep_in_ser
-import PANDORA.parsing.del_uncommon_residues_pdbs as durp
+from PANDORA.parsing.utils import move_uncommon_pdbf
+#import PANDORA.parsing.del_uncommon_residues_pdbs as durp
 
 
 def get_chainid_alleles_MHCI(pdbf):
@@ -384,7 +385,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
     #os.system('python ./tools/change_sep_in_ser.py %s/' %outdir)
     change_sep_in_ser(outdir)
     print('Removing uncommon residue files')
-    uncommon_pdbs = durp.move_uncommon_pdbf(outdir + '/', unused_pdbs_dir + '/non_canonical_res')
+    uncommon_pdbs = move_uncommon_pdbf(outdir + '/', unused_pdbs_dir + '/non_canonical_res/')
     for u_pdb in uncommon_pdbs:
         try:
             del IDs_dict[u_pdb]
@@ -404,7 +405,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
                          '#4': err_4, '#5': err_5, '#6': err_6, '#7': err_7}
 
     if out_pkl:
-        IDd = open("data/csv_pkl_files/%s" %out_pkl, "wb")
+        IDd = open("PANDORA_files/data/csv_pkl_files/%s" %out_pkl, "wb")
         pickle.dump(IDs_dict, IDd)
         pickle.dump(bad_IDs, IDd)
         IDd.close()

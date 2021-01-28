@@ -101,16 +101,38 @@ best_rmsds = manager.dict()
 
 ###########################################
 
-def na_model(k, pept_seq, best_rmsds):
-    t1 = time.time()
-    #for k, pept_seq in zip(range(pepts_start, pepts_end), pept_seqs[pepts_start:pepts_end]):
-    #for k, pept_seq in enumerate(pept_seqs[575:576]):
+def na_model(k, target_info, best_rmsds):
+    '''
+    Prepares and performs the model for one case with the following steps:
+    1. Data parsing and Preparation
+    2. Template selection
+    3. Anchor selection
+    4. Write alingment files and MODELLER .ini file
+    5. Retrive distance restrains
+    6. Prepare MODELLER modelling scripts
+    7. Run modeller
+    8. Models benchmark (only for cross-validation purposes)
 
+    Args:
+        k(int) : query index for batch jobs. It is used to keep track of the query
+        target_info(list) : list containing target PDB ID, peptide sequence and MHC allele
+        best_rmsds(dict) : shared dictionary of top models l-RMSDs
+    '''
+
+    ###############################
+    ########## Step 1 ############
+    ###############################
+
+    t1 = time.time()
+
+    ### Set some useful variables
     query = 'query_' + str(k + 1)
-    target_id = pept_seq[0]
-    pept = pept_seq[1]
-    allele = pept_seq[2]
+    target_id = target_info[0]
+    pept = target_info[1]
+    allele = target_info[2]
     length = len(pept)
+
+    ### Retrieve the target M chain sequence
     try:
         M_chain = utils.get_seqs('./PANDORA_files/data/PDBs/pMHCI/%s_MP.pdb' %target_id)['M']
     except FileNotFoundError:
@@ -124,10 +146,18 @@ def na_model(k, pept_seq, best_rmsds):
         print('###')
         return (target_id, pept, allele, "NA", "NA", "NA", "Invalid Peptide Length")
 
+
+    ### Copying the main ID Dictionary to a fake one for cross validation.
+    ### This IDD will have all the IDs and structure info except the target one.
     IDD = copy.deepcopy(main_IDD)
     del IDD[target_id]
 
+
     ### Organizing Allele IDs in a dictionary ###
+    ### This dictionary contains alleles as keys and structure IDs as values,
+    ### reporting which structures belong to which allele.
+    ### Please note that since some structure can be identified as belonging to
+    ### multiple alleles, thi disctionary will be ambiguous
     allele_list = []
     for key in IDD:
         allele_list += IDD[key]['allele']
@@ -138,7 +168,7 @@ def na_model(k, pept_seq, best_rmsds):
         for multi_allele in IDD[key]['allele']:
             allele_ID[multi_allele].append(key)
 
-    #Check if this query has been modelled already
+    ### Check if this query has been modelled already
     ext_flag = False
     print( '## Wokring on %s, structure %s ##' %(query, target_id))
     ext_flag = ext_flag = modelling.check_model_existance(k, outdir_name, filename_start, filename_end)
@@ -146,27 +176,36 @@ def na_model(k, pept_seq, best_rmsds):
         print('Exiting here. This is only a DEBUG message')
         return None
 
-    #Correct allele name depending on available alleles
+    ### Correct allele name depending on available template alleles
     allele = modelling.allele_name_adapter(allele, allele_ID)
 
-    #Select template
+    ###############################
+    ########## Step 2 ############
+    ###############################
+
+    ### Select template
     sel_template = modelling.select_template(IDD, allele, homolog_allele, length, pept, print_results)
 
-    ###################################
-    #   CHANGING WORKING DIRECTORY
-    ###################################
-
+    ### Retrieve template PDB sequences
     sequences, empty_seqs = utils.get_pdb_seq([template_ID])
 
+    ### Set output directory
     outdir = ('outputs/%s/%s_%s' %(outdir_name, template_ID.lower(), target_id))
     try:
         os.mkdir(outdir)
     except FileExistsError:
         print('WARNING: Existing directory.')
         return None
+
+    ### Changing working directory
     os.chdir(outdir)
 
-    #Obtain template anchor positions
+
+    ###############################
+    ########## Step 3 ############
+    ###############################
+
+    ### Obtain template anchor positions
     try:
         anch_1, anch_2 = get_anchors('../../../data/PDBs/pMHCI/%s_MP.pdb' %target_id, rm_outfile = True)
         anch_1 -= 1
@@ -183,21 +222,30 @@ def na_model(k, pept_seq, best_rmsds):
         os.chdir('../../../')
         return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
 
-    #Write alignment file.
+    ###############################
+    ########## Step 4 ############
+    ###############################
+
+    ### Write alignment file.
     final_alifile_name = modelling.make_ali_files(sequences[0], M_chain, template_ID, query, template_pept, pept, length, remove_temp_outputs)
 
-    #Write and running MODELLER scripts to produce .ini file
+    ### Write and running MODELLER scripts to produce .ini file
     modelling.write_ini_scripts(anch_1, anch_2, template_ID, final_alifile_name, query)
-    #If default python is not python3, change the following line
+
+    ### If default python is not python3, change the following line
     os.popen('python cmd_modeller_ini.py').read()
 
     if remove_temp_outputs:
         os.system('rm cmd_modeller_ini.py')
 
-    # Calculate all Atom contacts
+    ###############################
+    ########## Step 5 ############
+    ###############################
+
+    ###  Calculate all Atom contacts
     os.popen('../../../../PANDORA/tools/contact-chainID_allAtoms %s.ini %s > all_contacts_%s.list' %(target_id, cutoff, template_ID)).read()
 
-    #Select only the anchors contacts
+    ### Select only the anchors contacts
     anch_1_same = False
     anch_2_same = False
 
@@ -248,6 +296,12 @@ def na_model(k, pept_seq, best_rmsds):
     if remove_temp_outputs:
         os.system('rm all_contacts_%s.list' %template_ID)
 
+    ###############################
+    ########## Step 6 ############
+    ###############################
+
+    modelling.write_modelling_scripts(anch_1, anch_2, template_ID, final_alifile_name)
+    '''
     with open('MyLoop.py', 'w') as myloopscript:
         MyL_temp = open('../../../../PANDORA/modelling/MyLoop_template.py', 'r')
         for line in MyL_temp:
@@ -269,6 +323,11 @@ def na_model(k, pept_seq, best_rmsds):
             else:
                 modscript.write(line)
         cmd_m_temp.close()
+    '''
+
+    ###############################
+    ########## Step 7 ############
+    ###############################
 
     #Running MODELLER
     smt = time.time()
@@ -283,11 +342,16 @@ def na_model(k, pept_seq, best_rmsds):
         os.chdir('../../../')
         return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in the modelling')
     else:
+        ###############################
+        ########## Step 1 ############
+        ###############################
+
         ########################
         # BENCHMARKING #
+        ########################
 
         #extracting molpdf and DOPE scores from modeller.log
-        os.system('python ../../../parsing/get_molpdf_dope_scores.py modeller.log')
+        os.system('python ../../../../PANDORA/parsing/get_molpdf_dope_scores.py modeller.log')
 
         #Calculating RMSD with target real structure
 
@@ -299,18 +363,18 @@ def na_model(k, pept_seq, best_rmsds):
         for f in os.listdir('./'):
             if f.startswith(target_id+'.'+filename_start) and f.endswith(filename_end):
                 break
-        os.popen('bash ../../../tools/map_2_pdb.sh %s reres_%s.pdb > ref.pdb' %(f, target_id)).read()
-        os.popen('python ../../../tools/pdb_fast_lzone_mhc_fitG.py ref.pdb').read()
+        os.popen('bash ../../../../PANDORA/tools/map_2_pdb.sh %s reres_%s.pdb > ref.pdb' %(f, target_id)).read()
+        os.popen('python ../../../../PANDORA/tools/pdb_fast_lzone_mhc_fitG.py ref.pdb').read()
 
         with open('file.list', 'w') as out:
             for f in os.listdir('./'):
                 if f.startswith(target_id+'.'+filename_start) and f.endswith(filename_end):
                     out.write('matched_'+ f + '\n')
-                    os.popen('bash ../../../tools/map_2_pdb.sh ref.pdb %s >  matched_%s' %(f,f)).read()
+                    os.popen('bash ../../../../PANDORA/tools/map_2_pdb.sh ref.pdb %s >  matched_%s' %(f,f)).read()
 
-        os.popen('../../../tools/CA_l-rmsd-calc.csh ref file.list').read()
-        os.popen('../../../tools/CA_backbone_l-rmsd-calc.csh ref file.list').read()
-        os.popen('../../../tools/CA_backbone_CB_l-rmsd-calc.csh ref file.list').read()
+        os.popen('../../../../PANDORA/tools/CA_l-rmsd-calc.csh ref file.list').read()
+        os.popen('../../../../PANDORA/tools/CA_backbone_l-rmsd-calc.csh ref file.list').read()
+        os.popen('../../../../PANDORA/tools/CA_backbone_CB_l-rmsd-calc.csh ref file.list').read()
 
         try:
             models_dict = {}
@@ -380,7 +444,7 @@ def na_model(k, pept_seq, best_rmsds):
 ######################################################################################################
 ######################################################################################################
 
-non_modelled = Parallel(n_jobs = n_cores)(delayed(na_model[:100])(k, pept_seq, best_rmsds) for k, pept_seq in enumerate(pept_seqs[pepts_start:pepts_end]))
+non_modelled = Parallel(n_jobs = n_cores)(delayed(na_model[:100])(k, target_info, best_rmsds) for k, target_info in enumerate(pept_seqs[pepts_start:pepts_end]))
 non_modelled = filter(None, non_modelled)
 
 best_rmsds = dict(best_rmsds)

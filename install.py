@@ -7,6 +7,7 @@ os.system('mkdir ./PANDORA_files/data/PDBs/pMHCI')
 os.system('mkdir ./PANDORA_files/data/PDBs/IMGT_retrieved/')
 os.system('mkdir ./PANDORA_files/data/PDBs/unused_templates')
 os.system('mkdir ./PANDORA_files/data/PDBs/unused_templates/parsing_errors')
+os.system('mkdir ./PANDORA_files/data/PDBs/unused_templates/non_canonical_res')
 os.system('mkdir ./PANDORA_files/data/dist_files')
 
 if "contact-chainID_allAtoms" not in os.listdir('./PANDORA/tools'):

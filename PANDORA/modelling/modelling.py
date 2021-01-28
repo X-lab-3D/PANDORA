@@ -52,7 +52,6 @@ def allele_name_adapter(allele, allele_ID):
 
     Args:
         allele(str) : Allele name
-
         allele_ID(dict) : Dictionary of structure IDs (values) in the dataset for each allele (keys)
     '''
     #homolog_allele = '--NONE--'
@@ -140,13 +139,9 @@ def select_template(IDD, allele, length, pept, print_results): #homolog_allele,
 
     Args:
         IDD(dict) : dictionary containing all the templates ID and relative informations
-
         allele(str) : target allele name
-
         length(int) : target peptide length
-
         pept(str) : target peptide sequence
-
         print_result(bool) : if True prints out the selected template structure and peptide
 
     '''
@@ -279,7 +274,7 @@ def write_ini_scripts(anch_1, anch_2, template_ID, final_alifile_name, query):
             cmd_m_temp.close()
 
 def write_contact_list(anch_1, anch_2, anch_1_same, anch_2_same):
-    
+
     with open( 'all_contacts_%s.list' %template_ID, 'r') as contacts:                             # Template contacts
         with open('contacts_%s.list' %template_ID, 'w') as output:                                                                ### If the target peptide is longer than the templtate peptide #TODO: This can be removed?
             for line in contacts:
@@ -307,3 +302,26 @@ def write_contact_list(anch_1, anch_2, anch_1_same, anch_2_same):
                         else:
                             if 'CA' in p_atom or 'CB' in p_atom:
                                 output.write(line)
+
+def write_modelling_scripts(anch_1, anch_2, template_ID, final_alifile_name):
+    with open('MyLoop.py', 'w') as myloopscript:
+        MyL_temp = open('../../../../PANDORA/modelling/MyLoop_template.py', 'r')
+        for line in MyL_temp:
+            if 'self.residue_range' in line:
+                myloopscript.write(line %(anch_1 + 2, anch_2))
+            elif 'contact_file = open' in line:
+                myloopscript.write(line %template_ID)
+            else:
+                myloopscript.write(line)
+        MyL_temp.close()
+
+    with open('cmd_modeller.py', 'w') as modscript:
+        cmd_m_temp = open('../../../../PANDORA/modelling/cmd_modeller_template.py', 'r')
+        for line in cmd_m_temp:
+            if 'alnfile' in line:
+                modscript.write(line %final_alifile_name)
+            elif 'knowns' in line:
+                modscript.write(line %(template_ID, target_id))
+            else:
+                modscript.write(line)
+        cmd_m_temp.close()
