@@ -1,5 +1,0 @@
-ID	ERROR_ID	ERROR	ACTION
-4WJ5	#7	multiple non-canonical residues in Chain P #1,2,10	Removed from dataset
-6Q3K	#8	ALA 1A and GLY 1 in Chain M	ALA 1A manually removed
-5IUE	#11	Only structure for HLA-F*0101	Removed from dataset
-4Z78	#11	Different structures in the pdb	Removed from dataset
