@@ -1,15 +1,17 @@
-# Datas folder. Tracking only csv_pkl_files and crucial (empty) folders.
-/PANDORA_files/data/Alignments
-/PANDORA_files/data/FASTAs
-/PANDORA_files/data/PDBs/*
-/PANDORA_files/data/temp
-/PANDORA_files/data/bkup_PDBs
-/PANDORA_files/data/Targets/*
-/PANDORA_files/data/unused_templates/*
-/PANDORA_files/data/dist_files/*
-/PANDORA_files/data/allele_profiles/*
-/PANDORA_files/data/netMHCpan_set/*
-/PANDORA_files/outputs/*
+# Data folders.
+/PANDORA_files
+#/PANDORA_files/csv_pkl_files
+#/PANDORA_files/data/Alignments
+#/PANDORA_files/data/FASTAs
+#/PANDORA_files/data/PDBs/*
+#/PANDORA_files/data/temp
+#/PANDORA_files/data/bkup_PDBs
+#/PANDORA_files/data/Targets/*
+#/PANDORA_files/data/unused_templates/*
+#/PANDORA_files/data/dist_files/*
+#/PANDORA_files/data/allele_profiles/*
+#/PANDORA_files/data/netMHCpan_set/*
+#/PANDORA_files/outputs/*
 
 #Secondary projects
 /william
