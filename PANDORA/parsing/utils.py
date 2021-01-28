@@ -167,7 +167,7 @@ def change_sep_in_ser(indir):
                 outfile.write(line)
         outfile.close()
 
-        os.system('mv %s %s' %(outfile_name, indir + pdbfile))
+        os.system('mv %s %s' %(outfile_name, indir +'/' + pdbfile))
 
 def move_uncommon_pdbf(indir, outdir, delete_files = False):
     res_list = ['ALA', 'ILE', 'LEU', 'VAL', 'PHE', 'GLY', 'ARG', 'LYS', 'HIS', 'ASN',
@@ -199,6 +199,82 @@ def move_uncommon_pdbf(indir, outdir, delete_files = False):
                 os.system('mv %s/%s %s/' %(indir, pdbf, outdir))
 
     return list(set(uncommon_pdbs))
+
+def small_molecule_MHCI(inputfile, chain_M='M', chain_P='P'):
+    '''
+    @author: Rafaella Buzatu
+    Takes as input a file (which can be either a pdb file or a contacts list)
+    name of chain M and name of chain P
+
+    Args:
+        inputfile(str) : Path to either a pdb file or a contacts list
+        chain_M(str) : chain ID of MHC-I alpha chain
+        chain_P(str) : chain ID of MHC-I bound peptide
+
+    Returns:
+        small_mol (str) : Name of the small molecule in the pocket. If no
+                          molecules are present, returns None
+    #function outputs the name of the small molecule if there is one inside the binding pocket; otherwise, returns None
+    '''
+
+    cutoff =6
+    pocket = [ 7, 9, 26, 28, 1007, 1009, 1024, 1026]
+
+    ### if the input is a pdb file, the contacts file is calculated
+    if inputfile.endswith('.pdb'):
+        contactfile = 'all_contacts_%s.list' %inputfile.split('/')[-1].split('.')[0]
+        os.popen('./PANDORA/tools/contact-chainID_allAtoms %s %s > %s ' %( inputfile, cutoff, contactfile)).read()
+
+    ### if the contacts file list is used as input, it is used further in the script
+    elif inputfile.endswith('.list'):
+        contactfile = inputfile
+
+    with open(contactfile) as contacts:
+
+        molecule_in_pocket = []  #list where the name of small molecule(s) is/are appended when found in contact list
+        count_molecule = [ 0, 0, 0, 0, 0]  #counter for the frequency of contacts between the small moelcule of corresponding index and the pocket
+
+
+        ### For cases where numbering starts from 1000, we use the updated pocket residues
+        line1=contacts.readline()
+        m_aa_id_check = line1.split("\t")[2]
+        if int(m_aa_id_check) >1000:
+            for i in pocket:
+                i = i+1000
+
+        for line in contacts:
+            cm_aa_id = line.split("\t")[1]
+            m_aa_id = line.split("\t")[2]
+            cp_aa_id = line.split("\t")[6]
+            molecule = line.split("\t")[5]
+
+            ### Check for contacts that are not between the MHC chain
+            ### and peptide or water molecules
+            if cm_aa_id == chain_M:
+                if cp_aa_id != chain_P  and cp_aa_id != 'B' and molecule != 'HOH':
+
+                    ### Once a suitable contact is found, molecule name is appended in
+                    ### moelcule_in_pocket if not previously there
+                    ### and the frequency count increases
+                    for aa in pocket:
+                        try:
+                            if int(m_aa_id) == aa:
+
+                                if molecule in molecule_in_pocket:
+                                    count_molecule [molecule_in_pocket.index(molecule)] += 1
+                                else:
+                                    molecule_in_pocket.append(molecule);
+                                    count_molecule [molecule_in_pocket.index(molecule)] = 1
+
+                        except ValueError:
+                            continue
+
+    if np_max(count_molecule)>0:
+        small_mol = molecule_in_pocket[np_argmax(count_molecule)]
+        return small_mol
+    else:
+        return None
+
 
 def get_pdb_seq(IDs):
     sequences = []
