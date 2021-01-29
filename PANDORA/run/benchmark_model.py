@@ -32,11 +32,13 @@ from PANDORA.modelling import modelling
 #url_protocols.download_unzip_imgt_structures(del_inn_files = True, del_kabat_files = True)
 IDs_list = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
 
+'''
 IDs_list = []
 with open( PANDORA.PANDORA_data + '/csv_pkl_files/all_MH1_IDs.tsv', 'r') as infile:
     next(infile)
     for line in infile:
         IDs_list.append(line.replace('\n',''))
+'''
 
 #main_IDD, bad_IDs = structures_parser.parse_pMHCI_pdbs(IDs_list)
 
@@ -175,9 +177,10 @@ def na_model(k, target_info, best_rmsds):
             allele_ID[multi_allele].append(key)
 
     ### Check if this query has been modelled already
+    
     ext_flag = False
     print( '## Wokring on %s, structure %s ##' %(query, target_id))
-    ext_flag = ext_flag = modelling.check_model_existance(k, outdir_name, filename_start, filename_end)
+    ext_flag = modelling.check_model_existance(k, outdir_name, filename_start, filename_end)
     if ext_flag == True:
         print('Exiting here. This is only a DEBUG message')
         return None
@@ -203,10 +206,11 @@ def na_model(k, target_info, best_rmsds):
         os.mkdir(outdir)
     except FileExistsError:
         print('WARNING: Existing directory.')
-        return None
+        #return None
 
     ### Changing working directory
     os.chdir(outdir)
+    print('CWD: %s' %os.getcwd())
 
 
     ###############################
@@ -215,7 +219,7 @@ def na_model(k, target_info, best_rmsds):
 
     ### Obtain template anchor positions
     try:
-        anch_1, anch_2 = get_anchors( PANDORA.PANDORA_data + '/PDBs/pMHCI/%s_MP.pdb' %target_id, rm_outfile = True)
+        anch_1, anch_2 = get_anchors( PANDORA.PANDORA_data + '/PDBs/pMHCI/%s_MP.pdb' %target_id, rm_outfile = False)
         anch_1 -= 1
         anch_2 -= 1
     except:
@@ -223,7 +227,7 @@ def na_model(k, target_info, best_rmsds):
         return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
 
     try:
-        temp_anch_1, temp_anch_2 = get_anchors( PANDORA.PANDORA_data + '/PDBs/pMHCI/%s_MP.pdb' %template_ID, rm_outfile = True)
+        temp_anch_1, temp_anch_2 = get_anchors(PANDORA.PANDORA_data + '/PDBs/pMHCI/%s_MP.pdb' %template_ID, rm_outfile = False)
         temp_anch_1 -= 1
         temp_anch_2 -= 1
     except:
@@ -234,6 +238,9 @@ def na_model(k, target_info, best_rmsds):
     ########## Step 4 ############
     ###############################
 
+    print(sequences[0], M_chain, template_ID, target_id, 
+        query, template_pept, temp_anch_1, temp_anch_2, pept,
+        anch_1, anch_2, length, remove_temp_outputs)
     ### Write alignment file.
     final_alifile_name = modelling.make_ali_files(sequences[0], M_chain, template_ID, target_id, 
                                                   query, template_pept, temp_anch_1, temp_anch_2, pept,

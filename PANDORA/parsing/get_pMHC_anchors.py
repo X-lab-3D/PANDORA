@@ -25,7 +25,8 @@ def get_anchors_pMHCI(pdbfile, rm_outfile=False):
 
 
     ### Calculating all Atom contacts
-    os.popen(PANDORA.PANDORA_path + '/tools/contact-chainID_allAtoms %s %s > ./all_contacts_for_anchors_%s.list' %(pdbfile, cutoff, pdbfile.split('/')[-1].split('.')[0])).read()
+    os.popen(PANDORA.PANDORA_path + '/tools/contact-chainID_allAtoms '+ pdbfile +' '+ cutoff +
+             ' > ./all_contacts_for_anchors_'+ pdbfile.split('/')[-1].split('.')[0] +'.list').read()
 
     with open( './all_contacts_for_anchors_%s.list' %pdbfile.split('/')[-1].split('.')[0], 'r') as contacts:                             # Template contacts
         # with open('./anchors_files/peptide_anchors_%s.list' %pdbfile.split('/')[-1].split('.')[0], 'w') as output:
@@ -79,9 +80,9 @@ def get_anchors_pMHCII(pdbfile):
     if not os.path.isdir('./contact_files'):
         os.mkdir ('./contact_files')
 
-    os.popen(PANDORA.PANDORA_path + '/tools/contact-chainID_allAtoms %s %s > contact_files/all_contacts_%s.list' %(pdbfile, cutoff, pdbfile.split('/')[-1].split('.')[0])).read()
+    os.popen(PANDORA.PANDORA_path + '/tools/contact-chainID_allAtoms %s %s > all_contacts_%s.list' %(pdbfile, cutoff, pdbfile.split('/')[-1].split('.')[0])).read()
 
-    with open( './contact_files/all_contacts_%s.list' %pdbfile.split('/')[-1].split('.')[0], 'r') as contacts:                             # Template contacts
+    with open( 'all_contacts_%s.list' %pdbfile.split('/')[-1].split('.')[0], 'r') as contacts:                             # Template contacts
         # vectors that will be used to count the frequency; each value represents the contact frequency between the
         #previously defined pocket residues and the peptide residue corresponding to the vector index
         contact_1 = [0]*30

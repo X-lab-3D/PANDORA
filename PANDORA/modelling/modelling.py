@@ -12,14 +12,12 @@ import csv
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.SubsMat import MatrixInfo
-#from Bio.Align import substitution_matrices
-#PAM30 = substitution_matrices.load('PAM30')
+#from Bio.SubsMat import MatrixInfo
+from Bio.Align import substitution_matrices
+PAM30 = substitution_matrices.load('PAM30')
 
 
 from random import choice
-from joblib import Parallel, delayed
-from multiprocessing import Manager
 
 #PANDORA modules
 sys.path.append('/home/dariom/PANDORA_master_to_package/') #TODO: change in final release
@@ -167,11 +165,13 @@ def select_template(IDD, target_id, allele, length, pept, print_results): #homol
         score -= ((abs(length - len(temp_pept)) ** 2.4)) #!!!  ## Gap Penalty
         for i, (aa, bb) in enumerate(zip(pept[:min_len], temp_pept[:min_len])):
             try:
-                gain = MatrixInfo.pam30[aa, bb]
+                #gain = MatrixInfo.pam30[aa, bb]
+                gain = PAM30[aa, bb]
                 score += gain
             except KeyError:
                 try:
-                    gain = MatrixInfo.pam30[bb, aa]
+                    #gain = MatrixInfo.pam30[bb, aa]
+                    gain = PAM30[bb, aa]
                     score += gain
                 except KeyError:
                     score = -50
