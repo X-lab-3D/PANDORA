@@ -204,8 +204,10 @@ def na_model(k, target_info, best_rmsds):
     outdir = ('PANDORA_files/outputs/%s/%s_%s' %(outdir_name, template_ID.lower(), target_id))
     try:
         os.mkdir(outdir)
-    except FileExistsError:
-        print('WARNING: Existing directory.')
+    except FileNotFoundError: #FileExistsError:
+        os.mkdir('./TESTDIR')
+        raise Exception('TESTDIR generated')
+        #print('WARNING: Existing directory.')
         #return None
 
     ### Changing working directory
@@ -218,21 +220,21 @@ def na_model(k, target_info, best_rmsds):
     ###############################
 
     ### Obtain template anchor positions
-    try:
-        anch_1, anch_2 = get_anchors( PANDORA.PANDORA_data + '/PDBs/pMHCI/%s_MP.pdb' %target_id, rm_outfile = False)
-        anch_1 -= 1
-        anch_2 -= 1
-    except:
-        os.chdir('../../../')
-        return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
+    #try:
+    anch_1, anch_2 = get_anchors( PANDORA.PANDORA_data + '/PDBs/pMHCI/%s_MP.pdb' %target_id, rm_outfile = False)
+    anch_1 -= 1
+    anch_2 -= 1
+    #except:
+    #    os.chdir('../../../../')
+    #    return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
 
-    try:
-        temp_anch_1, temp_anch_2 = get_anchors(PANDORA.PANDORA_data + '/PDBs/pMHCI/%s_MP.pdb' %template_ID, rm_outfile = False)
-        temp_anch_1 -= 1
-        temp_anch_2 -= 1
-    except:
-        os.chdir('../../../')
-        return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
+    #try:
+    temp_anch_1, temp_anch_2 = get_anchors(PANDORA.PANDORA_data + '/PDBs/pMHCI/%s_MP.pdb' %template_ID, rm_outfile = False)
+    temp_anch_1 -= 1
+    temp_anch_2 -= 1
+    #except:
+    #    os.chdir('../../../../')
+    #    return (target_id, pept, allele, template_ID, template_pept, IDD[template_ID]['allele'], 'Something gone wrong in defining target anchors')
 
     ###############################
     ########## Step 4 ############
@@ -264,7 +266,7 @@ def na_model(k, target_info, best_rmsds):
 
     dist_file ='all_contacts_'+ template_ID +'.list'
     os.system(PANDORA.PANDORA_path + '/tools/contact-chainID_allAtoms ' 
-              + target_id + '.ini ' + cutoff +' > ' + dist_file)
+              + query + '.ini ' + cutoff +' > ' + dist_file)
     '''
     ### Select only the anchors contacts
     anch_1_same = False
@@ -322,7 +324,7 @@ def na_model(k, target_info, best_rmsds):
     ########## Step 6 ############
     ###############################
 
-    modelling.write_modelling_scripts(anch_1, anch_2, template_ID, target_id, final_alifile_name)
+    modelling.write_modelling_scripts(anch_1, anch_2, template_ID, query, final_alifile_name)
     '''
     with open('MyLoop.py', 'w') as myloopscript:
         MyL_temp = open('../../../../PANDORA/modelling/MyLoop_template.py', 'r')
@@ -466,7 +468,7 @@ def na_model(k, target_info, best_rmsds):
 ######################################################################################################
 ######################################################################################################
 
-non_modelled = Parallel(n_jobs = n_cores)(delayed(na_model)(k, target_info, best_rmsds) for k, target_info in enumerate(pept_seqs[pepts_start:pepts_end]))
+non_modelled = Parallel(n_jobs = n_cores, backend='multiprocessing', verbose = 1)(delayed(na_model)(k, target_info, best_rmsds) for k, target_info in enumerate(pept_seqs[pepts_start:pepts_end]))
 non_modelled = filter(None, non_modelled)
 
 best_rmsds = dict(best_rmsds)

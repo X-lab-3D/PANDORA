@@ -16,7 +16,7 @@ import PANDORA
 ### ### Function that finds the anchors
 def get_anchors_pMHCI(pdbfile, rm_outfile=False):
 
-    cutoff =11.2
+    cutoff = str(11.2)
     ###Define pocket residues
     pocket = { 'pocket_anch1' : [ 24, 25, 35, 36],
               'pocket_anch2' : [81, 1005, 1027, 1028, 1029, 1030, 1033]}
@@ -73,7 +73,7 @@ def get_anchors_pMHCII(pdbfile):
 
     #uses the function below  pocket_residues () that adapts the pocket residue to the PDB numbering
     pocket_M, pocket_N = pocket_residues_pMHCII(pdbfile)
-    cutoff = 18
+    cutoff = str(18)
 
     #get all contacts between the chains with cutoff 18
     #contact file will be saved in a folder named contact_files

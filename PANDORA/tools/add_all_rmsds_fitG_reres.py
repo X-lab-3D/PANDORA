@@ -7,6 +7,7 @@ import sys
 from joblib import Parallel, delayed
 from multiprocessing import Manager
 
+import PANDORA
 n_cores = int(sys.argv[1])
 
 manager = Manager()

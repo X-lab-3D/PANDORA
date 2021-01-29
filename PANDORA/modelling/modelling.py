@@ -324,7 +324,7 @@ def write_contact_list(pept, anch_1, anch_2, template_pept, temp_anch_1, temp_an
                             if 'CA' in p_atom or 'CB' in p_atom:
                                 output.write(line)
 
-def write_modelling_scripts(anch_1, anch_2, template_ID, target_id, final_alifile_name):
+def write_modelling_scripts(anch_1, anch_2, template_ID, query, final_alifile_name):
     with open('MyLoop.py', 'w') as myloopscript:
         MyL_temp = open(PANDORA.PANDORA_path + '/modelling/MyLoop_template.py', 'r')
         for line in MyL_temp:
@@ -342,7 +342,7 @@ def write_modelling_scripts(anch_1, anch_2, template_ID, target_id, final_alifil
             if 'alnfile' in line:
                 modscript.write(line %final_alifile_name)
             elif 'knowns' in line:
-                modscript.write(line %(template_ID, target_id))
+                modscript.write(line %(template_ID, query))
             else:
                 modscript.write(line)
         cmd_m_temp.close()
