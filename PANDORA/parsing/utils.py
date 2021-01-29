@@ -15,6 +15,7 @@ import numpy as np
 from Bio.PDB import PDBParser
 from Bio.Data.SCOPData import protein_letters_3to1 as to_one_letter_code
 
+import PANDORA
 
 '''
 This file contains the following functions:
@@ -27,6 +28,7 @@ This file contains the following functions:
     - small_molecule_MHCI(inputfile, chain_M='M', chain_P='P')
     - get_pdb_seq(IDs)
     - get_seqs(pdbf)
+    - get_contacts_matrix(contactfile)
 '''
 
 
@@ -118,26 +120,23 @@ def get_peptides_w_star_from_csv(pepts_filename, pept_clmn, allele_clmn, delimit
     return seqs
 
 def remove_error_templates(pklfile):
-    try:
-        os.system('mkdir PANDORA_files/data/PDBs/unused_templates')
-    except:
-        pass
-    with open('PANDORA_files/data/csv_pkl_files/%s' %pklfile, 'rb') as inpkl:
+    with open(PANDORA.PANDORA_data +'/csv_pkl_files/%s' %pklfile, 'rb') as inpkl:
         IDD = pickle.load(inpkl)
         bad_IDs = pickle.load(inpkl)
         inpkl.close()
-    with open('PANDORA_files/data/csv_pkl_files/error_templates.tsv') as infile: #To be removed later
+    with open(PANDORA.PANDORA_data +'/csv_pkl_files/error_templates.tsv') as infile: #To be removed later
         r = csv.reader(infile, delimiter='\t')
         for i, row in enumerate(r):
             if i != 0:
                 try:
                     del IDD[row[0]]
                     bad_IDs[row[0]] = row[1]
-                    os.system('mv PANDORA_files/data/PDBs/pMHCI/%s_MP.pdb PANDORA_files/data/PDBs/unused_templates/' %row[0])
+                    os.system('mv '+ PANDORA.PANDORA_data +'/PDBs/pMHCI/'+row[0]+'_MP.pdb ' 
+                              + PANDORA.PANDORA_data +'/PDBs/unused_templates/')
                 except:
                     pass
         infile.close()
-    with open("PANDORA_files/data/csv_pkl_files/%s" %pklfile, "wb") as outpkl:
+    with open(PANDORA.PANDORA_data +'/csv_pkl_files/' + pklfile, 'wb') as outpkl:
         pickle.dump(IDD, outpkl)
         pickle.dump(bad_IDs, outpkl)
         outpkl.close()
@@ -202,7 +201,7 @@ def move_uncommon_pdbf(indir, outdir, delete_files = False):
 
     return list(set(uncommon_pdbs))
 
-def small_molecule_MHCI(inputfile, chain_M='M', chain_P='P'):
+def small_molecule_MHCI(inputfile, chain_M='M', chain_P='P', remove_dist_file = True):
     '''
     @author: Rafaella Buzatu
     Takes as input a file (which can be either a pdb file or a contacts list)
@@ -212,6 +211,7 @@ def small_molecule_MHCI(inputfile, chain_M='M', chain_P='P'):
         inputfile(str) : Path to either a pdb file or a contacts list
         chain_M(str) : chain ID of MHC-I alpha chain
         chain_P(str) : chain ID of MHC-I bound peptide
+        remove_dist_file(bool) : if True, deletes the distance file generated.
 
     Returns:
         small_mol (str) : Name of the small molecule in the pocket. If no
@@ -224,8 +224,8 @@ def small_molecule_MHCI(inputfile, chain_M='M', chain_P='P'):
 
     ### if the input is a pdb file, the contacts file is calculated
     if inputfile.endswith('.pdb'):
-        contactfile = './PANDORA_files/data/dist_files/all_contacts_%s.list' %inputfile.split('/')[-1].split('.')[0]
-        os.popen('./PANDORA/tools/contact-chainID_allAtoms %s %s > %s ' %( inputfile, cutoff, contactfile)).read()
+        contactfile = PANDORA.PANDORA_data +'/dist_files/all_contacts_'+ inputfile.split('/')[-1].split('.')[0] +'.list'
+        os.popen(PANDORA.PANDORA_path +'/tools/contact-chainID_allAtoms '+ inputfile +' '+ cutoff +'> '+ contactfile).read()
 
     ### if the contacts file list is used as input, it is used further in the script
     elif inputfile.endswith('.list'):
@@ -270,6 +270,9 @@ def small_molecule_MHCI(inputfile, chain_M='M', chain_P='P'):
                         except ValueError:
                             continue
 
+    if remove_dist_file == True:
+        os.system('rm %s ' %contactfile)
+        
     if np.max(count_molecule)>0:
         small_mol = molecule_in_pocket[np.argmax(count_molecule)]
         return small_mol
@@ -281,7 +284,7 @@ def get_pdb_seq(IDs):
     sequences = []
     empty_seqs = []
     for ID in IDs:
-        pdbf = 'PANDORA_files/data/PDBs/pMHCI/%s_MP.pdb' %ID
+        pdbf = PANDORA.PANDORA_data +'/PDBs/pMHCI/%s_MP.pdb' %ID
         seqs = get_seqs(pdbf)
         if seqs != {}:
             sequences.append(seqs)
@@ -308,3 +311,42 @@ def get_seqs(pdbf):
         seqs[chain.id] = sequence
         seqs['%s_st_ID' %chain.id] = start_ID
     return seqs
+
+def get_contacts_dict(contactfile):
+    temp_contacts_dict = {}
+    chains = []
+    with open(contactfile) as infile:
+        for line in infile:
+            donor = line.split('\t')[1]
+            acceptor  = line.split('\t')[6]
+            if donor not in chains and donor != ' ':
+                chains.append(donor)
+            if acceptor not in chains and acceptor != ' ':
+                chains.append(acceptor)
+            if donor != ' ' and acceptor != ' ':
+                try: 
+                    temp_contacts_dict[(donor, acceptor)] += 1
+                    temp_contacts_dict[(acceptor, donor)] += 1
+                except KeyError:
+                    temp_contacts_dict[(donor, acceptor)] = 1
+                    temp_contacts_dict[(acceptor, donor)] = 1
+    
+    contacts_dict = {}
+    for chain in chains:
+        contacts_dict[chain] = {}
+        for other_chain in chains: 
+            if other_chain != chain:
+                try:
+                    contacts_dict[chain][other_chain] = temp_contacts_dict[chain, other_chain]
+                except KeyError:
+                    try:
+                        contacts_dict[chain][other_chain] = temp_contacts_dict[other_chain, chain]
+                    except KeyError:
+                        contacts_dict[chain][other_chain] = 0
+        #contacts_dict[chain] = {key : 0 for key in chains if key != chain}
+        #try:
+        #    temp_contacts_dict[chain, ]
+    return contacts_dict
+            
+            
+            

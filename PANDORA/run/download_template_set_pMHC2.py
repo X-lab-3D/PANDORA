@@ -1,5 +1,8 @@
-from modelling_scripts import url_protocols
-from modelling_scripts import structures_parser
+import sys
+sys.path.append('./')
+
+from PANDORA.parsing import url_protocols
+from PANDORA.parsing import structures_parser
 
 
 #data_prep.download_ids_alleles_imgt(out_tsv = 'auto_generated_IDs_alleles_from_IMGT.tsv', out_pkl = 'IDs_and_alleles_identity_percs_from_imgt.pkl', print_outfiles = False)

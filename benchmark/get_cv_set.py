@@ -1,7 +1,7 @@
 import pickle
 import csv
 
-IDD_file = open('data/csv_pkl_files/IDs_and_bad_IDs_dict.pkl', 'rb')
+IDD_file = open('PANDORA_files/data/csv_pkl_files/IDs_and_bad_IDs_dict.pkl', 'rb')
 IDD = pickle.load(IDD_file)
 bad_IDs = pickle.load(IDD_file)
 IDD_file.close()

@@ -6,6 +6,8 @@ from pyparsing import nestedExpr
 import pickle
 from copy import deepcopy
 
+import PANDORA
+
 def download_unzip_imgt_structures(del_inn_files = True, del_kabat_files = True):
     '''
     Downloads the complete structural dataset
@@ -20,7 +22,7 @@ def download_unzip_imgt_structures(del_inn_files = True, del_kabat_files = True)
     '''
 
     # Changing working directory
-    os.chdir('./PANDORA_files/data/PDBs/IMGT_retrieved/')
+    os.chdir(PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/')
     # Downloading IMGT dataset
     os.system('wget http://www.imgt.org/download/3Dstructure-DB/IMGT3DFlatFiles.tgz')
     # Uncompressing
@@ -37,7 +39,7 @@ def download_unzip_imgt_structures(del_inn_files = True, del_kabat_files = True)
         os.system('rm IMGT3DFlatFiles/*.inn.gz')
     if del_kabat_files:
         os.system('rm IMGT3DFlatFiles/*.prot.gz')
-    os.chdir('../../../../')
+    #os.chdir('../../../../')
 
 def download_ids_imgt(ReceptorType, out_tsv = False):
     '''
@@ -74,7 +76,7 @@ def download_ids_imgt(ReceptorType, out_tsv = False):
     IDs_list = [x[3][-4:] for x in IDs_list]
 
     if out_tsv:
-        outfile = open('PANDORA_files/data/csv_pkl_files/' + out_tsv, 'w')
+        outfile = open(PANDORA.PANDORA_data + '/csv_pkl_files/' + out_tsv, 'w')
         outfile.write(ReceptorType + ' IMGT IDs\n')
         for ID in IDs_list:
             outfile.write(ID + '\n')

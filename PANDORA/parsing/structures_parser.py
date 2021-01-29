@@ -13,9 +13,8 @@ from copy import deepcopy
 from operator import xor
 
 ### TODO: Imports to be changed
+import PANDORA
 from PANDORA.parsing import utils
-from PANDORA.parsing.utils import change_sep_in_ser
-from PANDORA.parsing.utils import move_uncommon_pdbf
 
 
 def get_chainid_alleles_MHCI(pdbf):
@@ -151,7 +150,7 @@ def select_alleles_set_MHCI(chain_alleles_percs):
     return selected_alleles
 
 
-def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
+def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl', remove_dist_file = True):
     '''
     Parses pMHCI structures for PANDORA in the following steps for each structure:
     1. Uncompress and move to pMHCI folder (outdir).
@@ -166,10 +165,9 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
 
     # Variables
     IDs = ids_list
-    cwd = os.getcwd()
-    indir = 'PANDORA_files/data/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
-    outdir = 'PANDORA_files/data/PDBs/pMHCI'
-    unused_pdbs_dir = 'PANDORA_files/data/PDBs/unused_templates'
+    indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
+    outdir = PANDORA.PANDORA_data + '/PDBs/pMHCI'
+    unused_pdbs_dir = PANDORA.PANDORA_data + '/PDBs/unused_templates'
 
     bad_IDs = {}
     err_1 = 0
@@ -229,6 +227,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
         alpha_chains = get_chainid_alleles_MHCI(original_filepath)
 
         putative_pID = {}
+        ### Identify putative peptide and alpha chain
         for chain in seqs:
             if type(seqs[chain]) == str:
                 length = len(seqs[chain])
@@ -237,12 +236,16 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
                     aID = chain                          # TODO: Try another putative aID if the first does not work
                 elif length > 7 and length < 25:
                     putative_pID[chain] = 0
+
+        ### Check which putative peptide is close enough to the alpha chain
         if len(putative_pID) == 1:
             pID = list(putative_pID.keys())[0]
         elif len(putative_pID) > 1:
-            os.system('./PANDORA/tools/contact-chainID_allAtoms %s 5 > ./PANDORA_files/data/dist_files/%s.dist' %(original_filepath, ID))
+            dist_file = PANDORA.PANDORA_data + '/dist_files/'+ ID +'.list'
+            os.system(PANDORA.PANDORA_path + '/tools/contact-chainID_allAtoms ' + original_filepath + ' 5 > ' + 
+                      dist_file)
             contacts = []
-            for line in open('./PANDORA_files/data/dist_files/%s.dist' %ID, 'r'):
+            for line in open(dist_file, 'r'):
                 contact = (line.split('\t')[1], line.split('\t')[6])
                 contacts.append(contact)
             for candidate in putative_pID:
@@ -252,6 +255,8 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
                             putative_pID[candidate] += 1
             pID = (sorted(putative_pID.items(), key=lambda x: x[1], reverse = True))[0][0]
 
+            if remove_dist_file == True:
+                os.system('rm .%s/dist_files/%s.dist' %(PANDORA.PANDORA_data, ID))
         # Checking chainIDs
         try:
             if aID.islower() or pID.islower():
@@ -307,6 +312,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
 
         count_dict['allele'] = alleles
         count_dict['pept_seq'] = seqs[pID]
+        IDs_dict[ID] = count_dict
 
         ### Rename M and P chain, using an intermediate with persian M and P (in order to avoid ID overlaps)
         os.system('pdb_rplchain -%s:پ %s > %s' %(pID, original_filepath, a_renamed_filepath))
@@ -426,7 +432,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl'):
                          '#4': err_4, '#5': err_5, '#6': err_6, '#7': err_7}
 
     if out_pkl:
-        IDd = open("PANDORA_files/data/csv_pkl_files/%s" %out_pkl, "wb")
+        IDd = open(PANDORA.PANDORA_data + "/csv_pkl_files/%s" %out_pkl, "wb")
         pickle.dump(IDs_dict, IDd)
         pickle.dump(bad_IDs, IDd)
         IDd.close()
@@ -486,8 +492,9 @@ def get_chainid_alleles_MHCII(pdbf):
             pass
 
     ### Extracting alleles info
-    mhc_a_alleles = {}
-    mhc_b_alleles = {}
+    mhc_a_alleles = {x:[] for x in mhc_a}
+    mhc_b_alleles = {x:[] for x in mhc_b}
+    
     for chain in mhc_a:
         key = False
         for row in mhc_a[chain]:
@@ -497,7 +504,7 @@ def get_chainid_alleles_MHCII(pdbf):
                         key = 'G-ALPHA'
                     elif key:
                         if row[2] == 'gene' and row[3] == 'and' and row[4] == 'allele':
-                            mhc_a_alleles[key] += row[5:]
+                            mhc_a_alleles[chain] += row[5:]
                         else:
                             key = False
                 except IndexError:
@@ -509,10 +516,10 @@ def get_chainid_alleles_MHCII(pdbf):
             if row[0] == 'G-DOMAIN':
                 try:
                     if row[3] == 'description' and row[4] == 'G-BETA':
-                        key = 'G-ALPHA'
+                        key = 'G-BETA'
                     elif key:
                         if row[2] == 'gene' and row[3] == 'and' and row[4] == 'allele':
-                            mhc_b_alleles[key] += row[5:]
+                            mhc_b_alleles[chain] += row[5:]
                         else:
                             key = False
                 except IndexError:
@@ -530,7 +537,7 @@ def get_chainid_alleles_MHCII(pdbf):
                 perc = float(mhc_a_alleles[chain][key][3+(4*block)].replace('(', '').replace('%)', '').replace(',',''))
                 mhc_a_alleles_percs[chain][key][allele] = perc
     '''
-    return {'Aplha': mhc_a_alleles, 'Beta': mhc_b_alleles}
+    return {'Alpha': mhc_a_alleles, 'Beta': mhc_b_alleles}
 
 def parse_pMHCII_pdbs(ids_list, out_pkl = 'pMHC2_IDs_and_bad_IDs_dict.pkl'):
     '''
@@ -550,12 +557,18 @@ def parse_pMHCII_pdbs(ids_list, out_pkl = 'pMHC2_IDs_and_bad_IDs_dict.pkl'):
     # Variables
     IDs = ids_list
     cwd = os.getcwd()
-    indir = 'data/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
-    outdir = 'data/PDBs/pMHCII'
-    unused_pdbs_dir = 'data/unused_templates'
+    indir =  PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
+    outdir =  PANDORA.PANDORA_data + '/PDBs/pMHCII'
+    unused_pdbs_dir =  PANDORA.PANDORA_data + '/unused_templates'
 
     bad_IDs = {}
     err_1 = 0
+    err_2 = 0
+    err_3 = 0
+    err_4 = 0
+    err_5 = 0
+    err_6 = 0
+    err_7 = 0
 
     IDs_dict = {}
     for ID in IDs:
@@ -575,10 +588,93 @@ def parse_pMHCII_pdbs(ids_list, out_pkl = 'pMHC2_IDs_and_bad_IDs_dict.pkl'):
             continue
 
         original_filepath = '%s/%s.pdb' %(outdir, ID)
+        '''
+        selected_chains_filepath = '%s/%s_AC.pdb'%(outdir, ID)
+        a_renamed_filepath = '%s/%s_MC.pdb'%(outdir, ID)
+        new_filepath = '%s/%s_MP.pdb'%(outdir, ID)
+        header_filepath = '%s/%s_header.pdb'%(outdir, ID)
+        onlyM_filepath = '%s/%s_M.pdb'%(outdir, ID)
+        onlyP_filepath = '%s/%s_P.pdb'%(outdir, ID)
+        persian_filepath = '%s/%s_persian.pdb'%(outdir, ID)
+        '''
 
-        IDs_dict[ID] = get_chainid_alleles_MHCII(ID)
+        print('Parsing %s' %ID)
+        aID = False
+        bID = False
+        pID = False
+        count_dict = {}
 
-    with open(out_pkl, 'rb') as outfile:
+        try:
+            seqs = utils.get_seqs(original_filepath)
+        except (IndexError, ValueError):
+            bad_IDs[ID] = '#2 Parser'
+            print('ERROR TYPE #2: Something went wrong with PDBParser. %s added to Bad_IDs' %ID)
+            print('##################################')
+            err_2 += 1
+            os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
+            continue
+
+        ### Get Alpha and Beta chains info
+        chains = get_chainid_alleles_MHCII(original_filepath)
+        IDs_dict[ID] = chains
+        a_chains = list(chains['Alpha'].keys())
+        b_chains = list(chains['Beta'].keys())
+        
+        ### Identify putative peptides
+        putative_pID = []
+        for chain in seqs:
+            if type(seqs[chain]) == str:
+                length = len(seqs[chain])
+                if length > 7 and length < 25:
+                    putative_pID.append(chain)
+                    
+        if len(putative_pID) == 1:
+            pID = list(putative_pID.keys())[0]
+        elif len(putative_pID) > 1:
+            os.system( PANDORA.PANDORA_path + '/tools/contact-chainID_allAtoms %s 5 > ./PANDORA_files/data/dist_files/%s.list' %(original_filepath, ID))
+            contactfile =  PANDORA.PANDORA_data + '/dist_files/%s.list' %ID
+            contacts_dict = utils.get_contacts_dict(contactfile)
+            for a_chain in list(chains['Alpha'].keys()):
+                ab_contacts = {key : contacts_dict[key] for key in list(contacts_dict.keys())if key in b_chains}
+                b_chain = max(ab_contacts, key=ab_contacts.get)
+                if ab_contacts[b_chains] > 200:  # Check if alpha and beta chain have enough contacts. 
+                    break
+            # TODO: do the same thing with putative_pID
+                    
+               
+            
+        '''
+        putative_pID_contacts = {}
+        ### Identify putative peptide and alpha chain
+        for chain in seqs:
+            if type(seqs[chain]) == str:
+                length = len(seqs[chain])
+                count_dict[chain] = length
+                if (chain in list(chains['Alpha'].keys())): # and (not aID) and (length > 250 and length < 300)
+                    aID = chain                          # TODO: Try another putative aID if the first does not work
+                elif if (chain in list(chains['Beta'].keys())):
+                    bID = chain
+                elif length > 7 and length < 25:
+                    putative_pID_contacts[chain] = 0
+
+        ### Check which putative peptide is close enough to the alpha chain
+        if len(putative_pID) == 1:
+            pID = list(putative_pID.keys())[0]
+        elif len(putative_pID) > 1:
+            os.system('./PANDORA/tools/contact-chainID_allAtoms %s 5 > ./PANDORA_files/data/dist_files/%s.dist' %(original_filepath, ID))
+            contacts = []
+            for line in open('./PANDORA_files/data/dist_files/%s.dist' %ID, 'r'):
+                contact = (line.split('\t')[1], line.split('\t')[6])
+                contacts.append(contact)
+            for candidate in putative_pID:
+                for contact in contacts:
+                    if contact[0] == aID:
+                        if contact[1] == candidate:
+                            putative_pID[candidate] += 1
+            pID = (sorted(putative_pID.items(), key=lambda x: x[1], reverse = True))[0][0]
+            '''
+
+    with open( PANDORA.PANDORA_data + '/csv_pkl_files/%s' %out_pkl, 'wb') as outfile:
         pickle.dump(IDs_dict, outfile)
         pickle.dump(bad_IDs, outfile)
 

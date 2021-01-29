@@ -13,14 +13,18 @@ from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio.SubsMat import MatrixInfo
+#from Bio.Align import substitution_matrices
+#PAM30 = substitution_matrices.load('PAM30')
+
 
 from random import choice
 from joblib import Parallel, delayed
 from multiprocessing import Manager
 
 #PANDORA modules
-sys.path.append('/home/dariom/PANDORA_master_to_package/PANDORA') #TODO: change in final release
-from parsing import utils
+sys.path.append('/home/dariom/PANDORA_master_to_package/') #TODO: change in final release
+import PANDORA
+from PANDORA.parsing import utils
 
 def check_model_existance(k, outdir_name, filename_start, filename_end):
     '''
@@ -132,7 +136,7 @@ def allele_name_adapter(allele, allele_ID):
                 allele[a] = allele[a][:5]
     return(allele)#, homolog_allele)
 
-def select_template(IDD, allele, length, pept, print_results): #homolog_allele,
+def select_template(IDD, target_id, allele, length, pept, print_results): #homolog_allele,
     '''
     Select template for p:MHC I Modelling.
 
@@ -205,12 +209,14 @@ def select_template(IDD, allele, length, pept, print_results): #homolog_allele,
 
     return((template, template_ID, template_pept))
 
-def make_ali_files(templ_sequences, target_sequence, template_ID, query, template_pept, pept, length, remove_temp_outputs):
+def make_ali_files(templ_sequences, target_sequence, template_ID, target_id, 
+                   query, template_pept, temp_anch_1, temp_anch_2, pept, 
+                   anch_1, anch_2, length, remove_temp_outputs=True):
     '''
     Aligns target sequence and template sequence
     '''
 
-    template_seqr = SeqRecord(Seq(templ_sequences['M']), id=template_ID, name = ID)
+    template_seqr = SeqRecord(Seq(templ_sequences['M']), id=template_ID, name = template_ID)
     target_seqr = SeqRecord(Seq(target_sequence), id=query, name = query)
     SeqIO.write((template_seqr, target_seqr), "%s.fasta" %template_ID, "fasta")
 
@@ -228,7 +234,7 @@ def make_ali_files(templ_sequences, target_sequence, template_ID, query, templat
     for line in open('%s.afa' %template_ID, 'r'):
         if line.startswith('>') and i == 0:
             final_alifile.write('>P1;' + line.split(' ')[0].strip('>') + '\n')
-            final_alifile.write('structure:../../../data/PDBs/pMHCI/%s_MP.pdb:%s:M:%s:P::::\n' %(template_ID, str(templ_sequences['M_st_ID']), str(len(ali_template_pept))))
+            final_alifile.write('structure:%s/PDBs/pMHCI/%s_MP.pdb:%s:M:%s:P::::\n' %(PANDORA.PANDORA_data, template_ID, str(templ_sequences['M_st_ID']), str(len(ali_template_pept))))
             template_ini_flag = True
             i += 1
         elif line.startswith('>') and i == 1:
@@ -248,7 +254,7 @@ def make_ali_files(templ_sequences, target_sequence, template_ID, query, templat
 
 def write_ini_scripts(anch_1, anch_2, template_ID, final_alifile_name, query):
         with open('MyLoop.py', 'w') as myloopscript:
-            MyL_temp = open('../../../../PANDORA/modelling/MyLoop_template.py', 'r')
+            MyL_temp = open(PANDORA.PANDORA_path + '/modelling/MyLoop_template.py', 'r')
             for line in MyL_temp:
                 if 'self.residue_range' in line:
                     myloopscript.write(line %(anch_1 + 2, anch_2))
@@ -261,7 +267,7 @@ def write_ini_scripts(anch_1, anch_2, template_ID, final_alifile_name, query):
             MyL_temp.close()
 
         with open('cmd_modeller_ini.py', 'w') as modscript:
-            cmd_m_temp = open('../../../../PANDORA/modelling/cmd_modeller_ini.py', 'r')
+            cmd_m_temp = open(PANDORA.PANDORA_path + '/modelling/cmd_modeller_ini.py', 'r')
             for line in cmd_m_temp:
                 if 'alnfile' in line:
                     modscript.write(line %final_alifile_name)
@@ -271,14 +277,31 @@ def write_ini_scripts(anch_1, anch_2, template_ID, final_alifile_name, query):
                     modscript.write(line)
             cmd_m_temp.close()
 
-def write_contact_list(anch_1, anch_2, anch_1_same, anch_2_same):
+def write_contact_list(pept, anch_1, anch_2, template_pept, temp_anch_1, temp_anch_2, template_ID):
+    
+    ### Select only the anchors contacts
+    anch_1_same = False
+    anch_2_same = False
+
+    if template_pept[temp_anch_1] == pept[anch_1]:
+        anch_1_same = True
+    if template_pept[temp_anch_2] == pept[anch_2]:
+        anch_2_same = True
+    if pept[anch_1] == 'G':
+        first_gly = True
+    else:
+        first_gly= False
+    if pept[anch_2] == 'G':
+        last_gly = True
+    else:
+        last_gly = False
 
     with open( 'all_contacts_%s.list' %template_ID, 'r') as contacts:                             # Template contacts
-        with open('contacts_%s.list' %template_ID, 'w') as output:                                                                ### If the target peptide is longer than the templtate peptide #TODO: This can be removed?
+        with open('contacts_%s.list' %template_ID, 'w') as output:
             for line in contacts:
-                p_aa_id = line.split("\t")[7]                                                 ### position id of the template peptide residue
-                p_atom = line.split("\t")[8]                                                  ### atom name of the template peptide residue
-                if anch_1_same == True:                                                       ### If the target anchor 1 residue is the same as the template anchor 1 residue
+                p_aa_id = line.split("\t")[7]                                     ### position id of the template peptide residue
+                p_atom = line.split("\t")[8]                                      ### atom name of the template peptide residue
+                if anch_1_same == True:                                           ### If the target anchor 1 residue is the same as the template anchor 1 residue
                     if int(p_aa_id) == (anch_1+1):
                         output.write(line)
                 else:
@@ -301,9 +324,9 @@ def write_contact_list(anch_1, anch_2, anch_1_same, anch_2_same):
                             if 'CA' in p_atom or 'CB' in p_atom:
                                 output.write(line)
 
-def write_modelling_scripts(anch_1, anch_2, template_ID, final_alifile_name):
+def write_modelling_scripts(anch_1, anch_2, template_ID, target_id, final_alifile_name):
     with open('MyLoop.py', 'w') as myloopscript:
-        MyL_temp = open('../../../../PANDORA/modelling/MyLoop_template.py', 'r')
+        MyL_temp = open(PANDORA.PANDORA_path + '/modelling/MyLoop_template.py', 'r')
         for line in MyL_temp:
             if 'self.residue_range' in line:
                 myloopscript.write(line %(anch_1 + 2, anch_2))
@@ -314,7 +337,7 @@ def write_modelling_scripts(anch_1, anch_2, template_ID, final_alifile_name):
         MyL_temp.close()
 
     with open('cmd_modeller.py', 'w') as modscript:
-        cmd_m_temp = open('../../../../PANDORA/modelling/cmd_modeller_template.py', 'r')
+        cmd_m_temp = open(PANDORA.PANDORA_path + '/modelling/cmd_modeller_template.py', 'r')
         for line in cmd_m_temp:
             if 'alnfile' in line:
                 modscript.write(line %final_alifile_name)
