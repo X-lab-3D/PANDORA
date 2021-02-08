@@ -12,6 +12,9 @@ import pickle
 from matplotlib import pyplot as plt
 #from plt import figure
 
+sys.path.append('../../../')
+import PANDORA
+
 #%%
 outdir = sys.argv[1]
 label = int(sys.argv[2])
@@ -22,7 +25,7 @@ label = int(sys.argv[2])
 with open('all_best_RMSDs.pkl', 'rb') as infile:
     best_rmsds = pickle.load(infile)
 
-with open('../../benchmark/PANDORA_benchmark_dataset.tsv', 'r') as cvfile:
+with open(PANDORA.PANDORA_path+'/../benchmark/PANDORA_benchmark_dataset.tsv', 'r') as cvfile:
     for i, line in enumerate(cvfile):
         if i != 0:
             row = line.split('\t')
@@ -50,7 +53,7 @@ for fol in os.listdir('./'):
             pass
 
 #%%
-with open('../../benchmark/' +'APE-Gen_dataset.csv', 'r') as agfile:
+with open(PANDORA.PANDORA_path+'/../benchmark/' +'APE-Gen_dataset.csv', 'r') as agfile:
     ag = {}
     for i, line in enumerate(agfile):
         if i != 0:
@@ -82,7 +85,7 @@ if label:
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA')
 plt.ylabel(' APE-Gen ' )
-plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_vs_APE-Gen.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'CA_PANDORA_vs_APE-Gen.pdf')
 plt.show()
 plt.clf()
 
@@ -90,7 +93,7 @@ plt.hist([ag_comparison[x][0] - ag_comparison[x][1] for x in ag_comparison], bin
 plt.xlabel('PANDORA - APE-Gen')
 plt.ylabel(' # of cases ' )
 plt.axvline(0, color= 'r')
-plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_vs_APE-Gen_hist.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'CA_PANDORA_vs_APE-Gen_hist.pdf')
 plt.show()
 plt.clf()
 
@@ -98,7 +101,7 @@ plt.clf()
 #%%
 ### DockTope
 
-with open('../../benchmark/' +'DockTope_benchmark_dataset_calc.tsv', 'r') as dtfile:
+with open(PANDORA.PANDORA_path+'/../benchmark/' +'DockTope_benchmark_dataset_calc.tsv', 'r') as dtfile:
     dt = {}
     for line in dtfile:
         row = line.split(' ')
@@ -121,7 +124,7 @@ if label:
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA molpdf')
 plt.ylabel(' DockTope ' )
-plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_molpdf_vs_DockTope.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'CA_PANDORA_molpdf_vs_DockTope.pdf')
 plt.show()
 plt.clf()
 
@@ -129,7 +132,7 @@ plt.hist([dt_comparison[x][0][0] - dt_comparison[x][0][1] for x in dt_comparison
 plt.xlabel('PANDORA molpdf - DockTope')
 plt.ylabel(' # of cases ' )
 plt.axvline(0, color= 'r')
-plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_molpdf_vs_DockTope_hist.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'CA_PANDORA_molpdf_vs_DockTope_hist.pdf')
 plt.show()
 plt.clf()
 
@@ -140,7 +143,7 @@ if label:
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA DOPE')
 plt.ylabel(' DockTope ' )
-plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_DOPE_vs_DockTope.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'CA_PANDORA_DOPE_vs_DockTope.pdf')
 plt.show()
 plt.clf()
 
@@ -148,14 +151,14 @@ plt.hist([dt_comparison[x][1][0] - dt_comparison[x][1][1] for x in dt_comparison
 plt.xlabel('PANDORA molpdf - DockTope')
 plt.ylabel(' # of cases ' )
 plt.axvline(0, color= 'r')
-plt.savefig('../../benchmark/' + outdir + 'CA_PANDORA_DOPE_vs_DockTope_hist.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'CA_PANDORA_DOPE_vs_DockTope_hist.pdf')
 plt.show()
 plt.clf()
 
 #%%
 ### GradDock
 GD = []
-with open('../../benchmark/' + 'GradDock_results_table.txt', 'r') as gdinfile:
+with open(PANDORA.PANDORA_path+'/../benchmark/' + 'GradDock_results_table.txt', 'r') as gdinfile:
     for i, line in enumerate(gdinfile):
         if i > 107:
             GD.append(float(line.split('\t')[0]))
@@ -212,7 +215,7 @@ if label:
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA molpdf')
 plt.ylabel(' GradDock ' )
-plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_molpdf_vs_GradDock.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'CA-BB-CB_PANDORA_molpdf_vs_GradDock.pdf')
 plt.show()
 plt.clf()
 
@@ -220,7 +223,7 @@ plt.hist([gd_comparison[x][0][0] - gd_comparison[x][0][1] for x in gd_comparison
 plt.xlabel('PANDORA molpdf - GradDock')
 plt.ylabel(' # of cases ' )
 plt.axvline(0, color= 'r')
-plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_molpdf_vs_GradDock_hist.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'CA-BB-CB_PANDORA_molpdf_vs_GradDock_hist.pdf')
 plt.show()
 plt.clf()
 
@@ -231,7 +234,7 @@ if label:
 plt.plot([0, 2, 4], [0, 2, 4], 'g-')
 plt.xlabel('PANDORA DOPE')
 plt.ylabel(' GradDock ' )
-plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_DOPE_vs_GradDock.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'CA-BB-CB_PANDORA_DOPE_vs_GradDock.pdf')
 plt.show()
 plt.clf()
 
@@ -239,7 +242,7 @@ plt.hist([gd_comparison[x][1][0] - gd_comparison[x][1][1] for x in gd_comparison
 plt.xlabel('PANDORA DOPE - GradDock')
 plt.ylabel(' # of cases ' )
 plt.axvline(0, color= 'r')
-plt.savefig('../../benchmark/' + outdir + 'CA-BB-CB_PANDORA_DOPE_vs_GradDock_hist.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'CA-BB-CB_PANDORA_DOPE_vs_GradDock_hist.pdf')
 plt.show()
 plt.clf()
 
@@ -258,7 +261,7 @@ plt.axhline(2, color='r')
 plt.xlabel('molpdf top 5')
 plt.ylabel('DOPE top 5')
 plt.plot([0, 2, 4, 5], [0, 2, 4, 5], 'g-')
-plt.savefig('../../benchmark/' + outdir + 'PANDORA_CA_molpdf_vs_DOPE.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'PANDORA_CA_molpdf_vs_DOPE.pdf')
 plt.show()
 plt.clf()
 
@@ -274,7 +277,7 @@ plt.axhline(2, color='r')
 plt.xlabel('best RMSD model')
 plt.ylabel('best RMSD model')
 plt.plot([0, 2, 4, 5], [0, 2, 4, 5], 'g-')
-plt.savefig('../../benchmark/' + outdir + 'PANDORA_CA_best_rmsd.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'PANDORA_CA_best_rmsd.pdf')
 plt.show()
 plt.clf()
 
@@ -282,6 +285,6 @@ plt.hist([x for x in bests.values()], bins = 50)
 plt.axvline(2, color='r')
 plt.xlabel('Best model i-RMSD')
 plt.ylabel('# of cases')
-plt.savefig('../../benchmark/' + outdir + 'PANDORA_CA_best_rmsd_hist.pdf')
+plt.savefig(PANDORA.PANDORA_path+'/../benchmark/' + outdir + 'PANDORA_CA_best_rmsd_hist.pdf')
 plt.show()
 plt.clf()
