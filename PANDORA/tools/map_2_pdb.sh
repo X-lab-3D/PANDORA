@@ -6,7 +6,7 @@ model=$2
 
 egrep '^(ATOM|HETATM|END)' $model > clean_$model
 for chnID in {M,P};do
-../../../tools/pdb-pdbalign $ref $chnID clean_$model $chnID > common.pdb
+../../../../PANDORA/tools/pdb-pdbalign $ref $chnID clean_$model $chnID > common.pdb
 
 # delete the warning line in common.pdb
 sed -i '/Warning/d' common.pdb

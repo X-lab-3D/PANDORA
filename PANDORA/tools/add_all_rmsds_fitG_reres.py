@@ -16,7 +16,7 @@ IDs = {}
 
 filename_start = 'BL00'
 filename_end = '0001.pdb'
-with open('../../benchmark/PANDORA_benchmark_dataset.tsv', 'r') as idfile:
+with open('../../../benchmark/PANDORA_benchmark_dataset.tsv', 'r') as idfile:
     r = csv.reader(idfile, delimiter='\t')
     for i, row in enumerate(r):
         query = 'query_'+str(i)
@@ -34,16 +34,16 @@ def add_rmsds(fol, best_rmsds):
             final_scores = {}
                 
             
-            os.popen('cp ../../../data/PDBs/%s_MP.pdb ./' %target_id).read()
+            os.popen('cp '+ PANDORA.PANDORA_data +'/PDBs/%s_MP.pdb ./' %target_id).read()
                             
             os.popen('pdb_reres -1 %s_MP.pdb > reres_%s.pdb' %(target_id, target_id)).read()
-            os.popen('python ../../../../tools/pdb_selalt.py reres_%s.pdb > selalt_%s.pdb' %(target_id, target_id)).read()
+            os.popen('python '+ PANDORA.PANDORA_path +'/tools/pdb_selalt.py reres_%s.pdb > selalt_%s.pdb' %(target_id, target_id)).read()
             
             for f in os.listdir('./'):
                 if f.startswith(target_id+'.'+filename_start) and f.endswith(filename_end):
                     break
-            os.popen('bash ../../../tools/map_2_pdb.sh %s selalt_%s.pdb > ref.pdb' %(f, target_id)).read()
-            os.popen('python ../../../tools/pdb_fast_lzone_mhc_fitG.py ref.pdb').read()
+            os.popen('bash '+ PANDORA.PANDORA_path +'/tools/map_2_pdb.sh %s selalt_%s.pdb > ref.pdb' %(f, target_id)).read()
+            os.popen('python '+ PANDORA.PANDORA_path +'/tools/pdb_fast_lzone_mhc_fitG.py ref.pdb').read()
             
             print("Matching model to ref")
             with open('file.list', 'w') as out:
@@ -51,12 +51,12 @@ def add_rmsds(fol, best_rmsds):
                     if f.startswith(target_id+'.'+filename_start) and f.endswith(filename_end):
                         out.write('matched_'+ f + '\n')
                         print(f)
-                        os.popen('bash ../../../tools/map_2_pdb.sh ref.pdb %s >  matched_%s' %(f,f)).read()
+                        os.popen('bash '+ PANDORA.PANDORA_path +'/tools/map_2_pdb.sh ref.pdb %s >  matched_%s' %(f,f)).read()
 
             print('Calculating RMSDs')
-            os.popen('../../../tools/CA_l-rmsd-calc.csh ref file.list').read()
-            os.popen('../../../tools/CA_backbone_l-rmsd-calc.csh ref file.list').read()
-            os.popen('../../../tools/CA_backbone_CB_l-rmsd-calc.csh ref file.list').read()
+            os.popen(PANDORA.PANDORA_path +'/tools/CA_l-rmsd-calc.csh ref file.list').read()
+            os.popen(PANDORA.PANDORA_path +'/tools/CA_backbone_l-rmsd-calc.csh ref file.list').read()
+            os.popen(PANDORA.PANDORA_path +'/tools/CA_backbone_CB_l-rmsd-calc.csh ref file.list').read()
             
             with open('./molpdf_DOPE.tsv', 'r') as infile:
                 r = csv.reader(infile, delimiter='\t')

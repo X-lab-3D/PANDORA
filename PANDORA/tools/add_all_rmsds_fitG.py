@@ -7,6 +7,9 @@ import sys
 from joblib import Parallel, delayed
 from multiprocessing import Manager
 
+import PANDORA
+
+
 n_cores = int(sys.argv[1])
 
 manager = Manager()
@@ -33,7 +36,7 @@ def add_rmsds(fol, best_rmsds):
             final_scores = {}
                 
             
-            os.popen('cp ../../../data/PDBs/%s_MP.pdb ./' %target_id).read()
+            os.popen('cp '+ PANDORA.PANDORA_path +'/PDBs/pMHCI/%s_MP.pdb ./' %target_id).read()
             
             with open('%s_MP.pdb' %target_id, 'r') as pdbfile:
                 with open('%s_MP_nh.pdb' %target_id, 'w') as outpdb:
@@ -55,17 +58,17 @@ def add_rmsds(fol, best_rmsds):
                     if f.startswith(target_id+'.'+filename_start) and f.endswith(filename_end):
                         out.write('matched_'+ f + '\n')
                         print(f)
-                        os.popen('bash ../../../tools/map_2_pdb.sh %s_MP_nh.pdb %s >  matched_%s' %(target_id, f,f)).read()
+                        os.popen('bash '+PANDORA.PANDORA_path+'/tools/map_2_pdb.sh %s_MP_nh.pdb %s >  matched_%s' %(target_id, f,f)).read()
                         
             print("Matching ref to model")
-            os.popen('bash ../../../tools/map_2_pdb.sh matched_%s.BL00050001.pdb %s_MP_nh.pdb > ref.pdb' %(target_id, target_id)).read()
+            os.popen('bash '+PANDORA.PANDORA_path+'/tools/map_2_pdb.sh matched_%s.BL00050001.pdb %s_MP_nh.pdb > ref.pdb' %(target_id, target_id)).read()
             
-            os.popen('python ../../../tools/pdb_fast_lzone_mhc_fitG.py ref.pdb').read()
+            os.popen('python '+PANDORA.PANDORA_path+'/tools/pdb_fast_lzone_mhc_fitG.py ref.pdb').read()
 
             print('Calculating RMSDs')
-            os.popen('../../../tools/CA_l-rmsd-calc.csh ref file.list').read()
-            os.popen('../../../tools/CA_backbone_l-rmsd-calc.csh ref file.list').read()
-            os.popen('../../../tools/CA_backbone_CB_l-rmsd-calc.csh ref file.list').read()
+            os.popen(PANDORA.PANDORA_path +'/tools/CA_l-rmsd-calc.csh ref file.list').read()
+            os.popen(PANDORA.PANDORA_path +'/tools/CA_backbone_l-rmsd-calc.csh ref file.list').read()
+            os.popen(PANDORA.PANDORA_path +'/tools/CA_backbone_CB_l-rmsd-calc.csh ref file.list').read()
             
             with open('./molpdf_DOPE.tsv', 'r') as infile:
                 r = csv.reader(infile, delimiter='\t')

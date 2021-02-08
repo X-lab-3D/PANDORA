@@ -1,6 +1,7 @@
 import pickle
+import PANDORA
 
-IDd = open("data/IDs_ChainsCounts_dict.pkl", "rb")
+IDd = open(PANDORA.PANDORA_data+"/csv_pkl_files/IDs_ChainsCounts_dict.pkl", "rb")
 idd = pickle.load(IDd)
 IDd.close()
 

@@ -17,8 +17,8 @@ from statistics import mean
 #Meant to be runned from inside the output/benchmark<mybenchmark> directory
 
 indir = './'
-#outdir = sys.argv[1]
-outdir = '../../benchmark/no_prize/1906_unlabeled/'
+outdir = sys.argv[1]
+#outdir = '../../benchmark/no_prize/1906_unlabeled/'
 
 res_dict = {}
 for fol in os.listdir(indir):

@@ -20,7 +20,7 @@ PAM30 = substitution_matrices.load('PAM30')
 from random import choice
 
 #PANDORA modules
-sys.path.append('/home/dariom/PANDORA_master_to_package/') #TODO: change in final release
+sys.path.append('/home/dariom/PANDORA_package/') #TODO: change in final release
 import PANDORA
 from PANDORA.parsing import utils
 
@@ -145,6 +145,9 @@ def select_template(IDD, target_id, allele, length, pept, print_results): #homol
         pept(str) : target peptide sequence
         print_result(bool) : if True prints out the selected template structure and peptide
 
+    Returns:
+        template(tuple): (score(int), template_peptide(str), template_ID(str))
+
     '''
 
     putative_templates = []
@@ -207,17 +210,17 @@ def select_template(IDD, target_id, allele, length, pept, print_results): #homol
         print('')
         print('####################################################')
 
-    return((template, template_ID, template_pept))
+    return(template)
 
-def make_ali_files(templ_sequences, target_sequence, template_ID, target_id, 
-                   query, template_pept, temp_anch_1, temp_anch_2, pept, 
+def make_ali_files(templ_sequences, target_sequence, template_ID, target_id,
+                   template_pept, temp_anch_1, temp_anch_2, pept,
                    anch_1, anch_2, length, remove_temp_outputs=True):
     '''
     Aligns target sequence and template sequence
     '''
 
     template_seqr = SeqRecord(Seq(templ_sequences['M']), id=template_ID, name = template_ID)
-    target_seqr = SeqRecord(Seq(target_sequence), id=query, name = query)
+    target_seqr = SeqRecord(Seq(target_sequence), id=target_id, name = target_id)
     SeqIO.write((template_seqr, target_seqr), "%s.fasta" %template_ID, "fasta")
 
     os.system('muscle -in %s.fasta -out %s.afa -quiet' %(template_ID, template_ID))
@@ -252,7 +255,7 @@ def make_ali_files(templ_sequences, target_sequence, template_ID, target_id,
         os.system('rm *.afa')
     return(final_alifile_name)
 
-def write_ini_scripts(anch_1, anch_2, template_ID, final_alifile_name, query):
+def write_ini_scripts(anch_1, anch_2, template_ID, final_alifile_name, target_id):
         with open('MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/modelling/MyLoop_template.py', 'r')
             for line in MyL_temp:
@@ -272,13 +275,13 @@ def write_ini_scripts(anch_1, anch_2, template_ID, final_alifile_name, query):
                 if 'alnfile' in line:
                     modscript.write(line %final_alifile_name)
                 elif 'knowns' in line:
-                    modscript.write(line %(template_ID, query))
+                    modscript.write(line %(template_ID, target_id))
                 else:
                     modscript.write(line)
             cmd_m_temp.close()
 
 def write_contact_list(pept, anch_1, anch_2, template_pept, temp_anch_1, temp_anch_2, template_ID):
-    
+
     ### Select only the anchors contacts
     anch_1_same = False
     anch_2_same = False
@@ -324,7 +327,7 @@ def write_contact_list(pept, anch_1, anch_2, template_pept, temp_anch_1, temp_an
                             if 'CA' in p_atom or 'CB' in p_atom:
                                 output.write(line)
 
-def write_modelling_scripts(anch_1, anch_2, template_ID, query, final_alifile_name):
+def write_modelling_scripts(anch_1, anch_2, template_ID, target_id, final_alifile_name):
     with open('MyLoop.py', 'w') as myloopscript:
         MyL_temp = open(PANDORA.PANDORA_path + '/modelling/MyLoop_template.py', 'r')
         for line in MyL_temp:
@@ -342,7 +345,7 @@ def write_modelling_scripts(anch_1, anch_2, template_ID, query, final_alifile_na
             if 'alnfile' in line:
                 modscript.write(line %final_alifile_name)
             elif 'knowns' in line:
-                modscript.write(line %(template_ID, query))
+                modscript.write(line %(template_ID, target_id))
             else:
                 modscript.write(line)
         cmd_m_temp.close()

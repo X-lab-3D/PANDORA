@@ -183,6 +183,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl', remove_dist
         ID = ID.upper()
         ID = ID.rstrip()
 
+        ### Try to unzip the file
         try:
             with gzip.open('%s/IMGT-%s.pdb.gz' %(indir, ID), 'rb') as f_in:
                 with open('%s/%s.pdb' %(outdir, ID), 'wb') as f_out:
@@ -195,9 +196,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl', remove_dist
             os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
             continue
 
-        #Delete .gz file
-        #os.popen('rm %s/%s.pdb.gz' %(outdir, ID)).read()
-
+        ### Paths to use later
         original_filepath = '%s/%s.pdb' %(outdir, ID)
         selected_chains_filepath = '%s/%s_AC.pdb'%(outdir, ID)
         a_renamed_filepath = '%s/%s_MC.pdb'%(outdir, ID)
@@ -212,6 +211,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl', remove_dist
         pID = False
         count_dict = {}
 
+        ### Get the sequences
         try:
             seqs = utils.get_seqs(original_filepath)
         except (IndexError, ValueError):
@@ -222,12 +222,13 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl', remove_dist
             os.system('mv %s/%s.pdb %s/parsing_errors/ '%(outdir, ID ,unused_pdbs_dir))
             continue
 
-        ### Selecting Alpha chain and peptide chain
+        ### Select Alpha chain and peptide chain
 
         alpha_chains = get_chainid_alleles_MHCI(original_filepath)
 
-        putative_pID = {}
         ### Identify putative peptide and alpha chain
+        ### TODO: update this step to make it more flexible
+        putative_pID = {}
         for chain in seqs:
             if type(seqs[chain]) == str:
                 length = len(seqs[chain])
@@ -256,8 +257,9 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl', remove_dist
             pID = (sorted(putative_pID.items(), key=lambda x: x[1], reverse = True))[0][0]
 
             if remove_dist_file == True:
-                os.system('rm .%s/dist_files/%s.dist' %(PANDORA.PANDORA_data, ID))
-        # Checking chainIDs
+                os.system('rm %s/dist_files/%s.list' %(PANDORA.PANDORA_data, ID))
+                
+        ### Check chainIDs (lowercase or empty chainIDs would raise errors later)
         try:
             if aID.islower() or pID.islower():
                 bad_IDs[ID] = '#3 Lowercase_chainID'
@@ -278,7 +280,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl', remove_dist
             continue
 
 
-        ###### Check sequences lengths to identify molecules inside (obsolete at the moment)
+        ### Check sequences lengths to identify molecules inside (obsolete at the moment)
         pept_count = 0
         Amhc = 0
         Bmhc = 0
@@ -323,7 +325,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl', remove_dist
         os.system('pdb_rplchain -پ:P %s > %s' %(persian_filepath, a_renamed_filepath))
         os.system('pdb_rplchain -م:M %s > %s' %(a_renamed_filepath, new_filepath))
 
-        # Rorder the PDB file if chain P comes before chain M
+        ### Rorder the PDB file if chain P comes before chain M
         if list(seqs.keys()).index(pID) < list(seqs.keys()).index(aID):
 
             ### Write only-header PDB file
@@ -396,6 +398,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl', remove_dist
         try:
             small_molecule = utils.small_molecule_MHCI(new_filepath)
         except IndexError:
+            del IDs_dict[ID]
             bad_IDs[ID] = '#4 chainID'
             print('ERROR TYPE #4: False in chain ID. %s added to Bad_IDs' %ID)
             print(count_dict)
@@ -405,6 +408,7 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl', remove_dist
             continue
 
         if small_molecule != None:
+            del IDs_dict[ID]
             bad_IDs[ID] = '#6 Small Molecule'
             print('ERROR TYPE #6: Small Molecule in the binding cleft. %s added to Bad_IDs' %ID)
             print('##################################')
@@ -421,6 +425,8 @@ def parse_pMHCI_pdbs(ids_list, out_pkl = 'IDs_and_bad_IDs_dict.pkl', remove_dist
         try:
             del IDs_dict[u_pdb]
             bad_IDs[u_pdb] = '#7 uncommon residue'
+            print('ERROR TYPE #7: Uncommon residue PDB. %s added to Bad_IDs' %ID)
+            print('##################################')
             err_7 += 1
         except KeyError:
             print("Tried to delete %s from dataset error #7, error encountered" %u_pdb)

@@ -5,7 +5,7 @@ import re
 
 #%%
 '''
-os.chdir('../data/allele_profiles')
+os.chdir(PANDORA.PANDORA_data+'/allele_profiles')
 
 os.system('wget http://www.cbs.dtu.dk/suppl/immunology/NAR_NetMHCpan_NetMHCIIpan/NetMHCpan_train.tar.gz')
 os.system('tar -xzf NetMHCpan_train.tar.gz')

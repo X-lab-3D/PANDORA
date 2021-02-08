@@ -1,14 +1,7 @@
 #!/usr/bin/python
 
-import urllib.request
-import urllib.parse
-from pyparsing import nestedExpr
-from copy import deepcopy
 import os
-import subprocess
 import csv
-import gzip
-import shutil
 import pickle
 
 import numpy as np
@@ -219,13 +212,13 @@ def small_molecule_MHCI(inputfile, chain_M='M', chain_P='P', remove_dist_file = 
     #function outputs the name of the small molecule if there is one inside the binding pocket; otherwise, returns None
     '''
 
-    cutoff =6
+    cutoff =str(6)
     pocket = [ 7, 9, 26, 28, 1007, 1009, 1024, 1026]
 
     ### if the input is a pdb file, the contacts file is calculated
     if inputfile.endswith('.pdb'):
         contactfile = PANDORA.PANDORA_data +'/dist_files/all_contacts_'+ inputfile.split('/')[-1].split('.')[0] +'.list'
-        os.popen(PANDORA.PANDORA_path +'/tools/contact-chainID_allAtoms '+ inputfile +' '+ cutoff +'> '+ contactfile).read()
+        os.popen(PANDORA.PANDORA_path +'/tools/contact-chainID_allAtoms '+ inputfile +' '+ cutoff +' > '+ contactfile).read()
 
     ### if the contacts file list is used as input, it is used further in the script
     elif inputfile.endswith('.list'):
