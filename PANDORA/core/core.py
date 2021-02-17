@@ -114,7 +114,7 @@ class Target(PMHC):
     def calc_anchors(self):
         pass
 
-test = Template('XXX', allele = 'allele_1', MHC_class= 'II', pdb_path =  PANDORA.PANDORA_data + '/PDBs/pMHCII/1IAK.pdb')
+test = Template('XXXX', allele = 'allele_1', MHC_class= 'II', pdb_path =  PANDORA.PANDORA_data + '/PDBs/pMHCII/1IAK.pdb')
 
 
 
