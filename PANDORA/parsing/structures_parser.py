@@ -887,5 +887,5 @@ def parse_pMHCII_pdbs(ids_list):
         except: # If something goes wrong, append the ID to the bad_ids list
             bad_ids.append(ID)
             pass
-for i in pdb.get_chains:
-    print(i)
+# for i in pdb.get_chains:
+#     print(i)
