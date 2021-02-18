@@ -16,8 +16,8 @@ from statistics import mean
 
 #Meant to be runned from inside the output/benchmark<mybenchmark> directory
 
-indir = './'
-outdir = sys.argv[1]
+indir = sys.argv[1]
+outdir = sys.argv[2]
 #outdir = '../../benchmark/no_prize/1906_unlabeled/'
 
 res_dict = {}
@@ -78,6 +78,7 @@ res_tens[:,:,1] = torch.sigmoid((res_tens[:,:,1] - res_tens[:,:,1].mean(1).resha
 
 #plt.hist(torch.clamp(res_tens[:,:,0].reshape(-1),-600,75), bins=100)
 plt.hist(res_tens[:,:,1].reshape(-1), bins=100)
+#plt.savefig(outdir + 'test.pdf')
 #%%
 '''
 for key in res_dict:

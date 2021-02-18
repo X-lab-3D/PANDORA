@@ -14,7 +14,7 @@ import PANDORA
 ## Inputs: pdb file  Outputs: anchor positions
 
 ### ### Function that finds the anchors
-def get_anchors_pMHCI(pdbfile, rm_outfile=False):
+def get_anchors_pMHCI(pdbfile, rm_outfile=False, max_length = 20):
 
     cutoff = str(11.2)
     ###Define pocket residues
@@ -31,8 +31,8 @@ def get_anchors_pMHCI(pdbfile, rm_outfile=False):
     with open( './all_contacts_for_anchors_%s.list' %pdbfile.split('/')[-1].split('.')[0], 'r') as contacts:                             # Template contacts
         # with open('./anchors_files/peptide_anchors_%s.list' %pdbfile.split('/')[-1].split('.')[0], 'w') as output:
 
-            contact_1 = [0]*13
-            contact_2 = [0]*13
+            contact_1 = [0]*max_length
+            contact_2 = [0]*max_length
 
             #for cases where numbering starts from 1000, we use the updated pocket residues
             line1=contacts.readline()
