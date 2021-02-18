@@ -169,13 +169,79 @@ class Target(PMHC):
     def calc_anchors(self):
         pass
 
-test = Template('XXXX', allele = ['allele1','allele2'], MHC_class= 'II', pdb_path =  PANDORA.PANDORA_data + '/PDBs/pMHCII/1IAK.pdb')
-
-tar = Target('XXXX', 'NNNNN', [])
-
-
+# test = Template('XXXX', allele = ['allele1','allele2'], MHC_class= 'II', pdb_path =  PANDORA.PANDORA_data + '/PDBs/pMHCII/1IAK.pdb')
+#
+# tar = Target('XXXX', 'NNNNN', [])
 
 
+class Database:
+
+    # self.MHCI_data
+    # self.MHCII_data
+
+    def download_data(self):
+        pass
+
+    def __clean_MHCI_files(self):
+        pass
+
+    def __clean_MHCII_files(self):
+        pass
+
+    def construct_database(self):
+        pass
+
+    def add_structure(self):
+        pass
+
+    def remove_structure(self):
+        pass
+
+    def save(self):
+        pass
+
+    def load(self):
+        pass
+
+
+
+
+class Pandora:
+
+    def __init__(self):
+        # self.target
+        # self.template
+        # self.database
+        # self.alignment
+        # self.ini_modeller_script
+        # self.initial_model
+        # self.modeller_script
+        # self.results
+        pass
+
+    def find_template(self):
+        pass
+
+    def find_anchors(self):
+        pass
+
+    def align(self):
+        pass
+
+    def write_ini_script(self):
+        pass
+
+    def run_modeller(self):
+        pass
+
+    def anchor_contacts(self):
+        pass
+
+    def write_modeller_script(self):
+        pass
+
+    def model(self):
+        pass
 
 
 
