@@ -872,14 +872,14 @@ def parse_pMHCII_pdbs(ids_list):
     outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII'
 
     for ID in ids_list:
-        print(ID)
+        print('Parsing %s' %ID)
         try:
             # Unzip file (also check if the file is not empty) and save the path of this file
             pdb_file = unzip_pdb(ID, indir, outdir)
             # Find out which chains are the Alpha, Beta and Peptide chain
             MHC_chains, pdb = find_chains_MHCII(ID, pdb_file)
             # Rename the Alpha, Beta and Peptide chain to M,N,P respectively
-            pdb = replace_chain_names(MHC_chains, pdb, ['A', 'B', 'C'])
+            pdb = replace_chain_names(MHC_chains, pdb, ['M', 'N', 'P'])
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
             write_pdb(pdb, '%s/%s.pdb' %(outdir, ID), pdb_file)
 
