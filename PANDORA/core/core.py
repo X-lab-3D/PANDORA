@@ -4,6 +4,7 @@ from Bio.SeqUtils import seq1
 
 import PANDORA
 from PANDORA.tools import pdb_atom_contacts
+from PANDORA.parsing import url_protocols
 
 class PMHC:
 
@@ -180,7 +181,10 @@ class Database:
     # self.MHCII_data
 
     def download_data(self):
-        pass
+        url_protocols.download_unzip_imgt_structures(del_inn_files=True, del_kabat_files=True)
+            self.IDs_list_MHCI = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
+            self.IDs_list_MHCII = url_protocols.download_ids_imgt('MH2', out_tsv='all_MH1I_IDs.tsv')
+        print('Downloading structures ...')
 
     def __clean_MHCI_files(self):
         pass
