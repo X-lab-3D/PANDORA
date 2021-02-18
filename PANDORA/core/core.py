@@ -3,6 +3,9 @@ from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 
 import PANDORA
+import os
+import pickle
+
 from PANDORA.tools import pdb_atom_contacts
 from PANDORA.parsing import url_protocols
 from PANDORA.parsing import structures_parser
@@ -187,7 +190,7 @@ class Database:
     def download_data(self):
         """ Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
         print('Downloading structures ...')
-        url_protocols.download_unzip_imgt_structures(del_inn_files=True, del_kabat_files=True)
+        # url_protocols.download_unzip_imgt_structures(del_inn_files=True, del_kabat_files=True)
         self.__IDs_list_MHCI = url_protocols.download_ids_imgt('MH1', out_tsv='all_MH1_IDs.tsv')
         self.__IDs_list_MHCII = url_protocols.download_ids_imgt('MH2', out_tsv='all_MH1I_IDs.tsv')
 
@@ -227,7 +230,7 @@ class Database:
                     alpha = sum([al['Alpha'][i] for i in [i for i in al['Alpha'].keys()]], [])
                     a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
                     # Create MHC_structure object
-                    self.MHC1_data[id] = Template(id, allele=a_allele, pdb_path=file)
+                    self.MHCI_data[id] = Template(id, allele=a_allele, pdb_path=file)
 
         # Construct the MHCII database
         if MHCII:
@@ -246,7 +249,7 @@ class Database:
                     a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
                     b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
                     # Create MHC_structure object
-                    self.MHC2_data[id] = Template(id, allele=a_allele + b_allele, MHC_class= 'II', pdb_path=file)
+                    self.MHCII_data[id] = Template(id, allele=a_allele + b_allele, MHC_class= 'II', pdb_path=file)
 
 
     def add_structure(self, PDB_id, allele, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
@@ -270,10 +273,10 @@ class Database:
                 raise ValueError('Structure id or path of .pdb files was not given. Enter value for PDB_id and pdb_path')
         # Add to MHCI data
         if MHC_class == 'I':
-            self.MHC1_data[id] = Template(PDB_id, allele, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
+            self.MHCI_data[id] = Template(PDB_id, allele, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
         # Add to MHCII data
         if MHC_class == 'II':
-            self.MHC2_data[id] = Template(PDB_id, allele, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
+            self.MHCII_data[id] = Template(PDB_id, allele, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
 
     def remove_structure(self, id =''):
         ''' Removes a structure (by id) from the database
@@ -305,6 +308,13 @@ class Database:
         return db
 
 
+# db = Database()
+# # db.download_data()
+#
+# db.construct_database(MHCI=False)
+#
+# struc = db.MHCII_data['1A6A']
+# struc.PDB_id
 
 
 class Pandora:

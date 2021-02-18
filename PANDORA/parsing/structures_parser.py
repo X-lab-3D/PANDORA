@@ -872,6 +872,7 @@ def parse_pMHCII_pdbs(ids_list):
     outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII'
 
     for ID in ids_list:
+        ID = '1A6A'
         print('Parsing %s' %ID)
         try:
             # Unzip file (also check if the file is not empty) and save the path of this file
@@ -886,3 +887,5 @@ def parse_pMHCII_pdbs(ids_list):
         except: # If something goes wrong, append the ID to the bad_ids list
             bad_ids.append(ID)
             pass
+for i in pdb.get_chains:
+    print(i)
