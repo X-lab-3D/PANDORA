@@ -3,10 +3,6 @@
 
 import os
 import sys
-import time
-import copy
-import pickle
-import csv
 #import subprocess
 
 from Bio import SeqIO
@@ -22,7 +18,7 @@ from random import choice
 #PANDORA modules
 sys.path.append('/home/dariom/PANDORA_package/') #TODO: change in final release
 import PANDORA
-from PANDORA.parsing import utils
+from PANDORA.junk.parsing import utils
 
 def check_model_existance(k, outdir_name, filename_start, filename_end):
     '''

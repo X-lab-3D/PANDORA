@@ -13,14 +13,8 @@ from copy import deepcopy
 from operator import xor
 
 import PANDORA
-import PANDORA.parsing.utils as utils
+import PANDORA.junk.parsing.utils as utils
 from Bio.PDB import PDBParser
-import time
-import sys
-from collections import Counter
-
-
-
 
 
 def get_chainid_alleles_MHCI(pdbf):
@@ -887,5 +881,7 @@ def parse_pMHCII_pdbs(ids_list):
         except: # If something goes wrong, append the ID to the bad_ids list
             bad_ids.append(ID)
             pass
+
+
 # for i in pdb.get_chains:
 #     print(i)
