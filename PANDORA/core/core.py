@@ -1,7 +1,9 @@
 
 from Bio.PDB import PDBParser
-import PANDORA
 from Bio.SeqUtils import seq1
+
+import PANDORA
+from PANDORA.tools import pdb_atom_contacts
 
 class PMHC:
 
@@ -71,12 +73,40 @@ class Template(PMHC):
             if not self.peptide:
                 self.peptide = chain_seqs[-1]
 
-
     def info(self):
-        pass
+        """ Print the basic info of this structure
 
-    def __calc_contacts(self):
-        pass
+        """
+        print('This is a %s structure.' %(type(self).__name__))
+        print('ID: %s' %self.PDB_id)
+        print('Type: MHC class %s' %self.MHC_class)
+        print('Alleles: %s' % self.allele)
+        if len(self.chain_seq) > 0:
+            print('Alpha chain length: %s' %len(self.chain_seq[0]))
+        if len(self.chain_seq) > 1:
+            print('Beta chain length: %s' %len(self.chain_seq[1]))
+        print('Peptide length: %s' %len(self.peptide))
+        if len(self.chain_seq) > 0:
+            print('Alpha chain: %s' % self.chain_seq[0])
+        if len(self.chain_seq) > 1:
+            print('Beta chain: %s' % self.chain_seq[1])
+        print('Peptide: %s' % self.peptide)
+        print('Anchors: %s' %self.anchors)
+        if self.pdb_path:
+            print('Path to PDB file: %s' %self.pdb_path)
+        if not self.pdb:
+            print('PDB structure: no PDB structure provided')
+        else:
+            print('PDB structure:')
+            for (k, v) in self.pdb.header.items():
+                print('\t'+k + ':', v)
+
+
+    def calc_contacts(self):
+        if self.pdb:
+            self.chain_contacts = pdb_atom_contacts.Contacts(self.pdb)
+        else:
+            raise Exception('Provide a PDB structure to the Template object first')
 
     def calc_anchors(self):
         pass
@@ -106,24 +136,42 @@ class Target(PMHC):
         self.anchor_contacts = False
 
     def info(self):
-        pass
+        """ Print the basic info of this structure
 
-    def __calc_anchor_contacts(self):
-        pass
+        """
+        print('This is a %s structure.' % (type(self).__name__))
+        print('ID: %s' % self.PDB_id)
+        print('Type: MHC class %s' % self.MHC_class)
+        print('Alleles: %s' % self.allele)
+        if len(self.chain_seq) > 0:
+            print('Alpha chain length: %s' % len(self.chain_seq[0]))
+        if len(self.chain_seq) > 1:
+            print('Beta chain length: %s' % len(self.chain_seq[1]))
+        print('Peptide length: %s' % len(self.peptide))
+        if len(self.chain_seq) > 0:
+            print('Alpha chain: %s' % self.chain_seq[0])
+        if len(self.chain_seq) > 1:
+            print('Beta chain: %s' % self.chain_seq[1])
+        print('Peptide: %s' % self.peptide)
+        print('Anchors: %s' % self.anchors)
+        if self.use_template:
+            print('Using template %s for homology modelling' %self.use_template) #todo actually build this functionality
+        if self.initial_model:
+            print('An initial model has been provided.')
+
+
+    def calc_anchor_contacts(self):
+        if self.initial_model and self.anchors:
+            self.anchor_contacts = pdb_atom_contacts.Contacts(self.pdb, anchors=self.anchors)
+        else:
+            raise Exception('Provide an initial model (.ini PDB) and anchor positions to the Target object first')
 
     def calc_anchors(self):
         pass
 
-test = Template('XXXX', allele = 'allele_1', MHC_class= 'II', pdb_path =  PANDORA.PANDORA_data + '/PDBs/pMHCII/1IAK.pdb')
+test = Template('XXXX', allele = ['allele1','allele2'], MHC_class= 'II', pdb_path =  PANDORA.PANDORA_data + '/PDBs/pMHCII/1IAK.pdb')
 
-
-
-
-
-
-
-
-
+tar = Target('XXXX', 'NNNNN', [])
 
 
 

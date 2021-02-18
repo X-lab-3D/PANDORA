@@ -24,7 +24,7 @@ class Contacts:
             self.pdb_path = PDB
             parser = PDBParser(QUIET=True)  # Create a parser object, used to read pdb files
             self.PDB = parser.get_structure('MHC', PDB)
-        elif isinstance(PDB, Structure.Structure): #Else, its already a bio.pdb object
+        else: #Else, its already a bio.pdb object
             self.PDB = PDB
 
         # Actually find the atom contacts between chains
@@ -85,5 +85,12 @@ class Contacts:
 
         return out
 
-
+    def show(self):
+        """Print the contacts. If anchor contacts have been calculated, only show them"""
+        if self.anchor_contacts:
+            for i in self.anchor_contacts:
+                print(i)
+        else:
+            for i in self.chain_contacts:
+                print(i)
 
