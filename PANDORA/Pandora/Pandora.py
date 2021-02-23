@@ -33,7 +33,7 @@ class Pandora:
         pass
 
     def align(self):
-        self.alignment = Align.align(self.template, self.target, self.output_dir)
+        self.alignment = Align.Align(self.target, self.template)
 
     def write_ini_script(self):
         pass
@@ -52,18 +52,18 @@ class Pandora:
 
 
 
-db = Database.Database()
-db.construct_database(MHCI=False)
-
-target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II')
-
-mod = Pandora(target, db)
-mod.find_template()
-
-mod.target.anchors = [3,6,8,11]
-mod.template.anchors = [4,7,9,12]
-
-mod.align()
-
-mod.target.info()
-
+# db = Database.Database()
+# db.construct_database(MHCI=False)
+#
+# target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II')
+#
+# mod = Pandora(target, db)
+# mod.find_template()
+#
+# mod.target.anchors = [3,6,8,11]
+# mod.template.anchors = [4,7,9,12]
+#
+# mod.align()
+#
+# mod.target.info()
+# mod.alignment.alignment_file
