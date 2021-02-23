@@ -1,5 +1,6 @@
 
 import os
+import pickle
 
 import PANDORA
 from PANDORA.PMHC import PMHC
@@ -64,7 +65,7 @@ class Database:
         if MHCII:
 
             # Parse all MHCII files
-            self.bad_pdbs = self.__clean_MHCII_files()
+            # self.bad_pdbs = self.__clean_MHCII_files()
 
             for id in self.__IDs_list_MHCII:
                 file = PANDORA.PANDORA_data + '/PDBs/pMHCII/' + id + '.pdb'
@@ -124,15 +125,20 @@ class Database:
         pickle.dump(self, db)
         db.close()
 
-    def load(fn):
-        """Load the database from a saved pickle file
+    # def load(fn):
+    #     """Load the database from a saved pickle file
+    #
+    #     :param fn: (string) pathname of file
+    #     :return: local_database object
+    #     """
+    #     pkl = open(fn, 'rb')
+    #     db = pickle.load(pkl)
+    #     pkl.close()
+    #     return db
 
-        :param fn: (string) pathname of file
-        :return: local_database object
-        """
-        pkl = open(fn, 'rb')
-        db = pickle.load(pkl)
-        pkl.close()
-        return db
+
+    # def load(cls, fn):
+    #     with open(fn, 'rb') as f:
+    #         return pickle.load(f)
 
 
