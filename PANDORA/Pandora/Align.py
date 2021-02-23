@@ -67,8 +67,6 @@ class Align:
         :return: (dict) all aligned chains per structure id {id M: NNNNNNNNNNNN, id N: NNNNNNNNNNNN, id P: NNNNNN}
         '''
 
-
-
         # Align M and N chain for MHC II. Because the target chains need to be aligned to the respective chain of
         # the template, M and N are done seperately and later added together
         if self.__MHC_class == 'II':
@@ -110,12 +108,50 @@ class Align:
         seqs = {v.description: str(v.seq) for (v) in SeqIO.parse('%s/alignment.afa' % (self.output_dir), "fasta")}
 
         # Align peptides
-        aligned_pepts = {'1D9K P': 'GNSHRGAIEWEGIESG', '1IAK P': '-STDYGILQINSRW--'}
+        # aligned_pepts = {'1D9K P': 'GNSHRGAIEWEGIESG', '1IAK P': '-STDYGILQINSRW--'}
+        aligned_pepts = self.align_peptides()
 
         # Remove all intermediate files
         os.system('rm %s/*.fasta %s/*.afa' % (self.output_dir.replace(' ', '\\ '), self.output_dir.replace(' ', '\\ ')))
 
         return {**seqs, **aligned_pepts}
+
+    def align_peptides(self):
+        ''' align two MHCII peptides based on the 2nd and 3rd anchor position.
+
+        :return: (dict) {'id P': 'aligned_peptide_seq'}
+        '''
+
+        if self.__MHC_class == 'II':
+
+            # Make a dict containing {id, (peptide_sequence, [anchors])}
+            id_pept_anch = {self.__tar_id: (self.__tar_p, self.target.anchors)}
+            for i in self.template:
+                id_pept_anch[i.PDB_id] = (i.peptide, i.anchors)
+
+            # Find the peptide with the longest 2nd anchor.
+            longest_2nd_anch = max((v[1][1], k) for k, v in id_pept_anch.items())[0]
+            # add padding to the left of all shorter peptides, so the 2nd anchor of all peptide aligns
+            for k, v in id_pept_anch.items():
+                padding_len = longest_2nd_anch - v[1][1]
+                id_pept_anch[k] = ('-' * padding_len + v[0], [i + padding_len for i in v[1]])
+
+            # Find the longest 3rd anchor
+            # add padding between the 2nd and 3rd anchor if needed to align these
+            longest_3nd_anch = max((v[1][2], k) for k, v in id_pept_anch.items())[0]
+            for k, v in id_pept_anch.items():
+                padding_len = longest_3nd_anch - v[1][2]
+                id_pept_anch[k] = (v[0][:v[1][2] - 1] + '-' * padding_len + v[0][v[1][2] - 1:],
+                                   v[1][:2] + [i + padding_len for i in v[1][2:]])
+
+            # Add padding to the right of the shortest peptides to match their length
+            longest_peptide = max((len(v[0]), k) for k, v in id_pept_anch.items())[0]
+            for k, v in id_pept_anch.items():
+                padding_len = longest_peptide - len(v[0])
+                id_pept_anch[k] = (v[0] + '-' * padding_len, v[1])
+
+            # Reformat
+            return {k + ' P': v[0] for k, v in id_pept_anch.items()}
 
 
     def __write_ali_file(self):
@@ -157,30 +193,10 @@ class Align:
 
 
 
-# def align_peptides(p_target, p_template, anchors):
-#     ''' align two MHCII peptides based on the 2nd and 3rd anchor position.
-#
-#     :param p_target: (string) sequence of target peptide
-#     :param p_template: (string) sequence of template peptide
-#     :param anchors: (dict) anchors: {'target:(x,x,x,x), 'template':(x,x,x,x)}
-#     :return: aligned target and template peptide (2 strings)
-#     '''
-#     # save anchors to their own variables
-#     tar_1, tar_2, tar_3, tar_4 = anchors['target']
-#     tem_1, tem_2, tem_3, tem_4 = anchors['template']
-#
-#     # Because the 2nd and 3rd anchor are omnipresent across structure, start with those as an aligned core to add to
-#     ali_p_target = p_target[tar_2:tar_3 + 1]
-#     ali_p_template = p_template[tem_2:tem_3 + 1]
-#
-#     # find the longest n-term side, add dashes to the n-term side of the 2nd anchor to match length.
-#     max_n_terminal_len = max([len(p_target[0:tar_2]), len(p_template[0:tem_2])])
-#     ali_p_target = '-' * (max_n_terminal_len - len(p_target[0:tar_2])) + p_target[0:tar_2] + ali_p_target
-#     ali_p_template = '-' * (max_n_terminal_len - len(p_template[0:tem_2])) + p_template[0:tem_2] + ali_p_template
-#
-#     # find the longest c-term side, add dashes to the c-term side of the 3rd anchor to match length.
-#     max_c_terminal_len = max([len(p_target[tar_3+1:]), len(p_template[tem_3+1:])])
-#     ali_p_target = ali_p_target + p_target[tar_3+1:] + '-' * (max_c_terminal_len-len(p_target[tar_3+1:]))
-#     ali_p_template = ali_p_template + p_template[tem_3+1:] + '-' * (max_c_terminal_len-len(p_template[tem_3+1:]))
+
+
+
+
+
 #
 #     return ali_p_target, ali_p_template
