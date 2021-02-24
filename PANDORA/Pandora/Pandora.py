@@ -4,6 +4,7 @@ from PANDORA.Pandora import Find_template
 from PANDORA.Database import Database as Database
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Align
+from PANDORA.Pandora import Write_ini_script
 import os
 
 class Pandora:
@@ -25,7 +26,8 @@ class Pandora:
         # create an output directory
         try:
             self.output_dir = '%s%s_%s' %(self.output_dir, self.template.PDB_id, self.target.PDB_id)
-            os.system('mkdir %s' % self.output_dir)
+            if not os.path.exists(self.output_dir):
+                os.makedirs(self.output_dir)
         except:
             pass
 
@@ -36,7 +38,7 @@ class Pandora:
         self.alignment = Align.Align(self.target, self.template)
 
     def write_ini_script(self):
-        pass
+        Write_ini_script.write_ini_script(self.target, self.template, self.alignment, self.output_dir)
 
     def run_modeller(self):
         pass
@@ -52,18 +54,19 @@ class Pandora:
 
 
 
-# db = Database.Database()
-# db.construct_database(MHCI=False)
-#
-# target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II')
-#
-# mod = Pandora(target, db)
-# mod.find_template()
-#
-# mod.target.anchors = [3,6,8,11]
-# mod.template.anchors = [4,7,9,12]
-#
-# mod.align()
-#
-# mod.target.info()
-# mod.alignment.alignment_file
+db = Database.Database()
+db.construct_database(MHCI=False)
+
+target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II')
+
+mod = Pandora(target, db)
+mod.find_template()
+
+mod.target.anchors = [3,6,8,11]
+mod.template.anchors = [4,7,9,12]
+
+mod.align()
+
+mod.target.info()
+mod.alignment.alignment_file
+mod.write_ini_script()

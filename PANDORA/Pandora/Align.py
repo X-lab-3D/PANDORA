@@ -228,11 +228,4 @@ class Align:
                 f.write(v[0]+'\n'+v[1]+'\n'+v[2]+'\n\n')
 
         return alignment_file
-#
-# A = Align(mod.target, mod.template)
-#
-# os.getcwd()
-#
-# os.system('cat PANDORA/PANDORA_files/data/outputs/1D9K_1IAK/*.afa > PANDORA/PANDORA_files/data/outputs/1D9K_1IAK/alignment.afa')
-#
 
