@@ -34,8 +34,8 @@ class Contacts:
         if anchors: # Calculate peptide anchor residue - structure contacts
             if isinstance(anchors, list):
                 # First find which chain is the peptide chain by looking for the shortest chain
-                chain_len = [len(i) for i in pdb.get_chains()]
-                pept_chain = [i.id for i in pdb.get_chains()][chain_len.index(min(chain_len))]
+                chain_len = [len(i) for i in self.PDB.get_chains()]
+                pept_chain = [i.id for i in self.PDB.get_chains()][chain_len.index(min(chain_len))]
                 # Only keep the contacts with
                 self.anchor_contacts = [i for i in self.chain_contacts if i[1] == pept_chain and i[2] in self.anchors or
                                         i[5] == pept_chain and i[6] in self.anchors]

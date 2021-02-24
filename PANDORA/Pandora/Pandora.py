@@ -6,6 +6,7 @@ from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Align
 from PANDORA.Pandora import Write_ini_script
 import os
+from Bio.PDB import PDBParser
 
 class Pandora:
 
@@ -42,7 +43,7 @@ class Pandora:
     def write_ini_script(self):
         Write_ini_script.write_ini_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
 
-    def run_modeller(self, python_script):
+    def create_initial_model(self, python_script = 'cmd_modeller_ini.py'):
         ''' Run modeller given a python script (cmd_modeller_ini.py or cmd_modeller.py). Modeller can only output files
         in its work directory (why though?), so the current work directory is changed to the output dir and later
         changed back the the old working dir.
@@ -52,14 +53,25 @@ class Pandora:
         '''
 
         cwd = os.getcwd()
+        # Change working directory
         os.chdir(self.output_dir)
+        # Run Modeller
         os.popen('python %s' %python_script).read()
+        # Load initial model into target object
+        self.target.initial_model = PDBParser(QUIET=True).get_structure(self.target.PDB_id, self.target.PDB_id + '.ini')
+        # Change working directory back
         os.chdir(cwd)
 
-
+    def run_modeller(self):
+        pass
 
     def anchor_contacts(self):
-        pass
+        """ Calculate anchor contacts"""
+        self.target.calc_anchor_contacts()
+        #    Write output file
+        with open(self.output_dir + '/' + self.target.PDB_id + '.list', 'w') as f:
+                for i in self.target.anchor_contacts:
+                    f.write('\t'.join('%s' % x for x in i) + '\n')
 
     def write_modeller_script(self):
         pass
@@ -84,7 +96,15 @@ mod.prep_output_dir()
 mod.align()
 
 mod.write_ini_script()
-mod.run_modeller('cmd_modeller_ini.py')
+mod.create_initial_model()
+
+mod.anchor_contacts()
+
+
+for i in mod.target.anchor_contacts:
+    print(i)
+
+mod.output_dir
 
 
 

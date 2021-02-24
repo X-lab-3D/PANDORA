@@ -162,7 +162,7 @@ class Target(PMHC):
 
     def calc_anchor_contacts(self):
         if self.initial_model and self.anchors:
-            self.anchor_contacts = Contacts.Contacts(self.pdb, anchors=self.anchors)
+            self.anchor_contacts = Contacts.Contacts(self.initial_model, anchors=self.anchors).anchor_contacts
         else:
             raise Exception('Provide an initial model (.ini PDB) and anchor positions to the Target object first')
 
