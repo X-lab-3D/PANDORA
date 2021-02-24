@@ -211,6 +211,23 @@ def replace_chain_names(chains, pdb, replacement_chains=['M', 'N', 'P']):
                 chain.id = replacement_chains[chains.index(i)]
     return pdb
 
+def renumber(pdb):
+    ''' Renumbers the pdb. Each chain starts at 1
+
+    :param pdb: Bio.PDb object
+    :return: Bio.PDb object with renumbered residues
+    '''
+
+    for chain in pdb.get_chains():
+        nr = 1
+        for res in chain:
+            res.id = ('X', nr, res.id[2])
+            nr += 1
+    for chain in pdb.get_chains():
+        for res in chain:
+            res.id = (' ', res.id[1], ' ')
+
+    return pdb
 
 def write_pdb(pdb, out_path, get_header_from=False):
     ''' Write bio.pdb object to file, can use the header of the original pdb (bio.pdb cant remember file headers)
@@ -287,8 +304,9 @@ def parse_pMHCII_pdbs(ids_list):
             pdb_file = unzip_pdb(ID, indir, outdir)
             # Find out which chains are the Alpha, Beta and Peptide chain
             MHC_chains, pdb = find_chains_MHCII(ID, pdb_file)
-            # Rename the Alpha, Beta and Peptide chain to M,N,P respectively
+            # Rename the Alpha, Beta and Peptide chain to M,N,P respectively, next renumber the file
             pdb = replace_chain_names(MHC_chains, pdb, ['M', 'N', 'P'])
+            pdb = renumber(pdb)
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
             write_pdb(pdb, '%s/%s.pdb' %(outdir, ID), pdb_file)
 

@@ -1,3 +1,5 @@
+import os
+
 def write_ini_script(target, template, alignment_file, output_dir):
     ''' Writes the MyLoop.py and cmd_modeller_ini.py files. This function takes two template python scripts and fills
     in the required information: Anchor positions for the MyLoop file and structure name + alignment file for the
@@ -32,7 +34,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
         cmd_m_temp = open('PANDORA/Pandora/cmd_modeller_ini.py', 'r')
         for line in cmd_m_temp:
             if 'alnfile' in line:
-                modscript.write(line % alignment_file)
+                modscript.write(line % os.path.basename(alignment_file))
             elif 'knowns' in line:
                 modscript.write(line % (template.PDB_id, target.PDB_id))
             else:

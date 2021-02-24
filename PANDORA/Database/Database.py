@@ -48,7 +48,7 @@ class Database:
         if MHCI:
 
             # Parse all MHCI files
-            self.__clean_MHCI_files()
+            # self.__clean_MHCI_files()
 
             for id in self.__IDs_list_MHCI:
                 file = PANDORA.PANDORA_data + '/PDBs/pMHCI/' + id + '.pdb'
