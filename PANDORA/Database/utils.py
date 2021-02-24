@@ -9,6 +9,7 @@ from Bio.PDB import PDBParser
 from Bio.Data.SCOPData import protein_letters_3to1 as to_one_letter_code
 
 import PANDORA
+from PANDORA.Contacts import Contacts
 
 '''
 This file contains the following functions:
@@ -22,6 +23,8 @@ This file contains the following functions:
     - get_pdb_seq(IDs)
     - get_seqs(pdbf)
     - get_contacts_matrix(contactfile)
+    - get_anchors_pMHCII(Bio.PDB object)
+    - pocket_residues_pMHCII(Bio.PDB object)
 '''
 
 
@@ -340,6 +343,177 @@ def get_contacts_dict(contactfile):
         #try:
         #    temp_contacts_dict[chain, ]
     return contacts_dict
-            
-            
+
+
+def get_anchors_pMHCII(pdb):
+    ''' Find the anchor positions of MHC2 template structures.
+
+    :param pdb: Bio.PDB object
+    :return: (list) anchor positions of anchor 1,2,3 and 4
+    '''
+    # todo: This code is very verbose. The anchor finding process can probably be written in a more comprehensive way.
+    # uses the function below  pocket_residues () that adapts the pocket residue to the PDB numbering
+    pocket_M, pocket_N = pocket_residues_pMHCII(pdb)
+    cutoff = 18
+
+    contacts = Contacts.Contacts(pdb, cutoff=cutoff).chain_contacts
+    contacts = [(i[4], i[5], i[6], i[7], i[0], i[1], i[2], i[3], i[8]) for i in contacts]
+
+    # vectors that will be used to count the frequency; each value represents the contact frequency between the
+    # previously defined pocket residues and the peptide residue corresponding to the vector index
+    contact_1 = [0] * 30
+    contact_2 = [0] * 30
+    contact_3 = [0] * 30
+    contact_4 = [0] * 30
+
+    # read each line in the contacts file
+    # check for distances between the MHCII chains and the peptide that are smaller than values specified in the pocket_M/N dictionaries
+    for line in contacts:
+        chain_1 = line[1]
+        chain_2 = line[5]
+        # print(chain_1, chain_2)
+
+        # the folllowing if statement checks the order of P, M in the contact file
+        if chain_1 == 'P':
+            # print('P')
+            cp_aa_id = chain_1
+            cm_aa_id = chain_2
+            m_aa_id = line[6]
+            p_aa_id = line[2]
+            atom_name = line[3]
+            distance = line[-1]
+        else:
+            cm_aa_id = chain_1
+            cp_aa_id = chain_2
+            m_aa_id = line[2]
+            p_aa_id = line[6]
+            atom_name = line[7]
+            distance = line[-1]
+
+        # checks only the lines concerning the C alpha atom of the peptide residues/ C1 atom of modified residues
+        if cp_aa_id == 'P':
+            if atom_name == 'CA' or atom_name == 'C1':
+                # Checks pocket in chain M
+                if cm_aa_id == 'M':
+                    n = 0
+                    for aa in pocket_M.get('pocket_anch1'):
+                        try:
+                            if int(m_aa_id) == aa:
+                                if (float(distance) <= pocket_M.get('pocket_1_distance')[n]):
+                                    contact_1[int(p_aa_id)] += 1
+                        except ValueError:
+                            continue
+                        n += 1
+
+                    n = 0
+                    for aa in pocket_M.get('pocket_anch3'):
+                        try:
+                            if int(m_aa_id) == aa:
+                                if (float(distance) <= pocket_M.get('pocket_3_distance')[n]):
+                                    contact_3[int(p_aa_id)] += 1
+                        except ValueError:
+                            continue
+                        n += 1
+
+                # Check pocket in chain N
+                elif cm_aa_id == 'N':
+                    n = 0
+                    for aa in pocket_N.get('pocket_anch2'):
+                        try:
+                            if int(m_aa_id) == aa:
+                                if (float(distance) <= pocket_N.get('pocket_2_distance')[n]):
+                                    contact_2[int(p_aa_id)] += 1
+
+                        except ValueError:
+                            continue
+                        n += 1
+
+                    n = 0
+                    for aa in pocket_N.get('pocket_anch3'):
+                        try:
+                            if int(m_aa_id) == aa:
+                                if (float(distance) <= pocket_N.get('pocket_3_distance')[n]):
+                                    contact_3[int(p_aa_id)] += 1
+
+                        except ValueError:
+                            continue
+                        n += 1
+
+                    n = 0
+                    for aa in pocket_N.get('pocket_anch4'):
+                        try:
+                            if int(m_aa_id) == aa:
+                                if (float(distance) <= pocket_N.get('pocket_4_distance')[n]):
+                                    contact_4[int(p_aa_id)] += 1
+                        except ValueError:
+                            continue
+                        n += 1
+
+    anchor_1 = np.argmax(contact_1)
+    anchor_2 = np.argmax(contact_2)
+    anchor_3 = np.argmax(contact_3)
+    anchor_4 = np.argmax(contact_4)
+
+    anchors = [anchor_1, anchor_2, anchor_3, anchor_4]
+    anchors.sort()
+
+    return anchors
+
+
+def pocket_residues_pMHCII(pdb):
+    '''function takes as input pdbfile and outputs 2 dictionaries that define the peptide binding pocket in chains
+    M, N of MHCII
+
+    :param pdb: Bio.PDB object
+    :return: (Tuple of two dicts) of anchor binding positions of MHCII for the M and N chain
+    '''
+    ###
+
+    # normal pocket  numbering; pocket_anchn defines the residues of chain M/N that form the binding pocket of anchor n
+    # pocket_n_distance represents the distances between the nth anchor residue and corresponding nth pocket residues from the first list
+    pocket_M = {'pocket_anch1': [28, 33, 31], 'pocket_1_distance': [15, 10.5, 18],
+                'pocket_anch3': [10], 'pocket_3_distance': [13.5]}
+    pocket_N = {'pocket_anch2': [10, 11, 21, 22, 23], 'pocket_2_distance': [10.7, 10.5, 14.7, 10, 14],
+                'pocket_anch3': [6, 7], 'pocket_3_distance': [13, 7.5],
+                'pocket_anch4': [28, 27, 31, 33], 'pocket_4_distance': [14, 12.4, 15.7, 13]}
+
+    # the pocket residues are defined differently when the numbering in the M or/and N chain starts from 1000
+    pocket_M_renumbered = {'pocket_anch1': [1028, 1033, 1031], 'pocket_1_distance': [15, 10.5, 18],
+                           'pocket_anch3': [1010], 'pocket_3_distance': [13.5]}
+    pocket_N_renumbered = {'pocket_anch2': [1010, 1011, 1021, 1022, 1023],
+                           'pocket_2_distance': [10.7, 10.5, 14.7, 10, 14],
+                           'pocket_anch3': [1006, 1007], 'pocket_3_distance': [13, 7.5],
+                           'pocket_anch4': [1028, 1027, 1031, 1033], 'pocket_4_distance': [14, 12.5, 15.7, 13]}
+
+    # for each chain (M/N), the first 5 residues are checked; if one of them is >1000,
+    # the pocket is defined using the pocket_M/N_renumbered dictionary
+
+    for chain in pdb.get_chains():
+        if (chain.get_id() == 'M'):
+            n = 0
+            for residue in chain.get_residues():
+                n += 1
+                if n <= 7:
+                    try:
+                        if int(residue.id[1] > 1000):
+                            pocket_M = pocket_M_renumbered
+                    except ValueError:
+                        continue
+                else:
+                    break
+
+        if (chain.get_id() == 'N'):
+            n = 0
+            for residue in chain.get_residues():
+                n += 1
+                if n <= 7:
+                    try:
+                        if int(residue.id[1] > 1000):
+                            pocket_N = pocket_N_renumbered
+                    except ValueError:
+                        continue
+                else:
+                    break
+
+    return (pocket_M, pocket_N)
             

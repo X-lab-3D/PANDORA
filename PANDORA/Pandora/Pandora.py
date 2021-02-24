@@ -5,8 +5,11 @@ from PANDORA.Database import Database as Database
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Align
 from PANDORA.Pandora import Write_ini_script
+from PANDORA.Pandora import Write_modeller_script
 import os
 from Bio.PDB import PDBParser
+
+import time
 
 class Pandora:
 
@@ -20,13 +23,15 @@ class Pandora:
         # self.initial_model
         # self.modeller_script
         # self.results
-        pass
 
     def find_template(self):
+        ''' Find the best template structure given a Target object '''
         self.template = Find_template.find_template(self.target, self.database)
 
 
     def prep_output_dir(self):
+        ''' Create an output directory and move the template pdb there
+        '''
         # create an output directory
         try:
             self.output_dir = '%s%s_%s' %(self.output_dir, self.template.PDB_id, self.target.PDB_id)
@@ -48,7 +53,7 @@ class Pandora:
         in its work directory (why though?), so the current work directory is changed to the output dir and later
         changed back the the old working dir.
 
-        :param python_script:
+        :param python_script: (string) path to script that performs the modeller modelling. cmd_modeller_ini.py
         :return:
         '''
 
@@ -62,49 +67,100 @@ class Pandora:
         # Change working directory back
         os.chdir(cwd)
 
-    def run_modeller(self):
-        pass
+    def run_modeller(self, python_script = 'cmd_modeller.py'):
+        ''' Perform the homology modelling.
+
+        :param python_script: (string) path to script that performs the modeller modelling. cmd_modeller.py
+        :return:
+        '''
+        cwd = os.getcwd()
+        # Change working directory
+        os.chdir(self.output_dir)
+        # run Modeller to perform homology modelling
+        os.popen('python3 %s > modeller.log' %python_script).read()
+        os.chdir(cwd)
 
     def anchor_contacts(self):
         """ Calculate anchor contacts"""
         self.target.calc_anchor_contacts()
         #    Write output file
-        with open(self.output_dir + '/' + self.target.PDB_id + '.list', 'w') as f:
+        with open(self.output_dir + '/contacts_' + self.target.PDB_id + '.list', 'w') as f:
                 for i in self.target.anchor_contacts:
                     f.write('\t'.join('%s' % x for x in i) + '\n')
 
     def write_modeller_script(self):
-        pass
+        Write_modeller_script.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
 
     def model(self):
-        pass
+
+        # Find the best template structure given the Target
+        mod.find_template()
+        # mod.template.anchors = [4, 7, 9, 12]
+        # Prepare the output directory
+        mod.prep_output_dir()
+        # Perform sequence alignment. This is used to superimpose the target on the template structure in later steps
+        mod.align()
+        # Prepare the scripts that run modeller
+        mod.write_ini_script()
+        # Run modeller to create the initial model
+        mod.create_initial_model()
+        # Calculate anchor restraints
+        mod.anchor_contacts()
+        # prepare the scripts that run modeller
+        mod.write_modeller_script()
+        # Do the homology modelling
+        mod.run_modeller()
 
 
 
 db = Database.Database()
 db.construct_database(MHCI=False)
 
-target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II')
 
-mod = Pandora(target, db)
+for k in db.MHCII_data:
 
-mod.find_template()
-mod.target.anchors = [3,6,8,11]
-mod.template.anchors = [4,7,9,12]
-
-mod.prep_output_dir()
-mod.align()
-
-mod.write_ini_script()
-mod.create_initial_model()
-
-mod.anchor_contacts()
+    try:
+        target = PMHC.Target(db.MHCII_data[k].PDB_id, db.MHCII_data[k].allele, db.MHCII_data[k].peptide, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
+        mod = Pandora(target, db)
+        mod.model()
+    except:
+        print('Something went wrong')
 
 
-for i in mod.target.anchor_contacts:
-    print(i)
 
-mod.output_dir
+# t0 = time.time()
+#
+# target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II', anchors=[3,6,8,11])
+#
+# mod = Pandora(target, db)
+#
+# mod.model()
+#
+# print(time.time() - t0)
+
+
+
+# mod.find_template()
+# # mod.target.anchors = [3,6,8,11]
+# mod.template.anchors = [4,7,9,12]
+#
+# mod.prep_output_dir()
+# mod.align()
+#
+# mod.write_ini_script()
+# mod.create_initial_model()
+#
+# mod.anchor_contacts()
+#
+# mod.write_modeller_script()
+#
+# mod.run_modeller()
+
+
+# for i in mod.target.anchor_contacts:
+#     print(i)
+#
+# mod.output_dir
 
 
 

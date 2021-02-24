@@ -21,7 +21,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
                 myloopscript.write(line % (1, anch[0])) # write the first anchor
                 for i in range(len(anch)-1): # Write all the inbetween acnhors if they are there
                     myloopscript.write(line % (anch[i] + 2, anch[i+1]))
-                myloopscript.write(line % (anch[-1] + 2, len(template.peptide))) # Write the last anchor
+                myloopscript.write(line % (anch[-1] + 2, len(target.peptide))) # Write the last anchor
             elif 'SPECIAL_RESTRAINTS_BREAK' in line:
                 break
             elif 'contact_file = open' in line:

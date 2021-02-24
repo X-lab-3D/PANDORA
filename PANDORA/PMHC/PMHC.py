@@ -3,7 +3,7 @@ from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 
 from PANDORA.Contacts import Contacts
-
+import PANDORA.Database.utils as utils
 
 class PMHC:
 
@@ -50,6 +50,9 @@ class Template(PMHC):
 
         if not pdb_path or not pdb: # If the path to a pdb file or a Bio.PDB object is given, parse the pdb
             self.parse_pdb()
+
+        if not pdb and anchors == []:
+            self.calc_anchors()
 
     def parse_pdb(self):
         '''Loads pdb from path, updates self.pdb field and self.chain_seq/self.peptide if they were empty'''
@@ -109,7 +112,7 @@ class Template(PMHC):
             raise Exception('Provide a PDB structure to the Template object first')
 
     def calc_anchors(self):
-        pass
+        self.anchors = utils.get_anchors_pMHCII(self.pdb)
 
 
 class Target(PMHC):

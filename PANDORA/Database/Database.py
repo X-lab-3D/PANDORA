@@ -77,6 +77,7 @@ class Database:
                     beta = sum([al['Beta'][i] for i in [i for i in al['Beta'].keys()]], [])
                     a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
                     b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
+
                     # Create MHC_structure object
                     self.MHCII_data[id] = PMHC.Template(id, allele=a_allele + b_allele, MHC_class= 'II', pdb_path=file)
 
