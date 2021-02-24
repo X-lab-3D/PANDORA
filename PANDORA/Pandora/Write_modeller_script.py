@@ -1,4 +1,5 @@
 import os
+import PANDORA
 
 def write_modeller_script(target, template, alignment_file, output_dir):
     ''' Write script that refines the loops of the peptide
@@ -14,7 +15,7 @@ def write_modeller_script(target, template, alignment_file, output_dir):
     anch = target.anchors
 
     with open(output_dir.replace('\\ ', ' ') + '/MyLoop.py', 'w') as myloopscript:
-        MyL_temp = open('PANDORA/Pandora/MyLoop_template.py', 'r')
+        MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
         for line in MyL_temp:
             if 'self.residue_range' in line:
                 myloopscript.write(line % (1, anch[0]))  # write the first anchor
@@ -29,7 +30,7 @@ def write_modeller_script(target, template, alignment_file, output_dir):
 
 
     with open(output_dir.replace('\\ ', ' ') + '/cmd_modeller.py', 'w') as modscript:
-        cmd_m_temp = open('PANDORA/Pandora/cmd_modeller_template.py', 'r')
+        cmd_m_temp = open(PANDORA.PANDORA_path + '/Pandora/cmd_modeller_template.py', 'r')
         for line in cmd_m_temp:
             if 'alnfile' in line:
                 modscript.write(line %(os.path.basename(alignment_file)))

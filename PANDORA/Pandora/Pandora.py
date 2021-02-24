@@ -8,7 +8,7 @@ from PANDORA.Pandora import Write_ini_script
 from PANDORA.Pandora import Write_modeller_script
 import os
 from Bio.PDB import PDBParser
-
+import pickle
 import time
 
 class Pandora:
@@ -46,6 +46,7 @@ class Pandora:
         self.alignment = Align.Align(self.target, self.template)
 
     def write_ini_script(self):
+        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
         Write_ini_script.write_ini_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
 
     def create_initial_model(self, python_script = 'cmd_modeller_ini.py'):
@@ -57,7 +58,7 @@ class Pandora:
         :return:
         '''
 
-        cwd = os.getcwd()
+        # cwd = os.getcwd()
         # Change working directory
         os.chdir(self.output_dir)
         # Run Modeller
@@ -65,7 +66,7 @@ class Pandora:
         # Load initial model into target object
         self.target.initial_model = PDBParser(QUIET=True).get_structure(self.target.PDB_id, self.target.PDB_id + '.ini')
         # Change working directory back
-        os.chdir(cwd)
+        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
 
     def run_modeller(self, python_script = 'cmd_modeller.py'):
         ''' Perform the homology modelling.
@@ -73,12 +74,12 @@ class Pandora:
         :param python_script: (string) path to script that performs the modeller modelling. cmd_modeller.py
         :return:
         '''
-        cwd = os.getcwd()
+        # cwd = os.getcwd()
         # Change working directory
         os.chdir(self.output_dir)
         # run Modeller to perform homology modelling
         os.popen('python3 %s > modeller.log' %python_script).read()
-        os.chdir(cwd)
+        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
 
     def anchor_contacts(self):
         """ Calculate anchor contacts"""
@@ -92,6 +93,9 @@ class Pandora:
         Write_modeller_script.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
 
     def model(self):
+
+        # Make sure we're in the root directory
+        os.path.dirname(PANDORA.PANDORA_path)
 
         # Find the best template structure given the Target
         mod.find_template()
@@ -113,22 +117,38 @@ class Pandora:
 
 
 
-db = Database.Database()
-db.construct_database(MHCI=False)
+
+
+
+# db = Database.Database()
+# db.construct_database(MHCI=False)
+
+
+
+
+# pickle.dump(db, open( "db.pkl", "wb" ) )
+db = pickle.load( open( "db.pkl", "rb" ) )
+
+
+
 
 
 for k in db.MHCII_data:
 
+
     try:
+        t0 = time.time()
+        print('Modelling %s' %db.MHCII_data[k].PDB_id)
         target = PMHC.Target(db.MHCII_data[k].PDB_id, db.MHCII_data[k].allele, db.MHCII_data[k].peptide, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
         mod = Pandora(target, db)
         mod.model()
+        print('Modelling took %s seconds\n' %(time.time() - t0))
     except:
         print('Something went wrong')
 
 
-
-# t0 = time.time()
+os.getcwd()
+#
 #
 # target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II', anchors=[3,6,8,11])
 #
