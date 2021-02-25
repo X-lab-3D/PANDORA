@@ -117,70 +117,32 @@ class Pandora:
 
 
 
-
-
-
 # db = Database.Database()
 # db.construct_database(MHCI=False)
 
 
-
-
 # pickle.dump(db, open( "db.pkl", "wb" ) )
-db = pickle.load( open( "db.pkl", "rb" ) )
-
-
-
-
-
-for k in db.MHCII_data:
-
-
-    try:
-        t0 = time.time()
-        print('Modelling %s' %db.MHCII_data[k].PDB_id)
-        target = PMHC.Target(db.MHCII_data[k].PDB_id, db.MHCII_data[k].allele, db.MHCII_data[k].peptide, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
-        mod = Pandora(target, db)
-        mod.model()
-        print('Modelling took %s seconds\n' %(time.time() - t0))
-    except:
-        print('Something went wrong')
-
-
-os.getcwd()
+# db = pickle.load( open( "db.pkl", "rb" ) )
 #
 #
 # target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II', anchors=[3,6,8,11])
-#
 # mod = Pandora(target, db)
-#
 # mod.model()
 #
-# print(time.time() - t0)
+#
+# for k in db.MHCII_data:
+#
+#     try:
+#         t0 = time.time()
+#         print('Modelling %s' %db.MHCII_data[k].PDB_id)
+#         target = PMHC.Target(db.MHCII_data[k].PDB_id, db.MHCII_data[k].allele, db.MHCII_data[k].peptide, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
+#         mod = Pandora(target, db)
+#         mod.model()
+#         print('Modelling took %s seconds\n' %(time.time() - t0))
+#     except:
+#         print('Something went wrong')
+#
 
-
-
-# mod.find_template()
-# # mod.target.anchors = [3,6,8,11]
-# mod.template.anchors = [4,7,9,12]
-#
-# mod.prep_output_dir()
-# mod.align()
-#
-# mod.write_ini_script()
-# mod.create_initial_model()
-#
-# mod.anchor_contacts()
-#
-# mod.write_modeller_script()
-#
-# mod.run_modeller()
-
-
-# for i in mod.target.anchor_contacts:
-#     print(i)
-#
-# mod.output_dir
 
 
 
