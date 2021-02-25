@@ -141,7 +141,7 @@ def na_model(k, target_info, best_rmsds):
         print('CWD: %s' %os.getcwd())
         return (target_id, pept, allele, "NA", "NA", "NA", "Invalid Peptide Length")
 
-    if length < 8 or length > 12:
+    if length < 8 or length > 15:
         print('###')
         print('Invalid Peptide Length. Exiting here.')
         print('###')
