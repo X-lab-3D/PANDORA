@@ -10,22 +10,15 @@ import pickle
 import csv
 #import subprocess
 
-from Bio import SeqIO
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
-
-from random import choice
 from joblib import Parallel, delayed
 from multiprocessing import Manager
 
 sys.path.append('./')
 
 import PANDORA
-from PANDORA.parsing import structures_parser
-from PANDORA.parsing import url_protocols
-from PANDORA.parsing import utils
-from PANDORA.parsing.get_pMHC_anchors import get_anchors_pMHCI as get_anchors
-from PANDORA.modelling import modelling
+from PANDORA.Database import utils
+from PANDORA.junk.parsing import get_anchors_pMHCI as get_anchors
+from PANDORA.junk.modelling import modelling
 
 ### Retriving Dictionary with PDB IDs and chain lengths ###
 
@@ -142,7 +135,7 @@ def na_model(k, target_info, best_rmsds):
 
     ### Retrieve the target M chain sequence
     try:
-        M_chain = utils.get_seqs( PANDORA.PANDORA_data + '/PDBs/pMHCI/%s_MP.pdb' %target_id)['M']
+        M_chain = utils.get_seqs(PANDORA.PANDORA_data + '/PDBs/pMHCI/%s_MP.pdb' % target_id)['M']
     except FileNotFoundError:
         print('Error in retrieving M_chain, could not find PDB')
         print('CWD: %s' %os.getcwd())

@@ -18,14 +18,14 @@
 
 # Misc
 .DS_Store
-/PANDORA/modelling/.DS_Store
+/PANDORA/junk/modelling/.DS_Store
 /PANDORA/tools/contact-chainID_allAtoms
 /PANDORA/modelling/*.pyc
-/PANDORA/modelling/__pycache__/
+/PANDORA/junk/modelling/__pycache__/
 /PANDORA/tools/*.pyc
 /PANDORA/tools/__pycache__/
 /PANDORA/parsing/*.pyc
-/PANDORA/parsing/__pycache__/
+/PANDORA/junk/parsing/__pycache__/
 ._*
 *.out
 *.swp
