@@ -123,12 +123,12 @@ class Pandora:
 
 
 # pickle.dump(db, open( "db.pkl", "wb" ) )
-# db = pickle.load( open( "db.pkl", "rb" ) )
+db = pickle.load( open( "db.pkl", "rb" ) )
+
 #
-#
-# target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II', anchors=[3,6,8,11])
-# mod = Pandora(target, db)
-# mod.model()
+target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II', anchors=[3,6,8,11])
+mod = Pandora(target, db)
+mod.model()
 #
 #
 # for k in db.MHCII_data:

@@ -25,6 +25,7 @@ This file contains the following functions:
     - get_contacts_matrix(contactfile)
     - get_anchors_pMHCII(Bio.PDB object)
     - pocket_residues_pMHCII(Bio.PDB object)
+    - get_anchors_pMHCI(Bio.PDB object)
 '''
 
 
@@ -346,18 +347,22 @@ def get_contacts_dict(contactfile):
 
 
 def get_anchors_pMHCII(pdb):
-    ''' Find the anchor positions of MHC2 template structures.
+    ''' Find the peptide anchor positions of a pMHC2 template structure.
 
-    :param pdb: Bio.PDB object
-    :return: (list) anchor positions of anchor 1,2,3 and 4
+    Args:
+        pdb: Bio.PDB object
+
+    Returns: (list) anchor positions of anchor 1,2,3 and 4
+
     '''
+
     # todo: This code is very verbose. The anchor finding process can probably be written in a more comprehensive way.
     # uses the function below  pocket_residues () that adapts the pocket residue to the PDB numbering
     pocket_M, pocket_N = pocket_residues_pMHCII(pdb)
     cutoff = 18
 
+    # Calculate contacts
     contacts = Contacts.Contacts(pdb, cutoff=cutoff).chain_contacts
-    contacts = [(i[4], i[5], i[6], i[7], i[0], i[1], i[2], i[3], i[8]) for i in contacts]
 
     # vectors that will be used to count the frequency; each value represents the contact frequency between the
     # previously defined pocket residues and the peptide residue corresponding to the vector index
@@ -375,7 +380,6 @@ def get_anchors_pMHCII(pdb):
 
         # the folllowing if statement checks the order of P, M in the contact file
         if chain_1 == 'P':
-            # print('P')
             cp_aa_id = chain_1
             cm_aa_id = chain_2
             m_aa_id = line[6]
@@ -464,9 +468,13 @@ def pocket_residues_pMHCII(pdb):
     '''function takes as input pdbfile and outputs 2 dictionaries that define the peptide binding pocket in chains
     M, N of MHCII
 
-    :param pdb: Bio.PDB object
-    :return: (Tuple of two dicts) of anchor binding positions of MHCII for the M and N chain
+    Args:
+        pdb: Bio.PDB object
+
+    Returns:(Tuple of two dicts) of anchor binding positions of MHCII for the M and N chain
+
     '''
+
     ###
 
     # normal pocket  numbering; pocket_anchn defines the residues of chain M/N that form the binding pocket of anchor n
@@ -516,4 +524,57 @@ def pocket_residues_pMHCII(pdb):
                     break
 
     return (pocket_M, pocket_N)
-            
+
+
+### ### Function that finds the anchors
+def get_anchors_pMHCI(pdb):
+    ''' Find the peptide anchor residues of a pMHCI structure using the Contacts class
+
+    Args:
+        pdb: Bio.PDB object
+    Returns: tuple of anchor residues (int)
+
+    '''
+
+    cutoff = 11.2
+    ###Define pocket residues
+    pocket = { 'pocket_anch1' : [24, 25, 35, 36],
+              'pocket_anch2' : [81, 1005, 1027, 1028, 1029, 1030, 1033]}
+    pocket_wrong_numbering = { 'pocket_anch1' : [1024, 1025, 1035, 1036],
+                    'pocket_anch2' : [1081, 2005, 2027, 2028, 2029, 2030, 2033]}
+
+    # Template contacts
+    contacts = Contacts.Contacts(pdb, cutoff=cutoff).chain_contacts
+
+    contact_1 = [0]*25
+    contact_2 = [0]*25
+
+    #for cases where numbering starts from 1000, we use the updated pocket residues
+    if int(contacts[0][6]) >1000:
+        pocket = pocket_wrong_numbering
+
+    for line in contacts:
+        #looks at one residue at a time
+        m_aa_id = line[6]
+        p_aa_id = line[2]
+        atom_name = line[3]
+
+        if atom_name == 'CA':
+            for aa in pocket.get('pocket_anch1'):
+                try:
+                    if int(m_aa_id) == aa:
+                        contact_1[int(p_aa_id)]+=1
+                except ValueError:
+                    continue
+
+            for aa in pocket.get('pocket_anch2'):
+                try:
+                    if int(m_aa_id) == aa:
+                        contact_2[int(p_aa_id)]+=1
+                except ValueError:
+                    continue
+
+    anchor_1 = np.argmax(contact_1)
+    anchor_2 = np.argmax(contact_2)
+
+    return (anchor_1, anchor_2)
