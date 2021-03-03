@@ -6,6 +6,7 @@ from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Align
 from PANDORA.Pandora import Write_ini_script
 from PANDORA.Pandora import Write_modeller_script
+from PANDORA.PMHC import Model
 import os
 from Bio.PDB import PDBParser
 import pickle
@@ -39,7 +40,7 @@ class Pandora:
                 os.makedirs(self.output_dir)
         except:
             pass
-        os.system('cp %s %s/%s.pdb' %(self.template.pdb_path.replace(' ', '\\ '), self.output_dir.replace(' ', '\\ '), self.template.PDB_id))
+        os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.PDB_id))
 
 
     def align(self):
@@ -68,7 +69,7 @@ class Pandora:
         # Change working directory back
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
 
-    def run_modeller(self, python_script = 'cmd_modeller.py'):
+    def run_modeller(self, python_script = 'cmd_modeller.py', benchmark = False):
         ''' Perform the homology modelling.
 
         :param python_script: (string) path to script that performs the modeller modelling. cmd_modeller.py
@@ -81,6 +82,34 @@ class Pandora:
         os.popen('python3 %s > modeller.log' %python_script).read()
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
 
+
+        # Parse .log file
+        logf = []
+        f = open(self.output_dir + '/modeller.log')
+        for line in f:
+            if line.startswith(mod.target.PDB_id + '.'):
+                l = line.split()
+                if len(l) > 2:
+                    logf.append(tuple(l))
+        f.close()
+
+        # Create Model object of each theoretical model and add it to self.results
+        self.results = []
+        for i in range(len(logf)):
+            try:
+                m = Model.Model(self.target, self.output_dir, model_path=self.output_dir + '/' + logf[i][0],
+                                                molpdf=logf[i][1], dope=logf[i][2])
+                if benchmark:
+                    m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHCII/' + self.target.PDB_id + '.pdb')
+                self.results.append(m)
+            except:
+                pass
+
+        # Save results as pickle
+        pickle.dump(self.results, open("%s/results_%s.pkl" %(self.output_dir, os.path.basename(os.path.normpath(self.output_dir))), "wb"))
+
+
+
     def anchor_contacts(self):
         """ Calculate anchor contacts"""
         self.target.calc_anchor_contacts()
@@ -92,29 +121,28 @@ class Pandora:
     def write_modeller_script(self):
         Write_modeller_script.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
 
-    def model(self):
+    def model(self, benchmark = False):
 
         # Make sure we're in the root directory
         os.path.dirname(PANDORA.PANDORA_path)
 
         # Find the best template structure given the Target
-        mod.find_template()
+        self.find_template()
         # mod.template.anchors = [4, 7, 9, 12]
         # Prepare the output directory
-        mod.prep_output_dir()
+        self.prep_output_dir()
         # Perform sequence alignment. This is used to superimpose the target on the template structure in later steps
-        mod.align()
+        self.align()
         # Prepare the scripts that run modeller
-        mod.write_ini_script()
+        self.write_ini_script()
         # Run modeller to create the initial model
-        mod.create_initial_model()
+        self.create_initial_model()
         # Calculate anchor restraints
-        mod.anchor_contacts()
+        self.anchor_contacts()
         # prepare the scripts that run modeller
-        mod.write_modeller_script()
+        self.write_modeller_script()
         # Do the homology modelling
-        mod.run_modeller()
-
+        self.run_modeller(benchmark=benchmark)
 
 
 # db = Database.Database()
@@ -128,20 +156,26 @@ db = pickle.load( open( "db.pkl", "rb" ) )
 #
 target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II', anchors=[3,6,8,11])
 mod = Pandora(target, db)
-mod.model()
+mod.model(benchmark=True)
 #
+# for m in mod.results:
+#     print(m.lrmsd)
+
+
+
 #
-# for k in db.MHCII_data:
-#
-#     try:
-#         t0 = time.time()
-#         print('Modelling %s' %db.MHCII_data[k].PDB_id)
-#         target = PMHC.Target(db.MHCII_data[k].PDB_id, db.MHCII_data[k].allele, db.MHCII_data[k].peptide, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
-#         mod = Pandora(target, db)
-#         mod.model()
-#         print('Modelling took %s seconds\n' %(time.time() - t0))
-#     except:
-#         print('Something went wrong')
+for k in db.MHCII_data:
+    try:
+        t0 = time.time()
+        print('Modelling %s' %db.MHCII_data[k].PDB_id)
+        target = PMHC.Target(db.MHCII_data[k].PDB_id, db.MHCII_data[k].allele, db.MHCII_data[k].peptide, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
+        mod = Pandora(target, db)
+        mod.model(benchmark=True)
+
+        print('Mean L-RMSD: %s' %(sum([i.lrmsd for i in mod.results])/len(mod.results)))
+        print('Modelling took %s seconds\n' %(time.time() - t0))
+    except:
+        print('Something went wrong')
 #
 
 

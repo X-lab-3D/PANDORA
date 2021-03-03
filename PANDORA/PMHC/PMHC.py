@@ -117,7 +117,7 @@ class Template(PMHC):
 
 class Target(PMHC):
 
-    def __init__(self, PDB_id, peptide, allele, MHC_class = 'I', chain_seq = [], anchors = [], use_template = False):
+    def __init__(self, PDB_id, peptide, allele, MHC_class = 'I', chain_seq = [], anchors = [], templates = False):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
         :param PDB_id: (string) PDB identifier
@@ -134,7 +134,7 @@ class Target(PMHC):
 
         '''
         super().__init__(PDB_id, peptide, allele, MHC_class, chain_seq, anchors)
-        self.use_template = use_template
+        self.templates = templates
         self.initial_model = False
         self.anchor_contacts = False
 
@@ -157,8 +157,8 @@ class Target(PMHC):
             print('Beta chain: %s' % self.chain_seq[1])
         print('Peptide: %s' % self.peptide)
         print('Anchors: %s' % self.anchors)
-        if self.use_template:
-            print('Using template %s for homology modelling' %self.use_template) #todo actually build this functionality
+        if self.templates:
+            print('Using template %s for homology modelling' %self.templates) #todo actually build this functionality
         if self.initial_model:
             print('An initial model has been provided.')
 

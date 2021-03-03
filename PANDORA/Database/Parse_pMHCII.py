@@ -312,7 +312,7 @@ def parse_pMHCII_pdbs(ids_list):
 
         except: # If something goes wrong, append the ID to the bad_ids list
             bad_ids.append(ID)
-            os.system('mv %s/%s.pdb %s/%s.pdb' %(outdir.replace(' ', '\\ '), ID, bad_dir.replace(' ', '\\ '), ID))
+            os.system('mv %s/%s.pdb %s/%s.pdb' %(outdir, ID, bad_dir, ID))
             pass
 
     return bad_ids
