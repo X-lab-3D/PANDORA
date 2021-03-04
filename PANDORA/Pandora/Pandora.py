@@ -162,8 +162,6 @@ db = pickle.load( open( "db.pkl", "rb" ) )
 
 
 
-
-
 target = PMHC.Target('1DLH',
                      db.MHCII_data['1DLH'].allele,
                      db.MHCII_data['1DLH'].peptide,
@@ -171,13 +169,13 @@ target = PMHC.Target('1DLH',
                      MHC_class = 'II',
                      anchors = db.MHCII_data['1DLH'].anchors)
 
-target = PMHC.Target('1F3J',
-                     db.MHCII_data['1F3J'].allele,
-                     db.MHCII_data['1F3J'].peptide,
-                     chain_seq = db.MHCII_data['1F3J'].chain_seq,
-                     MHC_class = 'II',
-                     anchors = db.MHCII_data['1F3J'].anchors)
-
+# target = PMHC.Target('1F3J',
+#                      db.MHCII_data['1F3J'].allele,
+#                      db.MHCII_data['1F3J'].peptide,
+#                      chain_seq = db.MHCII_data['1F3J'].chain_seq,
+#                      MHC_class = 'II',
+#                      anchors = db.MHCII_data['1F3J'].anchors)
+#
 target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II', anchors=[3,6,8,11])
 
 
@@ -185,6 +183,7 @@ target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class
 
 mod = Pandora(target, db)
 mod.model(benchmark=True)
+
 
 
 for m in mod.results:
