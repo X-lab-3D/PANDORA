@@ -101,6 +101,7 @@ class Pandora:
                                                 molpdf=logf[i][1], dope=logf[i][2])
                 if benchmark:
                     m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHCII/' + self.target.PDB_id + '.pdb')
+                    m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHCII/' + self.target.PDB_id + '.pdb')
                 self.results.append(m)
             except:
                 pass
@@ -147,33 +148,81 @@ class Pandora:
 
 # db = Database.Database()
 # db.construct_database(MHCI=False)
-
-
-
 # pickle.dump(db, open( "db.pkl", "wb" ) )
+
+
+
+
+### ----- DEMO --------------------------------------------------------------------
+
+# import Pandora
+
+
 db = pickle.load( open( "db.pkl", "rb" ) )
 
-#
+
+
+
+
+target = PMHC.Target('1DLH',
+                     db.MHCII_data['1DLH'].allele,
+                     db.MHCII_data['1DLH'].peptide,
+                     chain_seq = db.MHCII_data['1DLH'].chain_seq,
+                     MHC_class = 'II',
+                     anchors = db.MHCII_data['1DLH'].anchors)
+
+target = PMHC.Target('1F3J',
+                     db.MHCII_data['1F3J'].allele,
+                     db.MHCII_data['1F3J'].peptide,
+                     chain_seq = db.MHCII_data['1F3J'].chain_seq,
+                     MHC_class = 'II',
+                     anchors = db.MHCII_data['1F3J'].anchors)
+
 target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II', anchors=[3,6,8,11])
+
+
+
+
 mod = Pandora(target, db)
 mod.model(benchmark=True)
-#
-# for m in mod.results:
-#     print(m.lrmsd)
+
+
+for m in mod.results:
+    print('Molpdf: %s\t\tL-RMSD: %s\t\tcore L-RMSD: %s' %(m.moldpf, m.lrmsd, m.core_lrmsd))
 
 
 
-#
+## --------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+with open('benchmark.csv', 'w') as f:
+    f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,L-RMSD,core L-MRSD\n')
+
 for k in db.MHCII_data:
     try:
         t0 = time.time()
         print('Modelling %s' %db.MHCII_data[k].PDB_id)
-        target = PMHC.Target(db.MHCII_data[k].PDB_id, db.MHCII_data[k].allele, db.MHCII_data[k].peptide, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
+        target = PMHC.Target(db.MHCII_data[k].PDB_id, db.MHCII_data[k].allele, db.MHCII_data[k].peptide, chain_seq= db.MHCII_data[k].chain_seq, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
         mod = Pandora(target, db)
         mod.model(benchmark=True)
 
-        print('Mean L-RMSD: %s' %(sum([i.lrmsd for i in mod.results])/len(mod.results)))
+        lmrsd = round(sum([i.lrmsd for i in mod.results])/len(mod.results), 4)
+        core_lmrsd = round(sum([i.core_lrmsd for i in mod.results])/len(mod.results), 4)
+
+        print('Mean L-RMSD: %s' %(lmrsd))
+        print('Mean core L-RMSD: %s' % (core_lmrsd))
         print('Modelling took %s seconds\n' %(time.time() - t0))
+
+        with open('benchmark.csv', 'a') as f:
+            f.write('%s,%s,%s,%s,%s,%s,%s,%s,\n' %(mod.target.PDB_id, mod.target.peptide, ';'.join(mod.target.allele), mod.template.PDB_id, mod.template.peptide, ';'.join(mod.template.allele), lmrsd, core_lmrsd))
+
     except:
         print('Something went wrong')
 #

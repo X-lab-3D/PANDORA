@@ -35,7 +35,7 @@ class Model:
             self.pdb = PDBParser(QUIET=True).get_structure(self.target.PDB_id, self.model_path)
 
 
-    def calc_LRMSD(self, reference_pdb):
+    def calc_LRMSD(self, reference_pdb, atoms = ['C', 'CA', 'N', 'O']):
         ''' Calculate the L-RMSD between the decoy and reference structure (ground truth)
 
         Args:
@@ -47,17 +47,42 @@ class Model:
         # load target pdb
         if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first
             ref = PDBParser(QUIET=True).get_structure('MHC', reference_pdb)
-        else:            ref = template_pdb
+        else:
+            ref = template_pdb
 
-        # make sure the structure sequences of the decoy and template are the same. If not, make them the same by
-        # removing some residues. This can happen if there is no sequence if the target structure given by the user and
-        # the template structure is used.
+        # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
         homogenize_pdbs(self.pdb, ref, self.output_dir)
 
         # Calculate l-rmsd between decoy and reference with pdb2sql
         sim = StructureSimilarity('%s/decoy.pdb' % (self.output_dir.replace(' ', '\\ ')), '%s/ref.pdb' % (self.output_dir))
-        self.lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None,
-                                          method='svd')
+        self.lrmsd = sim.compute_lrmsd_fast(method='svd', name=atoms)
+        # self.lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name = atoms)
+
+        # remove intermediate files
+        os.system('rm %s/decoy.pdb %s/ref.pdb' %(self.output_dir, self.output_dir))
+
+    def calc_Core_LRMSD(self, reference_pdb, atoms = ['C', 'CA', 'N', 'O']):
+        ''' Calculate the L-RMSD between the decoy and reference structure (ground truth)
+
+        Args:
+            template_pdb: Bio.PDB object
+
+        Returns: (float) L-RMSD
+        '''
+
+        # load target pdb
+        if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first
+            ref = PDBParser(QUIET=True).get_structure('MHC', reference_pdb)
+        else:
+            ref = template_pdb
+
+        # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
+        homogenize_pdbs(self.pdb, ref, self.output_dir, anchors = self.target.anchors)
+
+        # Calculate l-rmsd between decoy and reference with pdb2sql
+        sim = StructureSimilarity('%s/decoy.pdb' % (self.output_dir.replace(' ', '\\ ')), '%s/ref.pdb' % (self.output_dir))
+        self.core_lrmsd = sim.compute_lrmsd_fast(method='svd', name=atoms)
+
         # remove intermediate files
         os.system('rm %s/decoy.pdb %s/ref.pdb' %(self.output_dir, self.output_dir))
 
@@ -72,15 +97,17 @@ def merge_chains(pdb):
 
     '''
     # Merge chains
-    for j in pdb[0]['N'].get_residues():
-        j.id = (j.id[0], j.id[1], 'M')
-        pdb[0]['M'].add(j)
+    if 'N' in [chain.id for chain in pdb.get_chains()]:
 
-    for i in pdb.get_chains():
-        for model in pdb:
-            for chain in model:
-                if chain.id in ['N']:
-                    model.detach_child(chain.id)
+        for j in pdb[0]['N'].get_residues():
+            j.id = (j.id[0], j.id[1], 'M')
+            pdb[0]['M'].add(j)
+
+        for i in pdb.get_chains():
+            for model in pdb:
+                for chain in model:
+                    if chain.id in ['N']:
+                        model.detach_child(chain.id)
     return pdb
 
 
@@ -105,7 +132,7 @@ def renumber(pdb):
     return pdb
 
 
-def homogenize_pdbs(decoy, ref, output_dir):
+def homogenize_pdbs(decoy, ref, output_dir, anchors =False ):
     ''' Make sure that the decoy and reference structure have the same structure sequences.
 
     Args:
@@ -117,44 +144,20 @@ def homogenize_pdbs(decoy, ref, output_dir):
 
     '''
 
-
-    with open('%s/decoy_tar.fasta' % (output_dir), "w") as f:
-        f.write('>decoy\n' + seq1(''.join([i.resname for i in decoy[0]['M'].get_residues()])) + seq1(''.join([i.resname for i in decoy[0]['N'].get_residues()])) + '\n')
-        f.write('>ref\n' + seq1(''.join([i.resname for i in ref[0]['M'].get_residues()])) + seq1(''.join([i.resname for i in ref[0]['N'].get_residues()])) + '\n')
-
-    # Perform MSA with muscle
-    msl = MuscleCommandline(input='%s/decoy_tar.fasta' % (output_dir),
-                            out='%s/decoy_tar.afa' % (output_dir))
-    os.system(str(msl) + ' -quiet')
-
-    seqs = {v.description: str(v.seq) for (v) in SeqIO.parse('%s/decoy_tar.afa' % (output_dir), "fasta")}
-
-    os.system('rm %s/decoy_tar.afa %s/decoy_tar.fasta' % (output_dir,output_dir))
+    if anchors:
+        for x in range(len(decoy[0]['P'])):
+            for i in decoy[0]['P']:
+                if i.id[1] < anchors[0] or i.id[1] > anchors[-1]:
+                    decoy[0]['P'].detach_child(i.id)
+            for i in ref[0]['P']:
+                if i.id[1] < anchors[0] or i.id[1] > anchors[-1]:
+                    ref[0]['P'].detach_child(i.id)
 
     # merge chains of the decoy
     decoy = merge_chains(decoy)
-    # Remove residues based on the alignment
-    res_to_remove = [i for i in range(0, len(seqs['ref'])) if seqs['ref'][i] == '-']
-    resnr = 0
-    for res in decoy[0]['M']:
-        # if seq1(res.resname) != seqs['decoy'][resnr]:
-        if resnr in res_to_remove:
-            decoy[0]['M'].detach_child(res.id)
-        resnr += 1
-    # Renumber
     decoy = renumber(decoy)
-
     # merge chains of the reference
     ref = merge_chains(ref)
-    # Remove residues based on the alignment
-    res_to_remove = [i for i in range(0, len(seqs['decoy'])) if seqs['decoy'][i] == '-']
-    resnr = 0
-    for res in ref[0]['M']:
-        # if seq1(res.resname) != seqs['decoy'][resnr]:
-        if resnr in res_to_remove:
-            ref[0]['M'].detach_child(res.id)
-        resnr += 1
-    # renumber
     ref = renumber(ref)
 
     # Write pdbs
@@ -169,48 +172,22 @@ def homogenize_pdbs(decoy, ref, output_dir):
     return decoy, ref
 
 
+#
+# decoy_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/outputs/1DLH_1FYT/1FYT.BL00010001.pdb'
+# ref_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/PDBs/pMHCII/1FYT.pdb'
+#
+# decoy = PDBParser(QUIET=True).get_structure('Decoy', decoy_path)
+# ref = PDBParser(QUIET=True).get_structure('Ref', ref_path)
+#
+#
+# decoy_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/outputs/5KSU_6U3O/6U3O.BL00010001.pdb'
+# ref_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/PDBs/pMHCII/6U3O.pdb'
+#
+# m = Model(mod.target, mod.output_dir, model_path=decoy_path)
+# m.calc_LRMSD(ref_path)
+# m.calc_Core_LRMSD(ref_path)
+# print(m.lrmsd)
+# print(m.core_lrmsd)
 
-# for i in range(len(logf)):
-#
-#     decoy = PDBParser(QUIET=True).get_structure('MHC', mod.output_dir + '/' + logf[i][0])
-#     ref = PDBParser(QUIET=True).get_structure('MHC', '/Users/derek/Dropbox/Master Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/PDBs/pMHCII/1IAK.pdb')
-#
-#     homogenize_pdbs(decoy, ref, mod.output_dir)
-#
-#     sim = StructureSimilarity('%s/decoy.pdb' % (mod.output_dir),'%s/ref.pdb' % (mod.output_dir))
-#
-#     lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None,
-#         method='svd')
-#
-#     print(lrmsd)
-#
-#
-#
-#
-# logf = []
-# f = open(mod.output_dir + '/modeller.log')
-# for line in f:
-#     if line.startswith('1IAK.'):
-#         l = line.split()
-#         if len(l) > 2:
-#             logf.append(tuple(l))
-# f.close()
-#
-# henk = Model(mod.target, mod.output_dir + '/' + logf[0][0], molpdf=logf[0][1], dope=logf[0][2])
-#
-# henk.pdb
 
-# for i in logf:
-#     decoy = mod.output_dir + '/' + i[0]
-#     ref = '/Users/derek/Dropbox/Master Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/PDBs/pMHCII/1IAK.pdb'
-#
-#     homogenize_pdbs(decoy, ref, mod.output_dir)
-#
-#     sim = StructureSimilarity('%s/decoy.pdb' % (mod.output_dir), '%s/ref.pdb' % (mod.output_dir))
-#
-#     lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None,
-#                                       method='svd')
-#     print(lrmsd)
-#
-#
-#
+
