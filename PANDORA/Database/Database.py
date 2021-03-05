@@ -6,8 +6,6 @@ import PANDORA
 from PANDORA.PMHC import PMHC
 from PANDORA.Database import Download_data
 from PANDORA.Database import Parse_pMHC
-# from PANDORA.Database import Parse_pMHCII
-
 
 class Database:
     #todo Integrate Anchor calculation with Rafaellas code to do all the anchor calcs while initiating the db
@@ -21,8 +19,8 @@ class Database:
         """ Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
         print('Downloading structures ...')
         # Download_data.download_unzip_imgt_structures(del_inn_files=True, del_kabat_files=True)
-        self.__IDs_list_MHCI = Download_data.download_ids_imgt('MH1', out_tsv='all_MHI_IDs.tsv')[:10]
-        self.__IDs_list_MHCII = Download_data.download_ids_imgt('MH2', out_tsv='all_MHII_IDs.tsv')[:10]
+        self.__IDs_list_MHCI = Download_data.download_ids_imgt('MH1', out_tsv='all_MHI_IDs.tsv')
+        self.__IDs_list_MHCII = Download_data.download_ids_imgt('MH2', out_tsv='all_MHII_IDs.tsv')
 
 
     def __clean_MHCI_files(self):
@@ -51,17 +49,19 @@ class Database:
             self.__clean_MHCI_files()
 
             for id in self.__IDs_list_MHCI:
-                # id = '1AGE'
-                file = PANDORA.PANDORA_data + '/PDBs/pMHCI/' + id + '.pdb'
-                # Check if this file really exists
-                if os.path.isfile(file):
-                    # Find the alleles
-                    al = Parse_pMHC.get_chainid_alleles_MHCI(file)
-
-                    alpha = [[k for k,v in i.items()] for i in [al['A'][i] for i in [i for i in al['A'].keys()]]]
-                    a_allele = sum(alpha, [])
-                    # Create MHC_structure object
-                    self.MHCI_data[id] = PMHC.Template(id, allele=a_allele, pdb_path=file)
+                try:
+                    file = PANDORA.PANDORA_data + '/PDBs/pMHCI/' + id + '.pdb'
+                    # Check if this file really exists
+                    if os.path.isfile(file):
+                        print('Adding %s' % id)
+                        # Find the alleles
+                        al = Parse_pMHC.get_chainid_alleles_MHCI(file)
+                        alpha = [[k for k,v in i.items()] for i in [al['A'][i] for i in [i for i in al['A'].keys()]]]
+                        a_allele = sum(alpha, [])
+                        # Create MHC_structure object
+                        self.MHCI_data[id] = PMHC.Template(id, allele=a_allele, pdb_path=file)
+                except:
+                    pass
 
         # Construct the MHCII database
         if MHCII:
@@ -70,18 +70,22 @@ class Database:
             self.__clean_MHCII_files()
 
             for id in self.__IDs_list_MHCII:
-                file = PANDORA.PANDORA_data + '/PDBs/pMHCII/' + id + '.pdb'
-                # Check if this file really exists
-                if os.path.isfile(file):
-                    # Find the alleles
-                    al = Parse_pMHC.get_chainid_alleles_MHCII(file)
-                    alpha = sum([al['Alpha'][i] for i in [i for i in al['Alpha'].keys()]], [])
-                    beta = sum([al['Beta'][i] for i in [i for i in al['Beta'].keys()]], [])
-                    a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
-                    b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
+                try:
+                    file = PANDORA.PANDORA_data + '/PDBs/pMHCII/' + id + '.pdb'
+                    # Check if this file really exists
+                    if os.path.isfile(file):
+                        print('Adding %s' %id)
+                        # Find the alleles
+                        al = Parse_pMHC.get_chainid_alleles_MHCII(file)
+                        alpha = sum([al['Alpha'][i] for i in [i for i in al['Alpha'].keys()]], [])
+                        beta = sum([al['Beta'][i] for i in [i for i in al['Beta'].keys()]], [])
+                        a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
+                        b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
 
-                    # Create MHC_structure object
-                    self.MHCII_data[id] = PMHC.Template(id, allele=a_allele + b_allele, MHC_class= 'II', pdb_path=file)
+                        # Create MHC_structure object
+                        self.MHCII_data[id] = PMHC.Template(id, allele=a_allele + b_allele, MHC_class= 'II', pdb_path=file)
+                except:
+                    pass
 
 
     def add_structure(self, PDB_id, allele, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
@@ -119,34 +123,19 @@ class Database:
         self.MHCI_data.pop(id, None)
         self.MHCII_data.pop(id, None)
 
-    def save(self, fn):
+    def save(self, fn = 'db.pkl'):
         """Save the database as a pickle file
 
         :param fn: (string) pathname of file
         """
-        db = open(fn, "wb")
-        pickle.dump(self, db)
-        db.close()
+        pickle.dump(self, open(fn, "wb"))
 
-    # def load(fn):
-    #     """Load the database from a saved pickle file
-    #
-    #     :param fn: (string) pathname of file
-    #     :return: local_database object
-    #     """
-    #     pkl = open(fn, 'rb')
-    #     db = pickle.load(pkl)
-    #     pkl.close()
-    #     return db
+    def load(cls, fn):
+        return pickle.load( open(fn, "rb" ) )
 
-
-    # def load(cls, fn):
-    #     with open(fn, 'rb') as f:
-    #         return pickle.load(f)
-#
 # db = Database()
 # db.construct_database()
-#
-#
-# db.MHCII_data['1A6A'].anchors
-# db.MHCI_data['1A9B'].anchors
+# db.save('Pandora_MHCI_and_MHCII_data.pkl')
+# test_db = pickle.load( open("Pandora_MHCI_and_MHCII_data.pkl", "rb" ) )
+
+
