@@ -1,11 +1,15 @@
 import os
 import gzip
 import shutil
+from copy import deepcopy
 
 import PANDORA
 from Bio.PDB import PDBParser
 from Bio.PDB import PDBIO
 
+from PANDORA.Contacts import Contacts
+
+from string import ascii_uppercase
 
 def get_chainid_alleles_MHCI(pdbf):
     '''
@@ -163,7 +167,8 @@ def get_chainid_alleles_MHCII(pdbf):
                     pass
 
     return {'Alpha': mhc_a_alleles, 'Beta': mhc_b_alleles}
-
+#
+# chains = MHC_chains, pdb, ['M', 'N', 'P']
 
 def replace_chain_names(chains, pdb, replacement_chains=['M', 'N', 'P']):
     ''' Replace chain names by another chain name in a bio.pdb object
@@ -177,6 +182,7 @@ def replace_chain_names(chains, pdb, replacement_chains=['M', 'N', 'P']):
     for i in chains:
         for chain in pdb.get_chains():
             if chain.id == i:
+                # print(chain.id)
                 chain.id = replacement_chains[chains.index(i)]
     return pdb
 
@@ -317,16 +323,18 @@ def remove_weird_chains(pdb, chains_to_keep):
     Returns: Bio.PDB object
 
     '''
-    for i in pdb.get_chains():
-        for model in pdb:
-            for chain in model:
-                if chain.id not in chains_to_keep:
-                    model.detach_child(chain.id)
+    for _ in range(len([c for c in pdb.get_chains()])):
+        for i in pdb.get_chains():
+            for model in pdb:
+                for chain in model:
+                    if chain.id not in chains_to_keep or chain.id in [' ','','  ','_'] + list(range(1,20)):
+                        model.detach_child(chain.id)
 
     return pdb
 
 
-def find_chains_MHCI(pdb):
+
+def find_chains_MHCI(pdb, pept_chain):
     ''' Find the MHCI chains
 
     Args:
@@ -335,13 +343,13 @@ def find_chains_MHCI(pdb):
     Returns: list of chains
 
     '''
-    # Find the peptide chain
-    pept_chain = find_peptide_chain(pdb)
 
     # Find contacts between peptide chain and other chains
     c = [i for i in Contacts.Contacts(pdb).chain_contacts if i[1] == pept_chain or i[5] == pept_chain]
     # Make a list of all chains that contact the peptide chain
     chain_cont = [i for i in sum([[i[1],i[5]] for i in c], []) if i != pept_chain]
+    # Make sure the chain is longer than 120 residues. This prevents selecting e.g. two peptides in the binding groove
+    chain_cont = [i for i in chain_cont if i in [c.id for c in pdb.get_chains() if len(c) > 120]]
 
     # Find the two chains that have the most contacts with the peptide. This should also filter out TCR chains
     if len(set(chain_cont)) >= 1:
@@ -353,7 +361,7 @@ def find_chains_MHCI(pdb):
 
     return MHC_chains
 
-def find_chains_MHCII(pdb):
+def find_chains_MHCII(pdb, pept_chain):
     ''' Find the MHCI chains
 
     Args:
@@ -362,36 +370,158 @@ def find_chains_MHCII(pdb):
     Returns: list of chains
 
     '''
-    # Find the peptide chain
-    pept_chain = find_peptide_chain(pdb)
 
     # Find contacts between peptide chain and other chains
     c = [i for i in Contacts.Contacts(pdb).chain_contacts if i[1] == pept_chain or i[5] == pept_chain]
     # Make a list of all chains that contact the peptide chain
     chain_cont = [i for i in sum([[i[1],i[5]] for i in c], []) if i != pept_chain]
+    # Make sure the chain is longer than 120 residues. This prevents selecting e.g. two peptides in the binding groove
+    chain_cont = [i for i in chain_cont if i in [c.id for c in pdb.get_chains() if len(c) > 120]]
 
     # Find the two chains that have the most contacts with the peptide. This should also filter out TCR chains
     if len(set(chain_cont)) >= 2:
         MHC_chains = sorted([ss for ss in set(chain_cont)], key=chain_cont.count, reverse=True)[:2]
-        MHC_chains = [MHC_chains, pept_chain]
+        MHC_chains = sorted(MHC_chains)
+        MHC_chains = MHC_chains + [pept_chain]
     else:
         print('Found >2 MHC I chains')
         raise Exception
 
     return MHC_chains
 
+
+def check_pMHC(pdb):
+    ''' Tests parsed pMHC structures: chain numbering, naming and length
+
+    Args:
+        pdb: Bio.PDB object
+
+    Returns: Bool
+
+    '''
+    requirements = [False, False, False, True]
+
+    chains = [i.id for i in pdb.get_chains()]
+    chain_len = [len(i) for i in pdb.get_chains()]
+
+    # 1. Check chain names and the number of chains
+    if len(chains) == 2:
+        if chains[0] == 'M' and chains[1] == 'P':
+            requirements[0] = True
+    elif len(chains) == 3:
+        if chains[0] == 'M' and chains[1] == 'N' and chains[2] == 'P':
+            requirements[0] = True
+
+    # 2. Check M,N chain length
+    if len(chains) == 2:
+        if chain_len[0] > 120:
+            requirements[1] = True
+    elif len(chains) == 3:
+        if chain_len[0] > 120 and chain_len[1] > 120:
+            requirements[1] = True
+
+    # 3. Check peptide length
+    if chain_len[-1] > 6 and chain_len[-1] < 26:
+        requirements[2] = True
+
+    # 4. Check numbering. Does every chain start at 1 and end at its chain length?
+    for c in pdb.get_chains():
+        res = [r.id for r in c]
+        if not res[0][1] == 1:
+            requirements[3] = False
+        if not res[-1][1] == len(c):
+            requirements[3] = False
+
+    if all(requirements):
+        return True
+    else:
+        return False
+
+def log(ID, error, logfile, verbose=True):
+    ''' Keeps track of what goes wrong while parsing
+
+    Args:
+        ID: (string) PDB ID
+        error: (string) error to append to log file
+        logfile: (string) path to logfile
+        verbose: (Bool) print error?
+    '''
+
+    # Create log file
+    if not os.path.exists(logfile):
+        with open(logfile, 'w') as f:
+            f.write('ID,error\n')
+
+    if verbose:
+        print('\t' + error)
+    with open(logfile, 'a') as f:
+        f.write('%s,%s\n' % (ID, error))
+
+# ID = IDs_list_MHCI[0]
 def parse_pMHCI_pdbs(ids_list):
     ''' Clean all MHCI pdb files that have been downloaded from IMGT
 
     :param ids_list: (list) list of MHCI PDB IDs. core.Database.IDs_list_MHCI
     :return: Writes all cleaned PDBs to the /PDBs/pMHCI/ dir
     '''
-    # keep track of the failed PDBs
-    bad_ids = []
     # set paths for in and out directories
     indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
     outdir = PANDORA.PANDORA_data + '/PDBs/pMHCI'
     bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI'
+    logfile = os.path.dirname(bad_dir) + '/log_MHCI.csv'
+
+    for ID in ids_list:
+        print('Parsing %s' % ID)
+        try:
+            # Unzip file (also check if the file is not empty) and save the path of this file
+            pdb_file = unzip_pdb(ID, indir, outdir)
+            pdb = PDBParser(QUIET=True).get_structure('MHCI', pdb_file)
+            # Remove waters and weird chains
+            pdb = remove_weird_chains(pdb, list(ascii_uppercase))
+
+            try:                # Find the peptide chain
+                pept_chain = find_peptide_chain(pdb)
+            except:
+                log(ID, 'Could not find a suitable peptide chain', logfile)
+                raise Exception
+
+            try:                 # Find out which chains are the Alpha and Peptide chain
+                MHC_chains = find_chains_MHCI(pdb, pept_chain)
+            except:
+                log(ID, 'Could not locate Alpha chain', logfile)
+                raise Exception
+
+            try:                 # Reformat chains
+                pdb = remove_weird_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
+                pdb = replace_chain_names(MHC_chains, pdb,['M', 'P'])  # Rename chains to M,P
+                pdb = renumber(pdb)  # Renumber from 1
+            except:
+                log(ID, 'Could not reformat structure', logfile)
+                raise Exception
+
+            if not check_pMHC(pdb):
+                log(ID, 'Structure did not pass the test.', logfile)
+                raise Exception
+
+            # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
+            write_pdb(pdb, '%s/%s.pdb' % (outdir, ID), pdb_file)
+
+        except:  # If something goes wrong, append the ID to the bad_ids list
+            os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, ID, bad_dir, ID))
+
+
+
+def parse_pMHCII_pdbs(ids_list):
+    ''' Clean all MHCII pdb files that have been downloaded from IMGT
+
+    :param ids_list: (list) list of MHCI PDB IDs. core.Database.IDs_list_MHCII
+    :return: Writes all cleaned PDBs to the /PDBs/pMHCII/ dir
+    '''
+    # set paths for in and out directories
+    indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
+    outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII'
+    bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII'
+    logfile = os.path.dirname(bad_dir) + '/log_MHCII.csv'
 
     for ID in ids_list:
         print('Parsing %s' % ID)
@@ -399,63 +529,45 @@ def parse_pMHCI_pdbs(ids_list):
             # Unzip file (also check if the file is not empty) and save the path of this file
             pdb_file = unzip_pdb(ID, indir, outdir)
             pdb = PDBParser(QUIET=True).get_structure('MHCII', pdb_file)
+            # Remove waters and weird chains
+            pdb = remove_weird_chains(pdb, list(ascii_uppercase))
 
-            # Find out which chains are the Alpha, Beta and Peptide chain
-            MHC_chains = find_chains_MHCII(pdb)  # Find which chains are the MHCII Alpha, Beta and peptide chain
-            pdb = remove_weird_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
-            pdb = replace_chain_names(MHC_chains, pdb, ['M', 'P'])  # Rename the Alpha, Beta and Peptide chain to M,N,P
-            pdb = renumber(pdb)  # Renumber from 1
+            try:                # Find the peptide chain
+                pept_chain = find_peptide_chain(pdb)
+            except:
+                log(ID, 'Could not find a suitable peptide chain', logfile)
+                raise Exception
+
+            try:                 # Find out which chains are the Alpha and Peptide chain
+                MHC_chains = find_chains_MHCII(pdb, pept_chain)
+            except:
+                log(ID, 'Could not locate Alpha chain', logfile)
+                raise Exception
+
+            try:                 # Reformat chains
+                pdb = remove_weird_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
+                pdb = replace_chain_names(MHC_chains, pdb, ['M', 'N', 'P'])   # Rename chains to M,N,P
+                pdb = renumber(pdb)  # Renumber from 1
+            except:
+                log(ID, 'Could not reformat structure', logfile)
+                raise Exception
+
+            if not check_pMHC(pdb):
+                log(ID, 'Structure did not pass the test.', logfile)
+                raise Exception
 
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
             write_pdb(pdb, '%s/%s.pdb' % (outdir, ID), pdb_file)
 
         except:  # If something goes wrong, append the ID to the bad_ids list
-            bad_ids.append(ID)
             os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, ID, bad_dir, ID))
-            print('something went wrong')
-
-    return bad_ids
-
-def parse_pMHCII_pdbs(ids_list):
-    ''' Clean all MHCII pdb files that have been downloaded from IMGT
-
-    :param ids_list: (list) list of MHCII PDB IDs. core.Database.IDs_list_MHCII
-    :return: Writes all cleaned PDBs to the /PDBs/pMHCII/ dir
-    '''
-    # keep track of the failed PDBs
-    bad_ids = []
-    # set paths for in and out directories
-    indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
-    outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII'
-    bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII'
-
-    for ID in ids_list:
-        print('Parsing %s' %ID)
-        try:
-            # Unzip file (also check if the file is not empty) and save the path of this file
-            pdb_file = unzip_pdb(ID, indir, outdir)
-            pdb = PDBParser(QUIET=True).get_structure('MHCII', pdb_file)
-            # Find out which chains are the Alpha, Beta and Peptide chain
-            MHC_chains = find_chains_MHCII(pdb)  # Find which chains are the MHCII Alpha, Beta and peptide chain
-            pdb = remove_weird_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
-            pdb = replace_chain_names(MHC_chains, pdb, ['M', 'N', 'P']) # Rename the Alpha, Beta and Peptide chain to M,N,P
-            pdb = renumber(pdb) # Renumber from 1
-
-            # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
-            write_pdb(pdb, '%s/%s.pdb' %(outdir, ID), pdb_file)
-
-        except: # If something goes wrong, append the ID to the bad_ids list
-            bad_ids.append(ID)
-            os.system('mv %s/%s.pdb %s/%s.pdb' %(outdir, ID, bad_dir, ID))
-            print('something went wrong')
-
-    return bad_ids
 
 
+
+# from PANDORA.Database import Download_data
 # IDs_list_MHCI = Download_data.download_ids_imgt('MH1', out_tsv='all_MHI_IDs.tsv')
 # IDs_list_MHCII = Download_data.download_ids_imgt('MH2', out_tsv='all_MHII_IDs.tsv')
-#
-# parse_pMHCI_pdbs(IDs_list_MHCI[:10])
-# parse_pMHCII_pdbs(IDs_list_MHCII[:10])
+# #
+# parse_pMHCI_pdbs(IDs_list_MHCI)
+# parse_pMHCII_pdbs(IDs_list_MHCII)
 
-#todo check funtion. This function checks if the parsed PDB is good (correct #chains and names)

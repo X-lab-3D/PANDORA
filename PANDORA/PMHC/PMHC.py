@@ -112,7 +112,14 @@ class Template(PMHC):
             raise Exception('Provide a PDB structure to the Template object first')
 
     def calc_anchors(self):
-        self.anchors = utils.get_anchors_pMHCII(self.pdb)
+        if self.MHC_class == 'I':
+            self.anchors = utils.get_anchors_pMHCI(self.pdb)
+        if self.MHC_class == 'II':
+            self.anchors = utils.pMHCII_anchors(self.pdb)
+
+
+
+
 
 
 class Target(PMHC):

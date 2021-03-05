@@ -577,7 +577,7 @@ def get_anchors_pMHCI(pdb):
     anchor_1 = np.argmax(contact_1)
     anchor_2 = np.argmax(contact_2)
 
-    return (anchor_1, anchor_2)
+    return [anchor_1, anchor_2]
 
 
 def pMHCII_anchors(pdb):
