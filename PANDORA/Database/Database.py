@@ -46,7 +46,7 @@ class Database:
         if MHCI:
 
             # Parse all MHCI files
-            self.__clean_MHCI_files()
+            # self.__clean_MHCI_files()
 
             for id in self.__IDs_list_MHCI:
                 try:
@@ -67,7 +67,7 @@ class Database:
         if MHCII:
 
             # Parse all MHCII files
-            self.__clean_MHCII_files()
+            # self.__clean_MHCII_files()
 
             for id in self.__IDs_list_MHCII:
                 try:
@@ -123,15 +123,28 @@ class Database:
         self.MHCI_data.pop(id, None)
         self.MHCII_data.pop(id, None)
 
+    # def save(self, fn = 'db.pkl'):
+    #     """Save the database as a pickle file
+    #
+    #     :param fn: (string) pathname of file
+    #     """
+    #     pickle.dump(self, open(fn, "wb"))
+    #
+    # def load(cls, fn):
+    #     return pickle.load( open(fn, "rb" ) )
+
     def save(self, fn = 'db.pkl'):
         """Save the database as a pickle file
 
         :param fn: (string) pathname of file
         """
-        pickle.dump(self, open(fn, "wb"))
+        # pickle.dump(self, open(fn, "wb"))
+        with open(fn, "wb") as dill_file:
+            dill.dump(self, dill_file)
 
     def load(cls, fn):
-        return pickle.load( open(fn, "rb" ) )
+        # return pickle.load( open(fn, "rb" ) )
+        return dill.load(open(fn, 'rb'))
 
 # db = Database()
 # db.construct_database()

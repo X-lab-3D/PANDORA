@@ -15,21 +15,36 @@ def write_ini_script(target, template, alignment_file, output_dir):
 
     anch = target.anchors
 
-    with open(output_dir.replace('\\ ',' ') + '/MyLoop.py', 'w') as myloopscript:
-        MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
-        for line in MyL_temp:
-            if 'self.residue_range' in line:
-                myloopscript.write(line % (1, anch[0])) # write the first anchor
-                for i in range(len(anch)-1): # Write all the inbetween acnhors if they are there
-                    myloopscript.write(line % (anch[i] + 2, anch[i+1]))
-                myloopscript.write(line % (anch[-1] + 2, len(target.peptide))) # Write the last anchor
-            elif 'SPECIAL_RESTRAINTS_BREAK' in line:
-                break
-            elif 'contact_file = open' in line:
-                myloopscript.write(line % template_ID)
-            else:
-                myloopscript.write(line)
-        MyL_temp.close()
+    if target.MHC_class == 'I':
+        with open(output_dir.replace('\\ ',' ') + '/MyLoop.py', 'w') as myloopscript:
+            MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
+            for line in MyL_temp:
+                if 'self.residue_range' in line:
+                    myloopscript.write(line % (anch[0], anch[-1]))
+                elif 'SPECIAL_RESTRAINTS_BREAK' in line:
+                    break
+                elif 'contact_file = open' in line:
+                    myloopscript.write(line % template_ID)
+                else:
+                    myloopscript.write(line)
+            MyL_temp.close()
+
+    if target.MHC_class == 'II':
+        with open(output_dir.replace('\\ ',' ') + '/MyLoop.py', 'w') as myloopscript:
+            MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r')
+            for line in MyL_temp:
+                if 'self.residue_range' in line:
+                    myloopscript.write(line % (1, anch[0])) # write the first anchor
+                    for i in range(len(anch)-1): # Write all the inbetween acnhors if they are there
+                        myloopscript.write(line % (anch[i] + 2, anch[i+1]))
+                    myloopscript.write(line % (anch[-1] + 2, len(target.peptide))) # Write the last anchor
+                elif 'SPECIAL_RESTRAINTS_BREAK' in line:
+                    break
+                elif 'contact_file = open' in line:
+                    myloopscript.write(line % template_ID)
+                else:
+                    myloopscript.write(line)
+            MyL_temp.close()
 
     with open(output_dir.replace('\\ ', ' ') + '/cmd_modeller_ini.py', 'w') as modscript:
         cmd_m_temp = open(PANDORA.PANDORA_path + '/Pandora/cmd_modeller_ini.py', 'r')

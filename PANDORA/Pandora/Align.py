@@ -154,13 +154,15 @@ class Align:
                 msl = MuscleCommandline(input='%s/pept_cores.fasta' % (self.__output_dir),
                                         out='%s/pept_cores.afa' % (self.__output_dir))
                 os.system(str(msl) + ' -quiet')
-                # Remove intermediate files
-                os.system(
-                    'rm %s/*.fasta %s/*.afa' % (self.__output_dir.replace(' ', '\\ '), self.__output_dir.replace(' ', '\\ ')))
 
                 # Load aligned seqs into dict
                 aligned_cores = {v.description: str(v.seq) for (v) in
                                  SeqIO.parse('%s/pept_cores.afa' % (self.__output_dir), "fasta")}
+
+                # Remove intermediate files
+                os.system(
+                    'rm %s/*.fasta %s/*.afa' % (
+                    self.__output_dir.replace(' ', '\\ '), self.__output_dir.replace(' ', '\\ ')))
 
                 # Add aligned cores in between anchors
                 for k, v in id_pept_anch.items():
@@ -193,6 +195,7 @@ class Align:
 
         # Reformat
         return {k + ' P': v[0] for k, v in id_pept_anch.items()}
+
 
 
     def __write_ali_file(self):

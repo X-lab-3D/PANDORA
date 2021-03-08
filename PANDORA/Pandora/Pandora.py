@@ -11,6 +11,7 @@ import os
 from Bio.PDB import PDBParser
 import pickle
 import time
+import dill
 
 class Pandora:
 
@@ -87,7 +88,7 @@ class Pandora:
         logf = []
         f = open(self.output_dir + '/modeller.log')
         for line in f:
-            if line.startswith(mod.target.PDB_id + '.'):
+            if line.startswith(self.target.PDB_id + '.'):
                 l = line.split()
                 if len(l) > 2:
                     logf.append(tuple(l))
@@ -100,8 +101,9 @@ class Pandora:
                 m = Model.Model(self.target, self.output_dir, model_path=self.output_dir + '/' + logf[i][0],
                                                 molpdf=logf[i][1], dope=logf[i][2])
                 if benchmark:
-                    m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHCII/' + self.target.PDB_id + '.pdb')
-                    m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHCII/' + self.target.PDB_id + '.pdb')
+
+                    m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + self.target.MHC_class + '/' + self.target.PDB_id + '.pdb')
+                    m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + self.target.MHC_class + '/' + self.target.PDB_id + '.pdb')
                 self.results.append(m)
             except:
                 pass
@@ -146,21 +148,7 @@ class Pandora:
         self.run_modeller(benchmark=benchmark)
 
 
-# db = Database.Database()
-# db.construct_database(MHCI=False)
-# pickle.dump(db, open( "db.pkl", "wb" ) )
-
-
-
-
-### ----- DEMO --------------------------------------------------------------------
-
-# import Pandora
-
-
-db = pickle.load( open( "db.pkl", "rb" ) )
-
-
+db = dill.load(open("Pandora_MHCI_and_MHCII_data", 'rb'))
 
 target = PMHC.Target('1DLH',
                      db.MHCII_data['1DLH'].allele,
@@ -169,15 +157,12 @@ target = PMHC.Target('1DLH',
                      MHC_class = 'II',
                      anchors = db.MHCII_data['1DLH'].anchors)
 
-# target = PMHC.Target('1F3J',
-#                      db.MHCII_data['1F3J'].allele,
-#                      db.MHCII_data['1F3J'].peptide,
-#                      chain_seq = db.MHCII_data['1F3J'].chain_seq,
-#                      MHC_class = 'II',
-#                      anchors = db.MHCII_data['1F3J'].anchors)
-#
-target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II', anchors=[3,6,8,11])
-
+target = PMHC.Target('1A1M',
+                     db.MHCI_data['1A1M'].allele,
+                     db.MHCI_data['1A1M'].peptide,
+                     chain_seq = db.MHCI_data['1A1M'].chain_seq,
+                     # MHC_class = 'II',
+                     anchors = db.MHCI_data['1A1M'].anchors)
 
 
 

@@ -6,7 +6,7 @@ env = M.environ()
 class MyLoop(MA.loopmodel):
     def special_patches(self, aln):
         # Rename both chains and renumber the residues in each
-        self.rename_segments(segment_ids=['M', 'N', 'P'], renumber_residues=[1, 1, 1])
+        self.rename_segments(segment_ids=['M', 'P'], renumber_residues=[1, 1])
         
     ### Skipping randomness in Initial modelling. Uncomment this funtion only if you specifically mean it. 
     def build_ini_loop(self, atmsel):
