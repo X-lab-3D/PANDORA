@@ -1,17 +1,13 @@
 
 import PANDORA
-from PANDORA.Pandora import Find_template
-from PANDORA.Database import Database as Database
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Align
-from PANDORA.Pandora import Write_ini_script
-from PANDORA.Pandora import Write_modeller_script
-from PANDORA.PMHC import Model
+from PANDORA.Pandora import Modelling_functions
+
 import os
 from Bio.PDB import PDBParser
-import pickle
-import time
 import dill
+
 
 class Pandora:
 
@@ -20,15 +16,10 @@ class Pandora:
         self.template = None
         self.database = database
         self.output_dir = PANDORA.PANDORA_data + '/outputs/'
-        # self.alignment
-        # self.ini_modeller_script
-        # self.initial_model
-        # self.modeller_script
-        # self.results
 
     def find_template(self):
         ''' Find the best template structure given a Target object '''
-        self.template = Find_template.find_template(self.target, self.database)
+        self.template = Modelling_functions.find_template(self.target, self.database)
 
 
     def prep_output_dir(self):
@@ -49,7 +40,7 @@ class Pandora:
 
     def write_ini_script(self):
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
-        Write_ini_script.write_ini_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
+        Modelling_functions.write_ini_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
 
     def create_initial_model(self, python_script = 'cmd_modeller_ini.py'):
         ''' Run modeller given a python script (cmd_modeller_ini.py or cmd_modeller.py). Modeller can only output files
@@ -59,8 +50,6 @@ class Pandora:
         :param python_script: (string) path to script that performs the modeller modelling. cmd_modeller_ini.py
         :return:
         '''
-
-        # cwd = os.getcwd()
         # Change working directory
         os.chdir(self.output_dir)
         # Run Modeller
@@ -70,48 +59,14 @@ class Pandora:
         # Change working directory back
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
 
-    def run_modeller(self, python_script = 'cmd_modeller.py', benchmark = False):
+    def run_modeller(self, python_script='cmd_modeller.py', benchmark=False, pickle_out=True):
         ''' Perform the homology modelling.
 
         :param python_script: (string) path to script that performs the modeller modelling. cmd_modeller.py
         :return:
         '''
-        # cwd = os.getcwd()
-        # Change working directory
-        os.chdir(self.output_dir)
-        # run Modeller to perform homology modelling
-        os.popen('python3 %s > modeller.log' %python_script).read()
-        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
-
-
-        # Parse .log file
-        logf = []
-        f = open(self.output_dir + '/modeller.log')
-        for line in f:
-            if line.startswith(self.target.PDB_id + '.'):
-                l = line.split()
-                if len(l) > 2:
-                    logf.append(tuple(l))
-        f.close()
-
-        # Create Model object of each theoretical model and add it to self.results
-        self.results = []
-        for i in range(len(logf)):
-            try:
-                m = Model.Model(self.target, self.output_dir, model_path=self.output_dir + '/' + logf[i][0],
-                                                molpdf=logf[i][1], dope=logf[i][2])
-                if benchmark:
-
-                    m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + self.target.MHC_class + '/' + self.target.PDB_id + '.pdb')
-                    m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + self.target.MHC_class + '/' + self.target.PDB_id + '.pdb')
-                self.results.append(m)
-            except:
-                pass
-
-        # Save results as pickle
-        pickle.dump(self.results, open("%s/results_%s.pkl" %(self.output_dir, os.path.basename(os.path.normpath(self.output_dir))), "wb"))
-
-
+        self.results = Modelling_functions.run_modeller(self.output_dir, self.target, python_script=python_script,
+                                                        benchmark=benchmark, pickle_out=pickle_out)
 
     def anchor_contacts(self):
         """ Calculate anchor contacts"""
@@ -122,7 +77,7 @@ class Pandora:
                     f.write('\t'.join('%s' % x for x in i) + '\n')
 
     def write_modeller_script(self):
-        Write_modeller_script.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
+        Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
 
     def model(self, benchmark = False):
 
@@ -148,6 +103,7 @@ class Pandora:
         self.run_modeller(benchmark=benchmark)
 
 
+
 db = dill.load(open("Pandora_MHCI_and_MHCII_data", 'rb'))
 
 target = PMHC.Target('1DLH',
@@ -165,10 +121,8 @@ target = PMHC.Target('1A1M',
                      anchors = db.MHCI_data['1A1M'].anchors)
 
 
-
 mod = Pandora(target, db)
 mod.model(benchmark=True)
-
 
 
 for m in mod.results:
@@ -181,37 +135,56 @@ for m in mod.results:
 
 
 
-
-
-
-
-
-with open('benchmark.csv', 'w') as f:
-    f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,L-RMSD,core L-MRSD\n')
-
-for k in db.MHCII_data:
-    try:
-        t0 = time.time()
-        print('Modelling %s' %db.MHCII_data[k].PDB_id)
-        target = PMHC.Target(db.MHCII_data[k].PDB_id, db.MHCII_data[k].allele, db.MHCII_data[k].peptide, chain_seq= db.MHCII_data[k].chain_seq, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
-        mod = Pandora(target, db)
-        mod.model(benchmark=True)
-
-        lmrsd = round(sum([i.lrmsd for i in mod.results])/len(mod.results), 4)
-        core_lmrsd = round(sum([i.core_lrmsd for i in mod.results])/len(mod.results), 4)
-
-        print('Mean L-RMSD: %s' %(lmrsd))
-        print('Mean core L-RMSD: %s' % (core_lmrsd))
-        print('Modelling took %s seconds\n' %(time.time() - t0))
-
-        with open('benchmark.csv', 'a') as f:
-            f.write('%s,%s,%s,%s,%s,%s,%s,%s,\n' %(mod.target.PDB_id, mod.target.peptide, ';'.join(mod.target.allele), mod.template.PDB_id, mod.template.peptide, ';'.join(mod.template.allele), lmrsd, core_lmrsd))
-
-    except:
-        print('Something went wrong')
+# with open('benchmark_II.csv', 'w') as f:
+#     f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,L-RMSD,core L-MRSD\n')
 #
-
-
+# for k in db.MHCII_data:
+#     try:
+#         t0 = time.time()
+#         print('Modelling %s' %db.MHCII_data[k].PDB_id)
+#         target = PMHC.Target(db.MHCII_data[k].PDB_id, db.MHCII_data[k].allele, db.MHCII_data[k].peptide, chain_seq= db.MHCII_data[k].chain_seq, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
+#         mod = Pandora(target, db)
+#         mod.model(benchmark=True)
+#
+#         lmrsd = round(sum([i.lrmsd for i in mod.results])/len(mod.results), 4)
+#         core_lmrsd = round(sum([i.core_lrmsd for i in mod.results])/len(mod.results), 4)
+#
+#         print('Mean L-RMSD: %s' %(lmrsd))
+#         print('Mean core L-RMSD: %s' % (core_lmrsd))
+#         print('Modelling took %s seconds\n' %(time.time() - t0))
+#
+#         with open('benchmark_II.csv', 'a') as f:
+#             f.write('%s,%s,%s,%s,%s,%s,%s,%s,\n' %(mod.target.PDB_id, mod.target.peptide, ';'.join(mod.target.allele), mod.template.PDB_id, mod.template.peptide, ';'.join(mod.template.allele), lmrsd, core_lmrsd))
+#
+#     except:
+#         print('Something went wrong')
+# #
+#
+#
+# with open('benchmark_I.csv', 'w') as f:
+#     f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,L-RMSD,core L-MRSD\n')
+#
+# for k in db.MHCI_data:
+#     try:
+#         t0 = time.time()
+#         print('Modelling %s' %db.MHCI_data[k].PDB_id)
+#         target = PMHC.Target(db.MHCI_data[k].PDB_id, db.MHCI_data[k].allele, db.MHCI_data[k].peptide, chain_seq= db.MHCI_data[k].chain_seq, MHC_class= db.MHCI_data[k].MHC_class, anchors=db.MHCI_data[k].anchors)
+#         mod = Pandora(target, db)
+#         mod.model(benchmark=True)
+#
+#         lmrsd = round(sum([i.lrmsd for i in mod.results])/len(mod.results), 4)
+#         core_lmrsd = round(sum([i.core_lrmsd for i in mod.results])/len(mod.results), 4)
+#
+#         print('Mean L-RMSD: %s' %(lmrsd))
+#         print('Mean core L-RMSD: %s' % (core_lmrsd))
+#         print('Modelling took %s seconds\n' %(time.time() - t0))
+#
+#         with open('benchmark_I.csv', 'a') as f:
+#             f.write('%s,%s,%s,%s,%s,%s,%s,%s,\n' %(mod.target.PDB_id, mod.target.peptide, ';'.join(mod.target.allele), mod.template.PDB_id, mod.template.peptide, ';'.join(mod.template.allele), lmrsd, core_lmrsd))
+#
+#     except:
+#         print('Something went wrong')
+# #
 
 
 

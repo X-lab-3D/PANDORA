@@ -3,7 +3,7 @@ from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 
 from PANDORA.Contacts import Contacts
-import PANDORA.Database.utils as utils
+import PANDORA.junk.utils as utils
 
 class PMHC:
 

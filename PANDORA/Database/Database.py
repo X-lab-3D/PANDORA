@@ -1,11 +1,10 @@
 
 import os
-import pickle
-
 import PANDORA
 from PANDORA.PMHC import PMHC
-from PANDORA.Database import Download_data
-from PANDORA.Database import Parse_pMHC
+# from PANDORA.Database import Download_data
+# from PANDORA.Database import Parse_pMHC
+from PANDORA.Database import Database_functions
 
 class Database:
     #todo Integrate Anchor calculation with Rafaellas code to do all the anchor calcs while initiating the db
@@ -19,17 +18,17 @@ class Database:
         """ Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
         print('Downloading structures ...')
         # Download_data.download_unzip_imgt_structures(del_inn_files=True, del_kabat_files=True)
-        self.__IDs_list_MHCI = Download_data.download_ids_imgt('MH1', out_tsv='all_MHI_IDs.tsv')
-        self.__IDs_list_MHCII = Download_data.download_ids_imgt('MH2', out_tsv='all_MHII_IDs.tsv')
+        self.__IDs_list_MHCI = Database_functions.download_ids_imgt('MH1', out_tsv='all_MHI_IDs.tsv')
+        self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', out_tsv='all_MHII_IDs.tsv')
 
 
     def __clean_MHCI_files(self):
         """ Clean all MHCI structures"""
-        return Parse_pMHC.parse_pMHCI_pdbs(self.__IDs_list_MHCI)
+        return Database_functions.parse_pMHCI_pdbs(self.__IDs_list_MHCI)
 
     def __clean_MHCII_files(self):
         """ Clean all MHCII structures. Returns a list of bad PDBs"""
-        return Parse_pMHC.parse_pMHCII_pdbs(self.__IDs_list_MHCII)
+        return Database_functions.parse_pMHCII_pdbs(self.__IDs_list_MHCII)
 
     def construct_database(self, MHCI = True, MHCII = True):
         """ Construct a database
@@ -122,16 +121,6 @@ class Database:
         # Remove structure from database
         self.MHCI_data.pop(id, None)
         self.MHCII_data.pop(id, None)
-
-    # def save(self, fn = 'db.pkl'):
-    #     """Save the database as a pickle file
-    #
-    #     :param fn: (string) pathname of file
-    #     """
-    #     pickle.dump(self, open(fn, "wb"))
-    #
-    # def load(cls, fn):
-    #     return pickle.load( open(fn, "rb" ) )
 
     def save(self, fn = 'db.pkl'):
         """Save the database as a pickle file

@@ -13,7 +13,7 @@ from copy import deepcopy
 from operator import xor
 
 import PANDORA
-import PANDORA.Database.utils as utils
+import PANDORA.junk.utils as utils
 from Bio.PDB import PDBParser
 
 
