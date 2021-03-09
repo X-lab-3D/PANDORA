@@ -157,7 +157,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
 
 
 
-def write_modeller_script(target, template, alignment_file, output_dir):
+def write_modeller_script(target, template, alignment_file, output_dir, n_models=10, stdev=0.1):
     ''' Write script that refines the loops of the peptide
 
     :param target:
@@ -175,9 +175,11 @@ def write_modeller_script(target, template, alignment_file, output_dir):
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
             for line in MyL_temp:
                 if 'self.residue_range' in line:
-                    myloopscript.write(line % (anch[0], anch[-1]))  # write the first anchor
+                    myloopscript.write(line %(anch[0], anch[-1]))  # write the first anchor
                 elif 'contact_file = open' in line:
-                    myloopscript.write(line % target.id)
+                    myloopscript.write(line %(target.id))
+                elif 'STDEV MARKER' in line:
+                    myloopscript.write(line %(stdev))
                 else:
                     myloopscript.write(line)
             MyL_temp.close()
@@ -189,14 +191,15 @@ def write_modeller_script(target, template, alignment_file, output_dir):
                 if 'self.residue_range' in line:
                     myloopscript.write(line % (1, anch[0]))  # write the first anchor
                     for i in range(len(anch) - 1):  # Write all the inbetween acnhors if they are there
-                        myloopscript.write(line % (anch[i] + 2, anch[i + 1]))
-                    myloopscript.write(line % (anch[-1] + 2, len(target.peptide)))  # Write the last anchor
+                        myloopscript.write(line %(anch[i] + 2, anch[i + 1]))
+                    myloopscript.write(line %(anch[-1] + 2, len(target.peptide)))  # Write the last anchor
                 elif 'contact_file = open' in line:
-                    myloopscript.write(line % target.id)
+                    myloopscript.write(line %(target.id))
+                elif 'STDEV MARKER' in line:
+                    myloopscript.write(line %(stdev))
                 else:
                     myloopscript.write(line)
             MyL_temp.close()
-
 
     with open(output_dir.replace('\\ ', ' ') + '/cmd_modeller.py', 'w') as modscript:
         cmd_m_temp = open(PANDORA.PANDORA_path + '/Pandora/cmd_modeller_template.py', 'r')
@@ -205,9 +208,12 @@ def write_modeller_script(target, template, alignment_file, output_dir):
                 modscript.write(line %(os.path.basename(alignment_file)))
             elif 'knowns' in line:
                 modscript.write(line %(template.id, target.id))
+            elif 'a.loop.ending_model' in line:
+                modscript.write(line % (n_models))
             else:
                 modscript.write(line)
         cmd_m_temp.close()
+
 
 def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmark = False, pickle_out = True):
     ''' Perform the homology modelling.
@@ -238,7 +244,6 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
             m = Model.Model(target, output_dir, model_path=output_dir + '/' + logf[i][0],
                                             molpdf=logf[i][1], dope=logf[i][2])
             if benchmark:
-
                 m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
                 m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
             results.append(m)

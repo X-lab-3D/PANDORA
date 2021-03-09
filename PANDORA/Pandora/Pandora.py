@@ -39,7 +39,6 @@ class Pandora:
             pass
         os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
 
-
     def align(self, verbose = True):
         self.alignment = Align.Align(self.target, self.template)
         if verbose:
@@ -82,8 +81,6 @@ class Pandora:
         if verbose:
             print('\n\tModelling was successfull and took %s seconds' %(round(time.time() - t0, 2)))
 
-
-
     def anchor_contacts(self, verbose=True):
         """ Calculate anchor contacts"""
         if verbose:
@@ -94,10 +91,10 @@ class Pandora:
                 for i in self.target.anchor_contacts:
                     f.write('\t'.join('%s' % x for x in i) + '\n')
 
-    def write_modeller_script(self):
-        Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
+    def write_modeller_script(self, n_models = 10, stdev = 0.1):
+        Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir, n_models=n_models, stdev=stdev)
 
-    def model(self, benchmark=False, verbose=True):
+    def model(self,n_models = 10, stdev=0.1, benchmark=False, verbose=True):
 
         if verbose:
             print('\nModelling %s...\n' %self.target.id)
@@ -121,7 +118,7 @@ class Pandora:
         # Calculate anchor restraints
         self.anchor_contacts(verbose=verbose)
         # prepare the scripts that run modeller
-        self.write_modeller_script()
+        self.write_modeller_script(n_models = n_models, stdev=stdev)
         # Do the homology modelling
         self.run_modeller(benchmark=benchmark, verbose=verbose)
 
@@ -137,18 +134,20 @@ class Pandora:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
 
 db = Database.Database()
-db.construct_database()
-# db = dill.load(open("Pandora_MHCI_and_MHCII_data", 'rb'))
+# db.construct_database(MHCII=False)
+# db.save('temp')
+db = db.load('temp')
 
 
-target = PMHC.Target('1DLH',
-                     db.MHCII_data['1DLH'].allele_type,
-                     db.MHCII_data['1DLH'].peptide,
-                     # chain_seq = db.MHCII_data['1DLH'].chain_seq,
-                     M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
-                     N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
-                     MHC_class = 'II',
-                     anchors = db.MHCII_data['1DLH'].anchors)
+
+# target = PMHC.Target('1DLH',
+#                      db.MHCII_data['1DLH'].allele_type,
+#                      db.MHCII_data['1DLH'].peptide,
+#                      # chain_seq = db.MHCII_data['1DLH'].chain_seq,
+#                      M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
+#                      N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
+#                      MHC_class = 'II',
+#                      anchors = db.MHCII_data['1DLH'].anchors)
 
 target = PMHC.Target('1A1M',
                      db.MHCI_data['1A1M'].allele_type,
@@ -159,7 +158,7 @@ target = PMHC.Target('1A1M',
 
 
 mod = Pandora(target, db)
-mod.model()
+mod.model(n_models=2)
 
 
 

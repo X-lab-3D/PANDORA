@@ -1,6 +1,7 @@
 
 import os
 import PANDORA
+import dill
 from PANDORA.PMHC import PMHC
 # from PANDORA.Database import Download_data
 # from PANDORA.Database import Parse_pMHC
