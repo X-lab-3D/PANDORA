@@ -21,7 +21,7 @@ class Align:
 
         # Create an output file if there isn't one yet: template.id_target.id (chains together the name of the multiple
         # templates if they are given)
-        self.__output_dir = output_dir + '/%s_%s' %('_'.join([i.PDB_id for i in self.__template]), self.__target.PDB_id)
+        self.__output_dir = output_dir + '/%s_%s' %('_'.join([i.id for i in self.__template]), self.__target.id)
         if not os.path.exists(self.__output_dir):
             os.makedirs(self.__output_dir)
 
@@ -29,8 +29,8 @@ class Align:
         self.__MHC_class = target.MHC_class
 
         # Store the target and template ids for later use
-        self.__tar_id = target.PDB_id
-        self.__tem_id = [i.PDB_id for i in self.__template]
+        self.__tar_id = target.id
+        self.__tem_id = [i.id for i in self.__template]
 
         # Define template m, n and p seqs
         self.__tem_m = [i.M_chain_seq for i in self.__template]
@@ -128,7 +128,7 @@ class Align:
         # Make a dict containing {id, (peptide_sequence, [anchors])}
         id_pept_anch = {self.__tar_id: (self.__tar_p, self.__target.anchors)}
         for i in self.__template:
-            id_pept_anch[i.PDB_id] = (i.peptide, i.anchors)
+            id_pept_anch[i.id] = (i.peptide, i.anchors)
 
         if self.__MHC_class == 'I':
 
@@ -228,7 +228,7 @@ class Align:
             aligned_seqs[id] = (head, comment, seq)
 
         # Write actual .ali file
-        alignment_file = '%s/%s.ali' %(self.__output_dir, self.__target.PDB_id)
+        alignment_file = '%s/%s.ali' %(self.__output_dir, self.__target.id)
         with open(alignment_file, 'w') as f:
             for k,v in aligned_seqs.items():
                 f.write(v[0]+'\n'+v[1]+'\n'+v[2]+'\n\n')

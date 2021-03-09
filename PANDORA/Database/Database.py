@@ -88,12 +88,12 @@ class Database:
                     pass
 
 
-    def add_structure(self, PDB_id, allele_type, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
+    def add_structure(self, id, allele_type, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
         ''' Add a single structure to the database. Needs id and pdb_file as input. More can be given.
             Input is the same as the input from MHC_structure.template(). Allele needs to be given as input as well and
             is not fetched on the go. If no MHC class if specified, it will assume the structure is MHCI
 
-        :param PDB_id: (string) PDB identifier
+        :param id: (string) PDB identifier
         :param allele_type: (list) list of MHC alleles (or allele)
         :param peptide: (string) peptide sequence
         :param MHC_class: (string) either 'I' or 'II' denoting MHC class I and MHC class II respectively
@@ -104,15 +104,15 @@ class Database:
         :param pdb: (Bio.PDB) Biopython PBD object
         '''
 
-        if not PDB_id:
+        if not id:
             if not pdb_path or not pdb:
-                raise ValueError('Structure id or path of .pdb files was not given. Enter value for PDB_id and pdb_path')
+                raise ValueError('Structure id or path of .pdb files was not given. Enter value for id and pdb_path')
         # Add to MHCI data
         if MHC_class == 'I':
-            self.MHCI_data[id] = PMHC.Template(PDB_id, allele_type, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
+            self.MHCI_data[id] = PMHC.Template(id, allele_type, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
         # Add to MHCII data
         if MHC_class == 'II':
-            self.MHCII_data[id] = PMHC.Template(PDB_id, allele_type, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
+            self.MHCII_data[id] = PMHC.Template(id, allele_type, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
 
     def remove_structure(self, id =''):
         ''' Removes a structure (by id) from the database

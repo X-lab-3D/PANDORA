@@ -26,7 +26,7 @@ def find_template(target, database):
                     set(target.allele_type) & set(database.MHCI_data[id].allele_type))  # update dict with ID:all matching alleles
 
         # If the target template already occured in the database, remove it from the dict of putative templates
-        putative_templates.pop(target.PDB_id)
+        putative_templates.pop(target.id)
 
         # Find the putative template with the best matching peptide
         pos_list = []
@@ -67,7 +67,7 @@ def find_template(target, database):
                 putative_templates[id] = list(set(target.allele_type) & set(database.MHCII_data[id].allele_type)) #update dict with ID:all matching alleles
 
         # If the target template already occured in the database, remove it from the dict of putative templates
-        putative_templates.pop(target.PDB_id)
+        putative_templates.pop(target.id)
 
         # check if there are any template that have two matching alleles
         # max([len(v) for k,v in putative_templates.items()])
@@ -150,7 +150,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
             if 'alnfile' in line:
                 modscript.write(line % os.path.basename(alignment_file))
             elif 'knowns' in line:
-                modscript.write(line % (template.PDB_id, target.PDB_id))
+                modscript.write(line % (template.id, target.id))
             else:
                 modscript.write(line)
         cmd_m_temp.close()
@@ -177,7 +177,7 @@ def write_modeller_script(target, template, alignment_file, output_dir):
                 if 'self.residue_range' in line:
                     myloopscript.write(line % (anch[0], anch[-1]))  # write the first anchor
                 elif 'contact_file = open' in line:
-                    myloopscript.write(line % target.PDB_id)
+                    myloopscript.write(line % target.id)
                 else:
                     myloopscript.write(line)
             MyL_temp.close()
@@ -192,7 +192,7 @@ def write_modeller_script(target, template, alignment_file, output_dir):
                         myloopscript.write(line % (anch[i] + 2, anch[i + 1]))
                     myloopscript.write(line % (anch[-1] + 2, len(target.peptide)))  # Write the last anchor
                 elif 'contact_file = open' in line:
-                    myloopscript.write(line % target.PDB_id)
+                    myloopscript.write(line % target.id)
                 else:
                     myloopscript.write(line)
             MyL_temp.close()
@@ -204,7 +204,7 @@ def write_modeller_script(target, template, alignment_file, output_dir):
             if 'alnfile' in line:
                 modscript.write(line %(os.path.basename(alignment_file)))
             elif 'knowns' in line:
-                modscript.write(line %(template.PDB_id, target.PDB_id))
+                modscript.write(line %(template.id, target.id))
             else:
                 modscript.write(line)
         cmd_m_temp.close()
@@ -225,7 +225,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     logf = []
     f = open(output_dir + '/modeller.log')
     for line in f:
-        if line.startswith(target.PDB_id + '.'):
+        if line.startswith(target.id + '.'):
             l = line.split()
             if len(l) > 2:
                 logf.append(tuple(l))
@@ -239,8 +239,8 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
                                             molpdf=logf[i][1], dope=logf[i][2])
             if benchmark:
 
-                m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.PDB_id + '.pdb')
-                m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.PDB_id + '.pdb')
+                m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
+                m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
             results.append(m)
         except:
             pass

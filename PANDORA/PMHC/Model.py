@@ -32,7 +32,7 @@ class Model:
             raise Exception('Provide the path to a model structure or a Bio.PDB object')
         # If there is a model path and no pdb, parse the pdb structure from that path.
         if not pdb:
-            self.pdb = PDBParser(QUIET=True).get_structure(self.target.PDB_id, self.model_path)
+            self.pdb = PDBParser(QUIET=True).get_structure(self.target.id, self.model_path)
 
 
     def calc_LRMSD(self, reference_pdb, atoms = ['C', 'CA', 'N', 'O']):
