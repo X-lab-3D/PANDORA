@@ -7,7 +7,7 @@ import PANDORA.junk.utils as utils
 
 class PMHC:
 
-    def __init__(self, PDB_id, allele_type, peptide = '', MHC_class = 'I', chain_seq = [], anchors = []):
+    def __init__(self, PDB_id, allele_type, peptide = '', MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = []):
         ''' pMHC class. Acts as a parent class to Template and Target.
 
         :param PDB_id: (string) PDB identifier
@@ -21,14 +21,15 @@ class PMHC:
         self.PDB_id = PDB_id
         self.MHC_class = MHC_class
         self.peptide = peptide
-        self.chain_seq = chain_seq
+        self.M_chain_seq = M_chain_seq
+        self.N_chain_seq = N_chain_seq
         self.allele_type = allele_type
         self.anchors = anchors
 
 
 class Template(PMHC):
 
-    def __init__(self, PDB_id, allele_type, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
+    def __init__(self, PDB_id, allele_type, peptide = '', MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], pdb_path = False, pdb = False):
         ''' Template structure class. This class holds all information of a template structure that is used for
             homology modelling. This class needs a PDB_id, allele and the path to a pdb file to work. (sequence info of
             the chains and peptide can be fetched from the pdb)
@@ -43,7 +44,7 @@ class Template(PMHC):
         :param pdb_path: (string) path to pdb file
         :param pdb: (Bio.PDB) Biopython PBD object
         '''
-        super().__init__(PDB_id, allele_type, peptide, MHC_class, chain_seq, anchors)
+        super().__init__(PDB_id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors)
         self.pdb_path = pdb_path
         self.pdb = pdb
         self.chain_contacts = False
@@ -66,13 +67,14 @@ class Template(PMHC):
         chain_seqs = [seq1(''.join([res.resname for res in chain])) for chain in self.pdb.get_chains()]
         # Update chain and peptide fields if emtpy
         if self.MHC_class == 'I':
-            if not self.chain_seq:
-                self.chain_seq = [chain_seqs[0]]
+            if self.M_chain_seq == '':
+                self.M_chain_seq = chain_seqs[0]
             if not self.peptide:
                 self.peptide = chain_seqs[-1]
         if self.MHC_class == 'II':
-            if not self.chain_seq:
-                self.chain_seq = chain_seqs[:2]
+            if self.M_chain_seq == '' and self.N_chain_seq == '':
+                self.M_chain_seq = chain_seqs[0]
+                self.N_chain_seq = chain_seqs[1]
             if not self.peptide:
                 self.peptide = chain_seqs[-1]
 
@@ -84,15 +86,16 @@ class Template(PMHC):
         print('ID: %s' %self.PDB_id)
         print('Type: MHC class %s' %self.MHC_class)
         print('Alleles: %s' % self.allele_type)
-        if len(self.chain_seq) > 0:
-            print('Alpha chain length: %s' %len(self.chain_seq[0]))
-        if len(self.chain_seq) > 1:
-            print('Beta chain length: %s' %len(self.chain_seq[1]))
+        if self.M_chain_seq != '':
+            print('Alpha chain length: %s' %len(self.M_chain_seq))
+        if self.N_chain_seq != '' and self.MHC_class == 'II':
+            print('Beta chain length: %s' %len(self.N_chain_seq))
         print('Peptide length: %s' %len(self.peptide))
-        if len(self.chain_seq) > 0:
-            print('Alpha chain: %s' % self.chain_seq[0])
-        if len(self.chain_seq) > 1:
-            print('Beta chain: %s' % self.chain_seq[1])
+        if self.M_chain_seq != '':
+            print('Alpha chain: %s' % self.M_chain_seq)
+        if self.N_chain_seq != '':
+            print('Beta chain: %s' % self.N_chain_seq)
+
         print('Peptide: %s' % self.peptide)
         print('Anchors: %s' %self.anchors)
         if self.pdb_path:
@@ -103,7 +106,6 @@ class Template(PMHC):
             print('PDB structure:')
             for (k, v) in self.pdb.header.items():
                 print('\t'+k + ':', v)
-
 
     def calc_contacts(self):
         if self.pdb:
@@ -124,7 +126,7 @@ class Template(PMHC):
 
 class Target(PMHC):
 
-    def __init__(self, PDB_id, peptide, allele_type, MHC_class = 'I', chain_seq = [], anchors = [], templates = False):
+    def __init__(self, PDB_id, peptide, allele_type, MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], templates = False):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
         :param PDB_id: (string) PDB identifier
@@ -140,7 +142,7 @@ class Target(PMHC):
                         or small molecules.
 
         '''
-        super().__init__(PDB_id, peptide, allele_type, MHC_class, chain_seq, anchors)
+        super().__init__(PDB_id, peptide, allele_type, MHC_class, M_chain_seq, N_chain_seq, anchors)
         self.templates = templates
         self.initial_model = False
         self.anchor_contacts = False
@@ -153,15 +155,15 @@ class Target(PMHC):
         print('ID: %s' % self.PDB_id)
         print('Type: MHC class %s' % self.MHC_class)
         print('Alleles: %s' % self.allele_type)
-        if len(self.chain_seq) > 0:
-            print('Alpha chain length: %s' % len(self.chain_seq[0]))
-        if len(self.chain_seq) > 1:
-            print('Beta chain length: %s' % len(self.chain_seq[1]))
-        print('Peptide length: %s' % len(self.peptide))
-        if len(self.chain_seq) > 0:
-            print('Alpha chain: %s' % self.chain_seq[0])
-        if len(self.chain_seq) > 1:
-            print('Beta chain: %s' % self.chain_seq[1])
+        if self.M_chain_seq != '':
+            print('Alpha chain length: %s' %len(self.M_chain_seq))
+        if self.N_chain_seq != '' and self.MHC_class == 'II':
+            print('Beta chain length: %s' %len(self.N_chain_seq))
+        print('Peptide length: %s' %len(self.peptide))
+        if self.M_chain_seq != '':
+            print('Alpha chain: %s' % self.M_chain_seq)
+        if self.N_chain_seq != '':
+            print('Beta chain: %s' % self.N_chain_seq)
         print('Peptide: %s' % self.peptide)
         print('Anchors: %s' % self.anchors)
         if self.templates:

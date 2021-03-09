@@ -144,6 +144,8 @@ def homogenize_pdbs(decoy, ref, output_dir, anchors =False ):
 
     '''
 
+    # If you give the anchors, the core L-RMSD will be calculated.
+    # The peptide residues before and after the first and last anchor residue will be discarded.
     if anchors:
         for x in range(len(decoy[0]['P'])):
             for i in decoy[0]['P']:

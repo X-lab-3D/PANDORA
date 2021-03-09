@@ -113,14 +113,16 @@ db.construct_database()
 target = PMHC.Target('1DLH',
                      db.MHCII_data['1DLH'].allele_type,
                      db.MHCII_data['1DLH'].peptide,
-                     chain_seq = db.MHCII_data['1DLH'].chain_seq,
+                     # chain_seq = db.MHCII_data['1DLH'].chain_seq,
+                     M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
+                     N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
                      MHC_class = 'II',
                      anchors = db.MHCII_data['1DLH'].anchors)
 
 target = PMHC.Target('1A1M',
                      db.MHCI_data['1A1M'].allele_type,
                      db.MHCI_data['1A1M'].peptide,
-                     chain_seq = db.MHCI_data['1A1M'].chain_seq,
+                     M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
                      # MHC_class = 'II',
                      anchors = db.MHCI_data['1A1M'].anchors)
 

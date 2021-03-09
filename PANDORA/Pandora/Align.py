@@ -33,21 +33,21 @@ class Align:
         self.__tem_id = [i.PDB_id for i in self.__template]
 
         # Define template m, n and p seqs
-        self.__tem_m = [i.chain_seq[0] for i in self.__template]
+        self.__tem_m = [i.M_chain_seq for i in self.__template]
         if self.__MHC_class == 'II':
-            self.__tem_n = [i.chain_seq[1] for i in self.__template]
+            self.__tem_n = [i.N_chain_seq for i in self.__template]
         self.__tem_p = [i.peptide for i in self.__template]
 
         # Define target m, n and p seqs. If there are no m and n chains supplied, just take the seqs from the template
         # Only if the target is MHC class II, the n chains are defined.
-        if self.__target.chain_seq == []:
+        if self.__target.M_chain_seq == '':
             self.__tar_m = self.__tem_m[0]
-            if self.__MHC_class == 'II':
+            if self.__MHC_class == 'II' and self.__target.N_chain_seq == '':
                 self.__tar_n = self.__tem_n[0]
         else:
-            self.__tar_m = self.__target.chain_seq[0]
+            self.__tar_m = self.__target.M_chain_seq
             if self.__MHC_class == 'II':
-                self.__tar_n = self.__target.chain_seq[1]
+                self.__tar_n = self.__target.N_chain_seq
         self.__tar_p = self.__target.peptide
 
         # Perform alignment
