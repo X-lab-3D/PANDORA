@@ -4,8 +4,9 @@ from Bio.SeqUtils import seq1
 import PANDORA
 from PANDORA.Contacts import Contacts
 import PANDORA.junk.utils as utils
+from abc import ABC, abstractmethod
 
-class PMHC:
+class PMHC(ABC):
 
     def __init__(self, PDB_id, allele_type, peptide = '', MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = []):
         ''' pMHC class. Acts as a parent class to Template and Target.
@@ -18,6 +19,7 @@ class PMHC:
         :param anchors: (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
                         during the modelling. MHC class I typically has 2 anchors, while MHC class II typically has 4.
         '''
+        super().__init__()
         self.PDB_id = PDB_id
         self.MHC_class = MHC_class
         self.peptide = peptide
@@ -25,6 +27,19 @@ class PMHC:
         self.N_chain_seq = N_chain_seq
         self.allele_type = allele_type
         self.anchors = anchors
+
+
+        @abstractmethod
+        def info(self):
+            pass
+
+        @abstractmethod
+        def calc_contacts(self):
+            pass
+
+        @abstractmethod
+        def calc_anchor_contacts(self):
+            pass
 
 
 class Template(PMHC):
@@ -47,7 +62,7 @@ class Template(PMHC):
         super().__init__(PDB_id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors)
         self.pdb_path = pdb_path
         self.pdb = pdb
-        self.chain_contacts = False
+        self.contacts = False
 
         if not pdb_path or not pdb: # If the path to a pdb file or a Bio.PDB object is given, parse the pdb
             self.parse_pdb()
@@ -109,7 +124,7 @@ class Template(PMHC):
 
     def calc_contacts(self):
         if self.pdb:
-            self.chain_contacts = Contacts.Contacts(self.pdb)
+            self.contacts = Contacts.Contacts(self.pdb)
         else:
             raise Exception('Provide a PDB structure to the Template object first')
 
@@ -119,7 +134,11 @@ class Template(PMHC):
         if self.MHC_class == 'II':
             self.anchors = utils.pMHCII_anchors(self.pdb)
 
-
+    def calc_anchor_contacts(self):
+        if self.pdb and self.anchors:
+            self.anchor_contacts = Contacts.Contacts(self.pdb, anchors=self.anchors).anchor_contacts
+        else:
+            raise Exception('Provide an initial model (.ini PDB) and anchor positions to the Target object first')
 
 
 
@@ -145,6 +164,7 @@ class Target(PMHC):
         super().__init__(PDB_id, peptide, allele_type, MHC_class, M_chain_seq, N_chain_seq, anchors)
         self.templates = templates
         self.initial_model = False
+        self.contacts = False
         self.anchor_contacts = False
 
     def info(self):
@@ -171,6 +191,11 @@ class Target(PMHC):
         if self.initial_model:
             print('An initial model has been provided.')
 
+    def calc_contacts(self):
+        if self.initial_model:
+            self.contacts = Contacts.Contacts(self.initial_model)
+        else:
+            raise Exception('Provide a PDB structure to the Template object first')
 
     def calc_anchor_contacts(self):
         if self.initial_model and self.anchors:
@@ -178,7 +203,11 @@ class Target(PMHC):
         else:
             raise Exception('Provide an initial model (.ini PDB) and anchor positions to the Target object first')
 
-    def calc_anchors(self):
-        pass
+    # def calc_anchors(self):
+    #     pass
+#
+# x = Template('1DLH', ['asdasasdd'], MHC_class='II', pdb_path= PANDORA.PANDORA_data + '/PDBs/pMHCII/1DLH.pdb')
+# x.calc_contacts()
+# x.calc_anchor_contacts()
 
 
