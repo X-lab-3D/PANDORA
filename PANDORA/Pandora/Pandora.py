@@ -127,7 +127,7 @@ class Pandora:
         # Do the homology modelling
         self.run_modeller(benchmark=benchmark, verbose=verbose)
 
-        if verbose:
+        if verbose and benchmark:
             print('\n\tModel\t\t\t\tMolpdf\t\tL-RMSD\t\tcore L-RMSD')
             for m in self.results:
                 print('\t%s\t\t%s\t\t%s\t\t%s' % (
