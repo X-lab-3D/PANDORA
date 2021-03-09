@@ -18,8 +18,8 @@ class Database:
         """ Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
         print('Downloading structures ...')
         # Download_data.download_unzip_imgt_structures(del_inn_files=True, del_kabat_files=True)
-        self.__IDs_list_MHCI = Database_functions.download_ids_imgt('MH1', out_tsv='all_MHI_IDs.tsv')
-        self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', out_tsv='all_MHII_IDs.tsv')
+        self.__IDs_list_MHCI = Database_functions.download_ids_imgt('MH1', out_tsv='all_MHI_IDs.tsv')[:20]
+        self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', out_tsv='all_MHII_IDs.tsv')[:20]
 
 
     def __clean_MHCI_files(self):
@@ -54,11 +54,12 @@ class Database:
                     if os.path.isfile(file):
                         print('Adding %s' % id)
                         # Find the alleles
-                        al = Parse_pMHC.get_chainid_alleles_MHCI(file)
+                        al = Database_functions.get_chainid_alleles_MHCI(file)
                         alpha = [[k for k,v in i.items()] for i in [al['A'][i] for i in [i for i in al['A'].keys()]]]
                         a_allele = sum(alpha, [])
+
                         # Create MHC_structure object
-                        self.MHCI_data[id] = PMHC.Template(id, allele=a_allele, pdb_path=file)
+                        self.MHCI_data[id] = PMHC.Template(id, allele_type=a_allele, pdb_path=file)
                 except:
                     pass
 
@@ -75,25 +76,25 @@ class Database:
                     if os.path.isfile(file):
                         print('Adding %s' %id)
                         # Find the alleles
-                        al = Parse_pMHC.get_chainid_alleles_MHCII(file)
+                        al = Database_functions.get_chainid_alleles_MHCII(file)
                         alpha = sum([al['Alpha'][i] for i in [i for i in al['Alpha'].keys()]], [])
                         beta = sum([al['Beta'][i] for i in [i for i in al['Beta'].keys()]], [])
                         a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
                         b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
 
                         # Create MHC_structure object
-                        self.MHCII_data[id] = PMHC.Template(id, allele=a_allele + b_allele, MHC_class= 'II', pdb_path=file)
+                        self.MHCII_data[id] = PMHC.Template(id, allele_type=a_allele + b_allele, MHC_class= 'II', pdb_path=file)
                 except:
                     pass
 
 
-    def add_structure(self, PDB_id, allele, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
+    def add_structure(self, PDB_id, allele_type, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
         ''' Add a single structure to the database. Needs id and pdb_file as input. More can be given.
             Input is the same as the input from MHC_structure.template(). Allele needs to be given as input as well and
             is not fetched on the go. If no MHC class if specified, it will assume the structure is MHCI
 
         :param PDB_id: (string) PDB identifier
-        :param allele: (list) list of MHC alleles (or allele)
+        :param allele_type: (list) list of MHC alleles (or allele)
         :param peptide: (string) peptide sequence
         :param MHC_class: (string) either 'I' or 'II' denoting MHC class I and MHC class II respectively
         :param chain_seq: (list) list of chain sequence(s) for the M and N (Alpha and Beta) chain respectively
@@ -108,10 +109,10 @@ class Database:
                 raise ValueError('Structure id or path of .pdb files was not given. Enter value for PDB_id and pdb_path')
         # Add to MHCI data
         if MHC_class == 'I':
-            self.MHCI_data[id] = PMHC.Template(PDB_id, allele, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
+            self.MHCI_data[id] = PMHC.Template(PDB_id, allele_type, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
         # Add to MHCII data
         if MHC_class == 'II':
-            self.MHCII_data[id] = PMHC.Template(PDB_id, allele, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
+            self.MHCII_data[id] = PMHC.Template(PDB_id, allele_type, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
 
     def remove_structure(self, id =''):
         ''' Removes a structure (by id) from the database

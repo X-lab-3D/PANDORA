@@ -1,13 +1,13 @@
 
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
-
+import PANDORA
 from PANDORA.Contacts import Contacts
 import PANDORA.junk.utils as utils
 
 class PMHC:
 
-    def __init__(self, PDB_id, allele, peptide = '', MHC_class = 'I', chain_seq = [], anchors = []):
+    def __init__(self, PDB_id, allele_type, peptide = '', MHC_class = 'I', chain_seq = [], anchors = []):
         ''' pMHC class. Acts as a parent class to Template and Target.
 
         :param PDB_id: (string) PDB identifier
@@ -22,13 +22,13 @@ class PMHC:
         self.MHC_class = MHC_class
         self.peptide = peptide
         self.chain_seq = chain_seq
-        self.allele = allele
+        self.allele_type = allele_type
         self.anchors = anchors
 
 
 class Template(PMHC):
 
-    def __init__(self, PDB_id, allele, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
+    def __init__(self, PDB_id, allele_type, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
         ''' Template structure class. This class holds all information of a template structure that is used for
             homology modelling. This class needs a PDB_id, allele and the path to a pdb file to work. (sequence info of
             the chains and peptide can be fetched from the pdb)
@@ -43,7 +43,7 @@ class Template(PMHC):
         :param pdb_path: (string) path to pdb file
         :param pdb: (Bio.PDB) Biopython PBD object
         '''
-        super().__init__(PDB_id, allele, peptide, MHC_class, chain_seq, anchors)
+        super().__init__(PDB_id, allele_type, peptide, MHC_class, chain_seq, anchors)
         self.pdb_path = pdb_path
         self.pdb = pdb
         self.chain_contacts = False
@@ -83,7 +83,7 @@ class Template(PMHC):
         print('This is a %s structure.' %(type(self).__name__))
         print('ID: %s' %self.PDB_id)
         print('Type: MHC class %s' %self.MHC_class)
-        print('Alleles: %s' % self.allele)
+        print('Alleles: %s' % self.allele_type)
         if len(self.chain_seq) > 0:
             print('Alpha chain length: %s' %len(self.chain_seq[0]))
         if len(self.chain_seq) > 1:
@@ -124,7 +124,7 @@ class Template(PMHC):
 
 class Target(PMHC):
 
-    def __init__(self, PDB_id, peptide, allele, MHC_class = 'I', chain_seq = [], anchors = [], templates = False):
+    def __init__(self, PDB_id, peptide, allele_type, MHC_class = 'I', chain_seq = [], anchors = [], templates = False):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
         :param PDB_id: (string) PDB identifier
@@ -140,7 +140,7 @@ class Target(PMHC):
                         or small molecules.
 
         '''
-        super().__init__(PDB_id, peptide, allele, MHC_class, chain_seq, anchors)
+        super().__init__(PDB_id, peptide, allele_type, MHC_class, chain_seq, anchors)
         self.templates = templates
         self.initial_model = False
         self.anchor_contacts = False
@@ -152,7 +152,7 @@ class Target(PMHC):
         print('This is a %s structure.' % (type(self).__name__))
         print('ID: %s' % self.PDB_id)
         print('Type: MHC class %s' % self.MHC_class)
-        print('Alleles: %s' % self.allele)
+        print('Alleles: %s' % self.allele_type)
         if len(self.chain_seq) > 0:
             print('Alpha chain length: %s' % len(self.chain_seq[0]))
         if len(self.chain_seq) > 1:
@@ -178,3 +178,5 @@ class Target(PMHC):
 
     def calc_anchors(self):
         pass
+
+

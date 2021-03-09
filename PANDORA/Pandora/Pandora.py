@@ -1,6 +1,7 @@
 
 import PANDORA
 from PANDORA.PMHC import PMHC
+from PANDORA.Database import Database
 from PANDORA.Pandora import Align
 from PANDORA.Pandora import Modelling_functions
 
@@ -103,18 +104,21 @@ class Pandora:
         self.run_modeller(benchmark=benchmark)
 
 
+db = Database.Database()
+db.construct_database()
+# db = dill.load(open("Pandora_MHCI_and_MHCII_data", 'rb'))
 
-db = dill.load(open("Pandora_MHCI_and_MHCII_data", 'rb'))
+
 
 target = PMHC.Target('1DLH',
-                     db.MHCII_data['1DLH'].allele,
+                     db.MHCII_data['1DLH'].allele_type,
                      db.MHCII_data['1DLH'].peptide,
                      chain_seq = db.MHCII_data['1DLH'].chain_seq,
                      MHC_class = 'II',
                      anchors = db.MHCII_data['1DLH'].anchors)
 
 target = PMHC.Target('1A1M',
-                     db.MHCI_data['1A1M'].allele,
+                     db.MHCI_data['1A1M'].allele_type,
                      db.MHCI_data['1A1M'].peptide,
                      chain_seq = db.MHCI_data['1A1M'].chain_seq,
                      # MHC_class = 'II',

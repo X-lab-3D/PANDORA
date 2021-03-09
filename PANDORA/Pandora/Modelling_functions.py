@@ -21,9 +21,9 @@ def find_template(target, database):
         # Find template structures with matching alleles
         putative_templates = {}
         for id in database.MHCI_data:
-            if any(x in database.MHCI_data[id].allele for x in target.allele):
+            if any(x in database.MHCI_data[id].allele_type for x in target.allele_type):
                 putative_templates[id] = list(
-                    set(target.allele) & set(database.MHCI_data[id].allele))  # update dict with ID:all matching alleles
+                    set(target.allele_type) & set(database.MHCI_data[id].allele_type))  # update dict with ID:all matching alleles
 
         # If the target template already occured in the database, remove it from the dict of putative templates
         putative_templates.pop(target.PDB_id)
@@ -62,9 +62,9 @@ def find_template(target, database):
         # Find template structures with matching alleles
         putative_templates = {}
         for id in database.MHCII_data:
-            if any(x in database.MHCII_data[id].allele for x in target.allele):
-                # putative_templates[id] = db.MHCII_data[id].allele
-                putative_templates[id] = list(set(target.allele) & set(database.MHCII_data[id].allele)) #update dict with ID:all matching alleles
+            if any(x in database.MHCII_data[id].allele_type for x in target.allele_type):
+                # putative_templates[id] = db.MHCII_data[id].allele_type
+                putative_templates[id] = list(set(target.allele_type) & set(database.MHCII_data[id].allele_type)) #update dict with ID:all matching alleles
 
         # If the target template already occured in the database, remove it from the dict of putative templates
         putative_templates.pop(target.PDB_id)
