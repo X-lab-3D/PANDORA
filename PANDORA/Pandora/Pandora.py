@@ -145,34 +145,34 @@ class Pandora:
             for m in self.results:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
 
-db = Database.Database()
-# db.construct_database(clean=False)
-# db.save('Pandora_MHCI_and_MHCII_data')
-db = db.load('Pandora_MHCI_and_MHCII_data')
-
+# db = Database.Database()
+# # db.construct_database(clean=False)
+# # db.save('Pandora_MHCI_and_MHCII_data')
+# db = db.load('Pandora_MHCI_and_MHCII_data')
 #
+# #
+# #
+# #
+# #
+# target = PMHC.Target('1DLH',
+#                      db.MHCII_data['1DLH'].allele_type,
+#                      db.MHCII_data['1DLH'].peptide,
+#                      # chain_seq = db.MHCII_data['1DLH'].chain_seq,
+#                      M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
+#                      N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
+#                      MHC_class = 'II',
+#                      anchors = db.MHCII_data['1DLH'].anchors)
 #
-#
-#
-target = PMHC.Target('1DLH',
-                     db.MHCII_data['1DLH'].allele_type,
-                     db.MHCII_data['1DLH'].peptide,
-                     # chain_seq = db.MHCII_data['1DLH'].chain_seq,
-                     M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
-                     N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
-                     MHC_class = 'II',
-                     anchors = db.MHCII_data['1DLH'].anchors)
-
-target = PMHC.Target('1A1M',
-                     db.MHCI_data['1A1M'].allele_type,
-                     db.MHCI_data['1A1M'].peptide,
-                     M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
-                     # MHC_class = 'II',
-                     anchors = db.MHCI_data['1A1M'].anchors)
-#
-#
-mod = Pandora(target, db)
-mod.model(n_models=5, stdev=0.1, seq_based_templ_selection=True, benchmark=True)
+# target = PMHC.Target('1A1M',
+#                      db.MHCI_data['1A1M'].allele_type,
+#                      db.MHCI_data['1A1M'].peptide,
+#                      M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
+#                      # MHC_class = 'II',
+#                      anchors = db.MHCI_data['1A1M'].anchors)
+# #
+# #
+# mod = Pandora(target, db)
+# mod.model(n_models=5, stdev=0.1, seq_based_templ_selection=True, benchmark=True)
 
 
 
