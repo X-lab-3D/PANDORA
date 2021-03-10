@@ -44,3 +44,22 @@ Contains the main run scripts for downloading the dataset and perform large scal
 ## Benchmark
 
 ## Cluster_run_scripts
+
+
+## Example run script
+
+```
+import PANDORA
+
+## 1. Create local database
+db = PANDORA.Database.construct_database()
+
+## Alternatively, load a pre-built database
+dv = PANDORA.Database.load('db.pkl')
+
+## 2. Create target object
+target = PANDORA.PMHC.target(PDB_id = '1K5N', MHC_type = 1,
+                             allele = ['HLA-B*27:09'], peptide = 'GRFAAAIAK')
+                             
+## 3. Perform modelling
+model = PANDORA.Pandora.model(target, db)
