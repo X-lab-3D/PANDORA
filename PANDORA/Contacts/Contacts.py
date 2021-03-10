@@ -70,20 +70,21 @@ class Contacts:
         out = []
         # Append (Res 1,Chain 1,Resnr 1,Atom 1,Res 2,Chain 2,Resnr 2,Atom 2,Distance 1_2) to list for each contact
         for pair in atom_dist:
-            out.append((pair[0].get_parent().resname,
-                        pair[0].get_parent().get_parent().id,
-                        pair[0].get_parent().id[1],
-                        pair[0].get_id(),
-                        pair[1].get_parent().resname,
+            out.append((pair[1].get_parent().resname,
                         pair[1].get_parent().get_parent().id,
                         pair[1].get_parent().id[1],
                         pair[1].get_id(),
+                        pair[0].get_parent().resname,
+                        pair[0].get_parent().get_parent().id,
+                        pair[0].get_parent().id[1],
+                        pair[0].get_id(),
                         pair[0] - pair[1]))
 
         # If one would want all atom contacts (also within the same protein chain), the next line can be commented out
         out = [i for i in out if i[1] != i[5]] # filter out contacts between the same chain
 
         return out
+        # return [(i[4], i[5], i[6], i[7], i[0], i[1], i[2], i[3], i[8]) for i in out]
 
     def show(self):
         """Print the contacts. If anchor contacts have been calculated, only show them"""

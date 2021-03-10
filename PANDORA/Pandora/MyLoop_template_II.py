@@ -6,7 +6,7 @@ env = M.environ()
 class MyLoop(MA.loopmodel):
     def special_patches(self, aln):
         # Rename both chains and renumber the residues in each
-        self.rename_segments(segment_ids=['M', 'P'], renumber_residues=[1, 1])
+        self.rename_segments(segment_ids=['M', 'N', 'P'], renumber_residues=[1, 1, 1])
         
     ### Skipping randomness in Initial modelling. Uncomment this funtion only if you specifically mean it. 
     def build_ini_loop(self, atmsel):
@@ -24,7 +24,7 @@ class MyLoop(MA.loopmodel):
         rsr = self.restraints
         atoms = self.atoms
         modelling_stdev= float('%s')  #STDEV MARKER   DO NOT DELETE THIS COMMENT
-
+        
         # need to add more distance restraints later :)
         contact_file = open('contacts_%s.list', 'r')
         for contact_data_line in contact_file:

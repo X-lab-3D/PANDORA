@@ -18,7 +18,7 @@ from random import choice
 #PANDORA modules
 sys.path.append('/home/dariom/PANDORA_package/') #TODO: change in final release
 import PANDORA
-from PANDORA.Database import utils
+from PANDORA.junk import utils
 
 
 def check_model_existance(k, outdir_name, filename_start, filename_end):

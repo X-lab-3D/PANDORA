@@ -13,8 +13,7 @@ from copy import deepcopy
 from operator import xor
 
 import PANDORA
-import PANDORA.Database.utils as utils
-from Bio.PDB import PDBParser
+import PANDORA.junk.utils as utils
 
 
 def get_chainid_alleles_MHCI(pdbf):

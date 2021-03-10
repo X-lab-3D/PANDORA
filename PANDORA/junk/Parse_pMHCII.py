@@ -122,7 +122,7 @@ def unzip_pdb(ID, indir, outdir):
 
     return '%s/%s.pdb' % (outdir, ID)
 
-def find_chains_MHCII(ID, pdb_file,pept_dist = 10):
+def find_chains_MHCII(ID, pdb_file):
     ''' Find the Alpha, Beta and Peptide chain in a pdb file. Also checks if there are heteroatoms in the binding
     cleft and checks for the proper size of the peptide chain.
 
@@ -134,12 +134,12 @@ def find_chains_MHCII(ID, pdb_file,pept_dist = 10):
     parser = PDBParser(QUIET=True)  # Create a parser object, used to read pdb files
     pdb = parser.get_structure(ID, pdb_file)
 
-    # Remove weird chains
-    for i in pdb.get_chains():
-        for model in pdb:
-            for chain in model:
-                if chain.id in [' ', '', '1', '2', '3', '4', '5', '6', '7', '8', 'S']:
-                    model.detach_child(chain.id)
+    # # Remove weird chains
+    # for i in pdb.get_chains():
+    #     for model in pdb:
+    #         for chain in model:
+    #             if chain.id in [' ', '', '1', '2', '3', '4', '5', '6', '7', '8', 'S']:
+    #                 model.detach_child(chain.id)
 
     try:
     # Find most likely peptide chain: first chain to be 7 < len(chain) < 25
@@ -163,21 +163,26 @@ def find_chains_MHCII(ID, pdb_file,pept_dist = 10):
         raise Exception
 
     # Find peptide-structure contacts
-    try:
-        chain_cont = []
-        for pept_res in pdb[0][pept_chain].get_residues(): #loop through all alpha carbons of the peptide residues
-            for chain in pdb.get_chains(): #go through all chains and find residues of that chain that contact the peptide
-                if chain.id != pept_chain: #dont measure distance between peptide-peptide residues of course
-                    for res in chain:
-                        if res.id[0] == ' ': #check if the residue is an amino acid and no heteroatom or water
-                            try:
-                                if res['CA'] - pept_res['CA'] < pept_dist: #distance between peptide and chain residue alpha carbon
-                                    chain_cont.append(chain.id)
-                            except:
-                                pass
-    except:
-        print('Could not find peptide chain')
-        raise Exception
+    # try:
+    #     chain_cont = []
+    #     for pept_res in pdb[0][pept_chain].get_residues(): #loop through all alpha carbons of the peptide residues
+    #         for chain in pdb.get_chains(): #go through all chains and find residues of that chain that contact the peptide
+    #             if chain.id != pept_chain: #dont measure distance between peptide-peptide residues of course
+    #                 for res in chain:
+    #                     if res.id[0] == ' ': #check if the residue is an amino acid and no heteroatom or water
+    #                         try:
+    #                             if res['CA'] - pept_res['CA'] < pept_dist: #distance between peptide and chain residue alpha carbon
+    #                                 chain_cont.append(chain.id)
+    #                         except:
+    #                             pass
+    # except:
+    #     print('Could not find peptide chain')
+    #     raise Exception
+
+    # Find contacts between peptide chain and other chains
+    c = [i for i in Contacts.Contacts(pdb).chain_contacts if i[1] == pept_chain or i[5] == pept_chain]
+    # Make a list of all chains that contact the peptide chain
+    chain_cont = [i for i in sum([[i[1],i[5]] for i in c], []) if i != pept_chain]
 
     # Find the two chains that have the most contacts with the peptide. This should also filter out TCR chains
     if len(set(chain_cont)) >= 2:
@@ -188,11 +193,14 @@ def find_chains_MHCII(ID, pdb_file,pept_dist = 10):
         print('Found >2 MHC chains')
         raise Exception
 
-    for i in pdb.get_chains():
-        for model in pdb:
-            for chain in model:
-                if chain.id not in MHC_chains:
-                    model.detach_child(chain.id)
+    # for i in pdb.get_chains():
+    #     for model in pdb:
+    #         for chain in model:
+    #             if chain.id not in MHC_chains:
+    #                 model.detach_child(chain.id)
+    #
+     # Remove all chains that are not needed
+    pdb = remove_weird_chains(pdb, MHC_chains)
 
     return MHC_chains, pdb
 
@@ -312,7 +320,7 @@ def parse_pMHCII_pdbs(ids_list):
 
         except: # If something goes wrong, append the ID to the bad_ids list
             bad_ids.append(ID)
-            os.system('mv %s/%s.pdb %s/%s.pdb' %(outdir.replace(' ', '\\ '), ID, bad_dir.replace(' ', '\\ '), ID))
+            os.system('mv %s/%s.pdb %s/%s.pdb' %(outdir, ID, bad_dir, ID))
             pass
 
     return bad_ids

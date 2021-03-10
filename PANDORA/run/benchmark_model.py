@@ -16,7 +16,7 @@ from multiprocessing import Manager
 sys.path.append('./')
 
 import PANDORA
-from PANDORA.Database import utils
+from PANDORA.junk import utils
 from PANDORA.junk.parsing import get_anchors_pMHCI as get_anchors
 from PANDORA.junk.modelling import modelling
 

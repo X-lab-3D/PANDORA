@@ -1,55 +1,66 @@
 
 import PANDORA
-from PANDORA.Pandora import Find_template
-from PANDORA.Database import Database as Database
 from PANDORA.PMHC import PMHC
+from PANDORA.Database import Database
 from PANDORA.Pandora import Align
-from PANDORA.Pandora import Write_ini_script
-from PANDORA.Pandora import Write_modeller_script
+from PANDORA.Pandora import Modelling_functions
+import time
 import os
 from Bio.PDB import PDBParser
-import pickle
-import time
+
 
 class Pandora:
 
-    def __init__(self, target, database):
+    def __init__(self, target, database = None, template = None):
         self.target = target
-        self.template = None
+        self.template = template
         self.database = database
         self.output_dir = PANDORA.PANDORA_data + '/outputs/'
-        # self.alignment
-        # self.ini_modeller_script
-        # self.initial_model
-        # self.modeller_script
-        # self.results
 
-    def find_template(self):
+        if database == None and template == None:
+            raise Exception('Provide a Database object so Pandora can find the best suitable template structure for '
+                            'modelling. Alternatively, you can specify a user defined Template object.')
+
+    def find_template(self, seq_based_templ_selection = False, verbose = True):
         ''' Find the best template structure given a Target object '''
-        self.template = Find_template.find_template(self.target, self.database)
-
+        if self.template == None:
+            if verbose and self.target.M_chain_seq != '' and seq_based_templ_selection:
+                print('\tUsing sequence based template selection')
+            elif verbose:
+                print('\tUsing allele type based template selection')
+            self.template = Modelling_functions.find_template(self.target, self.database, seq_based_templ_selection)
+            self.target.templates = [self.template.id]
+            if verbose:
+                print('\tSelected template structure: %s' %self.template.id)
+        elif verbose:
+                print('\tUser defined template structure: %s' %self.template.id)
+        if verbose:
+            print('\tTemplate Allele:  %s' % self.template.allele_type)
+            print('\tTemplate Peptide: %s' % self.template.peptide)
+            print('\tTemplate Anchors: %s\n' % self.template.anchors)
 
     def prep_output_dir(self):
         ''' Create an output directory and move the template pdb there
         '''
         # create an output directory
         try:
-            self.output_dir = '%s%s_%s' %(self.output_dir, self.template.PDB_id, self.target.PDB_id)
+            self.output_dir = '%s%s_%s' %(self.output_dir, self.template.id, self.target.id)
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir)
         except:
             pass
-        os.system('cp %s %s/%s.pdb' %(self.template.pdb_path.replace(' ', '\\ '), self.output_dir.replace(' ', '\\ '), self.template.PDB_id))
+        os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
 
-
-    def align(self):
+    def align(self, verbose = True):
         self.alignment = Align.Align(self.target, self.template)
+        if verbose:
+            print('\tSuccessfully created alignment file')
 
     def write_ini_script(self):
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
-        Write_ini_script.write_ini_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
+        Modelling_functions.write_ini_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
 
-    def create_initial_model(self, python_script = 'cmd_modeller_ini.py'):
+    def create_initial_model(self, python_script = 'cmd_modeller_ini.py', verbose = True):
         ''' Run modeller given a python script (cmd_modeller_ini.py or cmd_modeller.py). Modeller can only output files
         in its work directory (why though?), so the current work directory is changed to the output dir and later
         changed back the the old working dir.
@@ -57,94 +68,111 @@ class Pandora:
         :param python_script: (string) path to script that performs the modeller modelling. cmd_modeller_ini.py
         :return:
         '''
-
-        # cwd = os.getcwd()
         # Change working directory
         os.chdir(self.output_dir)
         # Run Modeller
         os.popen('python %s' %python_script).read()
         # Load initial model into target object
-        self.target.initial_model = PDBParser(QUIET=True).get_structure(self.target.PDB_id, self.target.PDB_id + '.ini')
+        self.target.initial_model = PDBParser(QUIET=True).get_structure(self.target.id, self.target.id + '.ini')
         # Change working directory back
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+        if verbose:
+            print('\tSuccessfully created the initital model')
 
-    def run_modeller(self, python_script = 'cmd_modeller.py'):
+    def run_modeller(self, python_script='cmd_modeller.py', benchmark=False, pickle_out=True, verbose = True):
         ''' Perform the homology modelling.
 
         :param python_script: (string) path to script that performs the modeller modelling. cmd_modeller.py
         :return:
         '''
-        # cwd = os.getcwd()
-        # Change working directory
-        os.chdir(self.output_dir)
-        # run Modeller to perform homology modelling
-        os.popen('python3 %s > modeller.log' %python_script).read()
-        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+        if verbose:
+            print('\tPerforming homology modelling of %s on %s...' %(self.target.id, self.template.id))
+        t0 = time.time()
+        self.results = Modelling_functions.run_modeller(self.output_dir, self.target, python_script=python_script,
+                                                        benchmark=benchmark, pickle_out=pickle_out)
+        if verbose:
+            print('\n\tModelling was successfull and took %s seconds' %(round(time.time() - t0, 2)))
 
-    def anchor_contacts(self):
+    def anchor_contacts(self, verbose=True):
         """ Calculate anchor contacts"""
+        if verbose:
+            print('\tCalculating peptide anchor residue constraints...')
         self.target.calc_anchor_contacts()
         #    Write output file
-        with open(self.output_dir + '/contacts_' + self.target.PDB_id + '.list', 'w') as f:
+        with open(self.output_dir + '/contacts_' + self.target.id + '.list', 'w') as f:
                 for i in self.target.anchor_contacts:
                     f.write('\t'.join('%s' % x for x in i) + '\n')
 
-    def write_modeller_script(self):
-        Write_modeller_script.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
+    def write_modeller_script(self, n_models = 10, stdev = 0.1):
+        Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir, n_models=n_models, stdev=stdev)
 
-    def model(self):
+    def model(self, n_models=10, stdev=0.1, seq_based_templ_selection = False, benchmark=False, verbose=True):
+
+        if verbose:
+            print('\nModelling %s...\n' %self.target.id)
+            print('\tTarget MHC Class: %s' % self.target.MHC_class)
+            print('\tTarget Allele:  %s' % self.target.allele_type)
+            print('\tTarget Peptide: %s' % self.target.peptide)
+            print('\tTarget Anchors: %s\n' % self.target.anchors)
 
         # Make sure we're in the root directory
         os.path.dirname(PANDORA.PANDORA_path)
-
         # Find the best template structure given the Target
-        mod.find_template()
-        # mod.template.anchors = [4, 7, 9, 12]
+        self.find_template(seq_based_templ_selection, verbose=verbose)
         # Prepare the output directory
-        mod.prep_output_dir()
+        self.prep_output_dir()
         # Perform sequence alignment. This is used to superimpose the target on the template structure in later steps
-        mod.align()
+        self.align(verbose=verbose)
         # Prepare the scripts that run modeller
-        mod.write_ini_script()
+        self.write_ini_script()
         # Run modeller to create the initial model
-        mod.create_initial_model()
+        self.create_initial_model(verbose=verbose)
         # Calculate anchor restraints
-        mod.anchor_contacts()
+        self.anchor_contacts(verbose=verbose)
         # prepare the scripts that run modeller
-        mod.write_modeller_script()
+        self.write_modeller_script(n_models=n_models, stdev=stdev)
         # Do the homology modelling
-        mod.run_modeller()
+        self.run_modeller(benchmark=benchmark, verbose=verbose)
 
-
+        if verbose and benchmark:
+            print('\n\tModel\t\t\t\tMolpdf\t\tL-RMSD\t\tcore L-RMSD')
+            for m in self.results:
+                print('\t%s\t\t%s\t\t%s\t\t%s' % (
+                os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4),
+                round(float(m.lrmsd), 4), round(float(m.core_lrmsd), 4)))
+        elif verbose and not benchmark:
+            print('\n\tModel\t\t\t\tMolpdf')
+            for m in self.results:
+                print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
 
 # db = Database.Database()
-# db.construct_database(MHCI=False)
-
-
-
-# pickle.dump(db, open( "db.pkl", "wb" ) )
-# db = pickle.load( open( "db.pkl", "rb" ) )
+# # db.construct_database(clean=False)
+# # db.save('Pandora_MHCI_and_MHCII_data')
+# db = db.load('Pandora_MHCI_and_MHCII_data')
 #
+# #
+# #
+# #
+# #
+# target = PMHC.Target('1DLH',
+#                      db.MHCII_data['1DLH'].allele_type,
+#                      db.MHCII_data['1DLH'].peptide,
+#                      # chain_seq = db.MHCII_data['1DLH'].chain_seq,
+#                      M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
+#                      N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
+#                      MHC_class = 'II',
+#                      anchors = db.MHCII_data['1DLH'].anchors)
 #
-# target = PMHC.Target('1IAK', ['MH2-AA*02', 'H2-ABk'], 'STDYGILQINSRW', MHC_class='II', anchors=[3,6,8,11])
+# target = PMHC.Target('1A1M',
+#                      db.MHCI_data['1A1M'].allele_type,
+#                      db.MHCI_data['1A1M'].peptide,
+#                      M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
+#                      # MHC_class = 'II',
+#                      anchors = db.MHCI_data['1A1M'].anchors)
+# #
+# #
 # mod = Pandora(target, db)
-# mod.model()
-#
-#
-# for k in db.MHCII_data:
-#
-#     try:
-#         t0 = time.time()
-#         print('Modelling %s' %db.MHCII_data[k].PDB_id)
-#         target = PMHC.Target(db.MHCII_data[k].PDB_id, db.MHCII_data[k].allele, db.MHCII_data[k].peptide, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
-#         mod = Pandora(target, db)
-#         mod.model()
-#         print('Modelling took %s seconds\n' %(time.time() - t0))
-#     except:
-#         print('Something went wrong')
-#
-
-
+# mod.model(n_models=5, stdev=0.1, seq_based_templ_selection=True, benchmark=True)
 
 
 

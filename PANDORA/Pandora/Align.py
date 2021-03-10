@@ -21,7 +21,7 @@ class Align:
 
         # Create an output file if there isn't one yet: template.id_target.id (chains together the name of the multiple
         # templates if they are given)
-        self.__output_dir = output_dir + '/%s_%s' %('_'.join([i.PDB_id for i in self.__template]), self.__target.PDB_id)
+        self.__output_dir = output_dir + '/%s_%s' %('_'.join([i.id for i in self.__template]), self.__target.id)
         if not os.path.exists(self.__output_dir):
             os.makedirs(self.__output_dir)
 
@@ -29,25 +29,25 @@ class Align:
         self.__MHC_class = target.MHC_class
 
         # Store the target and template ids for later use
-        self.__tar_id = target.PDB_id
-        self.__tem_id = [i.PDB_id for i in self.__template]
+        self.__tar_id = target.id
+        self.__tem_id = [i.id for i in self.__template]
 
         # Define template m, n and p seqs
-        self.__tem_m = [i.chain_seq[0] for i in self.__template]
+        self.__tem_m = [i.M_chain_seq for i in self.__template]
         if self.__MHC_class == 'II':
-            self.__tem_n = [i.chain_seq[1] for i in self.__template]
+            self.__tem_n = [i.N_chain_seq for i in self.__template]
         self.__tem_p = [i.peptide for i in self.__template]
 
         # Define target m, n and p seqs. If there are no m and n chains supplied, just take the seqs from the template
         # Only if the target is MHC class II, the n chains are defined.
-        if self.__target.chain_seq == []:
+        if self.__target.M_chain_seq == '':
             self.__tar_m = self.__tem_m[0]
-            if self.__MHC_class == 'II':
+            if self.__MHC_class == 'II' and self.__target.N_chain_seq == '':
                 self.__tar_n = self.__tem_n[0]
         else:
-            self.__tar_m = self.__target.chain_seq[0]
+            self.__tar_m = self.__target.M_chain_seq
             if self.__MHC_class == 'II':
-                self.__tar_n = self.__target.chain_seq[1]
+                self.__tar_n = self.__target.N_chain_seq
         self.__tar_p = self.__target.peptide
 
         # Perform alignment
@@ -128,7 +128,7 @@ class Align:
         # Make a dict containing {id, (peptide_sequence, [anchors])}
         id_pept_anch = {self.__tar_id: (self.__tar_p, self.__target.anchors)}
         for i in self.__template:
-            id_pept_anch[i.PDB_id] = (i.peptide, i.anchors)
+            id_pept_anch[i.id] = (i.peptide, i.anchors)
 
         if self.__MHC_class == 'I':
 
@@ -154,13 +154,15 @@ class Align:
                 msl = MuscleCommandline(input='%s/pept_cores.fasta' % (self.__output_dir),
                                         out='%s/pept_cores.afa' % (self.__output_dir))
                 os.system(str(msl) + ' -quiet')
-                # Remove intermediate files
-                os.system(
-                    'rm %s/*.fasta %s/*.afa' % (self.__output_dir.replace(' ', '\\ '), self.__output_dir.replace(' ', '\\ ')))
 
                 # Load aligned seqs into dict
                 aligned_cores = {v.description: str(v.seq) for (v) in
                                  SeqIO.parse('%s/pept_cores.afa' % (self.__output_dir), "fasta")}
+
+                # Remove intermediate files
+                os.system(
+                    'rm %s/*.fasta %s/*.afa' % (
+                    self.__output_dir.replace(' ', '\\ '), self.__output_dir.replace(' ', '\\ ')))
 
                 # Add aligned cores in between anchors
                 for k, v in id_pept_anch.items():
@@ -195,6 +197,7 @@ class Align:
         return {k + ' P': v[0] for k, v in id_pept_anch.items()}
 
 
+
     def __write_ali_file(self):
         ''' Writes the alignement file from self.aligned_seqs_and_pept '''
 
@@ -225,7 +228,7 @@ class Align:
             aligned_seqs[id] = (head, comment, seq)
 
         # Write actual .ali file
-        alignment_file = '%s/%s.ali' %(self.__output_dir, self.__target.PDB_id)
+        alignment_file = '%s/%s.ali' %(self.__output_dir, self.__target.id)
         with open(alignment_file, 'w') as f:
             for k,v in aligned_seqs.items():
                 f.write(v[0]+'\n'+v[1]+'\n'+v[2]+'\n\n')
