@@ -141,94 +141,34 @@ class Pandora:
             for m in self.results:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
 
-db = Database.Database()
-# db.construct_database(clean=False)
-# db.save('Pandora_MHCI_and_MHCII_data')
-db = db.load('Pandora_MHCI_and_MHCII_data')
-
-
-
-
-
-target = PMHC.Target('1DLH',
-                     db.MHCII_data['1DLH'].allele_type,
-                     db.MHCII_data['1DLH'].peptide,
-                     # chain_seq = db.MHCII_data['1DLH'].chain_seq,
-                     M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
-                     N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
-                     MHC_class = 'II',
-                     anchors = db.MHCII_data['1DLH'].anchors)
-
-target = PMHC.Target('1A1M',
-                     db.MHCI_data['1A1M'].allele_type,
-                     db.MHCI_data['1A1M'].peptide,
-                     M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
-                     # MHC_class = 'II',
-                     anchors = db.MHCI_data['1A1M'].anchors)
-
-
-mod = Pandora(target, db)
-mod.model(n_models=5, stdev=0.1, benchmark=True)
-
-
-
-
-
-## --------------------------------------------------------------------------------
-
-
-
-
-# with open('benchmark_II.csv', 'w') as f:
-#     f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,L-RMSD,core L-MRSD\n')
-#
-# for k in db.MHCII_data:
-#     try:
-#         t0 = time.time()
-#         print('Modelling %s' %db.MHCII_data[k].id)
-#         target = PMHC.Target(db.MHCII_data[k].id, db.MHCII_data[k].allele, db.MHCII_data[k].peptide, chain_seq= db.MHCII_data[k].chain_seq, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
-#         mod = Pandora(target, db)
-#         mod.model(benchmark=True)
-#
-#         lmrsd = round(sum([i.lrmsd for i in mod.results])/len(mod.results), 4)
-#         core_lmrsd = round(sum([i.core_lrmsd for i in mod.results])/len(mod.results), 4)
-#
-#         print('Mean L-RMSD: %s' %(lmrsd))
-#         print('Mean core L-RMSD: %s' % (core_lmrsd))
-#         print('Modelling took %s seconds\n' %(time.time() - t0))
-#
-#         with open('benchmark_II.csv', 'a') as f:
-#             f.write('%s,%s,%s,%s,%s,%s,%s,%s,\n' %(mod.target.id, mod.target.peptide, ';'.join(mod.target.allele), mod.template.id, mod.template.peptide, ';'.join(mod.template.allele), lmrsd, core_lmrsd))
-#
-#     except:
-#         print('Something went wrong')
-# #
+# db = Database.Database()
+# # db.construct_database(clean=False)
+# # db.save('Pandora_MHCI_and_MHCII_data')
+# db = db.load('Pandora_MHCI_and_MHCII_data')
 #
 #
-# with open('benchmark_I.csv', 'w') as f:
-#     f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,L-RMSD,core L-MRSD\n')
 #
-# for k in db.MHCI_data:
-#     try:
-#         t0 = time.time()
-#         print('Modelling %s' %db.MHCI_data[k].id)
-#         target = PMHC.Target(db.MHCI_data[k].id, db.MHCI_data[k].allele, db.MHCI_data[k].peptide, chain_seq= db.MHCI_data[k].chain_seq, MHC_class= db.MHCI_data[k].MHC_class, anchors=db.MHCI_data[k].anchors)
-#         mod = Pandora(target, db)
-#         mod.model(benchmark=True)
 #
-#         lmrsd = round(sum([i.lrmsd for i in mod.results])/len(mod.results), 4)
-#         core_lmrsd = round(sum([i.core_lrmsd for i in mod.results])/len(mod.results), 4)
 #
-#         print('Mean L-RMSD: %s' %(lmrsd))
-#         print('Mean core L-RMSD: %s' % (core_lmrsd))
-#         print('Modelling took %s seconds\n' %(time.time() - t0))
+# target = PMHC.Target('1DLH',
+#                      db.MHCII_data['1DLH'].allele_type,
+#                      db.MHCII_data['1DLH'].peptide,
+#                      # chain_seq = db.MHCII_data['1DLH'].chain_seq,
+#                      M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
+#                      N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
+#                      MHC_class = 'II',
+#                      anchors = db.MHCII_data['1DLH'].anchors)
 #
-#         with open('benchmark_I.csv', 'a') as f:
-#             f.write('%s,%s,%s,%s,%s,%s,%s,%s,\n' %(mod.target.id, mod.target.peptide, ';'.join(mod.target.allele), mod.template.id, mod.template.peptide, ';'.join(mod.template.allele), lmrsd, core_lmrsd))
+# target = PMHC.Target('1A1M',
+#                      db.MHCI_data['1A1M'].allele_type,
+#                      db.MHCI_data['1A1M'].peptide,
+#                      M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
+#                      # MHC_class = 'II',
+#                      anchors = db.MHCI_data['1A1M'].anchors)
 #
-#     except:
-#         print('Something went wrong')
-# #
+#
+# mod = Pandora(target, db)
+# mod.model(n_models=5, stdev=0.1, benchmark=True)
 
 
 
