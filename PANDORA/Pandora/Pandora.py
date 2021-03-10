@@ -21,10 +21,14 @@ class Pandora:
             raise Exception('Provide a Database object so Pandora can find the best suitable template structure for '
                             'modelling. Alternatively, you can specify a user defined Template object.')
 
-    def find_template(self, verbose = True):
+    def find_template(self, seq_based_templ_selection = False, verbose = True):
         ''' Find the best template structure given a Target object '''
         if self.template == None:
-            self.template = Modelling_functions.find_template(self.target, self.database)
+            if verbose and self.target.M_chain_seq != '' and seq_based_templ_selection:
+                print('\tUsing sequence based template selection')
+            elif verbose:
+                print('\tUsing allele type based template selection')
+            self.template = Modelling_functions.find_template(self.target, self.database, seq_based_templ_selection)
             self.target.templates = [self.template.id]
             if verbose:
                 print('\tSelected template structure: %s' %self.template.id)
@@ -102,7 +106,7 @@ class Pandora:
     def write_modeller_script(self, n_models = 10, stdev = 0.1):
         Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir, n_models=n_models, stdev=stdev)
 
-    def model(self, n_models=10, stdev=0.1, benchmark=False, verbose=True):
+    def model(self, n_models=10, stdev=0.1, seq_based_templ_selection = False, benchmark=False, verbose=True):
 
         if verbose:
             print('\nModelling %s...\n' %self.target.id)
@@ -114,7 +118,7 @@ class Pandora:
         # Make sure we're in the root directory
         os.path.dirname(PANDORA.PANDORA_path)
         # Find the best template structure given the Target
-        self.find_template(verbose=verbose)
+        self.find_template(seq_based_templ_selection, verbose=verbose)
         # Prepare the output directory
         self.prep_output_dir()
         # Perform sequence alignment. This is used to superimpose the target on the template structure in later steps
@@ -141,34 +145,34 @@ class Pandora:
             for m in self.results:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
 
-# db = Database.Database()
-# # db.construct_database(clean=False)
-# # db.save('Pandora_MHCI_and_MHCII_data')
-# db = db.load('Pandora_MHCI_and_MHCII_data')
+db = Database.Database()
+# db.construct_database(clean=False)
+# db.save('Pandora_MHCI_and_MHCII_data')
+db = db.load('Pandora_MHCI_and_MHCII_data')
+
 #
 #
 #
 #
+target = PMHC.Target('1DLH',
+                     db.MHCII_data['1DLH'].allele_type,
+                     db.MHCII_data['1DLH'].peptide,
+                     # chain_seq = db.MHCII_data['1DLH'].chain_seq,
+                     M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
+                     N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
+                     MHC_class = 'II',
+                     anchors = db.MHCII_data['1DLH'].anchors)
+
+target = PMHC.Target('1A1M',
+                     db.MHCI_data['1A1M'].allele_type,
+                     db.MHCI_data['1A1M'].peptide,
+                     M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
+                     # MHC_class = 'II',
+                     anchors = db.MHCI_data['1A1M'].anchors)
 #
-# target = PMHC.Target('1DLH',
-#                      db.MHCII_data['1DLH'].allele_type,
-#                      db.MHCII_data['1DLH'].peptide,
-#                      # chain_seq = db.MHCII_data['1DLH'].chain_seq,
-#                      M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
-#                      N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
-#                      MHC_class = 'II',
-#                      anchors = db.MHCII_data['1DLH'].anchors)
 #
-# target = PMHC.Target('1A1M',
-#                      db.MHCI_data['1A1M'].allele_type,
-#                      db.MHCI_data['1A1M'].peptide,
-#                      M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
-#                      # MHC_class = 'II',
-#                      anchors = db.MHCI_data['1A1M'].anchors)
-#
-#
-# mod = Pandora(target, db)
-# mod.model(n_models=5, stdev=0.1, benchmark=True)
+mod = Pandora(target, db)
+mod.model(n_models=5, stdev=0.1, seq_based_templ_selection=True, benchmark=True)
 
 
 

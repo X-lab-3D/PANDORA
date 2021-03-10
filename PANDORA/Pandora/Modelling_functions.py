@@ -8,7 +8,7 @@ from Bio import Align
 
 
 
-def find_template(target, database):
+def find_template(target, database, seq_based_templ_selection = False):
     ''' Selects the structure that is best suited as template for homology modelling of the target
 
     :param target: (Target) object
@@ -17,7 +17,7 @@ def find_template(target, database):
     '''
 
     # Sequence based template search if the sequences of the target are provided
-    if target.M_chain_seq != '':
+    if target.M_chain_seq != '' and seq_based_templ_selection:
 
         if target.MHC_class == 'I':
 
@@ -29,7 +29,7 @@ def find_template(target, database):
             # Perform a pairwise alignment of the target and all templates for the MHC M chain and peptide
             for i in database.MHCI_data:
                 aligner = Align.PairwiseAligner()
-                aligner.substitution_matrix = substitution_matrices.load("BLOSUM62")  # or PAM30 ??
+                aligner.substitution_matrix = substitution_matrices.load("BLOSUM80")  # PAM30 for pept??
 
                 M_score = aligner.align(tar_seq, database.MHCI_data[i].M_chain_seq).score
                 P_score = aligner.align(tar_pept, database.MHCI_data[i].peptide).score
@@ -46,7 +46,7 @@ def find_template(target, database):
 
         if target.MHC_class == 'II':
             # define target sequences
-            tar_seq = database.MHCII_data[target.id].M_chain_seq + db.MHCII_data[target.id].N_chain_seq
+            tar_seq = database.MHCII_data[target.id].M_chain_seq + database.MHCII_data[target.id].N_chain_seq
             tar_pept = database.MHCII_data[target.id].peptide
             # keep track of alignment scores
             scores = {}
