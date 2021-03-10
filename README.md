@@ -11,6 +11,8 @@ Python 3 (Preferred)
 
 BioPython
 
+Dill
+
 Modeller 9.23 or later
 
 pdb_tools
