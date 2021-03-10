@@ -7,22 +7,30 @@ from PANDORA.Pandora import Modelling_functions
 import time
 import os
 from Bio.PDB import PDBParser
-import dill
 
 
 class Pandora:
 
-    def __init__(self, target, database):
+    def __init__(self, target, database = None, template = None):
         self.target = target
-        self.template = None
+        self.template = template
         self.database = database
         self.output_dir = PANDORA.PANDORA_data + '/outputs/'
 
+        if database == None and template == None:
+            raise Exception('Provide a Database object so Pandora can find the best suitable template structure for '
+                            'modelling. Alternatively, you can specify a user defined Template object.')
+
     def find_template(self, verbose = True):
         ''' Find the best template structure given a Target object '''
-        self.template = Modelling_functions.find_template(self.target, self.database)
+        if self.template == None:
+            self.template = Modelling_functions.find_template(self.target, self.database)
+            self.target.templates = [self.template.id]
+            if verbose:
+                print('\tSelected template structure: %s' %self.template.id)
+        elif verbose:
+                print('\tUser defined template structure: %s' %self.template.id)
         if verbose:
-            print('\tSelected template structure: %s' %self.template.id)
             print('\tTemplate Allele:  %s' % self.template.allele_type)
             print('\tTemplate Peptide: %s' % self.template.peptide)
             print('\tTemplate Anchors: %s\n' % self.template.anchors)
@@ -94,7 +102,7 @@ class Pandora:
     def write_modeller_script(self, n_models = 10, stdev = 0.1):
         Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir, n_models=n_models, stdev=stdev)
 
-    def model(self,n_models = 10, stdev=0.1, benchmark=False, verbose=True):
+    def model(self, n_models=10, stdev=0.1, benchmark=False, verbose=True):
 
         if verbose:
             print('\nModelling %s...\n' %self.target.id)
@@ -118,7 +126,7 @@ class Pandora:
         # Calculate anchor restraints
         self.anchor_contacts(verbose=verbose)
         # prepare the scripts that run modeller
-        self.write_modeller_script(n_models = n_models, stdev=stdev)
+        self.write_modeller_script(n_models=n_models, stdev=stdev)
         # Do the homology modelling
         self.run_modeller(benchmark=benchmark, verbose=verbose)
 
@@ -134,20 +142,22 @@ class Pandora:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
 
 db = Database.Database()
-# db.construct_database(MHCII=False)
-# db.save('temp')
-db = db.load('temp')
+# db.construct_database(clean=False)
+# db.save('Pandora_MHCI_and_MHCII_data')
+db = db.load('Pandora_MHCI_and_MHCII_data')
 
 
 
-# target = PMHC.Target('1DLH',
-#                      db.MHCII_data['1DLH'].allele_type,
-#                      db.MHCII_data['1DLH'].peptide,
-#                      # chain_seq = db.MHCII_data['1DLH'].chain_seq,
-#                      M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
-#                      N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
-#                      MHC_class = 'II',
-#                      anchors = db.MHCII_data['1DLH'].anchors)
+
+
+target = PMHC.Target('1DLH',
+                     db.MHCII_data['1DLH'].allele_type,
+                     db.MHCII_data['1DLH'].peptide,
+                     # chain_seq = db.MHCII_data['1DLH'].chain_seq,
+                     M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
+                     N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
+                     MHC_class = 'II',
+                     anchors = db.MHCII_data['1DLH'].anchors)
 
 target = PMHC.Target('1A1M',
                      db.MHCI_data['1A1M'].allele_type,
@@ -158,7 +168,7 @@ target = PMHC.Target('1A1M',
 
 
 mod = Pandora(target, db)
-mod.model(n_models=2)
+mod.model(n_models=5, stdev=0.1, benchmark=True)
 
 
 

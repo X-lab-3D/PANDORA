@@ -3,8 +3,6 @@ import os
 import PANDORA
 import dill
 from PANDORA.PMHC import PMHC
-# from PANDORA.Database import Download_data
-# from PANDORA.Database import Parse_pMHC
 from PANDORA.Database import Database_functions
 
 class Database:
@@ -19,8 +17,8 @@ class Database:
         """ Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
         print('Downloading structures ...')
         # Download_data.download_unzip_imgt_structures(del_inn_files=True, del_kabat_files=True)
-        self.__IDs_list_MHCI = Database_functions.download_ids_imgt('MH1', out_tsv='all_MHI_IDs.tsv')[:20]
-        self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', out_tsv='all_MHII_IDs.tsv')[:20]
+        self.__IDs_list_MHCI = Database_functions.download_ids_imgt('MH1', out_tsv='all_MHI_IDs.tsv')
+        self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', out_tsv='all_MHII_IDs.tsv')
 
 
     def __clean_MHCI_files(self):
@@ -31,7 +29,7 @@ class Database:
         """ Clean all MHCII structures. Returns a list of bad PDBs"""
         return Database_functions.parse_pMHCII_pdbs(self.__IDs_list_MHCII)
 
-    def construct_database(self, MHCI = True, MHCII = True):
+    def construct_database(self, MHCI = True, MHCII = True, clean = True):
         """ Construct a database
 
         :param MHCI: (bool) Calculate metadata for MHCI
@@ -46,7 +44,8 @@ class Database:
         if MHCI:
 
             # Parse all MHCI files
-            # self.__clean_MHCI_files()
+            if clean:
+                self.__clean_MHCI_files()
 
             for id in self.__IDs_list_MHCI:
                 try:
@@ -68,7 +67,8 @@ class Database:
         if MHCII:
 
             # Parse all MHCII files
-            # self.__clean_MHCII_files()
+            if clean:
+                self.__clean_MHCII_files()
 
             for id in self.__IDs_list_MHCII:
                 try:
@@ -129,17 +129,12 @@ class Database:
 
         :param fn: (string) pathname of file
         """
-        # pickle.dump(self, open(fn, "wb"))
         with open(fn, "wb") as dill_file:
             dill.dump(self, dill_file)
 
     def load(cls, fn):
-        # return pickle.load( open(fn, "rb" ) )
         return dill.load(open(fn, 'rb'))
 
-# db = Database()
-# db.construct_database()
-# db.save('Pandora_MHCI_and_MHCII_data.pkl')
-# test_db = pickle.load( open("Pandora_MHCI_and_MHCII_data.pkl", "rb" ) )
+
 
 
