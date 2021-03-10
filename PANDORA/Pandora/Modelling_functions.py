@@ -4,6 +4,8 @@ import os
 import PANDORA
 import pickle
 from PANDORA.PMHC import Model
+from Bio import Align
+
 
 
 def find_template(target, database):
@@ -14,6 +16,58 @@ def find_template(target, database):
     :return: (Template) Template object of the best structure
     '''
 
+    # Sequence based template search if the sequences of the target are provided
+    if target.M_chain_seq != '':
+
+        if target.MHC_class == 'I':
+
+            # define target sequences
+            tar_seq = database.MHCI_data[target.id].M_chain_seq
+            tar_pept = database.MHCI_data[target.id].peptide
+            # keep track of alignment scores
+            scores = {}
+            # Perform a pairwise alignment of the target and all templates for the MHC M chain and peptide
+            for i in database.MHCI_data:
+                aligner = Align.PairwiseAligner()
+                aligner.substitution_matrix = substitution_matrices.load("BLOSUM62")  # or PAM30 ??
+
+                M_score = aligner.align(tar_seq, database.MHCI_data[i].M_chain_seq).score
+                P_score = aligner.align(tar_pept, database.MHCI_data[i].peptide).score
+
+                scores[i] = (M_score, P_score)
+            # Remove the target structure from this dict, you cannot select the target as template
+            scores.pop(target.id, None)
+            # take the 10 best scoring templates
+            best_MHCs = sorted(scores, key=scores.get, reverse=True)[:10]
+            # take the template with the best scoring peptide
+            best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
+
+            return database.MHCI_data[best_template]
+
+        if target.MHC_class == 'II':
+            # define target sequences
+            tar_seq = database.MHCII_data[target.id].M_chain_seq + db.MHCII_data[target.id].N_chain_seq
+            tar_pept = database.MHCII_data[target.id].peptide
+            # keep track of alignment scores
+            scores = {}
+
+            for i in database.MHCII_data:
+                aligner = Align.PairwiseAligner()
+                aligner.substitution_matrix = substitution_matrices.load("BLOSUM62")  # or PAM30 ??
+
+                temp_seq = database.MHCII_data[i].M_chain_seq + database.MHCII_data[i].N_chain_seq
+                MN_score = aligner.align(tar_seq, temp_seq).score
+                P_score = aligner.align(tar_pept, database.MHCII_data[i].peptide).score
+
+                scores[i] = (MN_score, P_score)
+            # Remove the target structure from this dict, you cannot select the target as template
+            scores.pop(target.id, None)
+            # take the 10 best scoring templates
+            best_MHCs = sorted(scores, key=scores.get, reverse=True)[:10]
+            # take the template with the best scoring peptide
+            best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
+
+            return database.MHCII_data[best_template]
 
     ## For MHC I
     if target.MHC_class == 'I':
