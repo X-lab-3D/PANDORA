@@ -1,4 +1,5 @@
-# pMHC_modelling
+# PANDORA
+## (Peptide ANchored mODelling fRAmework)
 
 ## Installation
 
