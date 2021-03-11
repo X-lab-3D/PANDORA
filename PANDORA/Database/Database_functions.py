@@ -5,10 +5,10 @@ from string import ascii_uppercase
 from copy import deepcopy
 from Bio.PDB import PDBParser
 from Bio.PDB import PDBIO
-
+import gzip
+import shutil
 import PANDORA
 from PANDORA.Contacts import Contacts
-
 
 
 def download_unzip_imgt_structures(del_inn_files = True, del_kabat_files = True):
@@ -261,6 +261,7 @@ def replace_chain_names(chains, pdb, replacement_chains=['M', 'N', 'P']):
             if chain.id == i:
                 # print(chain.id)
                 chain.id = replacement_chains[chains.index(i)]
+
     return pdb
 
 def renumber(pdb):
@@ -356,7 +357,6 @@ def unzip_pdb(ID, indir, outdir):
                 shutil.copyfileobj(f_in, f_out)
     except FileNotFoundError:
         print('ERROR TYPE #1: File not found. %s' % ID)
-
     return '%s/%s.pdb' % (outdir, ID)
 
 
@@ -541,6 +541,7 @@ def parse_pMHCI_pdbs(ids_list):
     :param ids_list: (list) list of MHCI PDB IDs. core.Database.IDs_list_MHCI
     :return: Writes all cleaned PDBs to the /PDBs/pMHCI/ dir
     '''
+
     # set paths for in and out directories
     indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
     outdir = PANDORA.PANDORA_data + '/PDBs/pMHCI'

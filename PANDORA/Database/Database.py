@@ -13,10 +13,11 @@ class Database:
         self.__IDs_list_MHCI = []
         self.__IDs_list_MHCII = []
 
-    def download_data(self):
+    def download_data(self, download = True):
         """ Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
         print('Downloading structures ...')
-        # Download_data.download_unzip_imgt_structures(del_inn_files=True, del_kabat_files=True)
+        if download:
+            Database_functions.download_unzip_imgt_structures(del_inn_files=True, del_kabat_files=True)
         self.__IDs_list_MHCI = Database_functions.download_ids_imgt('MH1', out_tsv='all_MHI_IDs.tsv')
         self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', out_tsv='all_MHII_IDs.tsv')
 
@@ -29,7 +30,7 @@ class Database:
         """ Clean all MHCII structures. Returns a list of bad PDBs"""
         return Database_functions.parse_pMHCII_pdbs(self.__IDs_list_MHCII)
 
-    def construct_database(self, MHCI = True, MHCII = True, clean = True):
+    def construct_database(self, MHCI=True, MHCII=True, clean=True, download=True):
         """ Construct a database
 
         :param MHCI: (bool) Calculate metadata for MHCI
@@ -38,7 +39,8 @@ class Database:
         """
 
         # Download the data
-        self.download_data()
+        if download:
+            self.download_data()
 
         # Construct the MHCI database
         if MHCI:

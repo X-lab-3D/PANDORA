@@ -8,6 +8,7 @@ from Bio import Align
 
 
 
+
 def find_template(target, database, seq_based_templ_selection = False):
     ''' Selects the structure that is best suited as template for homology modelling of the target
 
