@@ -51,17 +51,19 @@ Contains the main run scripts for downloading the dataset and perform large scal
 ## Example run script
 
 ```
-import PANDORA
+from PANDORA.PMHC import PMHC
+from PANDORA.Pandora import Pandora
+from PANDORA.Database import Database
 
-## 1. Create local database
-db = PANDORA.Database.construct_database()
+db = Database.Database()
+db.construct_database()
 
-## Alternatively, load a pre-built database
-dv = PANDORA.Database.load('db.pkl')
+target = PMHC.Target('1A1M',
+    db.MHCI_data['1A1M'].allele_type,
+    db.MHCI_data['1A1M'].peptide,
+    M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
+    anchors = db.MHCI_data['1A1M'].anchors)
 
-## 2. Create target object
-target = PANDORA.PMHC.target(PDB_id = '1K5N', MHC_type = 1,
-                             allele = ['HLA-B*27:09'], peptide = 'GRFAAAIAK')
-                             
-## 3. Perform modelling
-model = PANDORA.Pandora.model(target, db)
+mod = Pandora.Pandora(target, db)
+mod.model(n_models=5, stdev=0.1, seq_based_templ_selection=True, benchmark=True)
+```
