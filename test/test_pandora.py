@@ -1,12 +1,13 @@
 import pytest
-from PANDORA.PMHC import PMHC
-import PANDORA
 import os
+import PANDORA
+from PANDORA.PMHC import PMHC
 from PANDORA.Contacts import Contacts
 from PANDORA.Pandora import Align
 from PANDORA.Database import Database
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
+from PANDORA.PMHC import Model
 
 def test_PMHC_target():
     # Create target object
@@ -86,7 +87,7 @@ def test_align():
 
     assert pass_test
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_construct_database():
     test_data = PANDORA.PANDORA_path + '/../test/test_data/'
     bad1, bad2 = test_data + 'PDBs/Bad/pMHCI/6C6A.pdb', test_data + 'PDBs/Bad/pMHCII/1K8I.pdb'
@@ -118,7 +119,8 @@ def test_load_db():
 
     assert pass_test
 
-def test_pandora_modelling():
+# @pytest.mark.skip
+def test_pandora_MHCI_modelling():
     # Load database
     db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
     # Create target object
@@ -127,6 +129,7 @@ def test_pandora_modelling():
                          db.MHCI_data['1A1O'].peptide,
                          M_chain_seq=db.MHCI_data['1A1O'].M_chain_seq,
                          anchors=db.MHCI_data['1A1O'].anchors)
+
     # Perform modelling
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
     mod.model(n_models=1, stdev=0.1, seq_based_templ_selection=True)
@@ -141,4 +144,49 @@ def test_pandora_modelling():
 
     assert pass_test
 
+# @pytest.mark.skip
+def test_pandora_MHCII_modelling():
+    # Load database
+    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    # Create target object
+    target = PMHC.Target('2NNA',
+                         db.MHCII_data['2NNA'].allele_type,
+                         db.MHCII_data['2NNA'].peptide,
+                         MHC_class= 'II',
+                         M_chain_seq=db.MHCII_data['2NNA'].M_chain_seq,
+                         N_chain_seq=db.MHCII_data['2NNA'].N_chain_seq,
+                         anchors=db.MHCII_data['2NNA'].anchors)
 
+    # Perform modelling
+    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
+    mod.model(n_models=1, stdev=0.2, seq_based_templ_selection=True)
+
+    # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
+    pass_test = False
+    if mod.template.id == '4Z7U' and [c.id for c in mod.target.initial_model.get_chains()] == ['M','N', 'P']:
+        if float(mod.results[0].moldpf) < 1000 and float(mod.results[0].moldpf) > -1000:
+            pass_test = True
+    # remove output file
+    os.system('rm -r %s' % (mod.output_dir))
+    assert pass_test
+
+def test_rmsd():
+    # Load database
+    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    # Create target object
+    target = PMHC.Target('1A1O',
+                         db.MHCI_data['1A1O'].allele_type,
+                         db.MHCI_data['1A1O'].peptide,
+                         M_chain_seq=db.MHCI_data['1A1O'].M_chain_seq,
+                         anchors=db.MHCI_data['1A1O'].anchors)
+
+    # Initiate Model object
+    m = Model.Model(target, model_path=PANDORA.PANDORA_path + '/../test/test_data/1A1O.BL00010001.pdb',
+                    output_dir=PANDORA.PANDORA_path + '/../test')
+    # Calculate L-RMSD and Core L-RMSD
+    m.calc_LRMSD(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
+    m.calc_Core_LRMSD(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
+    # Check if the rmsds are between 0.5 and 2 (I gave some slack for the cases that modeller gets lucky.
+    pass_test = m.lrmsd > 0.5 and m.lrmsd < 2 and m.core_lrmsd > 0.5 and m.core_lrmsd < 2
+
+    assert pass_test

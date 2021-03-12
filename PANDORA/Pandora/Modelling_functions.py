@@ -296,7 +296,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     results = []
     for i in range(len(logf)):
         try:
-            m = Model.Model(target, output_dir, model_path=output_dir + '/' + logf[i][0],
+            m = Model.Model(target, model_path=output_dir + '/' + logf[i][0], output_dir = output_dir,
                                             molpdf=logf[i][1], dope=logf[i][2])
             if benchmark:
                 m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')

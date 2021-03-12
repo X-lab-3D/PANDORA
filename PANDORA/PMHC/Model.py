@@ -1,14 +1,12 @@
 from Bio.PDB import PDBParser
-from Bio.SeqUtils import seq1
-from Bio.Align.Applications import MuscleCommandline
-from Bio import SeqIO
 import os
 from Bio.PDB import PDBIO
 from pdb2sql import StructureSimilarity
+import PANDORA
 
 class Model:
 
-    def __init__(self, target, output_dir, model_path='', pdb=False, molpdf=0, dope=0):
+    def __init__(self, target, model_path='', output_dir = PANDORA.PANDORA_data, pdb=False, molpdf=0, dope=0):
         '''
 
         Args:

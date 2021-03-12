@@ -1,7 +1,6 @@
 import os
 
 os.system('mkdir ./PANDORA_files')
-os.system('mkdir ./test')
 os.system('mkdir ./PANDORA_files/data')
 os.system('mkdir ./PANDORA_files/data/csv_pkl_files')
 os.system('mkdir ./PANDORA_files/data/PDBs')
