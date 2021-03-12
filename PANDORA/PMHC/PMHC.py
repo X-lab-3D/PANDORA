@@ -64,6 +64,9 @@ class Template(PMHC):
         self.pdb = pdb
         self.contacts = False
 
+        if not pdb_path and not pdb:
+            raise Exception('Provide a PDB structure to the Template object first')
+
         if not pdb_path or not pdb: # If the path to a pdb file or a Bio.PDB object is given, parse the pdb
             self.parse_pdb()
 

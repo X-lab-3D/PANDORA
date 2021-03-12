@@ -9,13 +9,14 @@ import os
 from Bio.PDB import PDBParser
 
 
+
 class Pandora:
 
-    def __init__(self, target, database = None, template = None):
+    def __init__(self, target, database = None, template = None, output_dir = PANDORA.PANDORA_data + '/outputs'):
         self.target = target
         self.template = template
         self.database = database
-        self.output_dir = PANDORA.PANDORA_data + '/outputs/'
+        self.output_dir = output_dir
 
         if database == None and template == None:
             raise Exception('Provide a Database object so Pandora can find the best suitable template structure for '
@@ -44,7 +45,7 @@ class Pandora:
         '''
         # create an output directory
         try:
-            self.output_dir = '%s%s_%s' %(self.output_dir, self.template.id, self.target.id)
+            self.output_dir = '%s/%s_%s' %(self.output_dir, self.template.id, self.target.id)
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir)
         except:
@@ -52,7 +53,7 @@ class Pandora:
         os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
 
     def align(self, verbose = True):
-        self.alignment = Align.Align(self.target, self.template)
+        self.alignment = Align.Align(self.target, self.template, output_dir=self.output_dir)
         if verbose:
             print('\tSuccessfully created alignment file')
 

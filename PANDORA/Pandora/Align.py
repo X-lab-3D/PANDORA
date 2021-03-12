@@ -21,7 +21,7 @@ class Align:
 
         # Create an output file if there isn't one yet: template.id_target.id (chains together the name of the multiple
         # templates if they are given)
-        self.__output_dir = output_dir + '/%s_%s' %('_'.join([i.id for i in self.__template]), self.__target.id)
+        self.__output_dir = output_dir # + '/%s_%s' %('_'.join([i.id for i in self.__template]), self.__target.id)
         if not os.path.exists(self.__output_dir):
             os.makedirs(self.__output_dir)
 

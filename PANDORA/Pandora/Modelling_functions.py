@@ -169,7 +169,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
     anch = target.anchors
 
     if target.MHC_class == 'I':
-        with open(output_dir.replace('\\ ',' ') + '/MyLoop.py', 'w') as myloopscript:
+        with open(output_dir+ '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
             for line in MyL_temp:
                 if 'self.residue_range' in line:
@@ -183,7 +183,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
             MyL_temp.close()
 
     if target.MHC_class == 'II':
-        with open(output_dir.replace('\\ ',' ') + '/MyLoop.py', 'w') as myloopscript:
+        with open(output_dir + '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r')
             for line in MyL_temp:
                 if 'self.residue_range' in line:

@@ -13,24 +13,30 @@ class Database:
         self.__IDs_list_MHCI = []
         self.__IDs_list_MHCII = []
 
-    def download_data(self, download = True):
+    def download_data(self, data_dir = PANDORA.PANDORA_data, download = True):
         """ Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
         print('Downloading structures ...')
         if download:
-            Database_functions.download_unzip_imgt_structures(del_inn_files=True, del_kabat_files=True)
-        self.__IDs_list_MHCI = Database_functions.download_ids_imgt('MH1', out_tsv='all_MHI_IDs.tsv')
-        self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', out_tsv='all_MHII_IDs.tsv')
+            Database_functions.download_unzip_imgt_structures(data_dir = data_dir, del_inn_files=True, del_kabat_files=True)
+        self.__IDs_list_MHCI = Database_functions.download_ids_imgt('MH1', data_dir = data_dir, out_tsv='all_MHI_IDs.tsv')
+        self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', data_dir = data_dir, out_tsv='all_MHII_IDs.tsv')
 
 
-    def __clean_MHCI_files(self):
+    def __clean_MHCI_files(self, data_dir):
         """ Clean all MHCI structures"""
-        return Database_functions.parse_pMHCI_pdbs(self.__IDs_list_MHCI)
+        return Database_functions.parse_pMHCI_pdbs(self.__IDs_list_MHCI,
+                                                   indir = data_dir + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
+                                                   outdir = data_dir + '/PDBs/pMHCI',
+                                                   bad_dir = data_dir + '/PDBs/Bad/pMHCI')
 
-    def __clean_MHCII_files(self):
+    def __clean_MHCII_files(self, data_dir):
         """ Clean all MHCII structures. Returns a list of bad PDBs"""
-        return Database_functions.parse_pMHCII_pdbs(self.__IDs_list_MHCII)
+        return Database_functions.parse_pMHCII_pdbs(self.__IDs_list_MHCII,
+                                                   indir = data_dir + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
+                                                   outdir = data_dir + '/PDBs/pMHCII',
+                                                   bad_dir = data_dir + '/PDBs/Bad/pMHCII')
 
-    def construct_database(self, MHCI=True, MHCII=True, clean=True, download=True):
+    def construct_database(self, data_dir = PANDORA.PANDORA_data, MHCI=True, MHCII=True, clean=True, download=True):
         """ Construct a database
 
         :param MHCI: (bool) Calculate metadata for MHCI
@@ -38,20 +44,23 @@ class Database:
         :return: (dict) {id:MHC_structure}
         """
 
+
+
         # Download the data
-        if download:
-            self.download_data()
+        self.download_data(download = download, data_dir = data_dir)
 
         # Construct the MHCI database
         if MHCI:
 
             # Parse all MHCI files
             if clean:
-                self.__clean_MHCI_files()
+                self.__clean_MHCI_files(data_dir = data_dir)
+
+
 
             for id in self.__IDs_list_MHCI:
                 try:
-                    file = PANDORA.PANDORA_data + '/PDBs/pMHCI/' + id + '.pdb'
+                    file = data_dir + '/PDBs/pMHCI/' + id + '.pdb'
                     # Check if this file really exists
                     if os.path.isfile(file):
                         print('Adding %s' % id)
@@ -70,11 +79,11 @@ class Database:
 
             # Parse all MHCII files
             if clean:
-                self.__clean_MHCII_files()
+                self.__clean_MHCII_files(data_dir)
 
             for id in self.__IDs_list_MHCII:
                 try:
-                    file = PANDORA.PANDORA_data + '/PDBs/pMHCII/' + id + '.pdb'
+                    file = data_dir + '/PDBs/pMHCII/' + id + '.pdb'
                     # Check if this file really exists
                     if os.path.isfile(file):
                         print('Adding %s' %id)

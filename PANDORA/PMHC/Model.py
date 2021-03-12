@@ -55,8 +55,8 @@ class Model:
 
         # Calculate l-rmsd between decoy and reference with pdb2sql
         sim = StructureSimilarity('%s/decoy.pdb' % (self.output_dir.replace(' ', '\\ ')), '%s/ref.pdb' % (self.output_dir))
-        self.lrmsd = sim.compute_lrmsd_fast(method='svd', name=atoms)
-        # self.lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name = atoms)
+        # self.lrmsd = sim.compute_lrmsd_fast(method='svd', name=atoms)
+        self.lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name = atoms)
 
         # remove intermediate files
         os.system('rm %s/decoy.pdb %s/ref.pdb' %(self.output_dir, self.output_dir))

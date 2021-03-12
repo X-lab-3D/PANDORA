@@ -11,7 +11,7 @@ import PANDORA
 from PANDORA.Contacts import Contacts
 
 
-def download_unzip_imgt_structures(del_inn_files = True, del_kabat_files = True):
+def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_files = True, del_kabat_files = True):
     '''
     Downloads the complete structural dataset
     from IMGT database: http://www.imgt.org/download/3Dstructure-DB/IMGT3DFlatFiles.tgz
@@ -25,7 +25,7 @@ def download_unzip_imgt_structures(del_inn_files = True, del_kabat_files = True)
     '''
 
     # Changing working directory
-    os.chdir(PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/')
+    os.chdir(data_dir + '/PDBs/IMGT_retrieved/')
     # Downloading IMGT dataset
     os.system('wget http://www.imgt.org/download/3Dstructure-DB/IMGT3DFlatFiles.tgz')
     # Uncompressing
@@ -44,7 +44,7 @@ def download_unzip_imgt_structures(del_inn_files = True, del_kabat_files = True)
         os.system('rm IMGT3DFlatFiles/*.prot.gz')
     #os.chdir('../../../../')
 
-def download_ids_imgt(ReceptorType, out_tsv = False):
+def download_ids_imgt(ReceptorType, data_dir = PANDORA.PANDORA_data, out_tsv = False):
     '''
     Querys IMGT with the ReceptorType for PDBs.
     Returns the list of IDs provided by IMGT.
@@ -79,7 +79,7 @@ def download_ids_imgt(ReceptorType, out_tsv = False):
     IDs_list = [x[3][-4:] for x in IDs_list]
 
     if out_tsv:
-        outfile = open(PANDORA.PANDORA_data + '/csv_pkl_files/' + out_tsv, 'w')
+        outfile = open(data_dir + '/csv_pkl_files/' + out_tsv, 'w')
         outfile.write(ReceptorType + ' IMGT IDs\n')
         for ID in IDs_list:
             outfile.write(ID + '\n')
@@ -535,7 +535,10 @@ def log(ID, error, logfile, verbose=True):
         f.write('%s,%s\n' % (ID, error))
 
 # ID = IDs_list_MHCI[0]
-def parse_pMHCI_pdbs(ids_list):
+def parse_pMHCI_pdbs(ids_list,
+                     indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
+                     outdir = PANDORA.PANDORA_data + '/PDBs/pMHCI',
+                     bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI'):
     ''' Clean all MHCI pdb files that have been downloaded from IMGT
 
     :param ids_list: (list) list of MHCI PDB IDs. core.Database.IDs_list_MHCI
@@ -543,9 +546,9 @@ def parse_pMHCI_pdbs(ids_list):
     '''
 
     # set paths for in and out directories
-    indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
-    outdir = PANDORA.PANDORA_data + '/PDBs/pMHCI'
-    bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI'
+    # indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
+    # outdir = PANDORA.PANDORA_data + '/PDBs/pMHCI'
+    # bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI'
     logfile = os.path.dirname(bad_dir) + '/log_MHCI.csv'
 
     for ID in ids_list:
@@ -589,16 +592,19 @@ def parse_pMHCI_pdbs(ids_list):
 
 
 
-def parse_pMHCII_pdbs(ids_list):
+def parse_pMHCII_pdbs(ids_list,
+                      indir=PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
+                      outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII',
+                      bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII'):
     ''' Clean all MHCII pdb files that have been downloaded from IMGT
 
     :param ids_list: (list) list of MHCI PDB IDs. core.Database.IDs_list_MHCII
     :return: Writes all cleaned PDBs to the /PDBs/pMHCII/ dir
     '''
     # set paths for in and out directories
-    indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
-    outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII'
-    bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII'
+    # indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
+    # outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII'
+    # bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII'
     logfile = os.path.dirname(bad_dir) + '/log_MHCII.csv'
 
     for ID in ids_list:
