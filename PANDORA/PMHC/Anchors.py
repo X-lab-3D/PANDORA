@@ -1,3 +1,7 @@
+from PANDORA.Contacts import Contacts
+import numpy as np
+
+
 ### ### Function that finds the anchors
 def get_anchors_pMHCI(pdb):
     ''' Find the peptide anchor residues of a pMHCI structure using the Contacts class

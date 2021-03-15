@@ -1,5 +1,3 @@
-
-import os
 import PANDORA
 import dill
 from PANDORA.PMHC import PMHC
@@ -22,83 +20,62 @@ class Database:
         self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', data_dir = data_dir, out_tsv='all_MHII_IDs.tsv')
 
 
-    def __clean_MHCI_files(self, data_dir):
+    def __clean_MHCI_file(self, pdb_id, data_dir):
         """ Clean all MHCI structures"""
-        return Database_functions.parse_pMHCI_pdbs(self.__IDs_list_MHCI,
+        return Database_functions.parse_pMHCI_pdb(pdb_id,
                                                    indir = data_dir + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                                                    outdir = data_dir + '/PDBs/pMHCI',
                                                    bad_dir = data_dir + '/PDBs/Bad/pMHCI')
 
-    def __clean_MHCII_files(self, data_dir):
+    def __clean_MHCII_file(self, pdb_id, data_dir):
         """ Clean all MHCII structures. Returns a list of bad PDBs"""
-        return Database_functions.parse_pMHCII_pdbs(self.__IDs_list_MHCII,
+        return Database_functions.parse_pMHCII_pdb(pdb_id,
                                                    indir = data_dir + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                                                    outdir = data_dir + '/PDBs/pMHCII',
                                                    bad_dir = data_dir + '/PDBs/Bad/pMHCII')
 
-    def construct_database(self, data_dir = PANDORA.PANDORA_data, MHCI=True, MHCII=True, clean=True, download=True):
-        """ Construct a database
+    def construct_database(self, save, data_dir = PANDORA.PANDORA_data, MHCI=True, MHCII=True, download=True):
+        ''' Construct the database. Download, clean and add all structures
 
-        :param MHCI: (bool) Calculate metadata for MHCI
-        :param MHCII: (bool) Calculate metadata for MHCII
-        :return: (dict) {id:MHC_structure}
-        """
+        Args:
+            save: (string/bool) Filename of database, can be False if you don't want to save the database
+            data_dir: (string) Path of data directory
+            MHCI: (bool) Parse data for MHCI
+            MHCII: (bool) Parse data for MHCII
+            download: (bool) Download the data? If you already downloaded the data, this can be set to False
 
+        Returns: Database object
 
-
+        '''
         # Download the data
         self.download_data(download = download, data_dir = data_dir)
 
-        # Construct the MHCI database
+        # Construct the MHCII database
         if MHCI:
-
             # Parse all MHCI files
-            if clean:
-                self.__clean_MHCI_files(data_dir = data_dir)
-
-
-
             for id in self.__IDs_list_MHCI:
                 try:
-                    file = data_dir + '/PDBs/pMHCI/' + id + '.pdb'
-                    # Check if this file really exists
-                    if os.path.isfile(file):
-                        print('Adding %s' % id)
-                        # Find the alleles
-                        al = Database_functions.get_chainid_alleles_MHCI(file)
-                        alpha = [[k for k,v in i.items()] for i in [al['A'][i] for i in [i for i in al['A'].keys()]]]
-                        a_allele = sum(alpha, [])
-
-                        # Create MHC_structure object
-                        self.MHCI_data[id] = PMHC.Template(id, allele_type=a_allele, pdb_path=file)
+                    print('Parsing %s' % id)
+                    templ = self.__clean_MHCI_file(pdb_id = id, data_dir = data_dir)
+                    if templ != None:
+                        self.MHCI_data[id] = templ
                 except:
                     pass
 
         # Construct the MHCII database
         if MHCII:
-
             # Parse all MHCII files
-            if clean:
-                self.__clean_MHCII_files(data_dir)
-
             for id in self.__IDs_list_MHCII:
                 try:
-                    file = data_dir + '/PDBs/pMHCII/' + id + '.pdb'
-                    # Check if this file really exists
-                    if os.path.isfile(file):
-                        print('Adding %s' %id)
-                        # Find the alleles
-                        al = Database_functions.get_chainid_alleles_MHCII(file)
-                        alpha = sum([al['Alpha'][i] for i in [i for i in al['Alpha'].keys()]], [])
-                        beta = sum([al['Beta'][i] for i in [i for i in al['Beta'].keys()]], [])
-                        a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
-                        b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
-
-                        # Create MHC_structure object
-                        self.MHCII_data[id] = PMHC.Template(id, allele_type=a_allele + b_allele, MHC_class= 'II', pdb_path=file)
+                    print('Parsing %s' % id)
+                    templ = self.__clean_MHCII_file(pdb_id = id, data_dir = data_dir)
+                    if templ != None:
+                        self.MHCII_data[id] = templ
                 except:
                     pass
 
+        if save:
+            self.save(save)
 
     def add_structure(self, id, allele_type, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
         ''' Add a single structure to the database. Needs id and pdb_file as input. More can be given.
@@ -147,5 +124,6 @@ class Database:
         return dill.load(open(fn, 'rb'))
 
 
-
+# db = Database()
+# db.construct_database(save = 'test_db', download=False)
 
