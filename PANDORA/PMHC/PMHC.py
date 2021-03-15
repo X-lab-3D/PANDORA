@@ -170,6 +170,12 @@ class Target(PMHC):
         self.contacts = False
         self.anchor_contacts = False
 
+        # If the user does provide sequence info, make sure both the M and N chain are provided
+        if MHC_class == 'II' and M_chain_seq != '' and N_chain_seq == '':
+            raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
+        if MHC_class == 'II' and N_chain_seq != '' and M_chain_seq == '':
+            raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
+
     def info(self):
         """ Print the basic info of this structure
 
