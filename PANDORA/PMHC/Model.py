@@ -79,7 +79,8 @@ class Model:
 
         # Calculate l-rmsd between decoy and reference with pdb2sql
         sim = StructureSimilarity('%s/decoy.pdb' % (self.output_dir.replace(' ', '\\ ')), '%s/ref.pdb' % (self.output_dir))
-        self.core_lrmsd = sim.compute_lrmsd_fast(method='svd', name=atoms)
+        self.core_lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name=atoms)
+
 
         # remove intermediate files
         os.system('rm %s/decoy.pdb %s/ref.pdb' %(self.output_dir, self.output_dir))
@@ -188,6 +189,12 @@ def homogenize_pdbs(decoy, ref, output_dir, anchors =False ):
 # m.calc_Core_LRMSD(ref_path)
 # print(m.lrmsd)
 # print(m.core_lrmsd)
+
+# 1A6A_3PDO/3PDO.BL00010001.pdb
+# /Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/outputs/1DLH_1JWM/1JWM.BL00010001.pdb
+# anchors = db.MHCII_data['3PDO'].anchors
+# decoy = PDBParser(QUIET=True).get_structure('MHC', '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/outputs/1A6A_3PDO/3PDO.BL00010001.pdb')
+# ref = PDBParser(QUIET=True).get_structure('MHC', '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/PDBs/pMHCII/3PDO.pdb')
 
 
 
