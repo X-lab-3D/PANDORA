@@ -3,7 +3,7 @@ from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 import PANDORA
 from PANDORA.Contacts import Contacts
-import PANDORA.junk.utils as utils
+from PANDORA.PMHC import Anchors
 from abc import ABC, abstractmethod
 
 class PMHC(ABC):
@@ -133,9 +133,9 @@ class Template(PMHC):
 
     def calc_anchors(self):
         if self.MHC_class == 'I':
-            self.anchors = utils.get_anchors_pMHCI(self.pdb)
+            self.anchors = Anchors.get_anchors_pMHCI(self.pdb)
         if self.MHC_class == 'II':
-            self.anchors = utils.pMHCII_anchors(self.pdb)
+            self.anchors = Anchors.pMHCII_anchors(self.pdb)
 
     def calc_anchor_contacts(self):
         if self.pdb and self.anchors:
