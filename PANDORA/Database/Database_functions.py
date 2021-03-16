@@ -5,6 +5,7 @@ from string import ascii_uppercase
 from copy import deepcopy
 from Bio.PDB import PDBParser
 from Bio.PDB import PDBIO
+from Bio.PDB import parse_pdb_header
 import gzip
 import shutil
 import PANDORA
@@ -247,6 +248,22 @@ def get_chainid_alleles_MHCII(pdbf):
 #
 # chains = MHC_chains, pdb, ['M', 'N', 'P']
 
+def get_resolution(pdbf):
+    ''' Returns the resolution in Angstrom from the given pdb
+
+    Args:
+        pdbf (str): path to the pdb file
+
+    Returns:
+        resolution (float): resolution of the model, in Angstrom
+
+    '''
+    header = parse_pdb_header(pdbf)
+    resolution = header['resolution']
+    return resolution
+
+
+
 def replace_chain_names(chains, pdb, replacement_chains=['M', 'N', 'P']):
     ''' Replace chain names by another chain name in a bio.pdb object
 
@@ -390,7 +407,7 @@ def find_peptide_chain(pdb, min=6, max=26):
 
     return pept_chain
 
-def remove_weird_chains(pdb, chains_to_keep):
+def remove_irregular_chains(pdb, chains_to_keep):
     ''' Removes all chains that you don't specify to keep
 
     Args:
@@ -554,8 +571,8 @@ def parse_pMHCI_pdbs(ids_list):
             # Unzip file (also check if the file is not empty) and save the path of this file
             pdb_file = unzip_pdb(ID, indir, outdir)
             pdb = PDBParser(QUIET=True).get_structure('MHCI', pdb_file)
-            # Remove waters and weird chains
-            pdb = remove_weird_chains(pdb, list(ascii_uppercase))
+            # Remove waters and irregular chains
+            pdb = remove_irregular_chains(pdb, list(ascii_uppercase))
 
             try:                # Find the peptide chain
                 pept_chain = find_peptide_chain(pdb)
@@ -570,7 +587,7 @@ def parse_pMHCI_pdbs(ids_list):
                 raise Exception
 
             try:                 # Reformat chains
-                pdb = remove_weird_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
+                pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
                 pdb = replace_chain_names(MHC_chains, pdb,['M', 'P'])  # Rename chains to M,P
                 pdb = renumber(pdb)  # Renumber from 1
             except:
@@ -607,8 +624,8 @@ def parse_pMHCII_pdbs(ids_list):
             # Unzip file (also check if the file is not empty) and save the path of this file
             pdb_file = unzip_pdb(ID, indir, outdir)
             pdb = PDBParser(QUIET=True).get_structure('MHCII', pdb_file)
-            # Remove waters and weird chains
-            pdb = remove_weird_chains(pdb, list(ascii_uppercase))
+            # Remove waters and irregular chains
+            pdb = remove_irregular_chains(pdb, list(ascii_uppercase))
 
             try:                # Find the peptide chain
                 pept_chain = find_peptide_chain(pdb)
@@ -623,7 +640,7 @@ def parse_pMHCII_pdbs(ids_list):
                 raise Exception
 
             try:                 # Reformat chains
-                pdb = remove_weird_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
+                pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
                 pdb = replace_chain_names(MHC_chains, pdb, ['M', 'N', 'P'])   # Rename chains to M,N,P
                 pdb = renumber(pdb)  # Renumber from 1
             except:

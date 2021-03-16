@@ -200,7 +200,7 @@ def find_chains_MHCII(ID, pdb_file):
     #                 model.detach_child(chain.id)
     #
      # Remove all chains that are not needed
-    pdb = remove_weird_chains(pdb, MHC_chains)
+    pdb = remove_irregular_chains(pdb, MHC_chains)
 
     return MHC_chains, pdb
 

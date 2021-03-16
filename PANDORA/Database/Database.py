@@ -60,8 +60,11 @@ class Database:
                         alpha = [[k for k,v in i.items()] for i in [al['A'][i] for i in [i for i in al['A'].keys()]]]
                         a_allele = sum(alpha, [])
 
+                        #Get Resolution
+                        resolution = Database_functions.get_resolution(file)
                         # Create MHC_structure object
-                        self.MHCI_data[id] = PMHC.Template(id, allele_type=a_allele, pdb_path=file)
+                        self.MHCI_data[id] = PMHC.Template(id, allele_type=a_allele, 
+                                                           pdb_path=file, resolution=resolution)
                 except:
                     pass
 
