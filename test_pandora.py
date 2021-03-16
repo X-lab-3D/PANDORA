@@ -95,7 +95,7 @@ def test_construct_database():
 
     # Construct database object
     db = Database.Database()
-    db.construct_database(download=False, clean=True, data_dir=test_data)
+    db.construct_database(save=False, download=False, data_dir=test_data)
 
     # test the creation of bad files, log files and the information inside of the database object
     pass_test = False
