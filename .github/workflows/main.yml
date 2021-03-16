@@ -48,6 +48,7 @@ jobs:
           ls -la
           cd ~
           cd ..
+          cd runner
           ls -la
 
 
