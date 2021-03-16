@@ -169,7 +169,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
     anch = target.anchors
 
     if target.MHC_class == 'I':
-        with open(output_dir.replace('\\ ',' ') + '/MyLoop.py', 'w') as myloopscript:
+        with open(output_dir+ '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
             for line in MyL_temp:
                 if 'self.residue_range' in line:
@@ -183,7 +183,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
             MyL_temp.close()
 
     if target.MHC_class == 'II':
-        with open(output_dir.replace('\\ ',' ') + '/MyLoop.py', 'w') as myloopscript:
+        with open(output_dir + '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r')
             for line in MyL_temp:
                 if 'self.residue_range' in line:
@@ -296,7 +296,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     results = []
     for i in range(len(logf)):
         try:
-            m = Model.Model(target, output_dir, model_path=output_dir + '/' + logf[i][0],
+            m = Model.Model(target, model_path=output_dir + '/' + logf[i][0], output_dir = output_dir,
                                             molpdf=logf[i][1], dope=logf[i][2])
             if benchmark:
                 m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
