@@ -47,6 +47,7 @@ jobs:
           echo test2.
           ls -la
           cd ~
+          cd ..
           ls -la
 
 
