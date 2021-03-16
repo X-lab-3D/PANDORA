@@ -2,11 +2,11 @@ from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
-# db = Database.Database()
+db = Database.Database().load('test_db')
 # db.construct_database()
 
-import dill
-db = dill.load(open("Pandora_MHCI_and_MHCII_data", 'rb'))
+# import dill
+# db = dill.load(open("test_db", 'rb'))
 
 
 ##------------------------------ MHCI -----------------------------------
@@ -34,11 +34,11 @@ for k in db.MHCI_data:
 
 ##------------------------------ MHCII -----------------------------------
 
-nr_models = 10
-filename = 'benchmark_II_seq_based.csv'
+nr_models = 20
+filename = '160321_benchmark_II.csv'
 
 with open(filename, 'w') as f:
-    f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,%s,%s\n' %(','.join(['L-RMSD_' + str(i+1) for i in range(nr_models)]), ','.join(['core_L-RMSD_' + str(i+1) for i in range(nr_models)])))
+    f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,%s,%s,%s\n' %(','.join(['molpdf_' + str(i+1) for i in range(nr_models)]), ','.join(['L-RMSD_' + str(i+1) for i in range(nr_models)]), ','.join(['core_L-RMSD_' + str(i+1) for i in range(nr_models)])))
 
 for k in db.MHCII_data:
     # pass
@@ -47,14 +47,12 @@ for k in db.MHCII_data:
         mod = Pandora.Pandora(target, db)
         mod.model(n_models=nr_models, stdev=0.2, benchmark=True)
 
-        # lmrsd = round(sum([i.lrmsd for i in mod.results])/len(mod.results), 4)
-        # core_lmrsd = round(sum([i.core_lrmsd for i in mod.results])/len(mod.results), 4)
-
+        moldpdf = ','.join([str(round(float(i.moldpf),4)) for i in mod.results])
         lmrsd = ','.join([str(round(i.lrmsd,4)) for i in mod.results])
         core_lmrsd = ','.join([str(round(i.core_lrmsd, 4)) for i in mod.results])
 
         with open(filename, 'a') as f:
-            f.write('%s,%s,%s,%s,%s,%s,%s,%s\n' %(mod.target.id, mod.target.peptide, ';'.join(mod.target.allele_type), mod.template.id, mod.template.peptide, ';'.join(mod.template.allele_type), lmrsd, core_lmrsd))
+            f.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(mod.target.id, mod.target.peptide, ';'.join(mod.target.allele_type), mod.template.id, mod.template.peptide, ';'.join(mod.template.allele_type),moldpdf, lmrsd, core_lmrsd))
 
     except:
         print('Something went wrong')

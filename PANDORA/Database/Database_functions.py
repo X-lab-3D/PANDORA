@@ -11,6 +11,7 @@ import PANDORA
 from PANDORA.Contacts import Contacts
 from Bio import SeqIO
 from PANDORA.PMHC import PMHC
+from Bio.SeqUtils import seq1
 
 def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_files = True, del_kabat_files = True):
     '''
@@ -587,18 +588,19 @@ def parse_pMHCI_pdb(pdb_id,
             log(pdb_id, 'Could not locate Alpha chain', logfile)
             raise Exception
 
-        try:  # get the chain sequences from the pdb file
-            seqs = seqs_from_pdb(pdb_file, MHC_chains)
-        except:
-            log(pdb_id, 'Could not fetch chain sequences from pdb file', logfile)
-            raise Exception
-
         try:                 # Reformat chains
             pdb = remove_weird_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
             pdb = replace_chain_names(MHC_chains, pdb,['M', 'P'])  # Rename chains to M,P
             pdb = renumber(pdb)  # Renumber from 1
         except:
             log(pdb_id, 'Could not reformat structure', logfile)
+            raise Exception
+
+        try:  # get the chain sequences from the pdb file
+            # seqs = seqs_from_pdb(pdb_file, MHC_chains)
+            seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
+        except:
+            log(pdb_id, 'Could not fetch chain sequences from pdb file', logfile)
             raise Exception
 
         if not check_pMHC(pdb):
@@ -655,12 +657,6 @@ def parse_pMHCII_pdb(pdb_id,
             log(pdb_id, 'Could not locate Alpha chain', logfile)
             raise Exception
 
-        try:  # get the chain sequences from the pdb file
-            seqs = seqs_from_pdb(pdb_file, MHC_chains)
-        except:
-            log(pdb_id, 'Could not fetch chain sequences from pdb file', logfile)
-            raise Exception
-
         try:                 # Reformat chains
             pdb = remove_weird_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
             pdb = replace_chain_names(MHC_chains, pdb, ['M', 'N', 'P'])   # Rename chains to M,N,P
@@ -668,6 +664,14 @@ def parse_pMHCII_pdb(pdb_id,
         except:
             log(pdb_id, 'Could not reformat structure', logfile)
             raise Exception
+
+        try:  # get the chain sequences from the pdb file
+            # seqs = seqs_from_pdb(pdb_file, MHC_chains)
+            seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
+        except:
+            log(pdb_id, 'Could not fetch chain sequences from pdb file', logfile)
+            raise Exception
+
 
         if not check_pMHC(pdb): #test if the pdb is parsed correctly
             log(pdb_id, 'Structure did not pass the test.', logfile)
