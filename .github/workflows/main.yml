@@ -46,6 +46,9 @@ jobs:
           echo test,
           echo test2.
           ls -la
+          cd ~
+          ls -la
+
 
       - name: Test with pytest
         run: pytest
