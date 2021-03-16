@@ -87,7 +87,7 @@ def test_align():
 
     assert pass_test
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_construct_database():
     test_data = PANDORA.PANDORA_path + '/../test/test_data/'
     bad1, bad2 = test_data + 'PDBs/Bad/pMHCI/6C6A.pdb', test_data + 'PDBs/Bad/pMHCII/1K8I.pdb'
@@ -119,7 +119,7 @@ def test_load_db():
 
     assert pass_test
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_pandora_MHCI_modelling():
     # Load database
     db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
@@ -144,7 +144,7 @@ def test_pandora_MHCI_modelling():
 
     assert pass_test
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_pandora_MHCII_modelling():
     # Load database
     db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
