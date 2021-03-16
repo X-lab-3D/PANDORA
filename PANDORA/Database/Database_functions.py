@@ -5,6 +5,7 @@ from string import ascii_uppercase
 from copy import deepcopy
 from Bio.PDB import PDBParser
 from Bio.PDB import PDBIO
+from Bio.PDB import parse_pdb_header
 import gzip
 import shutil
 import PANDORA
@@ -249,6 +250,22 @@ def get_chainid_alleles_MHCII(pdbf):
 #
 # chains = MHC_chains, pdb, ['M', 'N', 'P']
 
+def get_resolution(pdbf):
+    ''' Returns the resolution in Angstrom from the given pdb
+
+    Args:
+        pdbf (str): path to the pdb file
+
+    Returns:
+        resolution (float): resolution of the model, in Angstrom
+
+    '''
+    header = parse_pdb_header(pdbf)
+    resolution = header['resolution']
+    return resolution
+
+
+
 def replace_chain_names(chains, pdb, replacement_chains=['M', 'N', 'P']):
     ''' Replace chain names by another chain name in a bio.pdb object
 
@@ -392,7 +409,7 @@ def find_peptide_chain(pdb, min=6, max=26):
 
     return pept_chain
 
-def remove_weird_chains(pdb, chains_to_keep):
+def remove_irregular_chains(pdb, chains_to_keep):
     ''' Removes all chains that you don't specify to keep
 
     Args:
@@ -563,7 +580,6 @@ def parse_pMHCI_pdb(pdb_id,
     '''
     logfile = os.path.dirname(bad_dir) + '/log_MHCI.csv'
 
-
     try:
         # Check if file exists
         if not os.path.isfile('%s/IMGT-%s.pdb.gz' % (indir, pdb_id)):
@@ -589,7 +605,7 @@ def parse_pMHCI_pdb(pdb_id,
             raise Exception
 
         try:                 # Reformat chains
-            pdb = remove_weird_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
+            pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
             pdb = replace_chain_names(MHC_chains, pdb,['M', 'P'])  # Rename chains to M,P
             pdb = renumber(pdb)  # Renumber from 1
         except:
@@ -610,11 +626,16 @@ def parse_pMHCI_pdb(pdb_id,
         # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
         write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
 
+        # Get allele per each chain
         al = get_chainid_alleles_MHCI(pdb_file)
         alpha = [[k for k,v in i.items()] for i in [al['A'][i] for i in [i for i in al['A'].keys()]]]
         a_allele = sum(alpha, [])
+        
+        # Get structure resolution
+        resolution = get_resolution(pdb_file)
+        
         # Create MHC_structure object
-        templ =  PMHC.Template(pdb_file, allele_type=a_allele, M_chain_seq=seqs[0], peptide=seqs[-1],  pdb_path=pdb_file)
+        templ =  PMHC.Template(pdb_file, allele_type=a_allele, M_chain_seq=seqs[0], peptide=seqs[-1],  pdb_path=pdb_file, resolution=resolution)
 
         return templ
 
@@ -680,18 +701,21 @@ def parse_pMHCII_pdb(pdb_id,
         # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
         write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
 
+        # Get allele per each chain
         al = get_chainid_alleles_MHCII(pdb_file)
         alpha = sum([al['Alpha'][i] for i in [i for i in al['Alpha'].keys()]], [])
         beta = sum([al['Beta'][i] for i in [i for i in al['Beta'].keys()]], [])
         a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
         b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
+        
+        # Get structure resolution
+        resolution = get_resolution(pdb_file)
 
         # Create MHC_structure object
         templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele, M_chain_seq=seqs[0], N_chain_seq=seqs[1],
-                              peptide=seqs[2], MHC_class='II', pdb_path=pdb_file)
+                              peptide=seqs[2], MHC_class='II', pdb_path=pdb_file, resolution=resolution)
 
         return templ
 
     except:  # If something goes wrong, append the ID to the bad_ids list
         os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
-

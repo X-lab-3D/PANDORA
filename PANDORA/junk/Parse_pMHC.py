@@ -313,7 +313,7 @@ def find_peptide_chain(pdb, min=6, max=26):
 
     return pept_chain
 
-def remove_weird_chains(pdb, chains_to_keep):
+def remove_irregular_chains(pdb, chains_to_keep):
     ''' Removes all chains that you don't specify to keep
 
     Args:
@@ -477,7 +477,7 @@ def parse_pMHCI_pdbs(ids_list):
             pdb_file = unzip_pdb(ID, indir, outdir)
             pdb = PDBParser(QUIET=True).get_structure('MHCI', pdb_file)
             # Remove waters and weird chains
-            pdb = remove_weird_chains(pdb, list(ascii_uppercase))
+            pdb = remove_irregular_chains(pdb, list(ascii_uppercase))
 
             try:                # Find the peptide chain
                 pept_chain = find_peptide_chain(pdb)
@@ -492,7 +492,7 @@ def parse_pMHCI_pdbs(ids_list):
                 raise Exception
 
             try:                 # Reformat chains
-                pdb = remove_weird_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
+                pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
                 pdb = replace_chain_names(MHC_chains, pdb,['M', 'P'])  # Rename chains to M,P
                 pdb = renumber(pdb)  # Renumber from 1
             except:
@@ -530,7 +530,7 @@ def parse_pMHCII_pdbs(ids_list):
             pdb_file = unzip_pdb(ID, indir, outdir)
             pdb = PDBParser(QUIET=True).get_structure('MHCII', pdb_file)
             # Remove waters and weird chains
-            pdb = remove_weird_chains(pdb, list(ascii_uppercase))
+            pdb = remove_irregular_chains(pdb, list(ascii_uppercase))
 
             try:                # Find the peptide chain
                 pept_chain = find_peptide_chain(pdb)
@@ -545,7 +545,7 @@ def parse_pMHCII_pdbs(ids_list):
                 raise Exception
 
             try:                 # Reformat chains
-                pdb = remove_weird_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
+                pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
                 pdb = replace_chain_names(MHC_chains, pdb, ['M', 'N', 'P'])   # Rename chains to M,N,P
                 pdb = renumber(pdb)  # Renumber from 1
             except:

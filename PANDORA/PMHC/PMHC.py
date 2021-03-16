@@ -3,6 +3,7 @@ from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 import PANDORA
 from PANDORA.Contacts import Contacts
+from PANDORA.Database import Database_functions
 from PANDORA.PMHC import Anchors
 from abc import ABC, abstractmethod
 
@@ -44,7 +45,7 @@ class PMHC(ABC):
 
 class Template(PMHC):
 
-    def __init__(self, id, allele_type, peptide = '', MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], pdb_path = False, pdb = False):
+    def __init__(self, id, allele_type, peptide = '', MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], pdb_path = False, pdb = False, resolution=None):
         ''' Template structure class. This class holds all information of a template structure that is used for
             homology modelling. This class needs a id, allele and the path to a pdb file to work. (sequence info of
             the chains and peptide can be fetched from the pdb)
@@ -63,6 +64,7 @@ class Template(PMHC):
         self.pdb_path = pdb_path
         self.pdb = pdb
         self.contacts = False
+        self.resolution = resolution
 
         if not pdb_path and not pdb:
             raise Exception('Provide a PDB structure to the Template object first')
@@ -79,6 +81,7 @@ class Template(PMHC):
         if self.pdb_path and not self.pdb: #if there is a path to a pdb provided and there is not already a self.pdb...
             parser = PDBParser(QUIET=True)  # Create a parser object, used to read pdb files
             self.pdb = parser.get_structure('MHC', self.pdb_path) #Create Bio.PDB object
+            self.resolution = Database_functions.get_resolution(self.pdb_path) #Get resolution from pdb file
 
         # If the chains or peptide are not given by the user, fetch them from the pdb
         # Get the chain sequences
