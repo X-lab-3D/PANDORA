@@ -35,7 +35,7 @@ jobs:
         with:
           python-version: 3.8
       - name: Set up directories
-        run: install.py
+        run: python install.py
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
