@@ -3,7 +3,7 @@ from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 import PANDORA
 from PANDORA.Contacts import Contacts
-import PANDORA.junk.utils as utils
+from PANDORA.PMHC import Anchors
 from abc import ABC, abstractmethod
 
 class PMHC(ABC):
@@ -63,6 +63,9 @@ class Template(PMHC):
         self.pdb_path = pdb_path
         self.pdb = pdb
         self.contacts = False
+
+        if not pdb_path and not pdb:
+            raise Exception('Provide a PDB structure to the Template object first')
 
         if not pdb_path or not pdb: # If the path to a pdb file or a Bio.PDB object is given, parse the pdb
             self.parse_pdb()
@@ -130,9 +133,9 @@ class Template(PMHC):
 
     def calc_anchors(self):
         if self.MHC_class == 'I':
-            self.anchors = utils.get_anchors_pMHCI(self.pdb)
+            self.anchors = Anchors.get_anchors_pMHCI(self.pdb)
         if self.MHC_class == 'II':
-            self.anchors = utils.pMHCII_anchors(self.pdb)
+            self.anchors = Anchors.pMHCII_anchors(self.pdb)
 
     def calc_anchor_contacts(self):
         if self.pdb and self.anchors:
@@ -166,6 +169,12 @@ class Target(PMHC):
         self.initial_model = False
         self.contacts = False
         self.anchor_contacts = False
+
+        # If the user does provide sequence info, make sure both the M and N chain are provided
+        if MHC_class == 'II' and M_chain_seq != '' and N_chain_seq == '':
+            raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
+        if MHC_class == 'II' and N_chain_seq != '' and M_chain_seq == '':
+            raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
 
     def info(self):
         """ Print the basic info of this structure

@@ -18,12 +18,7 @@ class Align:
             self.__template = template
         else:
             self.__template = [template]
-
-        # Create an output file if there isn't one yet: template.id_target.id (chains together the name of the multiple
-        # templates if they are given)
-        self.__output_dir = output_dir + '/%s_%s' %('_'.join([i.id for i in self.__template]), self.__target.id)
-        if not os.path.exists(self.__output_dir):
-            os.makedirs(self.__output_dir)
+        self.__output_dir = output_dir # + '/%s_%s' %('_'.join([i.id for i in self.__template]), self.__target.id)
 
         # Find out if the target is MHC class I or II
         self.__MHC_class = target.MHC_class
@@ -216,8 +211,6 @@ class Align:
                     # self.__template[self.__tem_id.index(id)].pdb_path.replace(' ', '\\ '), len(seqs[id + ' P']))
             else:
                 comment = 'sequence:::::::::'
-
-
 
             # The sequences
             if self.__MHC_class == 'II':
