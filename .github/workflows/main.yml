@@ -48,6 +48,8 @@ jobs:
           pip show modeller
           cd /opt/hostedtoolcache/Python/3.8.8/x64/lib/python3.8/site-packages
           ls -la
+          cd /opt/hostedtoolcache/Python/3.8.8/x64/lib/python3.8/site-packages/modeller
+          ls -la
 
 
       - name: Test with pytest
