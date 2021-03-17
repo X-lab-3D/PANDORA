@@ -49,15 +49,17 @@ class Model:
             ref = template_pdb
 
         # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
-        homogenize_pdbs(self.pdb, ref, self.output_dir)
+        homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id)
 
+        os.chdir(self.output_dir)
         # Calculate l-rmsd between decoy and reference with pdb2sql
-        sim = StructureSimilarity('%s/decoy.pdb' % (self.output_dir.replace(' ', '\\ ')), '%s/ref.pdb' % (self.output_dir))
+        sim = StructureSimilarity('%s/%s_decoy.pdb' % (self.output_dir, self.target.id), '%s/%s_ref.pdb' % (self.output_dir, self.target.id))
         # self.lrmsd = sim.compute_lrmsd_fast(method='svd', name=atoms)
         self.lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name = atoms)
 
         # remove intermediate files
-        os.system('rm %s/decoy.pdb %s/ref.pdb' %(self.output_dir, self.output_dir))
+        os.system('rm %s/%s_decoy.pdb %s/%s_ref.pdb' %(self.output_dir, self.target.id, self.output_dir, self.target.id))
+        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
 
     def calc_Core_LRMSD(self, reference_pdb, atoms = ['C', 'CA', 'N', 'O']):
         ''' Calculate the L-RMSD between the decoy and reference structure (ground truth)
@@ -75,16 +77,17 @@ class Model:
             ref = template_pdb
 
         # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
-        homogenize_pdbs(self.pdb, ref, self.output_dir, anchors = self.target.anchors)
+        homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id, anchors = self.target.anchors)
 
+        os.chdir(self.output_dir)
         # Calculate l-rmsd between decoy and reference with pdb2sql
-        sim = StructureSimilarity('%s/decoy.pdb' % (self.output_dir.replace(' ', '\\ ')), '%s/ref.pdb' % (self.output_dir))
+        sim = StructureSimilarity('%s/%s_decoy.pdb' % (self.output_dir, self.target.id), '%s/%s_ref.pdb' % (self.output_dir, self.target.id))
         self.core_lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name=atoms)
 
 
         # remove intermediate files
-        os.system('rm %s/decoy.pdb %s/ref.pdb' %(self.output_dir, self.output_dir))
-
+        os.system('rm %s/%s_decoy.pdb %s/%s_ref.pdb' %(self.output_dir, self.target.id, self.output_dir, self.target.id))
+        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
 
 def merge_chains(pdb):
     ''' Merges two chains of MHCII to one chain. pdb2sql can only calculate L-rmsd with one chain.
@@ -131,7 +134,7 @@ def renumber(pdb):
     return pdb
 
 
-def homogenize_pdbs(decoy, ref, output_dir, anchors =False ):
+def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False):
     ''' Make sure that the decoy and reference structure have the same structure sequences.
 
     Args:
@@ -164,14 +167,13 @@ def homogenize_pdbs(decoy, ref, output_dir, anchors =False ):
     # Write pdbs
     io = PDBIO()
     io.set_structure(decoy)
-    io.save('%s/decoy.pdb' % (output_dir))
+    io.save('%s/%s_decoy.pdb' % (output_dir, target_id))
 
     io = PDBIO()
     io.set_structure(ref)
-    io.save('%s/ref.pdb' % (output_dir))
+    io.save('%s/%s_ref.pdb' % (output_dir, target_id))
 
     return decoy, ref
-
 
 #
 # decoy_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/outputs/1DLH_1FYT/1FYT.BL00010001.pdb'
