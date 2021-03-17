@@ -126,5 +126,5 @@ class Database:
 # import time
 # t0 = time.time()
 # db = Database()
-# db.construct_database(save = 'test_db', download=False)
+# db.construct_database(save = 'MHCII_test_db', download=False, MHCI=False)
 # print(time.time()-t0)

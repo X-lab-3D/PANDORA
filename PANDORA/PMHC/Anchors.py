@@ -64,12 +64,12 @@ def pMHCII_anchors(pdb):
     '''
 
     # Rafaella's residues
-    pocket_M = {'anch1':[28, 33, 31], 'anch3':[10]}
-    pocket_N = {'anch2':[10, 11, 21, 22, 23], 'anch3':[6,7], 'anch4':[ 28, 27, 31, 33]}
+    # pocket_M = {'anch1':[28, 33, 31], 'anch3':[10]}
+    # pocket_N = {'anch2':[10, 11, 21, 22, 23], 'anch3':[6,7], 'anch4':[ 28, 27, 31, 33]}
 
     # Derek's slightly modified version
-    # pocket_M = {'anch1':range(28,36), 'anch3':[10]}
-    # pocket_N = {'anch2':[10, 11, 21, 22, 23], 'anch3':[6,7], 'anch4':range(33,37)}
+    pocket_M = {'anch1':range(28,36), 'anch3':[10]}
+    pocket_N = {'anch2':[10, 11, 21, 22, 23], 'anch3':[6,7], 'anch4':range(33,37)}
 
 
     # Calculate the contacts with a cutoff of 18. This cutoff because at lower cutoffs, the orientations of side chains
