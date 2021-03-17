@@ -47,7 +47,12 @@ jobs:
           echo test,
           pip show modeller
           find . -name config.py
-
+          cd /opt
+          ls -la
+          cd /hostedtoolcache
+          ls -la
+          cd /Python
+          ls -la
 
       - name: Test with pytest
         run: pytest
