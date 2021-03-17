@@ -10,9 +10,11 @@ db = Database.Database().load('test_db')
 
 
 ##------------------------------ MHCI -----------------------------------
+nr_models = 20
+filenameI = '160321_benchmark_I.csv'
 
-with open('benchmark_I.csv', 'w') as f:
-    f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,L-RMSD,core L-MRSD\n')
+with open(filenameI, 'w') as f:
+    f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,%s,%s,%s\n' %(','.join(['molpdf_' + str(i+1) for i in range(nr_models)]), ','.join(['L-RMSD_' + str(i+1) for i in range(nr_models)]), ','.join(['core_L-RMSD_' + str(i+1) for i in range(nr_models)])))
 
 for k in db.MHCI_data:
     # pass
@@ -21,12 +23,12 @@ for k in db.MHCI_data:
         mod = Pandora.Pandora(target, db)
         mod.model(benchmark=True)
         # mod.results
-
+        moldpdf = ','.join([str(round(float(i.moldpf), 4)) for i in mod.results])
         lmrsd = round(sum([i.lrmsd for i in mod.results])/len(mod.results), 4)
         core_lmrsd = round(sum([i.core_lrmsd for i in mod.results])/len(mod.results), 4)
 
-        with open('benchmark_I.csv', 'a') as f:
-            f.write('%s,%s,%s,%s,%s,%s,%s,%s,\n' %(mod.target.PDB_id, mod.target.peptide, ';'.join(mod.target.allele), mod.template.PDB_id, mod.template.peptide, ';'.join(mod.template.allele), lmrsd, core_lmrsd))
+        with open(filenameI, 'a') as f:
+            f.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(mod.target.id, mod.target.peptide, ';'.join(mod.target.allele_type), mod.template.id, mod.template.peptide, ';'.join(mod.template.allele_type),moldpdf, lmrsd, core_lmrsd))
 
     except:
         print('Something went wrong')

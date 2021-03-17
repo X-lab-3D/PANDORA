@@ -44,12 +44,7 @@ jobs:
       - name: Run a multi-line script
         run: |
           echo test,
-          echo test2.
-          ls -la
-          cd ~
-          cd ..
-          cd runner
-          ls -la
+          pip show modeller
 
 
       - name: Test with pytest
