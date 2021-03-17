@@ -46,20 +46,14 @@ jobs:
         run: |
           echo test,
           pip show modeller
-          find . -name config.py
-          cd /opt
+
+          cd /opt/hostedtoolcache/Python/3.8.8/x64
           ls -la
           echo 1
-          cd /opt/hostedtoolcache/
+          cd /opt/hostedtoolcache/Python/3.8.8/x64/bin
           ls -la
           echo 2
-          cd /opt/hostedtoolcache/Python
-          ls -la
-          echo 3
-          cd /opt/hostedtoolcache/Python/3.8.8
-          ls -la
-          echo 4
-          cd /opt/hostedtoolcache/Python/3.8.8/x64
+          cd /opt/hostedtoolcache/Python/3.8.8/x64/lib
           ls -la
 
       - name: Test with pytest
