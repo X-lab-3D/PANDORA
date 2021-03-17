@@ -49,9 +49,17 @@ jobs:
           find . -name config.py
           cd /opt
           ls -la
-          cd /hostedtoolcache
+          echo 1
+          cd /opt/hostedtoolcache/
           ls -la
-          cd /Python
+          echo 2
+          cd /opt/hostedtoolcache/Python
+          ls -la
+          echo 3
+          cd /opt/hostedtoolcache/Python/3.8.8
+          ls -la
+          echo 4
+          cd /opt/hostedtoolcache/Python/3.8.8/x64
           ls -la
 
       - name: Test with pytest
