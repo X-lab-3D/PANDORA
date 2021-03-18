@@ -10,14 +10,16 @@ from abc import ABC, abstractmethod
 class PMHC(ABC):
 
     def __init__(self, id, allele_type, peptide = '', MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = []):
-        ''' pMHC class. Acts as a parent class to Template and Target.
+        ''' pMHC class. Acts as a parent class to Template and Target
 
-        :param id: (string) PDB identifier
-        :param allele: (list) list of MHC alleles (or allele)
-        :param peptide: (string) peptide sequence
-        :param MHC_class: (string) either 'I' or 'II' denoting MHC class I and MHC class II respectively
-        :param chain_seq: (list) list of chain sequence(s) for the M and N (Alpha and Beta) chain respectively
-        :param anchors: (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
+        Args:
+            id: (string) PDB identifier
+            allele_type: (list) list of MHC alleles (or allele)
+            peptide: (string) peptide sequence
+            MHC_class: (string) either 'I' or 'II' denoting MHC class I and MHC class II respectively
+            M_chain_seq: (string) M chain sequence for the Alpha chain
+            N_chain_seq: (string) N chain sequence for the Beta chain
+            anchors:  (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
                         during the modelling. MHC class I typically has 2 anchors, while MHC class II typically has 4.
         '''
         super().__init__()
@@ -50,15 +52,18 @@ class Template(PMHC):
             homology modelling. This class needs a id, allele and the path to a pdb file to work. (sequence info of
             the chains and peptide can be fetched from the pdb)
 
-        :param id: (string) PDB identifier
-        :param allele: (list) list of MHC alleles (or allele)
-        :param peptide: (string) peptide sequence
-        :param MHC_class: (string) either 'I' or 'II' denoting MHC class I and MHC class II respectively
-        :param chain_seq: (list) list of chain sequence(s) for the M and N (Alpha and Beta) chain respectively
-        :param anchors: (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
+        Args:
+            id: (string) PDB identifier
+            allele_type: (list) list of MHC alleles (or allele)
+            peptide: (string) peptide sequence
+            MHC_class:  (string) either 'I' or 'II' denoting MHC class I and MHC class II respectively
+            M_chain_seq: (string) M chain sequence for the Alpha chain
+            N_chain_seq: (string) N chain sequence for the Beta chain
+            anchors: (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
                         during the modelling. MHC class I typically has 2 anchors, while MHC class II typically has 4.
-        :param pdb_path: (string) path to pdb file
-        :param pdb: (Bio.PDB) Biopython PBD object
+            pdb_path: (string) path to pdb file
+            pdb: (Bio.PDB) Biopython PBD object
+            resolution: (float) Structure resolution in Angstrom
         '''
         super().__init__(id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors)
         self.pdb_path = pdb_path
@@ -154,19 +159,18 @@ class Target(PMHC):
     def __init__(self, id, peptide, allele_type, MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], templates = False):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
-        :param id: (string) PDB identifier
-        :param allele: (list) list of MHC alleles (or allele)
-        :param peptide: (string) peptide sequence
-        :param MHC_class: (string) either 'I' or 'II' denoting MHC class I and MHC class II respectively
-        :param chain_seq: (list) list of chain sequence(s) for the M and N (Alpha and Beta) chain respectively
-        :param anchors: (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
+        Args:
+            id: (string) PDB identifier
+            peptide: (string) peptide sequence
+            allele_type: (list) list of MHC alleles (or allele)
+            MHC_class: (string) either 'I' or 'II' denoting MHC class I and MHC class II respectively
+            M_chain_seq: (string) M chain sequence for the Alpha chain
+            N_chain_seq: (string) N chain sequence for the Beta chain
+            anchors: (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
                         during the modelling. MHC class I typically has 2 anchors, while MHC class II typically has 4.
-        :param use_template: (string) or (Bio.PDB) The user can specify that PANDORA uses a certain structure as
-                        template. This can be provided as the path to a pdb file or a Bio.PDB object. The pdb must
-                        contain of a Alpha (and Beta for MHC Type II) chain and peptide, without extra chains like TCR
-                        or small molecules.
-
+            templates: Template object. The user can specify that PANDORA uses a certain structure as template.
         '''
+
         super().__init__(id, peptide, allele_type, MHC_class, M_chain_seq, N_chain_seq, anchors)
         self.templates = templates
         self.initial_model = False

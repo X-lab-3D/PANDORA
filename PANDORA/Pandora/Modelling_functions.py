@@ -10,11 +10,15 @@ from Bio import Align
 
 
 def find_template(target, database, seq_based_templ_selection = False):
-    ''' Selects the structure that is best suited as template for homology modelling of the target
+    ''' Selects the template structure that is best suited as template for homology modelling of the target
 
-    :param target: (Target) object
-    :param database: (Database) object
-    :return: (Template) Template object of the best structure
+    Args:
+        target: Target object
+        database: Database object
+        seq_based_templ_selection: (bool) Use template selection based on template sequences instead of allele.
+
+    Returns: Template object
+
     '''
 
     # Sequence based template search if the sequences of the target are provided
@@ -156,15 +160,17 @@ def find_template(target, database, seq_based_templ_selection = False):
 
 def write_ini_script(target, template, alignment_file, output_dir):
     ''' Writes the MyLoop.py and cmd_modeller_ini.py files. This function takes two template python scripts and fills
-    in the required information: Anchor positions for the MyLoop file and structure name + alignment file for the
-    cmd_modeller_ini file.
+        in the required information: Anchor positions for the MyLoop file and structure name + alignment file for the
+        cmd_modeller_ini file.
 
-    :param target:
-    :param template:
-    :param alignment_file:
-    :param output_dir:
-    :return:
+    Args:
+        target: Target object
+        template: Template object
+        alignment_file: (string) path to alignment file
+        output_dir: (string) path to output directory
+
     '''
+
 
     anch = target.anchors
 
@@ -212,15 +218,19 @@ def write_ini_script(target, template, alignment_file, output_dir):
 
 
 
-def write_modeller_script(target, template, alignment_file, output_dir, n_models=10, stdev=0.1):
+def write_modeller_script(target, template, alignment_file, output_dir, n_models=20, stdev=0.1):
     ''' Write script that refines the loops of the peptide
 
-    :param target:
-    :param template:
-    :param alignment_file:
-    :param output_dir:
-    :return:  writes two files; Myloop.py and cmd_modeller.py that contain the info to run modeller
+    Args:
+        target: Target object
+        template: Template object
+        alignment_file: (string) path to alignment file
+        output_dir: (string) path to output directory
+        n_models:  (int) number of models modeller generates per run
+        stdev: (float) standard deviation of modelling restraints. Higher = more flexible restraints.
+
     '''
+
 
 
     anch = target.anchors
@@ -273,9 +283,17 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_models
 def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmark = False, pickle_out = True):
     ''' Perform the homology modelling.
 
-    :param python_script: (string) path to script that performs the modeller modelling. cmd_modeller.py
-    :return: list of Model objects
+    Args:
+        output_dir: (string) path to output directory
+        target: Target object
+        python_script:  (string) path to script that performs the modeller modelling. cmd_modeller.py
+        benchmark: (bool) Perform L-RMSD calculations? only works if the target id is an existing pdb id
+        pickle_out: (bool) Save a .pkl with the results
+
+    Returns: (list) of Model objects
+
     '''
+
     # Change working directory
     os.chdir(output_dir)
     # run Modeller to perform homology modelling

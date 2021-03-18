@@ -7,7 +7,7 @@ import PANDORA
 class Model:
 
     def __init__(self, target, model_path='', output_dir = PANDORA.PANDORA_data, pdb=False, molpdf=0, dope=0):
-        '''
+        ''' Initiate model object
 
         Args:
             target: Target object

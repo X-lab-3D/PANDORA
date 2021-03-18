@@ -1,7 +1,5 @@
 
 import PANDORA
-from PANDORA.PMHC import PMHC
-from PANDORA.Database import Database
 from PANDORA.Pandora import Align
 from PANDORA.Pandora import Modelling_functions
 import time
@@ -23,7 +21,14 @@ class Pandora:
                             'modelling. Alternatively, you can specify a user defined Template object.')
 
     def find_template(self, seq_based_templ_selection = False, verbose = True):
-        ''' Find the best template structure given a Target object '''
+        ''' Find the best template structure given a Target object
+
+        Args:
+            seq_based_templ_selection: (bool) Use template selection based on template sequences instead of allele.
+            verbose: (bool) Print information
+
+        '''
+
         if self.template == None:
             if verbose and self.target.M_chain_seq != '' and seq_based_templ_selection:
                 print('\tUsing sequence based template selection')
@@ -53,21 +58,35 @@ class Pandora:
         os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
 
     def align(self, verbose = True):
+        ''' Create the alignment file for modeller
+
+        Args:
+            verbose:  (bool) Print information
+
+        Returns: (dict) dict of alignment of the chains with the chains as keys
+
+        '''
         self.alignment = Align.Align(self.target, self.template, output_dir=self.output_dir)
         if verbose:
             print('\tSuccessfully created alignment file')
 
     def write_ini_script(self):
+        ''' Write the scipt that modeller uses for creating the initial model'''
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
         Modelling_functions.write_ini_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
 
     def create_initial_model(self, python_script = 'cmd_modeller_ini.py', verbose = True):
-        ''' Run modeller given a python script (cmd_modeller_ini.py or cmd_modeller.py). Modeller can only output files
-        in its work directory (why though?), so the current work directory is changed to the output dir and later
-        changed back the the old working dir.
+        ''' Run modeller to create the initial model. Modeller can only output files in its work directory
+            (why though?), so the current work directory is changed to the output dir and later changed back the the
+            old working dir.
 
-        :param python_script: (string) path to script that performs the modeller modelling. cmd_modeller_ini.py
-        :return:
+
+        Args:
+            python_script:  (string) path to script that performs the modeller modelling. cmd_modeller_ini.py
+            verbose:  (bool) Print information
+
+        Returns: (BIO.PDB object) self.target.initial_model
+
         '''
         # Change working directory
         os.chdir(self.output_dir)
@@ -83,9 +102,16 @@ class Pandora:
     def run_modeller(self, python_script='cmd_modeller.py', benchmark=False, pickle_out=True, verbose = True):
         ''' Perform the homology modelling.
 
-        :param python_script: (string) path to script that performs the modeller modelling. cmd_modeller.py
-        :return:
+        Args:
+            python_script: (string) path to script that performs the modeller modelling. cmd_modeller.py
+            benchmark: (bool) Perform L-RMSD calculations? only works if the target id is an existing pdb id
+            pickle_out: (bool) Save a .pkl with the results
+            verbose:  (bool) Print information
+
+        Returns: (list) list of Model objects
+
         '''
+
         if verbose:
             print('\tPerforming homology modelling of %s on %s...' %(self.target.id, self.template.id))
         t0 = time.time()
@@ -95,7 +121,13 @@ class Pandora:
             print('\n\tModelling was successfull and took %s seconds' %(round(time.time() - t0, 2)))
 
     def anchor_contacts(self, verbose=True):
-        """ Calculate anchor contacts"""
+        ''' Calculate anchor contacts and writes a contacts.list file that modeller uses for restraints.
+
+        Args:
+            verbose: (bool) Print information
+
+        '''
+
         if verbose:
             print('\tCalculating peptide anchor residue constraints...')
         self.target.calc_anchor_contacts()
@@ -104,10 +136,29 @@ class Pandora:
                 for i in self.target.anchor_contacts:
                     f.write('\t'.join('%s' % x for x in i) + '\n')
 
-    def write_modeller_script(self, n_models = 10, stdev = 0.1):
+    def write_modeller_script(self, n_models = 20, stdev = 0.1):
+        ''' Write the script that modeller uses for the final homology modelling.
+
+        Args:
+            n_models: (int) number of models that Pandora generates
+            stdev: (float) standard deviation of modelling restraints. Higher = more flexible restraints.
+
+        '''
         Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir, n_models=n_models, stdev=stdev)
 
-    def model(self, n_models=10, stdev=0.1, seq_based_templ_selection = False, benchmark=False, verbose=True):
+    def model(self, n_models=20, stdev=0.1, seq_based_templ_selection = False, benchmark=False, verbose=True):
+        ''' Wrapper function that combines all modelling steps.
+
+        Args:
+            n_models: (int) number of models modeller generates per run
+            stdev: (float) standard deviation of modelling restraints. Higher = more flexible restraints.
+            seq_based_templ_selection: (bool) Use template selection based on template sequences instead of allele.
+            benchmark: (bool) Perform L-RMSD calculations? only works if the target id is an existing pdb id
+            verbose: (bool) Print information
+
+        Returns:
+
+        '''
 
         if verbose:
             print('\nModelling %s...\n' %self.target.id)
@@ -145,35 +196,6 @@ class Pandora:
             print('\n\tModel\t\t\t\tMolpdf')
             for m in self.results:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
-
-# db = Database.Database()
-# # db.construct_database(clean=False)
-# # db.save('Pandora_MHCI_and_MHCII_data')
-# db = db.load('Pandora_MHCI_and_MHCII_data')
-#
-# #
-# #
-# #
-# #
-# target = PMHC.Target('1DLH',
-#                      db.MHCII_data['1DLH'].allele_type,
-#                      db.MHCII_data['1DLH'].peptide,
-#                      # chain_seq = db.MHCII_data['1DLH'].chain_seq,
-#                      M_chain_seq = db.MHCII_data['1DLH'].M_chain_seq,
-#                      N_chain_seq = db.MHCII_data['1DLH'].N_chain_seq,
-#                      MHC_class = 'II',
-#                      anchors = db.MHCII_data['1DLH'].anchors)
-#
-# target = PMHC.Target('1A1M',
-#                      db.MHCI_data['1A1M'].allele_type,
-#                      db.MHCI_data['1A1M'].peptide,
-#                      M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
-#                      # MHC_class = 'II',
-#                      anchors = db.MHCI_data['1A1M'].anchors)
-# #
-# #
-# mod = Pandora(target, db)
-# mod.model(n_models=5, stdev=0.1, seq_based_templ_selection=True, benchmark=True)
 
 
 
