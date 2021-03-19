@@ -319,7 +319,7 @@ def write_pdb(pdb, out_path, get_header_from=False):
 
     '''
 
-
+pdb_file = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/PDBs/IMGT_retrieved/IMGT3DFlatFiles/IMGT-1A6A.pdb'
     def get_head_and_remarks(pdb_file):
         ''' Get the head and remarks of an IMGT pdb file
 
@@ -329,21 +329,14 @@ def write_pdb(pdb, out_path, get_header_from=False):
         Returns: (list) list of lines
 
         '''
-
-        # Count until where the header and remarks last
-        x = 0
-        last_header_line = 0
+        # Take all lines of the pdb file up until the "ATOM" part
         with open(pdb_file) as infile:
             header = []
             for line in infile:
-                x += 1
+                if line.startswith('ATOM'):
+                    break
                 header.append(line[:-1])
-                if line.startswith('REMARK'):
-                    if last_header_line == 0:
-                        last_header_line = x
-                    last_header_line += 1
-        header = [x for x in header[:last_header_line - 1] if
-                  x != []]  # remove everything after the remarks and whitelines
+
         return header
 
     def line_prepender(filename, line):
