@@ -55,7 +55,6 @@ class Database:
             # Parse all MHCI files
             for id in self.__IDs_list_MHCI:
                 try:
-                    print('Parsing %s' % id)
                     templ = self.__clean_MHCI_file(pdb_id = id, data_dir = data_dir)
                     if templ != None:
                         self.MHCI_data[id] = templ
@@ -67,7 +66,6 @@ class Database:
             # Parse all MHCII files
             for id in self.__IDs_list_MHCII:
                 try:
-                    print('Parsing %s' % id)
                     templ = self.__clean_MHCII_file(pdb_id = id, data_dir = data_dir)
                     if templ != None:
                         self.MHCII_data[id] = templ

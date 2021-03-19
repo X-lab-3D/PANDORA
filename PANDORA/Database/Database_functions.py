@@ -319,7 +319,6 @@ def write_pdb(pdb, out_path, get_header_from=False):
 
     '''
 
-pdb_file = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/PDBs/IMGT_retrieved/IMGT3DFlatFiles/IMGT-1A6A.pdb'
     def get_head_and_remarks(pdb_file):
         ''' Get the head and remarks of an IMGT pdb file
 
@@ -605,67 +604,65 @@ def parse_pMHCI_pdb(pdb_id,
     '''
     logfile = os.path.dirname(bad_dir) + '/log_MHCI.csv'
 
-    try:
-        # Check if file exists
-        if not os.path.isfile('%s/IMGT-%s.pdb.gz' % (indir, pdb_id)):
-            log(pdb_id, 'Could not find file', logfile)
-            raise Exception
+    # Check if file exists
+    if os.path.isfile('%s/IMGT-%s.pdb.gz' % (indir, pdb_id)):
+        print('Parsing %s' % pdb_id)
+        try:
+            # Unzip file (also check if the file is not empty) and save the path of this file
+            pdb_file = unzip_pdb(pdb_id, indir, outdir)
+            pdb = PDBParser(QUIET=True).get_structure('MHCI', pdb_file)
+            # Remove waters and weird chains
+            pdb = remove_irregular_chains(pdb, list(ascii_uppercase))
 
-        # Unzip file (also check if the file is not empty) and save the path of this file
-        pdb_file = unzip_pdb(pdb_id, indir, outdir)
-        pdb = PDBParser(QUIET=True).get_structure('MHCI', pdb_file)
-        # Remove waters and weird chains
-        pdb = remove_irregular_chains(pdb, list(ascii_uppercase))
+            try:                # Find the peptide chain
+                pept_chain = find_peptide_chain(pdb)
+            except:
+                log(pdb_id, 'Could not find a suitable peptide chain', logfile)
+                raise Exception
 
-        try:                # Find the peptide chain
-            pept_chain = find_peptide_chain(pdb)
-        except:
-            log(pdb_id, 'Could not find a suitable peptide chain', logfile)
-            raise Exception
+            try:                 # Find out which chains are the Alpha and Peptide chain
+                MHC_chains = find_chains_MHCI(pdb, pept_chain)
+            except:
+                log(pdb_id, 'Could not locate Alpha chain', logfile)
+                raise Exception
 
-        try:                 # Find out which chains are the Alpha and Peptide chain
-            MHC_chains = find_chains_MHCI(pdb, pept_chain)
-        except:
-            log(pdb_id, 'Could not locate Alpha chain', logfile)
-            raise Exception
+            try:                 # Reformat chains
+                pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
+                pdb = replace_chain_names(MHC_chains, pdb,['M', 'P'])  # Rename chains to M,P
+                pdb = renumber(pdb)  # Renumber from 1
+            except:
+                log(pdb_id, 'Could not reformat structure', logfile)
+                raise Exception
 
-        try:                 # Reformat chains
-            pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
-            pdb = replace_chain_names(MHC_chains, pdb,['M', 'P'])  # Rename chains to M,P
-            pdb = renumber(pdb)  # Renumber from 1
-        except:
-            log(pdb_id, 'Could not reformat structure', logfile)
-            raise Exception
+            try:  # get the chain sequences from the pdb file
+                # seqs = seqs_from_pdb(pdb_file, MHC_chains)
+                seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
+            except:
+                log(pdb_id, 'Could not fetch chain sequences from pdb file', logfile)
+                raise Exception
 
-        try:  # get the chain sequences from the pdb file
-            # seqs = seqs_from_pdb(pdb_file, MHC_chains)
-            seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
-        except:
-            log(pdb_id, 'Could not fetch chain sequences from pdb file', logfile)
-            raise Exception
+            if not check_pMHC(pdb):
+                log(pdb_id, 'Structure did not pass the test.', logfile)
+                raise Exception
 
-        if not check_pMHC(pdb):
-            log(pdb_id, 'Structure did not pass the test.', logfile)
-            raise Exception
+            # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
+            write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
 
-        # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
-        write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
+            # Get allele per each chain
+            al = get_chainid_alleles_MHCI(pdb_file)
+            alpha = [[k for k,v in i.items()] for i in [al['A'][i] for i in [i for i in al['A'].keys()]]]
+            a_allele = sum(alpha, [])
 
-        # Get allele per each chain
-        al = get_chainid_alleles_MHCI(pdb_file)
-        alpha = [[k for k,v in i.items()] for i in [al['A'][i] for i in [i for i in al['A'].keys()]]]
-        a_allele = sum(alpha, [])
-        
-        # Get structure resolution
-        resolution = get_resolution(pdb_file)
-        
-        # Create MHC_structure object
-        templ =  PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs[0], peptide=seqs[-1],  pdb_path=pdb_file, resolution=resolution)
+            # Get structure resolution
+            resolution = get_resolution(pdb_file)
 
-        return templ
+            # Create MHC_structure object
+            templ =  PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs[0], peptide=seqs[-1],  pdb_path=pdb_file, resolution=resolution)
 
-    except:  # If something goes wrong, append the ID to the bad_ids list
-        os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
+            return templ
+
+        except:  # If something goes wrong, append the ID to the bad_ids list
+            os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
 
 def parse_pMHCII_pdb(pdb_id,
                       indir=PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
@@ -685,68 +682,65 @@ def parse_pMHCII_pdb(pdb_id,
     # set paths for in and out directories
     logfile = os.path.dirname(bad_dir) + '/log_MHCII.csv'
 
-    try:
-        # Check if file exists
-        if not os.path.isfile('%s/IMGT-%s.pdb.gz' % (indir, pdb_id)):
-            log(pdb_id, 'Could not find file', logfile)
-            raise Exception
+    if os.path.isfile('%s/IMGT-%s.pdb.gz' % (indir, pdb_id)):
+        print('Parsing %s' % pdb_id)
+        try:
+            # Unzip file (also check if the file is not empty) and save the path of this file
+            pdb_file = unzip_pdb(pdb_id, indir, outdir)
+            pdb = PDBParser(QUIET=True).get_structure('MHCII', pdb_file)
+            # Remove waters and weird chains
+            pdb = remove_irregular_chains(pdb, list(ascii_uppercase))
 
-        # Unzip file (also check if the file is not empty) and save the path of this file
-        pdb_file = unzip_pdb(pdb_id, indir, outdir)
-        pdb = PDBParser(QUIET=True).get_structure('MHCII', pdb_file)
-        # Remove waters and weird chains
-        pdb = remove_irregular_chains(pdb, list(ascii_uppercase))
+            try:                # Find the peptide chain
+                pept_chain = find_peptide_chain(pdb)
+            except:
+                log(pdb_id, 'Could not find a suitable peptide chain', logfile)
+                raise Exception
 
-        try:                # Find the peptide chain
-            pept_chain = find_peptide_chain(pdb)
-        except:
-            log(pdb_id, 'Could not find a suitable peptide chain', logfile)
-            raise Exception
+            try:                 # Find out which chains are the Alpha and Peptide chain
+                MHC_chains = find_chains_MHCII(pdb, pept_chain)
+            except:
+                log(pdb_id, 'Could not locate Alpha chain', logfile)
+                raise Exception
 
-        try:                 # Find out which chains are the Alpha and Peptide chain
-            MHC_chains = find_chains_MHCII(pdb, pept_chain)
-        except:
-            log(pdb_id, 'Could not locate Alpha chain', logfile)
-            raise Exception
+            try:                 # Reformat chains
+                pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
+                pdb = replace_chain_names(MHC_chains, pdb, ['M', 'N', 'P'])   # Rename chains to M,N,P
+                pdb = renumber(pdb)  # Renumber from 1
+            except:
+                log(pdb_id, 'Could not reformat structure', logfile)
+                raise Exception
 
-        try:                 # Reformat chains
-            pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
-            pdb = replace_chain_names(MHC_chains, pdb, ['M', 'N', 'P'])   # Rename chains to M,N,P
-            pdb = renumber(pdb)  # Renumber from 1
-        except:
-            log(pdb_id, 'Could not reformat structure', logfile)
-            raise Exception
-
-        try:  # get the chain sequences from the pdb file
-            # seqs = seqs_from_pdb(pdb_file, MHC_chains)
-            seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
-        except:
-            log(pdb_id, 'Could not fetch chain sequences from pdb file', logfile)
-            raise Exception
+            try:  # get the chain sequences from the pdb file
+                # seqs = seqs_from_pdb(pdb_file, MHC_chains)
+                seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
+            except:
+                log(pdb_id, 'Could not fetch chain sequences from pdb file', logfile)
+                raise Exception
 
 
-        if not check_pMHC(pdb): #test if the pdb is parsed correctly
-            log(pdb_id, 'Structure did not pass the test.', logfile)
-            raise Exception
+            if not check_pMHC(pdb): #test if the pdb is parsed correctly
+                log(pdb_id, 'Structure did not pass the test.', logfile)
+                raise Exception
 
-        # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
-        write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
+            # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
+            write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
 
-        # Get allele per each chain
-        al = get_chainid_alleles_MHCII(pdb_file)
-        alpha = sum([al['Alpha'][i] for i in [i for i in al['Alpha'].keys()]], [])
-        beta = sum([al['Beta'][i] for i in [i for i in al['Beta'].keys()]], [])
-        a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
-        b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
-        
-        # Get structure resolution
-        resolution = get_resolution(pdb_file)
+            # Get allele per each chain
+            al = get_chainid_alleles_MHCII(pdb_file)
+            alpha = sum([al['Alpha'][i] for i in [i for i in al['Alpha'].keys()]], [])
+            beta = sum([al['Beta'][i] for i in [i for i in al['Beta'].keys()]], [])
+            a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
+            b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
 
-        # Create MHC_structure object
-        templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele, M_chain_seq=seqs[0], N_chain_seq=seqs[1],
-                              peptide=seqs[2], MHC_class='II', pdb_path=pdb_file, resolution=resolution)
+            # Get structure resolution
+            resolution = get_resolution(pdb_file)
 
-        return templ
+            # Create MHC_structure object
+            templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele, M_chain_seq=seqs[0], N_chain_seq=seqs[1],
+                                  peptide=seqs[2], MHC_class='II', pdb_path=pdb_file, resolution=resolution)
 
-    except:  # If something goes wrong, append the ID to the bad_ids list
-        os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
+            return templ
+
+        except:  # If something goes wrong, append the ID to the bad_ids list
+            os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))

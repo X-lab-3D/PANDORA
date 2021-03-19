@@ -3,7 +3,7 @@ from Bio.PDB import PDBParser
 from Bio.PDB import NeighborSearch
 
 class Contacts:
-    def __init__(self, PDB, output_file = False, anchors = False, cutoff = 5):
+    def __init__(self, PDB, output_file = False, anchors = False, pept_contacts = False, cutoff = 5):
         ''' Calculate atom contacts between different chains of a protein or between peptide anchor residues and the
             rest of the MHC structure.
 
@@ -22,13 +22,16 @@ class Contacts:
         # check input type
         if isinstance(PDB, str): #if its a string, it should be the path of the pdb, then load pdb first
             self.pdb_path = PDB
-            parser = PDBParser(QUIET=True)  # Create a parser object, used to read pdb files
-            self.PDB = parser.get_structure('MHC', PDB)
+             # Create a parser object, used to read pdb files
+            self.PDB = PDBParser(QUIET=True).get_structure('MHC', PDB)
         else: #Else, its already a bio.pdb object
             self.PDB = PDB
 
         # Actually find the atom contacts between chains
-        self.chain_contacts = self.find_chain_contacts(self.PDB, self.cutoff)
+        if not pept_contacts:
+            self.chain_contacts = self.find_chain_contacts(self.PDB, self.cutoff)
+        if pept_contacts:
+            self.chain_contacts = self.find_pept_chain_contacts(self.PDB, self.cutoff)
 
         # If the user supplied anchors, calculate the anchor contacts
         if anchors: # Calculate peptide anchor residue - structure contacts
@@ -84,7 +87,53 @@ class Contacts:
         out = [i for i in out if i[1] != i[5]] # filter out contacts between the same chain
 
         return out
-        # return [(i[4], i[5], i[6], i[7], i[0], i[1], i[2], i[3], i[8]) for i in out]
+
+    def find_pept_chain_contacts(self, PDB, cutoff=5):
+        ''' Calculate atom distances in a pdb object.
+
+        :param pdb: Bio.PDB object
+        :param cutoff: (int) Distance cutoff that determines atom contact, standard is 5 Angstrom
+        :param all: (Bool) Calculate all atom contacts or just between chains
+        :param specific_chain: (String) Only consider contacts between one specific chain and the rest.
+        :param anchors: (list) list of anchor positions. If such a list is given, only the contacts between the atoms of
+                                the peptide anchor residues and the rest of the structure are calculated.
+        :return: list of tuples of: Res 1, Chain 1, Resnr 1, Atom 1, Res 2, Chainm 2, Resnr 2, Atom 2, Distance 1_2
+        '''
+        # Calculate distances
+
+        # Select the atoms in the peptide and the G-domain. This speeds up anchor calculation with 40/60%
+        atoms = []
+        atoms = atoms + [i for i in PDB[0]['P'].get_atoms()]
+        if 'N' in [i.id for i in PDB.get_chains()]:  # Check if its MHCI
+            for i in PDB[0]['M'].get_residues():  # Take the G-domain of the M chain
+                if i.id[1] < 81:
+                    atoms = atoms + [i for i in i.get_atoms()]
+            for i in PDB[0]['N'].get_residues():  # Take the G-domain of the N chain
+                if i.id[1] < 91:
+                    atoms = atoms + [i for i in i.get_atoms()]
+        elif 'N' not in [i.id for i in PDB.get_chains()]:
+            for i in PDB[0]['M'].get_residues():  # Take the G-domain of the M chain
+                if i.id[1] < 181:
+                    atoms = atoms + [i for i in i.get_atoms()]
+
+        atom_dist = NeighborSearch(atom_list=atoms).search_all(cutoff)
+        out = []
+        # Append (Res 1,Chain 1,Resnr 1,Atom 1,Res 2,Chain 2,Resnr 2,Atom 2,Distance 1_2) to list for each contact
+        for pair in atom_dist:
+            out.append((pair[1].get_parent().resname,
+                        pair[1].get_parent().get_parent().id,
+                        pair[1].get_parent().id[1],
+                        pair[1].get_id(),
+                        pair[0].get_parent().resname,
+                        pair[0].get_parent().get_parent().id,
+                        pair[0].get_parent().id[1],
+                        pair[0].get_id(),
+                        pair[0] - pair[1]))
+
+        # If one would want all atom contacts (also within the same protein chain), the next line can be commented out
+        out = [i for i in out if i[1] != i[5]] # filter out contacts between the same chain
+
+        return out
 
     def show(self):
         """Print the contacts. If anchor contacts have been calculated, only show them"""
@@ -95,3 +144,8 @@ class Contacts:
             for i in self.chain_contacts:
                 print(i)
 
+
+pept_contacts = True
+
+
+import time
