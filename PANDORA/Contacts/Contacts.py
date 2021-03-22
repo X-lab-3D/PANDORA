@@ -3,7 +3,8 @@ from Bio.PDB import PDBParser
 from Bio.PDB import NeighborSearch
 
 class Contacts:
-    def __init__(self, PDB, output_file = False, anchors = False, pept_contacts = False, cutoff = 5):
+    def __init__(self, PDB, output_file = False, anchors = False, pept_contacts = False, M_only = list(range(1,182)),
+                 N_only = list(range(1,92)), cutoff = 5):
         ''' Calculate atom contacts between different chains of a protein or between peptide anchor residues and the
             rest of the MHC structure.
 
@@ -31,7 +32,7 @@ class Contacts:
         if not pept_contacts:
             self.chain_contacts = self.find_chain_contacts(self.PDB, self.cutoff)
         if pept_contacts:
-            self.chain_contacts = self.find_pept_chain_contacts(self.PDB, self.cutoff)
+            self.chain_contacts = self.find_pept_chain_contacts(self.PDB, M_only=M_only, N_only=N_only, cutoff=self.cutoff)
 
         # If the user supplied anchors, calculate the anchor contacts
         if anchors: # Calculate peptide anchor residue - structure contacts
@@ -88,7 +89,7 @@ class Contacts:
 
         return out
 
-    def find_pept_chain_contacts(self, PDB, cutoff=5):
+    def find_pept_chain_contacts(self, PDB, M_only = list(range(1,182)), N_only = list(range(1,92)), cutoff=5):
         ''' Calculate atom distances in a pdb object.
 
         :param pdb: Bio.PDB object
@@ -106,14 +107,14 @@ class Contacts:
         atoms = atoms + [i for i in PDB[0]['P'].get_atoms()]
         if 'N' in [i.id for i in PDB.get_chains()]:  # Check if its MHCI
             for i in PDB[0]['M'].get_residues():  # Take the G-domain of the M chain
-                if i.id[1] < 81:
+                if i.id[1] in M_only:
                     atoms = atoms + [i for i in i.get_atoms()]
             for i in PDB[0]['N'].get_residues():  # Take the G-domain of the N chain
-                if i.id[1] < 91:
+                if i.id[1] in N_only:
                     atoms = atoms + [i for i in i.get_atoms()]
         elif 'N' not in [i.id for i in PDB.get_chains()]:
             for i in PDB[0]['M'].get_residues():  # Take the G-domain of the M chain
-                if i.id[1] < 181:
+                if i.id[1] in M_only:
                     atoms = atoms + [i for i in i.get_atoms()]
 
         atom_dist = NeighborSearch(atom_list=atoms).search_all(cutoff)
@@ -143,9 +144,3 @@ class Contacts:
         else:
             for i in self.chain_contacts:
                 print(i)
-
-
-pept_contacts = True
-
-
-import time
