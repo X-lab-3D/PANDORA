@@ -141,7 +141,7 @@ class Template(PMHC):
 
     def calc_anchors(self):
         if self.MHC_class == 'I':
-            self.anchors = Anchors.get_anchors_pMHCI(self.pdb)
+            self.anchors = Anchors.pMHCI_anchors(self.pdb)
         if self.MHC_class == 'II':
             self.anchors = Anchors.pMHCII_anchors(self.pdb)
 
