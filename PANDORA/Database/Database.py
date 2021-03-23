@@ -124,8 +124,4 @@ class Database:
     def load(cls, fn):
         return dill.load(open(fn, 'rb'))
 
-# import time
-# t0 = time.time()
-# db = Database()
-# db.construct_database(save = 'MHCI_test_db', download=False, MHCII=False)
-# print(time.time()-t0)
+#
