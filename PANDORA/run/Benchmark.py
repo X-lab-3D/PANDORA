@@ -21,7 +21,7 @@ import time
 def run_pandora(tar_temp):
     target = tar_temp[0]
     template = tar_temp[1]
-    filename = '180321_benchmark_I.csv'
+    filename = '220321_benchmark_II.csv'
     nr_models = 20
     if not os.path.exists(filename):
         with open(filename, 'w') as f:
@@ -51,9 +51,9 @@ def run_multiprocessing(func, i, num_cores):
 
 def bench_MHCII():
     t0 = time.time()
-    print(t0)
+    # print(t0)
     db = Database.Database().load('MHCII_test_db')
-    num_cores = 12
+    num_cores = 8
 
     list_of_targets_templates = []
     for k in db.MHCII_data:
@@ -76,9 +76,9 @@ def bench_MHCII():
 
 def bench_MHCI():
     t0 = time.time()
-    print(t0)
+    # print(t0)
     db = Database.Database().load('MHCI_test_db')
-    num_cores = 12
+    num_cores = 8
 
     list_of_targets_templates = []
     for k in db.MHCI_data:
@@ -103,8 +103,8 @@ def bench_MHCI():
 if __name__ == "__main__":
     # Parallel(n_jobs=num_cores)(delayed(run_pandora)(target) for target in list_of_targets[:2])
     freeze_support()  # required to use multiprocessing
-    # bench_MHCII()
-    bench_MHCI()
+    bench_MHCII()
+    # bench_MHCI()
 
 
 
