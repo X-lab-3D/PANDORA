@@ -312,6 +312,81 @@ REMARK 999 SEQUENCE
 REMARK 999 1A1O  A    SWS     P30491       1 -    24 NOT IN ATOMS LIST          
 REMARK 999 1A1O  A    SWS     P30491     301 -   362 NOT IN ATOMS LIST          
 REMARK 999 1A1O  B    SWS     P01884       1 -    20 NOT IN ATOMS LIST          
+DBREF  1A1O A    1   276  SWS    P30491   1B54_HUMAN      25    300             
+DBREF  1A1O B    1    99  SWS    P01884   B2MG_HUMAN      21    119             
+DBREF  1A1O C    1     9  PDB    1A1O     1A1O             1      9             
+SEQADV 1A1O PRO A   49  SWS  P30491    ALA    73 CONFLICT                       
+SEQRES   1 A  276  GLY SER HIS SER MET ARG TYR PHE TYR THR ALA MET SER          
+SEQRES   2 A  276  ARG PRO GLY ARG GLY GLU PRO ARG PHE ILE ALA VAL GLY          
+SEQRES   3 A  276  TYR VAL ASP ASP THR GLN PHE VAL ARG PHE ASP SER ASP          
+SEQRES   4 A  276  ALA ALA SER PRO ARG THR GLU PRO ARG PRO PRO TRP ILE          
+SEQRES   5 A  276  GLU GLN GLU GLY PRO GLU TYR TRP ASP ARG ASN THR GLN          
+SEQRES   6 A  276  ILE PHE LYS THR ASN THR GLN THR TYR ARG GLU ASN LEU          
+SEQRES   7 A  276  ARG ILE ALA LEU ARG TYR TYR ASN GLN SER GLU ALA GLY          
+SEQRES   8 A  276  SER HIS ILE ILE GLN ARG MET TYR GLY CYS ASP LEU GLY          
+SEQRES   9 A  276  PRO ASP GLY ARG LEU LEU ARG GLY HIS ASP GLN SER ALA          
+SEQRES  10 A  276  TYR ASP GLY LYS ASP TYR ILE ALA LEU ASN GLU ASP LEU          
+SEQRES  11 A  276  SER SER TRP THR ALA ALA ASP THR ALA ALA GLN ILE THR          
+SEQRES  12 A  276  GLN ARG LYS TRP GLU ALA ALA ARG VAL ALA GLU GLN LEU          
+SEQRES  13 A  276  ARG ALA TYR LEU GLU GLY LEU CYS VAL GLU TRP LEU ARG          
+SEQRES  14 A  276  ARG TYR LEU GLU ASN GLY LYS GLU THR LEU GLN ARG ALA          
+SEQRES  15 A  276  ASP PRO PRO LYS THR HIS VAL THR HIS HIS PRO VAL SER          
+SEQRES  16 A  276  ASP HIS GLU ALA THR LEU ARG CYS TRP ALA LEU GLY PHE          
+SEQRES  17 A  276  TYR PRO ALA GLU ILE THR LEU THR TRP GLN ARG ASP GLY          
+SEQRES  18 A  276  GLU ASP GLN THR GLN ASP THR GLU LEU VAL GLU THR ARG          
+SEQRES  19 A  276  PRO ALA GLY ASP ARG THR PHE GLN LYS TRP ALA ALA VAL          
+SEQRES  20 A  276  VAL VAL PRO SER GLY GLU GLU GLN ARG TYR THR CYS HIS          
+SEQRES  21 A  276  VAL GLN HIS GLU GLY LEU PRO LYS PRO LEU THR LEU ARG          
+SEQRES  22 A  276  TRP GLU PRO                                                  
+SEQRES   1 B   99  ILE GLN ARG THR PRO LYS ILE GLN VAL TYR SER ARG HIS          
+SEQRES   2 B   99  PRO ALA GLU ASN GLY LYS SER ASN PHE LEU ASN CYS TYR          
+SEQRES   3 B   99  VAL SER GLY PHE HIS PRO SER ASP ILE GLU VAL ASP LEU          
+SEQRES   4 B   99  LEU LYS ASN GLY GLU ARG ILE GLU LYS VAL GLU HIS SER          
+SEQRES   5 B   99  ASP LEU SER PHE SER LYS ASP TRP SER PHE TYR LEU LEU          
+SEQRES   6 B   99  TYR TYR THR GLU PHE THR PRO THR GLU LYS ASP GLU TYR          
+SEQRES   7 B   99  ALA CYS ARG VAL ASN HIS VAL THR LEU SER GLN PRO LYS          
+SEQRES   8 B   99  ILE VAL LYS TRP ASP ARG ASP MET                              
+SEQRES   1 C    9  LYS PRO ILE VAL GLN TYR ASP ASN PHE                          
+FORMUL   4  HOH   *113(H2 O1)                                                   
+HELIX    1   1 PRO A   50  ILE A   52  5                                   3    
+HELIX    2   2 PRO A   57  TYR A   85  1                                  29    
+HELIX    3   3 THR A 1050  ALA A 1061  1                                  12    
+HELIX    4   4 VAL A 1063  GLU A 1072  1                                  10    
+HELIX    5   5 LEU A 1073  ASN A 1084  1                                  12    
+HELIX    6   6 LYS A 1086  LEU A 1089  1                                   4    
+HELIX    7   7 GLU A 2099  ARG A 2101  5                                   3    
+SHEET    1   A 7 THR A  31  ASP A  37  0                              
+SHEET    2   A 7 ARG A  21  VAL A  28 -1  N  VAL A  28   O  THR A  31 
+SHEET    3   A 7 HIS A   3  MET A  12 -1  N  MET A  12   O  ARG A  21 
+SHEET    4   A 7 ILE A1004  LEU A1013 -1  N  LEU A1013   O  HIS A   3 
+SHEET    5   A 7 LEU A1019  TYR A1028 -1  N  ALA A1027   O  GLN A1006 
+SHEET    6   A 7 LYS A1031  LEU A1036 -1  N  ILE A1034   O  SER A1026 
+SHEET    7   A 7 TRP A1045  ALA A1047 -1  N  THR A1046   O  ALA A1035 
+SHEET    1   B 4 LYS A2003  PRO A2010  0                              
+SHEET    2   B 4 GLU A2018  LEU A2026 -1  N  LEU A2026   O  LYS A2003 
+SHEET    3   B 4 LYS A2085  PRO A2092 -1  N  VAL A2091   O  ALA A2019 
+SHEET    4   B 4 THR A2078  LEU A2080 -1  N  GLU A2079   O  ALA A2088 
+SHEET    1   C 3 THR A2038  ARG A2043  0                              
+SHEET    2   C 3 TYR A2102  GLN A2107 -1  N  GLN A2107   O  THR A2038 
+SHEET    3   C 3 LEU A2117  LEU A2119 -1  N  LEU A2119   O  CYS A2104 
+SHEET    1   D 3 LYS B   3  SER B   8  0                              
+SHEET    2   D 3 SER B  18  PHE B  28 -1  N  SER B  26   O  LYS B   3 
+SHEET    3   D 3 PHE B  85B THR B  92 -1  N  PHE B  91   O  ASN B  19 
+SHEET    1   E 3 GLU B  38  LYS B  43  0                              
+SHEET    2   E 3 TYR B 102  ASN B 107 -1  N  ASN B 107   O  GLU B  38 
+SHEET    3   E 3 LYS B 117  LYS B 120 -1  N  VAL B 119   O  CYS B 104 
+SSBOND   1 CYS A 1011    CYS A 1074                                     
+SSBOND   2 CYS A 2023    CYS A 2104                                     
+SSBOND   3 CYS B   23    CYS B  104                                     
+CISPEP   1 TYR A 2029    PRO A 2030          0         0.27
+CISPEP   2 HIS B   29    PRO B   30          0        -1.00
+CRYST1   51.300   83.300  112.400  90.00  90.00  90.00 P 21 21 21    4          
+ORIGX1      1.000000  0.000000  0.000000        0.00000                         
+ORIGX2      0.000000  1.000000  0.000000        0.00000                         
+ORIGX3      0.000000  0.000000  1.000000        0.00000                         
+SCALE1      0.019493  0.000000  0.000000        0.00000                         
+SCALE2      0.000000  0.012005  0.000000        0.00000                         
+SCALE3      0.000000  0.000000  0.008897        0.00000                         
 ATOM      1  N   GLY M   1      15.072  15.969  33.511  1.00 60.45           N  
 ATOM      2  CA  GLY M   1      16.191  15.318  32.766  1.00 58.34           C  
 ATOM      3  C   GLY M   1      17.366  16.258  32.581  1.00 55.16           C  

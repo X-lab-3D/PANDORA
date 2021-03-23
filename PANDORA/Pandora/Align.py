@@ -6,12 +6,14 @@ import os
 class Align:
 
     def __init__(self, target, template, output_dir = PANDORA.PANDORA_data + '/outputs'):
-        '''Performs a alignment of the target and template(s). Will spit out a filename that will be used for modeller.
+        ''' Performs a alignment of the target and template(s). Will spit out a filename that will be used for modeller.
 
-        :param target: (Target object) The target object that will be aligned to the template structures
-        :param template: (Template object) can be either a single Target object or a list of Target objects
-        :param output_dir: (string)
+        Args:
+            target: (Target object) The target object that will be aligned to the template structures
+            template: (Template object) can be either a single Target object or a list of Target objects
+            output_dir: (string)
         '''
+
         # Assign target and template. If the template is not given as a list, put in in a list.
         self.__target = target
         if isinstance(template, list):
@@ -53,7 +55,8 @@ class Align:
     def __align_chains(self):
         ''' Alignes the chains of MHCI/MHCII structues given a target and (multiple) templates.
 
-        :return: (dict) all aligned chains per structure id {id M: NNNNNNNNNNNN, id N: NNNNNNNNNNNN, id P: NNNNNN}
+        Returns: (dict) all aligned chains per structure id {id M: NNNNNNNNNNNN, id N: NNNNNNNNNNNN, id P: NNNNNN}
+
         '''
 
         # Align M and N chain for MHC II. Because the target chains need to be aligned to the respective chain of
@@ -112,12 +115,13 @@ class Align:
 
     def __align_peptides(self):
         ''' Align MHCI peptides based on their anchors. This function adds padding to the left and the right of
-        the anchors and uses muscle to align the core. For MHCII, the peptides are aligned on the 2nd and 3rd anchor
-        position. These two anchor positions are present in all MHCII structures (1 and 4 are missing sometimes).
-        For MHCII, no Muscle alignment is performed because there is very little distance between the 2nd and 3rd
-        anchor.
+            the anchors and uses muscle to align the core. For MHCII, the peptides are aligned on the 2nd and 3rd anchor
+            position. These two anchor positions are present in all MHCII structures (1 and 4 are missing sometimes).
+            For MHCII, no Muscle alignment is performed because there is very little distance between the 2nd and 3rd
+            anchor.
 
-        :return: (dict) {'id P': 'aligned_peptide_seq'}
+        Returns: (dict) {'id P': 'aligned_peptide_seq'}
+
         '''
 
         # Make a dict containing {id, (peptide_sequence, [anchors])}

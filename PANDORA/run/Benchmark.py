@@ -1,59 +1,115 @@
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
+import os
+from pathos.multiprocessing import ProcessingPool as Pool
+from pathos.multiprocessing import freeze_support
+import time
 
-db = Database.Database().load('test_db')
+# db = Database.Database().load('test_db')
 # db.construct_database()
 
 # import dill
 # db = dill.load(open("test_db", 'rb'))
 
 
-##------------------------------ MHCI -----------------------------------
+# ------ Multithreading test ------
 
-with open('benchmark_I.csv', 'w') as f:
-    f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,L-RMSD,core L-MRSD\n')
 
-for k in db.MHCI_data:
-    # pass
+# num_cores = 2 # multiprocessing.cpu_count()
+
+def run_pandora(tar_temp):
+    target = tar_temp[0]
+    template = tar_temp[1]
+    filename = '220321_benchmark_II.csv'
+    nr_models = 20
+    if not os.path.exists(filename):
+        with open(filename, 'w') as f:
+            f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,%s,%s,%s\n' % (
+            ','.join(['molpdf_' + str(i + 1) for i in range(nr_models)]),
+            ','.join(['L-RMSD_' + str(i + 1) for i in range(nr_models)]),
+            ','.join(['core_L-RMSD_' + str(i + 1) for i in range(nr_models)])))
+
     try:
-        target = PMHC.Target(db.MHCI_data[k].id, db.MHCI_data[k].allele_type, db.MHCI_data[k].peptide, M_chain_seq= db.MHCI_data[k].M_chain_seq, MHC_class= db.MHCI_data[k].MHC_class, anchors=db.MHCI_data[k].anchors)
-        mod = Pandora.Pandora(target, db)
-        mod.model(benchmark=True)
-        # mod.results
+        mod = Pandora.Pandora(target, template = template)
+        mod.model(n_models=nr_models, stdev=0.1, benchmark=True)
 
-        lmrsd = round(sum([i.lrmsd for i in mod.results])/len(mod.results), 4)
-        core_lmrsd = round(sum([i.core_lrmsd for i in mod.results])/len(mod.results), 4)
-
-        with open('benchmark_I.csv', 'a') as f:
-            f.write('%s,%s,%s,%s,%s,%s,%s,%s,\n' %(mod.target.PDB_id, mod.target.peptide, ';'.join(mod.target.allele), mod.template.PDB_id, mod.template.peptide, ';'.join(mod.template.allele), lmrsd, core_lmrsd))
-
-    except:
-        print('Something went wrong')
-
-
-##------------------------------ MHCII -----------------------------------
-
-nr_models = 20
-filename = '160321_benchmark_II.csv'
-
-with open(filename, 'w') as f:
-    f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,%s,%s,%s\n' %(','.join(['molpdf_' + str(i+1) for i in range(nr_models)]), ','.join(['L-RMSD_' + str(i+1) for i in range(nr_models)]), ','.join(['core_L-RMSD_' + str(i+1) for i in range(nr_models)])))
-
-for k in db.MHCII_data:
-    # pass
-    try:
-        target = PMHC.Target(db.MHCII_data[k].id, db.MHCII_data[k].allele_type, db.MHCII_data[k].peptide, M_chain_seq= db.MHCII_data[k].M_chain_seq, N_chain_seq= db.MHCII_data[k].N_chain_seq, MHC_class= db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
-        mod = Pandora.Pandora(target, db)
-        mod.model(n_models=nr_models, stdev=0.2, benchmark=True)
-
-        moldpdf = ','.join([str(round(float(i.moldpf),4)) for i in mod.results])
-        lmrsd = ','.join([str(round(i.lrmsd,4)) for i in mod.results])
+        moldpdf = ','.join([str(round(float(i.moldpf), 4)) for i in mod.results])
+        lmrsd = ','.join([str(round(i.lrmsd, 4)) for i in mod.results])
         core_lmrsd = ','.join([str(round(i.core_lrmsd, 4)) for i in mod.results])
 
         with open(filename, 'a') as f:
-            f.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' %(mod.target.id, mod.target.peptide, ';'.join(mod.target.allele_type), mod.template.id, mod.template.peptide, ';'.join(mod.template.allele_type),moldpdf, lmrsd, core_lmrsd))
-
+            f.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (
+            mod.target.id, mod.target.peptide, ';'.join(mod.target.allele_type), mod.template.id, mod.template.peptide,
+            ';'.join(mod.template.allele_type), moldpdf, lmrsd, core_lmrsd))
     except:
         print('Something went wrong')
-#
+
+def run_multiprocessing(func, i, num_cores):
+    with Pool(processes=num_cores) as pool:
+        return pool.map(func, i)
+
+def bench_MHCII():
+    t0 = time.time()
+    # print(t0)
+    db = Database.Database().load('MHCII_test_db')
+    num_cores = 8
+
+    list_of_targets_templates = []
+    for k in db.MHCII_data:
+        try:
+            tar = PMHC.Target(db.MHCII_data[k].id, db.MHCII_data[k].allele_type, db.MHCII_data[k].peptide,
+                                               M_chain_seq=db.MHCII_data[k].M_chain_seq,
+                                               N_chain_seq=db.MHCII_data[k].N_chain_seq,
+                                               MHC_class=db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
+            mod = Pandora.Pandora(tar, db)
+            mod.find_template()
+            list_of_targets_templates.append((tar, mod.template))
+        except:
+            pass
+
+        # run_pandora(list_of_targets_templates[0])
+
+    run_multiprocessing(run_pandora, list_of_targets_templates, num_cores)
+
+    print(time.time()-t0)
+
+def bench_MHCI():
+    t0 = time.time()
+    # print(t0)
+    db = Database.Database().load('MHCI_test_db')
+    num_cores = 8
+
+    list_of_targets_templates = []
+    for k in db.MHCI_data:
+        try:
+
+            tar = PMHC.Target(db.MHCI_data[k].id, db.MHCI_data[k].allele_type, db.MHCI_data[k].peptide,
+                                                M_chain_seq=db.MHCI_data[k].M_chain_seq,
+                                                anchors=db.MHCI_data[k].anchors)
+
+            mod = Pandora.Pandora(tar, db)
+            mod.find_template()
+            list_of_targets_templates.append((tar, mod.template))
+        except:
+            pass
+
+        # run_pandora(list_of_targets_templates[0])
+
+    run_multiprocessing(run_pandora, list_of_targets_templates, num_cores)
+
+    print(time.time()-t0)
+
+if __name__ == "__main__":
+    # Parallel(n_jobs=num_cores)(delayed(run_pandora)(target) for target in list_of_targets[:2])
+    freeze_support()  # required to use multiprocessing
+    bench_MHCII()
+    # bench_MHCI()
+
+
+
+
+
+
+
+

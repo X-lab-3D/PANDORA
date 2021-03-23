@@ -55,7 +55,6 @@ class Database:
             # Parse all MHCI files
             for id in self.__IDs_list_MHCI:
                 try:
-                    print('Parsing %s' % id)
                     templ = self.__clean_MHCI_file(pdb_id = id, data_dir = data_dir)
                     if templ != None:
                         self.MHCI_data[id] = templ
@@ -67,7 +66,6 @@ class Database:
             # Parse all MHCII files
             for id in self.__IDs_list_MHCII:
                 try:
-                    print('Parsing %s' % id)
                     templ = self.__clean_MHCII_file(pdb_id = id, data_dir = data_dir)
                     if templ != None:
                         self.MHCII_data[id] = templ
@@ -78,19 +76,19 @@ class Database:
             self.save(save)
 
     def add_structure(self, id, allele_type, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
-        ''' Add a single structure to the database. Needs id and pdb_file as input. More can be given.
-            Input is the same as the input from MHC_structure.template(). Allele needs to be given as input as well and
-            is not fetched on the go. If no MHC class if specified, it will assume the structure is MHCI
+        ''' Add a single structure to the database
 
-        :param id: (string) PDB identifier
-        :param allele_type: (list) list of MHC alleles (or allele)
-        :param peptide: (string) peptide sequence
-        :param MHC_class: (string) either 'I' or 'II' denoting MHC class I and MHC class II respectively
-        :param chain_seq: (list) list of chain sequence(s) for the M and N (Alpha and Beta) chain respectively
-        :param anchors: (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
+        Args:
+            id: (string) PDB identifier
+            allele_type: (list) list of MHC alleles (or allele)
+            peptide: (string) peptide sequence
+            MHC_class: (string) either 'I' or 'II' denoting MHC class I and MHC class II respectively
+            chain_seq: (list) list of chain sequence(s) for the M and N (Alpha and Beta) chain respectively
+            anchors: (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
                         during the modelling. MHC class I typically has 2 anchors, while MHC class II typically has 4.
-        :param pdb_path: (string) path to pdb file
-        :param pdb: (Bio.PDB) Biopython PBD object
+            pdb_path: (string) path to pdb file
+            pdb: (Bio.PDB) Biopython PBD object
+
         '''
 
         if not id:
@@ -106,8 +104,11 @@ class Database:
     def remove_structure(self, id =''):
         ''' Removes a structure (by id) from the database
 
-        :param id: (string) PDB ID
+        Args:
+            id: (string) PDB ID
+
         '''
+
         # Remove structure from database
         self.MHCI_data.pop(id, None)
         self.MHCII_data.pop(id, None)
@@ -123,8 +124,4 @@ class Database:
     def load(cls, fn):
         return dill.load(open(fn, 'rb'))
 
-# import time
-# t0 = time.time()
-# db = Database()
-# db.construct_database(save = 'test_db', download=False)
-# print(time.time()-t0)
+#

@@ -61,6 +61,7 @@ def test_contacts():
 
     assert pass_test
 
+# @pytest.mark.skip
 def test_align():
     # initiate target and template object
     template = PMHC.Template('1A1O',
