@@ -22,21 +22,16 @@ def pMHCI_anchors(pdb):
     # pocket_M = {'anch1': [24, 25, 35, 36], 'anch2': [81]}
 
     # Derek's modified version. Empirically tested to have the highest prediction accuracy. See below. (only best shown)
-    pocket_M = {'anch1': [7,24,35], 'anch2': [118, 135]}
+    pocket_M = {'anch1': [7, 24, 35], 'anch2': [118, 135]}
 
     # Accuracies peptide residue anchor prediction using MHCI residue specified above.
     # I selected all structures with non-canonically spaced anchors from Rafaella's prediction and 100 random pdbs.
     # From this dataset I manually determined the peptide anchor residue position. I then looped through all MHCI
     # residues and selected the ones with the highest accuracy in predicting the correct anchors.
 
-    # Getting all anchors right --> Accuracy: 99.3789
-    # Anchor 1: 99.3789
+    # Getting all anchors right --> Accuracy: 100.0
+    # Anchor 1: 100.0
     # Anchor 2: 100.0
-
-    # Compared the the old algorithm (unfair, because I selected all predictions that were probably wrong + 100 others)
-    # Total Accuracy: 75.15527950310559
-    # # Anchor 1: 97.51552795031056
-    # # Anchor 2: 76.3975155279503
 
     # Calculate the contacts with a cutoff of 18. This cutoff because at lower cutoffs, the orientations of side chains
     # of different structures, result in highly different contacts.
@@ -60,7 +55,6 @@ def pMHCI_anchors(pdb):
     # Now find the peptide residues that are closest to the specified MHCII residues to get the anchors
     anchor_1 = closest_pept_res(anch1)
     anchor_2 = closest_pept_res(anch2)
-
     # Put the anchors in the right order if they aren't already
     anchors = sorted([i for i in [anchor_1, anchor_2]])
 
