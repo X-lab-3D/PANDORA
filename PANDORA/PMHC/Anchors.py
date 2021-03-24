@@ -22,7 +22,7 @@ def pMHCI_anchors(pdb):
     # pocket_M = {'anch1': [24, 25, 35, 36], 'anch2': [81]}
 
     # Derek's modified version. Empirically tested to have the highest prediction accuracy. See below. (only best shown)
-    pocket_M = {'anch1': [7, 24, 35], 'anch2': [118, 135]}
+    pocket_M = {'anch1': [7,24,35], 'anch2': [118, 135]}
 
     # Accuracies peptide residue anchor prediction using MHCI residue specified above.
     # I selected all structures with non-canonically spaced anchors from Rafaella's prediction and 100 random pdbs.
@@ -51,7 +51,7 @@ def pMHCI_anchors(pdb):
     for i in cont:
         if i[1] == 'P' and i[5] == 'M': # Use residues from the M chain to find anchor 1, 3 and 4
             # Check the Alpha, Beta and Gamma carbon molecules of the peptide residues.
-            if i[3] == 'CA' or i[3] == 'CB' or i[3] == 'CG':
+            if i[3] == 'CA' or i[3] == 'CB' or i[3] == 'CG' or i[3] == 'C1':
                 if i[6] in pocket_M['anch1']: #If connected (<25 ang) to specified anch 1 MHC residues, add to list
                     anch1.append(i)
                 if i[6] in pocket_M['anch2']: #If connected (<25 ang) to specified anch 2 MHC residues, add to list
@@ -60,6 +60,7 @@ def pMHCI_anchors(pdb):
     # Now find the peptide residues that are closest to the specified MHCII residues to get the anchors
     anchor_1 = closest_pept_res(anch1)
     anchor_2 = closest_pept_res(anch2)
+
     # Put the anchors in the right order if they aren't already
     anchors = sorted([i for i in [anchor_1, anchor_2]])
 
@@ -174,58 +175,3 @@ def pMHCII_anchors(pdb):
 
     # Return the ordered set of anchors. Filter out 0's and >25 numbers if they happen to get through.
     return sorted(set([i for i in anchors if i != 0 or i > 25]))
-
-# Old code ...
-#
-# import numpy as np
-# def get_anchors_pMHCI(pdb):
-#     ''' Find the peptide anchor residues of a pMHCI structure using the Contacts class
-#
-#     Args:
-#         pdb: Bio.PDB object
-#     Returns: tuple of anchor residues (int)
-#
-#     '''
-#
-#     cutoff = 11.2
-#     ###Define pocket residues
-#     pocket = { 'pocket_anch1' : [24, 25, 35, 36],
-#               'pocket_anch2' : [81, 1005, 1027, 1028, 1029, 1030, 1033]}
-#     pocket_wrong_numbering = { 'pocket_anch1' : [1024, 1025, 1035, 1036],
-#                     'pocket_anch2' : [1081, 2005, 2027, 2028, 2029, 2030, 2033]}
-#
-#     # Template contacts
-#     contacts = Contacts.Contacts(pdb, cutoff=cutoff).chain_contacts
-#
-#     contact_1 = [0]*25
-#     contact_2 = [0]*25
-#
-#     #for cases where numbering starts from 1000, we use the updated pocket residues
-#     if int(contacts[0][6]) >1000:
-#         pocket = pocket_wrong_numbering
-#
-#     for line in contacts:
-#         #looks at one residue at a time
-#         m_aa_id = line[6]
-#         p_aa_id = line[2]
-#         atom_name = line[3]
-#
-#         if atom_name == 'CA':
-#             for aa in pocket.get('pocket_anch1'):
-#                 try:
-#                     if int(m_aa_id) == aa:
-#                         contact_1[int(p_aa_id)]+=1
-#                 except ValueError:
-#                     continue
-#
-#             for aa in pocket.get('pocket_anch2'):
-#                 try:
-#                     if int(m_aa_id) == aa:
-#                         contact_2[int(p_aa_id)]+=1
-#                 except ValueError:
-#                     continue
-#
-#     anchor_1 = np.argmax(contact_1)
-#     anchor_2 = np.argmax(contact_2)
-#
-#     return [anchor_1, anchor_2]
