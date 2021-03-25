@@ -182,6 +182,17 @@ class Target(PMHC):
             raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
         if MHC_class == 'II' and N_chain_seq != '' and M_chain_seq == '':
             raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
+        
+        # If anchors are not provided, predict them from the peptide length
+        if MHC_class =='I' and anchors == []:
+            print('WARNING: no anchor positions provided. Pandora will assign them to canonical anchor position')
+            anchor_1 = 2
+            anchor_2 = len(peptide)
+            anchors = [anchor_1, anchor_2]
+            self.anchors = anchors
+        if MHC_class =='II' and anchors == []:
+            print('WARNING: no anchor positions provided. Pandora will assign them to canonical anchor position')
+            raise Exception('This function is not implemented yet. Please provide anchor position for your target peptide')
 
     def info(self):
         """ Print the basic info of this structure
