@@ -80,15 +80,13 @@ def find_template(target, database, seq_based_templ_selection = False):
         # Find template structures with matching alleles
         putative_templates = {}
         for ID in database.MHCI_data:
-            if any(x in database.MHCI_data[ID].allele_type for x in target.allele_type):
-                putative_templates[ID] = list(
-                    set(target.allele_type) & set(database.MHCI_data[ID].allele_type))  # update dict with ID:all matching alleles
+            if ID != target.id:
+                if any(x in database.MHCI_data[ID].allele_type for x in target.allele_type):
+                    putative_templates[ID] = list(
+                        set(target.allele_type) & set(database.MHCI_data[ID].allele_type))  # update dict with ID:all matching alleles
 
         # If the target template already occured in the database, remove it from the dict of putative templates
-        try:
-            putative_templates.pop(target.id)
-        except:
-            pass
+        #putative_templates.pop(target.id)
 
         # Find the putative template with the best matching peptide
         pos_list = []
