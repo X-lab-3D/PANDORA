@@ -246,8 +246,6 @@ def get_chainid_alleles_MHCII(pdbf):
                     pass
 
     return {'Alpha': mhc_a_alleles, 'Beta': mhc_b_alleles}
-#
-# chains = MHC_chains, pdb, ['M', 'N', 'P']
 
 def get_resolution(pdbf):
     ''' Returns the resolution in Angstrom from the given pdb
@@ -263,7 +261,44 @@ def get_resolution(pdbf):
     resolution = header['resolution']
     return resolution
 
+def change_sep_in_ser(pdb_file):
+    '''
 
+    Args:
+        pdb_file:
+
+    Returns:
+
+    '''
+
+    with open(pdb_file) as f:
+        infile = []
+        for line in f:
+            infile.append(line)
+
+    with open(pdb_file, 'w') as f:
+        for line in infile:
+            # pss
+            l = [x for x in line.split(' ') if x != '']
+            if line.startswith('ATOM') or line.startswith('HETATM'):
+                if ('SEP' in l[3] or 'SEP' in l[2]) and l[2] not in ['P', 'O1P', 'O2P', 'O3P', 'HA', 'HB2',
+                                                                     'HB3']:  # Lines to keep
+                    f.write(line.replace('HETATM', 'ATOM  ').replace('SEP', 'SER'))
+                elif ('SEP' in l[3] or 'SEP' in l[2]) and l[2] in ['P', 'O1P', 'O2P', 'O3P', 'HA', 'HB2',
+                                                                   'HB3']:  # Lines to delete
+                    pass
+                elif ('F2F' in l[3] or 'F2F' in l[2]) and l[2] not in ['F1', 'F2']:
+                    f.write(line.replace('HETATM', 'ATOM  ').replace('F2F', 'PHE'))
+                elif ('F2F' in l[3] or 'F2F' in l[2]) and l[2] in ['F1', 'F2']:
+                    pass
+                elif ('CSO' in l[3] or 'CSO' in l[2]) and l[2] not in ['OD']:  # Lines to keep
+                    f.write(line.replace('HETATM', 'ATOM  ').replace('CSO', 'CYS'))
+                elif ('CSO' in l[3] or 'CSO' in l[2]) and l[2] in ['OD']:  # Lines to delete
+                    pass
+                else:
+                    f.write(line)
+            else:
+                f.write(line)
 
 def replace_chain_names(chains, pdb, replacement_chains=['M', 'N', 'P']):
     ''' Replace chain names by another chain name in a bio.pdb object
@@ -276,12 +311,17 @@ def replace_chain_names(chains, pdb, replacement_chains=['M', 'N', 'P']):
     Returns: bio.pdb object with changed chain names
 
     '''
-
+    # First give them a greek letter, so names that are already present are taken care of.
+    intermediate_chains = ['𝜶','𝜷','𝜸','𝜹','𝜺','𝜻','𝜼','𝜽','𝜾','𝜿','𝝀','𝝁','𝝂','𝝃','𝝄','𝝇','𝝈','𝝊','𝝋','𝝌','𝝎']
     for i in chains:
         for chain in pdb.get_chains():
             if chain.id == i:
-                # print(chain.id)
-                chain.id = replacement_chains[chains.index(i)]
+                chain.id = intermediate_chains[chains.index(i)]
+
+    # for i in chains:
+    for chain in pdb.get_chains():
+        if chain.id == intermediate_chains[intermediate_chains.index(chain.id)]:
+            chain.id = replacement_chains[intermediate_chains.index(chain.id)]
 
     return pdb
 
@@ -408,19 +448,23 @@ def find_peptide_chain(pdb, min=6, max=26):
     # Find most likely peptide chain: first chain to be 7 < len(chain) < 25
     pept_chain = []
     for chain in pdb.get_chains():
-        if len(chain) > min and len(chain) < max:  # Is this chain between 7 and 25?
+        if len(chain) > min and len(chain) < max:
+            # print(chain.id)# Is this chain between 7 and 25?
             heteroatoms = False
             for res in chain:
+                # print(res.id)
                 if res.id[0] != " " and res.id[0] != 'W':  # Check if a res in this chain is a heteroatom
+                    print('\tHeteroatoms in peptide chain')
                     heteroatoms = True
                     break
             if heteroatoms == False:  # If all residues are oke, add this to the list of peptide chains
                 pept_chain.append(chain.id)
-    pept_chain = pept_chain[0]  # Take the first pept chain. If there are multiple, they are probably duplicates
 
     if len(pept_chain) == 0:
         print('Could not find peptide chain')
         raise Exception
+
+    pept_chain = pept_chain[0]  # Take the first pept chain. If there are multiple, they are probably duplicates
 
     return pept_chain
 
@@ -444,6 +488,65 @@ def remove_irregular_chains(pdb, chains_to_keep):
     return pdb
 
 
+def remove_duplicated_chains(pdb):
+    ''' In very rare cases, PDBParser duplicates the same chain multiple times. If that happens, this function removes
+        all duplicates
+
+    Args:
+        pdb: Bio.PDB object
+
+    Returns: Bio.PDB object
+
+    '''
+    # If there are multipel models, remove them so the pdb contains only one: pdb[0]
+    if len([model.id for model in pdb]) > 1:
+        # Remove all extra models that are not pdb[0]
+        for _ in range(len([i.id for i in pdb])):
+            for model in pdb:
+                if model.id > 0:
+                    pdb.detach_child(model.id)
+
+    # Find all unique chains
+    chains_to_keep = sorted(list(set([i.id for i in pdb.get_chains()])))
+    # Check if there are duplicates. If true, remove them
+    if len(chains_to_keep) != len([i for i in pdb.get_chains()]):
+
+        # A list of placeholder names
+        intermediate_chains = ['𝜶','𝜷','𝜸','𝜹','𝜺','𝜻','𝜼','𝜽','𝜾','𝜿','𝝀','𝝁','𝝂','𝝃','𝝄','𝝇','𝝈','𝝊','𝝋','𝝌','𝝎']
+
+        # Function to find a key by its value in a dict
+        def getkey(dic, val):
+           for key, value in dic.items():
+              if val == value:
+                 return key
+
+        # Find out when a duplicated chain occurs
+        chain_id_seen = {}
+        cnt = 0
+        for chain in pdb.get_chains():
+            cnt += 1
+            if chain.id not in chain_id_seen:
+                chain_id_seen[cnt] = chain.id
+
+        # Rename all unique (non duplicated) chains to a greek placeholder
+        cnt = 0
+        for chain in pdb.get_chains():
+            cnt += 1
+            if chain.id in chains_to_keep and cnt == getkey(chain_id_seen,chain.id):
+                chain.id = intermediate_chains[cnt-1]
+        # Remove all chains that are not greek placeholders aka the duplicates
+        for _ in range(len([c for c in pdb.get_chains()])):
+            for model in pdb:
+                for chain in model:
+                    if chain.id not in intermediate_chains:
+                        model.detach_child(chain.id)
+
+        # change the chain names back to the original names
+        for chain in pdb.get_chains():
+            chain.id = chains_to_keep[intermediate_chains.index(chain.id)]
+
+    return pdb
+
 
 def find_chains_MHCI(pdb, pept_chain):
     ''' Find the MHCI chains
@@ -456,7 +559,8 @@ def find_chains_MHCI(pdb, pept_chain):
     '''
 
     # Find contacts between peptide chain and other chains
-    c = [i for i in Contacts.Contacts(pdb).chain_contacts if i[1] == pept_chain or i[5] == pept_chain]
+    cont = Contacts.Contacts(pdb).chain_contacts
+    c = [i for i in cont if i[1] == pept_chain or i[5] == pept_chain]
     # Make a list of all chains that contact the peptide chain
     chain_cont = [i for i in sum([[i[1],i[5]] for i in c], []) if i != pept_chain]
     # Make sure the chain is longer than 120 residues. This prevents selecting e.g. two peptides in the binding groove
@@ -483,7 +587,8 @@ def find_chains_MHCII(pdb, pept_chain):
     '''
 
     # Find contacts between peptide chain and other chains
-    c = [i for i in Contacts.Contacts(pdb).chain_contacts if i[1] == pept_chain or i[5] == pept_chain]
+    cont = Contacts.Contacts(pdb).chain_contacts
+    c = [i for i in cont if i[1] == pept_chain or i[5] == pept_chain]
     # Make a list of all chains that contact the peptide chain
     chain_cont = [i for i in sum([[i[1],i[5]] for i in c], []) if i != pept_chain]
     # Make sure the chain is longer than 120 residues. This prevents selecting e.g. two peptides in the binding groove
@@ -529,28 +634,27 @@ def check_pMHC(pdb):
 
     '''
     requirements = [False, False, False, True]
-
     chains = [i.id for i in pdb.get_chains()]
-    chain_len = [len(i) for i in pdb.get_chains()]
+    chain_len = {i.id:len(i) for i in pdb.get_chains()}
 
     # 1. Check chain names and the number of chains
     if len(chains) == 2:
-        if chains[0] == 'M' and chains[1] == 'P':
+        if 'M' in chains and 'P' in chains and not 'N' in chains:
             requirements[0] = True
     elif len(chains) == 3:
-        if chains[0] == 'M' and chains[1] == 'N' and chains[2] == 'P':
+        if 'M' in chains and 'N' in chains and 'P' in chains:
             requirements[0] = True
 
     # 2. Check M,N chain length
     if len(chains) == 2:
-        if chain_len[0] > 120:
+        if chain_len['M'] > 120:
             requirements[1] = True
     elif len(chains) == 3:
-        if chain_len[0] > 120 and chain_len[1] > 120:
+        if chain_len['M'] > 120 and chain_len['N'] > 120:
             requirements[1] = True
 
     # 3. Check peptide length
-    if chain_len[-1] > 6 and chain_len[-1] < 26:
+    if chain_len['P'] > 6 and chain_len['P'] < 26:
         requirements[2] = True
 
     # 4. Check numbering. Does every chain start at 1 and end at its chain length?
@@ -561,6 +665,7 @@ def check_pMHC(pdb):
         if not res[-1][1] == len(c):
             requirements[3] = False
 
+    # If all tests are TRUE, the p:MHC structure is successfully passed
     if all(requirements):
         return True
     else:
@@ -610,8 +715,10 @@ def parse_pMHCI_pdb(pdb_id,
         try:
             # Unzip file (also check if the file is not empty) and save the path of this file
             pdb_file = unzip_pdb(pdb_id, indir, outdir)
+            change_sep_in_ser(pdb_file)
             pdb = PDBParser(QUIET=True).get_structure('MHCI', pdb_file)
-            # Remove waters and weird chains
+            # Remove waters and duplicated/weird chains
+            pdb = remove_duplicated_chains(pdb)
             pdb = remove_irregular_chains(pdb, list(ascii_uppercase))
 
             try:                # Find the peptide chain
@@ -648,14 +755,29 @@ def parse_pMHCI_pdb(pdb_id,
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
             write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
 
-            # Get allele per each chain
-            al = get_chainid_alleles_MHCI(pdb_file)
-            alpha = [[k for k,v in i.items()] for i in [al['A'][i] for i in [i for i in al['A'].keys()]]]
-            a_allele = sum(alpha, [])
+
+
+            try:
+                # Get allele per each chain
+                al = get_chainid_alleles_MHCI(pdb_file)
+                try:
+                    alpha = [[k for k, v in i.items()] for i in [al['A'][i] for i in [i for i in al['A'].keys()]]]
+                except KeyError:
+                    try:
+                        c = MHC_chains[0]
+                        alpha = [[k for k, v in i.items()] for i in [al[c][i] for i in [i for i in al[c].keys()]]]
+                    except KeyError:
+                        c = [i for i in al.keys()][0]
+                        alpha = [[k for k, v in i.items()] for i in [al[c][i] for i in [i for i in al[c].keys()]]]
+
+                a_allele = sum(alpha, [])
+            except:
+                log(pdb_id, 'Could not find allele type', logfile)
+                raise Exception
 
             # Get structure resolution
             resolution = get_resolution(pdb_file)
-
+            # pdb[0]['P']
             # Create MHC_structure object
             templ =  PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs[0], peptide=seqs[-1],  pdb_path=pdb_file, resolution=resolution)
 
@@ -688,7 +810,8 @@ def parse_pMHCII_pdb(pdb_id,
             # Unzip file (also check if the file is not empty) and save the path of this file
             pdb_file = unzip_pdb(pdb_id, indir, outdir)
             pdb = PDBParser(QUIET=True).get_structure('MHCII', pdb_file)
-            # Remove waters and weird chains
+            # Remove waters and duplicated/weird chains
+            pdb = remove_duplicated_chains(pdb)
             pdb = remove_irregular_chains(pdb, list(ascii_uppercase))
 
             try:                # Find the peptide chain
@@ -727,11 +850,28 @@ def parse_pMHCII_pdb(pdb_id,
             write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
 
             # Get allele per each chain
-            al = get_chainid_alleles_MHCII(pdb_file)
-            alpha = sum([al['Alpha'][i] for i in [i for i in al['Alpha'].keys()]], [])
-            beta = sum([al['Beta'][i] for i in [i for i in al['Beta'].keys()]], [])
-            a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
-            b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
+            try:
+                al = get_chainid_alleles_MHCII(pdb_file)
+                try:
+                    alpha = sum([al['Alpha'][i] for i in [i for i in al['Alpha'].keys()]], [])
+                except KeyError:
+                    try:
+                        alpha = sum([al[MHC_chains[0]][i] for i in [i for i in al[MHC_chains[0]].keys()]], [])
+                    except KeyError:
+                        alpha = sum([al['A'][i] for i in [i for i in al['A'].keys()]], [])
+
+                try:
+                    beta = sum([al['Beta'][i] for i in [i for i in al['Beta'].keys()]], [])
+                except KeyError:
+                    try:
+                        beta = sum([al[MHC_chains[1]][i] for i in [i for i in al[MHC_chains[1]].keys()]], [])
+                    except KeyError:
+                        beta = sum([al['B'][i] for i in [i for i in al['B'].keys()]], [])
+                a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
+                b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
+            except:
+                log(pdb_id, 'Could not find allele type', logfile)
+                raise Exception
 
             # Get structure resolution
             resolution = get_resolution(pdb_file)
