@@ -1,7 +1,6 @@
 import os
 import urllib.request
 import urllib.parse
-from string import ascii_uppercase
 from copy import deepcopy
 from Bio.PDB import PDBParser
 from Bio.PDB import PDBIO
@@ -12,6 +11,7 @@ import PANDORA
 from PANDORA.Contacts import Contacts
 from Bio import SeqIO
 from PANDORA.PMHC import PMHC
+from Bio.PDB import NeighborSearch
 from Bio.SeqUtils import seq1
 
 def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_files = True, del_kabat_files = True):
@@ -43,6 +43,7 @@ def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_file
     if del_kabat_files:
         os.system('rm IMGT3DFlatFiles/*.prot.gz')
     #os.chdir('../../../../')
+
 
 def download_ids_imgt(ReceptorType, data_dir = PANDORA.PANDORA_data, out_tsv = False):
     ''' Querys IMGT with the ReceptorType for PDBs.
@@ -247,6 +248,7 @@ def get_chainid_alleles_MHCII(pdbf):
 
     return {'Alpha': mhc_a_alleles, 'Beta': mhc_b_alleles}
 
+
 def get_resolution(pdbf):
     ''' Returns the resolution in Angstrom from the given pdb
 
@@ -260,6 +262,7 @@ def get_resolution(pdbf):
     header = parse_pdb_header(pdbf)
     resolution = header['resolution']
     return resolution
+
 
 def change_sep_in_ser(pdb_file):
     '''
@@ -300,6 +303,7 @@ def change_sep_in_ser(pdb_file):
             else:
                 f.write(line)
 
+
 def replace_chain_names(chains, pdb, replacement_chains=['M', 'N', 'P']):
     ''' Replace chain names by another chain name in a bio.pdb object
 
@@ -324,6 +328,7 @@ def replace_chain_names(chains, pdb, replacement_chains=['M', 'N', 'P']):
             chain.id = replacement_chains[intermediate_chains.index(chain.id)]
 
     return pdb
+
 
 def renumber(pdb):
     ''' Renumbers the pdb. Each chain starts at 1
@@ -460,13 +465,10 @@ def find_peptide_chain(pdb, min=6, max=26):
             if heteroatoms == False:  # If all residues are oke, add this to the list of peptide chains
                 pept_chain.append(chain.id)
 
-    if len(pept_chain) == 0:
-        print('Could not find peptide chain')
-        raise Exception
-
     pept_chain = pept_chain[0]  # Take the first pept chain. If there are multiple, they are probably duplicates
 
     return pept_chain
+
 
 def remove_irregular_chains(pdb, chains_to_keep):
     ''' Removes all chains that you don't specify to keep
@@ -576,6 +578,7 @@ def find_chains_MHCI(pdb, pept_chain):
 
     return MHC_chains
 
+
 def find_chains_MHCII(pdb, pept_chain):
     ''' Find the MHCI chains
 
@@ -585,7 +588,7 @@ def find_chains_MHCII(pdb, pept_chain):
     Returns: list of chains
 
     '''
-
+    # todo this works for imgt, need to check if M and N are selected
     # Find contacts between peptide chain and other chains
     cont = Contacts.Contacts(pdb).chain_contacts
     c = [i for i in cont if i[1] == pept_chain or i[5] == pept_chain]
@@ -605,6 +608,7 @@ def find_chains_MHCII(pdb, pept_chain):
 
     return MHC_chains
 
+
 def seqs_from_pdb(pdb_file, MHC_chains):
     ''' Use SeqIO to get the amino acid sequences from a PDB file.
 
@@ -623,6 +627,36 @@ def seqs_from_pdb(pdb_file, MHC_chains):
         seqs.append(str(chain_seqs[chain]))
 
     return seqs
+
+
+def check_missing_pept_residues(pdb, chain='P'):
+    ''' Checks for missing residues in a chain by calculating N_{res_i-1}-Ca_{res_i} distance. This distance never
+        exceeds ~2.5, so if the N_{res_i-1}-Ca_{res_i} distance > 3 --> residues are missing.
+
+    Args:
+        pdb: Bio.PDB object.
+        chain: (string) name of the chain that is tested for missing residues.
+
+    Returns: bool. True if residues are missing from the chain
+
+    '''
+    # Calculate the distances between every N of residue x and CA of residue x-1.
+    N_CA_dist = []
+    # Cutoff threshold. If this distance is exceeded, there is a residue gap
+    threshold = 3
+    # Check for missing chain residues
+    prev_atom = [i for i in pdb[0][chain].get_atoms()][0]
+    for res in pdb[0][chain]:
+        for atom in res:
+            if atom.id == 'N':
+                N_CA_dist.append(atom - prev_atom)
+
+            if atom.id == 'CA':
+                prev_atom = atom
+
+    # If the distance is greater than 3, there is a distance gap because there is a residue missing.
+    return any([i > threshold for i in N_CA_dist])
+
 
 def check_pMHC(pdb):
     ''' Tests parsed pMHC structures: chain numbering, naming and length
@@ -671,6 +705,116 @@ def check_pMHC(pdb):
     else:
         return False
 
+
+def check_non_canonical_res(chain):
+    ''' Check if there are non-canonical residues in the chain of a Bio.PDB chain object
+
+    Args:
+        chain: Bio.PDB chain object
+
+    Returns: bool, true if there are non canonical residues in the chain
+
+    '''
+    letters = ["ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE", "LYS", "LEU", "MET", "ASN", "PRO", "GLN", "ARG",
+               "SER", "THR", "VAL", "TRP", "TYR"]
+
+    return any([r.resname not in letters for r in chain if r.resname])
+
+
+def check_hetatoms_in_binding_groove(pdb, MHC_chains):
+    ''' Checks if there are heteroatoms in the binding groove between MHC and the peptide. Heteroatoms near the
+        peptide on the outside of the binding groove are allowed. This takes ~ 0.008 seconds.
+
+    Args:
+        pdb: Bio.PDB object
+        MHC_chains: (list) list of MHC chains for the M and P chains respectively
+
+    Returns: bool, true if there are problematic heteroatoms in the binding groove
+
+    '''
+
+    letters = ["ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE", "LYS", "LEU", "MET", "ASN", "PRO", "GLN", "ARG",
+               "SER", "THR", "VAL", "TRP", "TYR", 'HOH']
+
+    # Based on the number of MHC_chains, the structure is MHCI or II.
+    # Define the chain names and the center MHC residue from which distances are calculated.
+    if len(MHC_chains) == 2:
+        MHC = MHC_chains[0]
+        MHC_res = [8]
+        search_dist = 18
+    if len(MHC_chains) == 3:
+        MHC = MHC_chains[1]
+        MHC_res = [12, 29]
+        search_dist = 18
+
+    P = MHC_chains[-1]
+
+    # Take the CA of a central residue (res 8) in MHCI
+    MHC_ch_atoms = [a for a in pdb[0][MHC].get_atoms() if a.id == 'CA' and a.get_parent().id[1] in MHC_res]
+    # Take all CA atoms of the peptide chain
+    pept_atoms = [a for a in pdb[0][P].get_atoms() if a.id == 'CA']
+
+    potential_junk = []
+    for chain in pdb.get_chains():
+        for res in chain:
+            # If the chain has non-amino acids -> add the atoms to the list.
+            if res.resname not in letters:
+                for atom in res:
+                    potential_junk.append(atom)
+
+    # calculate distances
+    atom_dist = NeighborSearch(atom_list=MHC_ch_atoms + potential_junk + pept_atoms).search_all(search_dist)
+
+    # format the distances
+    cont = []
+    for pair in atom_dist:
+        cont.append((pair[1].get_parent().resname, pair[1].get_parent().get_parent().id,
+                    pair[1].get_parent().id[1], pair[1].get_id(),pair[0].get_parent().resname,
+                    pair[0].get_parent().get_parent().id,pair[0].get_parent().id[1],
+                    pair[0].get_id(),pair[0] - pair[1]))
+    # remove intra-chain contacts
+    cont = [i for i in cont if i[1] != i[5]]
+    cont = cont + [(i[4], i[5], i[6], i[7], i[0], i[1], i[2], i[3], i[8]) for i in cont if i[1] == P or i[5] == P]
+    cont = list(dict.fromkeys(cont))
+
+    # Find the min distance between the peptide and the central MHC residue
+    pept_MHC_dist = min((x[-1], x) for x in [i for i in cont if i[1] == P and i[5] == MHC])
+
+    # remove junk-junk distances
+    cont = [i for i in cont if i[5] in [MHC, P]]
+
+    # Find all unique pieces of junk
+    junk = list(set([(i[0],i[1],i[2]) for i in cont if i[1] not in [MHC, P]]))
+
+    for piece in junk:
+        # For every piece of junk find the min junk-MHC and min junk-peptide distances.
+        try:
+            # Get the distances for this specific piece of junk
+            piece_of_junk_cont = []
+            for i in cont:
+                if (i[0], i[1], i[2]) == piece:
+                    piece_of_junk_cont.append(i)
+            # Calculate min junk-MHC and min junk-peptide distances.
+            junk_MHC_dist = min((x[-1], x) for x in [i for i in piece_of_junk_cont if i[5] == MHC])
+            # max distance between junk and pept
+            junk_pept_dist = min((x[-1], x) for x in [i for i in piece_of_junk_cont if i[5] == P])
+
+            # Find out of the piece of junk is inside the binding groove
+            if junk_pept_dist[0] < 6:
+                # Check if the distance between junk and peptide is smaller than the distance between pept and MHC.
+                # If the junk is in between the peptide and MHC, this will be true, but also if the junk is on the outside
+                if junk_pept_dist[0] < pept_MHC_dist[0]:
+                    # Check if the distance between MHC and junk is smaller than the distance between pept and MHC.
+                    # If the junk is in between the peptide and MHC, this will be true
+                    if junk_MHC_dist[0] < pept_MHC_dist[0]:
+                        return True
+
+        except:
+            pass
+
+    return False
+
+
 def log(ID, error, logfile, verbose=True):
     ''' Keeps track of what goes wrong while parsing
 
@@ -717,9 +861,9 @@ def parse_pMHCI_pdb(pdb_id,
             pdb_file = unzip_pdb(pdb_id, indir, outdir)
             change_sep_in_ser(pdb_file)
             pdb = PDBParser(QUIET=True).get_structure('MHCI', pdb_file)
-            # Remove waters and duplicated/weird chains
+            # Remove waters and duplicated chains, then renumber
             pdb = remove_duplicated_chains(pdb)
-            pdb = remove_irregular_chains(pdb, list(ascii_uppercase))
+            pdb = renumber(pdb)
 
             try:                # Find the peptide chain
                 pept_chain = find_peptide_chain(pdb)
@@ -733,10 +877,21 @@ def parse_pMHCI_pdb(pdb_id,
                 log(pdb_id, 'Could not locate Alpha chain', logfile)
                 raise Exception
 
+            if check_missing_pept_residues(pdb, chain=pept_chain):
+                log(pdb_id, 'Peptide chain is missing residues', logfile)
+                raise Exception
+
+            if check_non_canonical_res(pdb[0][pept_chain]):
+                log(pdb_id, 'Non canonical residues in the peptide chain', logfile)
+                raise Exception
+
+            if check_hetatoms_in_binding_groove(pdb, MHC_chains):
+                log(pdb_id, 'Heteroatoms in binding groove between the peptide and MHC', logfile)
+                raise Exception
+
             try:                 # Reformat chains
                 pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
-                pdb = replace_chain_names(MHC_chains, pdb,['M', 'P'])  # Rename chains to M,P
-                pdb = renumber(pdb)  # Renumber from 1
+                pdb = replace_chain_names(MHC_chains, pdb,['M', 'P'])  # Rename chains to M,P # Renumber from 1
             except:
                 log(pdb_id, 'Could not reformat structure', logfile)
                 raise Exception
@@ -754,8 +909,6 @@ def parse_pMHCI_pdb(pdb_id,
 
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
             write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
-
-
 
             try:
                 # Get allele per each chain
@@ -777,14 +930,14 @@ def parse_pMHCI_pdb(pdb_id,
 
             # Get structure resolution
             resolution = get_resolution(pdb_file)
-            # pdb[0]['P']
             # Create MHC_structure object
-            templ =  PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs[0], peptide=seqs[-1],  pdb_path=pdb_file, resolution=resolution)
+            templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs[0], peptide=seqs[-1],  pdb_path=pdb_file, resolution=resolution)
 
             return templ
 
         except:  # If something goes wrong, append the ID to the bad_ids list
             os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
+
 
 def parse_pMHCII_pdb(pdb_id,
                       indir=PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
@@ -809,10 +962,11 @@ def parse_pMHCII_pdb(pdb_id,
         try:
             # Unzip file (also check if the file is not empty) and save the path of this file
             pdb_file = unzip_pdb(pdb_id, indir, outdir)
+            change_sep_in_ser(pdb_file)
             pdb = PDBParser(QUIET=True).get_structure('MHCII', pdb_file)
-            # Remove waters and duplicated/weird chains
+            # Remove waters and duplicated chains, then renumber
             pdb = remove_duplicated_chains(pdb)
-            pdb = remove_irregular_chains(pdb, list(ascii_uppercase))
+            pdb = renumber(pdb)
 
             try:                # Find the peptide chain
                 pept_chain = find_peptide_chain(pdb)
@@ -826,10 +980,21 @@ def parse_pMHCII_pdb(pdb_id,
                 log(pdb_id, 'Could not locate Alpha chain', logfile)
                 raise Exception
 
+            if check_missing_pept_residues(pdb, chain=pept_chain):
+                log(pdb_id, 'Peptide chain is missing residues', logfile)
+                raise Exception
+
+            if check_non_canonical_res(pdb[0][pept_chain]):
+                log(pdb_id, 'Non canonical residues in the peptide chain', logfile)
+                raise Exception
+
+            if check_hetatoms_in_binding_groove(pdb, MHC_chains):
+                log(pdb_id, 'Heteroatoms in binding groove between the peptide and MHC', logfile)
+                raise Exception
+
             try:                 # Reformat chains
                 pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
                 pdb = replace_chain_names(MHC_chains, pdb, ['M', 'N', 'P'])   # Rename chains to M,N,P
-                pdb = renumber(pdb)  # Renumber from 1
             except:
                 log(pdb_id, 'Could not reformat structure', logfile)
                 raise Exception
