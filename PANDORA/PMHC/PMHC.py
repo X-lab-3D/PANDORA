@@ -156,7 +156,7 @@ class Template(PMHC):
 
 class Target(PMHC):
 
-    def __init__(self, id, peptide, allele_type, MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], templates = False):
+    def __init__(self, id, allele_type, peptide, MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], templates = False):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
         Args:
@@ -171,7 +171,7 @@ class Target(PMHC):
             templates: Template object. The user can specify that PANDORA uses a certain structure as template.
         '''
 
-        super().__init__(id, peptide, allele_type, MHC_class, M_chain_seq, N_chain_seq, anchors)
+        super().__init__(id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors)
         self.templates = templates
         self.initial_model = False
         self.contacts = False
