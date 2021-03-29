@@ -26,12 +26,18 @@ def run_model(target, template, benchmark=False, num_models=20):
         mod.model(n_models=nr_models, stdev=0.1, benchmark=benchmark)
 
         moldpdf = ','.join([str(round(float(i.moldpf), 4)) for i in mod.results])
-        lmrsd = ','.join([str(round(i.lrmsd, 4)) for i in mod.results])
-        core_lmrsd = ','.join([str(round(i.core_lrmsd, 4)) for i in mod.results])
+        if benchmark:
+            lmrsd = ','.join([str(round(i.lrmsd, 4)) for i in mod.results])
+            core_lmrsd = ','.join([str(round(i.core_lrmsd, 4)) for i in mod.results])
 
-        with open(filename, 'a') as f:
-            f.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (
-            mod.target.id, mod.target.peptide, ';'.join(mod.target.allele_type), mod.template.id, mod.template.peptide,
-            ';'.join(mod.template.allele_type), moldpdf, lmrsd, core_lmrsd))
+            with open(filename, 'a') as f:
+                f.write('%s,%s,%s,%s,%s,%s,%s,%s,%s\n' % (
+                mod.target.id, mod.target.peptide, ';'.join(mod.target.allele_type), mod.template.id, mod.template.peptide,
+                ';'.join(mod.template.allele_type), moldpdf, lmrsd, core_lmrsd))
+        else:
+            with open(filename, 'a') as f:
+                f.write('%s,%s,%s,%s,%s,%s,%s\n' % (
+                mod.target.id, mod.target.peptide, ';'.join(mod.target.allele_type), mod.template.id, mod.template.peptide,
+                ';'.join(mod.template.allele_type), moldpdf))
     except:
         print('Something went wrong')
