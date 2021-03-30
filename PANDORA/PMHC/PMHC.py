@@ -156,7 +156,7 @@ class Template(PMHC):
 
 class Target(PMHC):
 
-    def __init__(self, id, peptide, allele_type, MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], templates = False):
+    def __init__(self, id, allele_type, peptide, MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], templates = False):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
         Args:
@@ -171,7 +171,7 @@ class Target(PMHC):
             templates: Template object. The user can specify that PANDORA uses a certain structure as template.
         '''
 
-        super().__init__(id, peptide, allele_type, MHC_class, M_chain_seq, N_chain_seq, anchors)
+        super().__init__(id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors)
         self.templates = templates
         self.initial_model = False
         self.contacts = False
@@ -203,7 +203,7 @@ class Target(PMHC):
         print('Peptide: %s' % self.peptide)
         print('Anchors: %s' % self.anchors)
         if self.templates:
-            print('Using template %s for homology modelling' %self.templates) #todo actually build this functionality
+            print('Using template %s for homology modelling' %self.templates)
         if self.initial_model:
             print('An initial model has been provided.')
 
@@ -219,11 +219,6 @@ class Target(PMHC):
         else:
             raise Exception('Provide an initial model (.ini PDB) and anchor positions to the Target object first')
 
-    # def calc_anchors(self):
-    #     pass
-#
-# x = Template('1DLH', ['asdasasdd'], MHC_class='II', pdb_path= PANDORA.PANDORA_data + '/PDBs/pMHCII/1DLH.pdb')
-# x.calc_contacts()
-# x.calc_anchor_contacts()
+
 
 
