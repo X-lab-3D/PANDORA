@@ -1,8 +1,8 @@
 from Bio.PDB import PDBParser
 import os
 from Bio.PDB import PDBIO
-from pdb2sql import StructureSimilarity
 import PANDORA
+import sys
 
 class Model:
 
@@ -34,19 +34,23 @@ class Model:
 
 
     def calc_LRMSD(self, reference_pdb, atoms = ['C', 'CA', 'N', 'O']):
-        ''' Calculate the L-RMSD between the decoy and reference structure (ground truth)
+        ''' Calculate the L-RMSD between the decoy and reference structure (ground truth).
+            This function requires the pdb2sql module for L-RMSD calculation.
 
         Args:
-            template_pdb: Bio.PDB object
+            reference_pdb: Bio.PDB object or path to pdb file
 
         Returns: (float) L-RMSD
         '''
+        
+        if 'pdb2sql.StructureSimilarity' not in sys.modules:
+            from pdb2sql import StructureSimilarity
 
         # load target pdb
         if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first
             ref = PDBParser(QUIET=True).get_structure('MHC', reference_pdb)
         else:
-            ref = template_pdb
+            ref = reference_pdb
 
         # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
         homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id)
@@ -65,16 +69,19 @@ class Model:
         ''' Calculate the L-RMSD between the decoy and reference structure (ground truth)
 
         Args:
-            template_pdb: Bio.PDB object
+            reference_pdb: Bio.PDB object or path to pdb file
 
         Returns: (float) L-RMSD
         '''
+        
+        if 'pdb2sql.StructureSimilarity' not in sys.modules:
+            from pdb2sql import StructureSimilarity
 
         # load target pdb
         if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first
             ref = PDBParser(QUIET=True).get_structure('MHC', reference_pdb)
         else:
-            ref = template_pdb
+            ref = reference_pdb
 
         # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
         homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id, anchors = self.target.anchors)
