@@ -42,9 +42,8 @@ class Model:
 
         Returns: (float) L-RMSD
         '''
-        
-        if 'pdb2sql.StructureSimilarity' not in sys.modules:
-            from pdb2sql import StructureSimilarity
+
+        from pdb2sql import StructureSimilarity
 
         # load target pdb
         if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first
@@ -73,9 +72,8 @@ class Model:
 
         Returns: (float) L-RMSD
         '''
-        
-        if 'pdb2sql.StructureSimilarity' not in sys.modules:
-            from pdb2sql import StructureSimilarity
+
+        from pdb2sql import StructureSimilarity
 
         # load target pdb
         if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first
