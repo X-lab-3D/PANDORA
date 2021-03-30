@@ -149,17 +149,20 @@ class Pandora:
                 for i in self.target.anchor_contacts:
                     f.write('\t'.join('%s' % x for x in i) + '\n')
 
-    def write_modeller_script(self, n_models = 20, stdev = 0.1):
+    def write_modeller_script(self, n_models = 20, n_jobs=None, stdev = 0.1):
         ''' Write the script that modeller uses for the final homology modelling.
 
         Args:
             n_models: (int) number of models that Pandora generates
+            n_jobs: (int) number of parallel jobs. Is recommended to use as many jobs as the number of models: less will result in
+                a slower run, more will not add any benefit but might occupy cores unnecessarily.
             stdev: (float) standard deviation of modelling restraints. Higher = more flexible restraints.
 
         '''
-        Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, self.output_dir, n_models=n_models, stdev=stdev)
+        Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, 
+                                                  self.output_dir, n_models=n_models, n_jobs=n_jobs, stdev=stdev)
 
-    def model(self, n_models=20, stdev=0.1, seq_based_templ_selection = False, benchmark=False, verbose=True):
+    def model(self, n_models=20, n_jobs=None, stdev=0.1, seq_based_templ_selection = False, benchmark=False, verbose=True):
         ''' Wrapper function that combines all modelling steps.
 
         Args:
@@ -191,7 +194,7 @@ class Pandora:
         # Calculate anchor restraints
         self.anchor_contacts(verbose=verbose)
         # prepare the scripts that run modeller
-        self.write_modeller_script(n_models=n_models, stdev=stdev)
+        self.write_modeller_script(n_models=n_models, n_jobs=n_jobs, stdev=stdev)
         # Do the homology modelling
         self.run_modeller(benchmark=benchmark, verbose=verbose, keep_IL=self.keep_IL)
 

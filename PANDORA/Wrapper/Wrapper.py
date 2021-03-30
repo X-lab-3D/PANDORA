@@ -134,7 +134,7 @@ class Wrapper():
                                   peptide=self.targets[target_id]['peptide_sequence'],
                                   MHC_class=MHC_class)
             mod = Pandora.Pandora(tar, db)
-            mod.find_template()
+            mod.find_template(benchmark=benchmark)
             jobs[target_id] = [tar, mod.template]
             #except: ### TODO: test and specify exception for this except
             #    pass
@@ -144,7 +144,7 @@ class Wrapper():
         with Pool(processes=num_cores) as pool:
             return pool.map(func, list(self.jobs.values()))
 
-    def run_pandora(self, num_cores=1, num_models=20, benchmark=False):
+    def run_pandora(self, num_cores=1, num_models=20, n_jobs=None, benchmark=False):
         """
         
 
@@ -159,10 +159,10 @@ class Wrapper():
         
         freeze_support()
         for job in self.jobs:
-            self.jobs[job].extend([num_models, benchmark])
+            self.jobs[job].extend([num_models, n_jobs, benchmark])
         self.__run_multiprocessing(run_model, num_cores)
     
-    def run_pandora_joblib(self, num_cores=1, num_models=20, benchmark=False):
+    def run_pandora_joblib(self, num_cores=1, num_models=20, n_jobs=None, benchmark=False):
         """
         
 
@@ -176,7 +176,7 @@ class Wrapper():
         """
 
         for job in self.jobs:
-            self.jobs[job].extend([num_models, benchmark])
+            self.jobs[job].extend([num_models, n_jobs, benchmark])
         Parallel(n_jobs = num_cores, verbose = 1, backend='loky')(delayed(run_model)(job) for job in list(self.jobs.values()))
 '''
 ## To test
