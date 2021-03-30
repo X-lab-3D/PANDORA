@@ -86,7 +86,7 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
     # If the template is already present in the db and you're not benchmarking, return this template
     if templ_present and not benchmark:
         print('\n\t---- PANDORA FOUND A TEMPLATE WITH THE SAME ALLELE AND PEPTIDE SEQUENCE AS THE TARGET ----\n')
-        return templ_present
+        return templ_present, True
 
     # def find_best_template_peptide(target, templates):
     #     ''' Finds the best template based on pairwise alignment
@@ -109,8 +109,8 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
     #         if v[0] == max((v, k) for k, v in ali.pept_alignment_scores.items())[0][0]:
     #             if v[2] == target.anchors:
     #                 template_id = k
-
-        return template_id
+    #
+    #     return template_id
 
 
     if not seq_based_templ_selection:
@@ -157,7 +157,7 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
             template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
             # Return the Template object of the selected template that will be used for homology modelling
 
-            return database.MHCI_data[template_id]
+            return database.MHCI_data[template_id], False
 
 
         ## For MHC II
@@ -203,7 +203,7 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
             template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
             # Return the Template object of the selected template that will be used for homology modelling
 
-            return database.MHCII_data[template_id]
+            return database.MHCII_data[template_id], False
 
     # Sequence based template search if the sequences of the target are provided
     elif target.M_chain_seq != '' and seq_based_templ_selection:
@@ -231,7 +231,7 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
             # take the template with the best scoring peptide
             best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
 
-            return database.MHCI_data[best_template]
+            return database.MHCI_data[best_template], False
 
         if target.MHC_class == 'II':
             # define target sequences
@@ -256,7 +256,7 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
             # take the template with the best scoring peptide
             best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
 
-            return database.MHCII_data[best_template]
+            return database.MHCII_data[best_template], False
 
 
 def write_ini_script(target, template, alignment_file, output_dir):
@@ -271,7 +271,6 @@ def write_ini_script(target, template, alignment_file, output_dir):
         output_dir: (string) path to output directory
 
     '''
-
 
     anch = target.anchors
 
@@ -316,7 +315,6 @@ def write_ini_script(target, template, alignment_file, output_dir):
             else:
                 modscript.write(line)
         cmd_m_temp.close()
-
 
 
 def write_modeller_script(target, template, alignment_file, output_dir, n_models=20, stdev=0.1):
@@ -381,11 +379,7 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_models
         cmd_m_temp.close()
 
 
-#output_dir = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/outputs/1SJH_1SJE'
-benchmark = True
-
-
-def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmark = False, pickle_out = True):
+def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmark = False, pickle_out = True, keep_IL = False):
     ''' Perform the homology modelling.
 
     Args:
@@ -414,6 +408,18 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
             if len(l) > 2:
                 logf.append(tuple(l))
     f.close()
+
+    if keep_IL:
+        # Also take the Initial Loop model. Take the molpdf from the pdb header.
+        il_file = [i for i in os.listdir(output_dir) if i.startswith(target.id + '.IL')][0]
+        il = open(output_dir + '/' + il_file)
+        for line in il:
+            if 'MODELLER OBJECTIVE FUNCTION' in line:
+                il_molpdf = line.split()[-1]
+        f.close()
+        # Append the filename and molpdf to the rest of the data
+        logf.append((il_file, il_molpdf, None))
+
 
     # Create Model object of each theoretical model and add it to results
     results = []
