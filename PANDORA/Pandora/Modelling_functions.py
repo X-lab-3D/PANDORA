@@ -381,7 +381,7 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_models
         cmd_m_temp.close()
 
 
-output_dir = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/outputs/1SJH_1SJE'
+#output_dir = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/outputs/1SJH_1SJE'
 benchmark = True
 
 
