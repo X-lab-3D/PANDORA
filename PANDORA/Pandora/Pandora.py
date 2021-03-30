@@ -20,7 +20,7 @@ class Pandora:
             raise Exception('Provide a Database object so Pandora can find the best suitable template structure for '
                             'modelling. Alternatively, you can specify a user defined Template object.')
 
-    def find_template(self, seq_based_templ_selection = False, verbose = True):
+    def find_template(self, seq_based_templ_selection=False, benchmark=False, verbose=True):
         ''' Find the best template structure given a Target object
 
         Args:
@@ -29,12 +29,20 @@ class Pandora:
 
         '''
 
+        if verbose:
+            print('\tTarget MHC Class: %s' % self.target.MHC_class)
+            print('\tTarget Allele:  %s' % self.target.allele_type)
+            print('\tTarget Peptide: %s' % self.target.peptide)
+            print('\tTarget Anchors: %s\n' % self.target.anchors)
+
         if self.template == None:
             if verbose and self.target.M_chain_seq != '' and seq_based_templ_selection:
                 print('\tUsing sequence based template selection')
             elif verbose:
                 print('\tUsing allele type based template selection')
-            self.template = Modelling_functions.find_template(self.target, self.database, seq_based_templ_selection)
+            self.template = Modelling_functions.find_template(self.target, self.database,
+                                                              seq_based_templ_selection=seq_based_templ_selection,
+                                                              benchmark=benchmark)
             self.target.templates = [self.template.id]
             if verbose:
                 print('\tSelected template structure: %s' %self.template.id)
@@ -67,6 +75,9 @@ class Pandora:
 
         '''
         self.alignment = Align.Align(self.target, self.template, output_dir=self.output_dir)
+        # self.alignment = Align.Align()
+        # self.alignment.Align_templates(self.target, self.template, output_dir=self.output_dir)
+
         if verbose:
             print('\tSuccessfully created alignment file')
 
@@ -162,15 +173,11 @@ class Pandora:
 
         if verbose:
             print('\nModelling %s...\n' %self.target.id)
-            print('\tTarget MHC Class: %s' % self.target.MHC_class)
-            print('\tTarget Allele:  %s' % self.target.allele_type)
-            print('\tTarget Peptide: %s' % self.target.peptide)
-            print('\tTarget Anchors: %s\n' % self.target.anchors)
 
         # Make sure we're in the root directory
         os.path.dirname(PANDORA.PANDORA_path)
         # Find the best template structure given the Target
-        self.find_template(seq_based_templ_selection, verbose=verbose)
+        self.find_template(seq_based_templ_selection, benchmark=benchmark, verbose=verbose)
         # Prepare the output directory
         self.prep_output_dir()
         # Perform sequence alignment. This is used to superimpose the target on the template structure in later steps

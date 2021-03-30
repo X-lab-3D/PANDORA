@@ -214,7 +214,7 @@ class Target(PMHC):
         print('Peptide: %s' % self.peptide)
         print('Anchors: %s' % self.anchors)
         if self.templates:
-            print('Using template %s for homology modelling' %self.templates) #todo actually build this functionality
+            print('Using template %s for homology modelling' %self.templates)
         if self.initial_model:
             print('An initial model has been provided.')
 
@@ -230,11 +230,6 @@ class Target(PMHC):
         else:
             raise Exception('Provide an initial model (.ini PDB) and anchor positions to the Target object first')
 
-    # def calc_anchors(self):
-    #     pass
-#
-# x = Template('1DLH', ['asdasasdd'], MHC_class='II', pdb_path= PANDORA.PANDORA_data + '/PDBs/pMHCII/1DLH.pdb')
-# x.calc_contacts()
-# x.calc_anchor_contacts()
+
 
 
