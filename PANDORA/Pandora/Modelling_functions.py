@@ -2,6 +2,7 @@ from Bio.Align import substitution_matrices
 import os
 import PANDORA
 import dill
+import pickle
 from PANDORA.PMHC import Model
 from Bio import Align
 
@@ -374,7 +375,11 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_models
         cmd_m_temp.close()
 
 
-def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmark = False, pickle_out = True):
+#output_dir = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/outputs/1SJH_1SJE'
+benchmark = True
+
+
+def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmark = False, pickle_out = True, verbose = True):
     ''' Perform the homology modelling.
 
     Args:
@@ -412,7 +417,6 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
                                             molpdf=logf[i][1], dope=logf[i][2])
         except:
             print('Something went wrong when calling Model.Model() for case %s' %target.id)
-            pass
         if benchmark:
             try:
                 m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
@@ -420,17 +424,18 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
             except:
                 print('Something went wrong when calculating l-RMSD for case %s' %target.id)
                 pass
-            try:
-                m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
-                print('Core l-RMSD for %s: %f' %(target.id, m.core_lrmsd))
-            except:
-                print('Something went wrong when calculating core l-RMSD for case %s' %target.id)
-                pass
+            if target.MHC_class == 'II': #only calculate the core L-rmsd for MHCII cases
+                try:
+                    m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
+                    print('Core l-RMSD for %s: %f' %(target.id, m.core_lrmsd))
+                except:
+                    print('Something went wrong when calculating core l-RMSD for case %s' %target.id)
+                    pass
         results.append(m)
 
 
     # Save results as pickle
     if pickle_out:
-        dill.dump(results, open("%s/results_%s.pkl" %(output_dir, os.path.basename(os.path.normpath(output_dir))), "wb"))
+        pickle.dump(results, open("%s/results_%s.pkl" %(output_dir, os.path.basename(os.path.normpath(output_dir))), "wb"))
 
     return results
