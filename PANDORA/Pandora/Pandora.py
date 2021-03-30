@@ -75,8 +75,9 @@ class Pandora:
 
         '''
         self.alignment = Align.Align(self.target, self.template, output_dir=self.output_dir)
-        # self.alignment = Align.Align()
-        # self.alignment.Align_templates(self.target, self.template, output_dir=self.output_dir)
+
+        # self.alignment = Align.Align2(target = self.target, template=self.template, output_dir=self.output_dir)
+        # self.alignment.align_templates()
 
         if verbose:
             print('\tSuccessfully created alignment file')

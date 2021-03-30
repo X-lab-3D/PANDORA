@@ -4,8 +4,8 @@ import PANDORA
 import dill
 import pickle
 from PANDORA.PMHC import Model
-from Bio import Align
-
+# from Bio import Align
+from PANDORA.Pandora import Align
 
 
 def check_presence(target, database, seq_based_templ_selection = False):
@@ -70,13 +70,6 @@ def check_presence(target, database, seq_based_templ_selection = False):
     return target_in_db
 
 
-
-
-
-
-
-
-
 def find_template(target, database, seq_based_templ_selection = False, benchmark=False):
     ''' Selects the template structure that is best suited as template for homology modelling of the target
 
@@ -95,98 +88,122 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
         print('\n\t---- PANDORA FOUND A TEMPLATE WITH THE SAME ALLELE AND PEPTIDE SEQUENCE AS THE TARGET ----\n')
         return templ_present
 
+    # def find_best_template_peptide(target, templates):
+    #     ''' Finds the best template based on pairwise alignment
+    #
+    #     Args:
+    #         target: (:obj:`Target`): Target object
+    #         templates: (:obj:`list` of :obj:`Template`): A list of putative templates to align and score
+    #
+    #     Returns: (str): ID of the template with the best matching peptide.
+    #
+    #     '''
+    #     # Find the alignment scores of the peptides of all putative templates with the target peptide
+    #     ali = Align.Align2(target=target, template=templates)
+    #     ali.align_peptides()
+    #
+    #     # Find the peptide with the highest alignment score. If there are multiple, take the first one with same
+    #     # same anchor positions
+    #     template_id = max((v, k) for k, v in ali.pept_alignment_scores.items())[1]
+    #     for k, v in ali.pept_alignment_scores.items():
+    #         if v[0] == max((v, k) for k, v in ali.pept_alignment_scores.items())[0][0]:
+    #             if v[2] == target.anchors:
+    #                 template_id = k
+
+        return template_id
+
 
     if not seq_based_templ_selection:
 
         PAM30 = substitution_matrices.load('PAM30')
 
-    ## For MHC I
-    if target.MHC_class == 'I':
+        ## For MHC I
+        if target.MHC_class == 'I':
 
-        # Find template structures with matching alleles
-        putative_templates = {}
-        for ID in database.MHCI_data:
-            if ID != target.id:
-                if any(x in database.MHCI_data[ID].allele_type for x in target.allele_type):
-                    putative_templates[ID] = list(
-                        set(target.allele_type) & set(database.MHCI_data[ID].allele_type))  # update dict with ID:all matching alleles
-        
-        # If the target template already occured in the database, remove it from the dict of putative templates
-        #putative_templates.pop(target.id)
+            # Find template structures with matching alleles
+            putative_templates = {}
+            for ID in database.MHCI_data:
+                if ID != target.id:
+                    if any(x in database.MHCI_data[ID].allele_type for x in target.allele_type):
+                        putative_templates[ID] = list(
+                            set(target.allele_type) & set(database.MHCI_data[ID].allele_type))  # update dict with ID:all matching alleles
 
-        # Find the putative template with the best matching peptide
-        pos_list = []
-        for ID in putative_templates:
-            score = 0
-            temp_pept = database.MHCI_data[ID].peptide
-            min_len = min([len(target.peptide), len(temp_pept)])
-            score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty
-            for i, (aa, bb) in enumerate(zip(target.peptide[:min_len], temp_pept[:min_len])):
-                try:
-                    # gain = MatrixInfo.pam30[aa, bb]
-                    gain = PAM30[aa, bb]
-                    score += gain
-                except KeyError:
+            # Find the putative template with the best matching peptide
+            # template_id = find_best_template_peptide(target=target,
+            #                                          templates=[database.MHCII_data[i] for i in putative_templates])
+
+            pos_list = []
+            for ID in putative_templates:
+                score = 0
+                temp_pept = database.MHCI_data[ID].peptide
+                min_len = min([len(target.peptide), len(temp_pept)])
+                score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty
+                for i, (aa, bb) in enumerate(zip(target.peptide[:min_len], temp_pept[:min_len])):
                     try:
-                        # gain = MatrixInfo.pam30[bb, aa]
-                        gain = PAM30[bb, aa]
+                        # gain = MatrixInfo.pam30[aa, bb]
+                        gain = PAM30[aa, bb]
                         score += gain
                     except KeyError:
-                        score = -50
-                        pass
-            pos_list.append((score, temp_pept, ID))
+                        try:
+                            # gain = MatrixInfo.pam30[bb, aa]
+                            gain = PAM30[bb, aa]
+                            score += gain
+                        except KeyError:
+                            score = -50
+                            pass
+                pos_list.append((score, temp_pept, ID))
 
-        # Take the putative template with the max scoring peptide
-        template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
-        # Return the Template object of the selected template that will be used for homology modelling
-        return database.MHCI_data[template_id]
+            # Take the putative template with the max scoring peptide
+            template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
+            # Return the Template object of the selected template that will be used for homology modelling
+
+            return database.MHCI_data[template_id]
 
 
-    ## For MHC II
-    if target.MHC_class == 'II':
+        ## For MHC II
+        if target.MHC_class == 'II':
 
-        # Find template structures with matching alleles
-        putative_templates = {}
-        for id in database.MHCII_data:
-            if any(x in database.MHCII_data[id].allele_type for x in target.allele_type):
-                # putative_templates[id] = db.MHCII_data[id].allele_type
-                putative_templates[id] = list(set(target.allele_type) & set(database.MHCII_data[id].allele_type)) #update dict with ID:all matching alleles
+            # Find template structures with matching alleles
+            putative_templates = {}
+            for ID in database.MHCII_data:
+                if ID != target.id:
+                    if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
+                        putative_templates[ID] = list(
+                            set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
 
-        # If the target template already occured in the database, remove it from the dict of putative templates
-        putative_templates.pop(target.id)
+            # Find the peptide with the highest alignment score. If there are multiple, take the first one with same
+            # same anchor positions
 
-        # check if there are any template that have two matching alleles
-        # max([len(v) for k,v in putative_templates.items()])
+            # template_id = find_best_template_peptide(target=target,
+            #                                          templates=[database.MHCII_data[i] for i in putative_templates])
 
-        # Find the putative template with the best matching peptide
-        pos_list = []
-        for ID in putative_templates:
-            score = 0
-            temp_pept = database.MHCII_data[ID].peptide
-            min_len = min([len(target.peptide), len(temp_pept)])
-            score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty
-            for i, (aa, bb) in enumerate(zip(target.peptide[:min_len], temp_pept[:min_len])):
-                try:
-                    # gain = MatrixInfo.pam30[aa, bb]
-                    gain = PAM30[aa, bb]
-                    score += gain
-                except KeyError:
+            # Find the putative template with the best matching peptide
+            pos_list = []
+            for ID in putative_templates:
+                score = 0
+                temp_pept = database.MHCII_data[ID].peptide
+                min_len = min([len(target.peptide), len(temp_pept)])
+                score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty
+                for i, (aa, bb) in enumerate(zip(target.peptide[:min_len], temp_pept[:min_len])):
                     try:
-                        # gain = MatrixInfo.pam30[bb, aa]
-                        gain = PAM30[bb, aa]
+                        # gain = MatrixInfo.pam30[aa, bb]
+                        gain = PAM30[aa, bb]
                         score += gain
                     except KeyError:
-                        score = -50
-                        pass
-            pos_list.append((score, temp_pept, ID))
+                        try:
+                            # gain = MatrixInfo.pam30[bb, aa]
+                            gain = PAM30[bb, aa]
+                            score += gain
+                        except KeyError:
+                            score = -50
+                            pass
+                pos_list.append((score, temp_pept, ID))
 
-        # Take the putative template with the max scoring peptide
-        template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
-        # Return the Template object of the selected template that will be used for homology modelling
-        return database.MHCII_data[template_id]
+            # Take the putative template with the max scoring peptide
+            template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
+            # Return the Template object of the selected template that will be used for homology modelling
 
-
-
+            return database.MHCII_data[template_id]
 
     # Sequence based template search if the sequences of the target are provided
     elif target.M_chain_seq != '' and seq_based_templ_selection:
@@ -368,7 +385,7 @@ output_dir = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PAND
 benchmark = True
 
 
-def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmark = False, pickle_out = True, verbose = True):
+def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmark = False, pickle_out = True):
     ''' Perform the homology modelling.
 
     Args:
@@ -408,16 +425,12 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
             if benchmark:
                 try:
                     m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
-                    if verbose:
-                        print('l-RMSD for %s: %f' %(target.id, m.lrmsd))
                 except:
                     print('Something went wrong when calculating l-RMSD for case %s' %target.id)
                     pass
                 if target.MHC_class == 'II': #only calculate the core L-rmsd for MHCII cases
                     try:
                         m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
-                        if verbose:
-                            print('Core l-RMSD for %s: %f' %(target.id, m.core_lrmsd))
                     except:
                         print('Something went wrong when calculating core l-RMSD for case %s' %target.id)
                         pass
