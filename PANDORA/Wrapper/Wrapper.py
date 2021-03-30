@@ -16,9 +16,16 @@ import time
 import csv
 import os
 
+#test joblib
+from joblib import Parallel, delayed
+from multiprocessing import Manager
+from joblib.externals.loky import set_loky_pickler
+set_loky_pickler("dill")
+
 
 class Wrapper():
     def __init__(self):
+
         """
 
         Args:
@@ -87,10 +94,6 @@ class Wrapper():
                 else:
                     targets[target_id] = {'peptide_sequence' : peptide_seq, 'allele' : allele}
         self.targets = targets
-    
-    def __run_multiprocessing(self, func, num_cores, benchmark, num_models):
-        with Pool(processes=num_cores) as pool:
-            return pool.map(func, self.targets, benchmark, num_models)
 
     def create_targets(self, data_file, db, MHC_class, delimiter = '\t', header=True, IDs_col=None, 
                        peptides_col=0, allele_col=1, anchors_col=None, benchmark=False, num_models=20):
@@ -132,11 +135,14 @@ class Wrapper():
                                   MHC_class=MHC_class)
             mod = Pandora.Pandora(tar, db)
             mod.find_template()
-            jobs[target_id] = (tar, mod.template)
+            jobs[target_id] = [tar, mod.template]
             #except: ### TODO: test and specify exception for this except
             #    pass
-        print(jobs)
         self.jobs = jobs
+        
+    def __run_multiprocessing(self, func, num_cores):
+        with Pool(processes=num_cores) as pool:
+            return pool.map(func, list(self.jobs.values()))
 
     def run_pandora(self, num_cores=1, num_models=20, benchmark=False):
         """
@@ -152,8 +158,26 @@ class Wrapper():
         """
         
         freeze_support()
-        self.__run_multiprocessing(run_model, num_cores, self.jobs)
+        for job in self.jobs:
+            self.jobs[job].extend([num_models, benchmark])
+        self.__run_multiprocessing(run_model, num_cores)
+    
+    def run_pandora_joblib(self, num_cores=1, num_models=20, benchmark=False):
+        """
         
+
+        Args:
+            n_cores (TYPE, optional): DESCRIPTION. Defaults to 1.
+            benchmark (TYPE, optional): DESCRIPTION. Defaults to False.
+
+        Returns:
+            None.
+
+        """
+
+        for job in self.jobs:
+            self.jobs[job].extend([num_models, benchmark])
+        Parallel(n_jobs = num_cores, verbose = 1, backend='loky')(delayed(run_model)(job) for job in list(self.jobs.values()))
 '''
 ## To test
 
@@ -164,7 +188,7 @@ wrap = Wrapper()
 wrap.create_targets('PANDORA_files/data/csv_pkl_files/test_datafile.tsv', db, 
                     MHC_class='I', header=False, IDs_col=0, peptides_col=1, 
                     allele_col=2, benchmark=True)
-#wrap.run_pandora(benchmark=True)
+wrap.run_pandora(num_cores=6, num_models=20, benchmark=True)
 MHC_class='I'
 for target in wrap.targets:
     tar = PMHC.Target(target, allele_type=wrap.targets[target]['allele'], peptide=wrap.targets[target]['peptide_sequence'], MHC_class=MHC_class)

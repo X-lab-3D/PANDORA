@@ -38,7 +38,7 @@ class Model:
             This function requires the pdb2sql module for L-RMSD calculation.
 
         Args:
-            template_pdb: Bio.PDB object
+            reference_pdb: Bio.PDB object or path to pdb file
 
         Returns: (float) L-RMSD
         '''
@@ -50,7 +50,7 @@ class Model:
         if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first
             ref = PDBParser(QUIET=True).get_structure('MHC', reference_pdb)
         else:
-            ref = template_pdb
+            ref = reference_pdb
 
         # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
         homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id)
@@ -69,7 +69,7 @@ class Model:
         ''' Calculate the L-RMSD between the decoy and reference structure (ground truth)
 
         Args:
-            template_pdb: Bio.PDB object
+            reference_pdb: Bio.PDB object or path to pdb file
 
         Returns: (float) L-RMSD
         '''
@@ -81,7 +81,7 @@ class Model:
         if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first
             ref = PDBParser(QUIET=True).get_structure('MHC', reference_pdb)
         else:
-            ref = template_pdb
+            ref = reference_pdb
 
         # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
         homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id, anchors = self.target.anchors)

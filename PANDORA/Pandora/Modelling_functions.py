@@ -2,7 +2,7 @@ from Bio.Align import substitution_matrices
 PAM30 = substitution_matrices.load('PAM30')
 import os
 import PANDORA
-import pickle
+import dill
 from PANDORA.PMHC import Model
 from Bio import Align
 
@@ -317,15 +317,27 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         try:
             m = Model.Model(target, model_path=output_dir + '/' + logf[i][0], output_dir = output_dir,
                                             molpdf=logf[i][1], dope=logf[i][2])
-            if benchmark:
-                m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
-                m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
-            results.append(m)
         except:
+            print('Something went wrong when calling Model.Model() for case %s' %target.id)
             pass
+            if benchmark:
+                try:
+                    m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
+                    print('l-RMSD for %s: %f' %(target.id, m.lrmsd))
+                except:
+                    print('Something went wrong when calculating l-RMSD for case %s' %target.id)
+                    pass
+                try:
+                    m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
+                    print('Core l-RMSD for %s: %f' %(target.id, m.core_lrmsd))
+                except:
+                    print('Something went wrong when calculating core l-RMSD for case %s' %target.id)
+                    pass
+            results.append(m)
+
 
     # Save results as pickle
     if pickle_out:
-        pickle.dump(results, open("%s/results_%s.pkl" %(output_dir, os.path.basename(os.path.normpath(output_dir))), "wb"))
+        dill.dump(results, open("%s/results_%s.pkl" %(output_dir, os.path.basename(os.path.normpath(output_dir))), "wb"))
 
     return results
