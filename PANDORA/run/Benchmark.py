@@ -54,13 +54,8 @@ def run_multiprocessing(func, i, num_cores):
 def bench_MHCII():
     t0 = time.time()
     # print(t0)
-<<<<<<< Updated upstream
-    db = Database.Database().load('27_03_21_Pandora_db')
-    num_cores = 12
-=======
     db = Database.Database().load('./PANDORA_files/data/csv_pkl_files/27_03_21_pandora_db.pkl')
     num_cores = 8
->>>>>>> Stashed changes
 
     list_of_targets_templates = []
     for k in db.MHCII_data:
@@ -84,13 +79,8 @@ def bench_MHCII():
 def bench_MHCI():
     t0 = time.time()
     # print(t0)
-<<<<<<< Updated upstream
-    db = Database.Database().load('27_03_21_Pandora_db')
-    num_cores = 12
-=======
     db = Database.Database().load('./PANDORA_files/data/csv_pkl_files/27_03_21_pandora_db.pkl')
     num_cores = 128
->>>>>>> Stashed changes
 
     list_of_targets_templates = []
     for k in db.MHCI_data:
