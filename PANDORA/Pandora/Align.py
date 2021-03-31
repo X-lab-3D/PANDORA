@@ -1,7 +1,8 @@
 from Bio import SeqIO
 from Bio.Align.Applications import MuscleCommandline
 from Bio.Align import substitution_matrices
-from Bio import Align
+from Bio.Align import PairwiseAligner
+import Bio.Align
 import PANDORA
 import os
 
@@ -387,7 +388,7 @@ class Align2:
 
             # Create aligner object. The high gap penalties make sure gaps are only created if really needed.
             # For example if the anchors of target and template do not match and a gap needs to be introduced.
-            aligner = Align.PairwiseAligner()
+            aligner = Bio.Align.PairwiseAligner()
             aligner.substitution_matrix = substitution_matrices.load(subt_matrix)  # PAM30 for pept??
             aligner.gap_score = -1000
             aligner.end_open_gap_score = -1000000
@@ -402,7 +403,7 @@ class Align2:
             aligned_left_score = 0
             if len(tar_left) > 0 and len(temp_left) > 0:
                 # Create aligner object. Make sure no gaps are created in the right side of the sequence
-                aligner = Align.PairwiseAligner()
+                aligner = Bio.Align.PairwiseAligner()
                 aligner.substitution_matrix = substitution_matrices.load(subt_matrix)
                 aligner.gap_score = -1000
                 aligner.right_open_gap_score = -1000000
@@ -420,7 +421,7 @@ class Align2:
             aligned_right_score = 0
             if len(tar_right) > 0 and len(temp_right) > 0:
                 # Create aligner object. Make sure no gaps are created in the left side of the sequence
-                aligner = Align.PairwiseAligner()
+                aligner = Bio.Align.PairwiseAligner()
                 aligner.substitution_matrix = substitution_matrices.load(subt_matrix)
                 aligner.gap_score = -1000
                 aligner.left_open_gap_score = -1000000
