@@ -47,8 +47,13 @@ class Pandora:
             self.target.templates = [self.template.id]
             if verbose:
                 print('\tSelected template structure: %s' %self.template.id)
-        elif verbose:
+
+        else:
+            if verbose:
                 print('\tUser defined template structure: %s' %self.template.id)
+
+            self.keep_IL = Modelling_functions.check_target_template(self.target, self.template)
+
         if verbose:
             print('\tTemplate Allele:  %s' % self.template.allele_type)
             print('\tTemplate Peptide: %s' % self.template.peptide)

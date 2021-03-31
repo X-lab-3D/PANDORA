@@ -7,6 +7,45 @@ from PANDORA.PMHC import Model
 # from Bio import Align
 from PANDORA.Pandora import Align
 
+def check_target_template(target, template):
+    """ Checks if the target and the template are the same. If the user gave sequence info in the target, use that, else
+        use the allele type.
+
+    Args:
+        target: (:obj:`Target`): Target object
+        template: (:obj:`Template`): Template object
+
+    Returns: (bool): True if target/template are the same, False if they are not.
+
+    """
+    out = False
+    # Check if target peptide and template peptide are the same
+    if target.peptide == template.peptide:
+        # If the target has no sequence information, use allele type
+        if target.M_chain_seq == '':
+            # Check if the allele of target and template are the same
+            if any(x in template.allele_type for x in target.allele_type):
+                out = True
+
+        # If the target has sequence information..
+        elif target.M_chain_seq != '':
+            # For MHCI, check if the M chain sequence of target and template are the same
+            if target.MHC_class == 'I':
+                if target.M_chain_seq == template.M_chain_seq:
+                    out = True
+            # For MHCII, check if the M and N chain sequence of target and template are the same
+            elif target.MHC_class == 'II' and target.N_chain_seq != '':
+                if target.M_chain_seq == template.M_chain_seq and target.N_chain_seq == template.N_chain_seq:
+                    out = True
+    if out:
+        print('\n\t---- THE TARGET HAS THE SAME PEPTIDE AND ALLELE/SEQUENCE INFORMATION AS THE TEMPLATE ----\n')
+
+    return out
+
+
+
+
+
 
 def check_presence(target, database, seq_based_templ_selection = False):
     ''' Checks if the target the user submitted, already exists in has a template in the database with the same allele
@@ -317,7 +356,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
         cmd_m_temp.close()
 
 
-def write_modeller_script(target, template, alignment_file, output_dir, n_models=20, stdev=0.1):
+def write_modeller_script(target, template, alignment_file, output_dir, n_models=20, stdev=0.1, n_jobs = None):
     ''' Write script that refines the loops of the peptide
 
     Args:
@@ -409,7 +448,9 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
                 logf.append(tuple(l))
     f.close()
 
-    if keep_IL:
+    # If keep_IL is true (happens if the target and template are the same), also use the initial model as one of the
+    # results. This will also happen while benchmarking.
+    if keep_IL or benchmark:
         # Also take the Initial Loop model. Take the molpdf from the pdb header.
         il_file = [i for i in os.listdir(output_dir) if i.startswith(target.id + '.IL')][0]
         il = open(output_dir + '/' + il_file)
