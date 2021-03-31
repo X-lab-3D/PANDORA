@@ -23,7 +23,7 @@ import time
 def run_pandora(tar_temp):
     target = tar_temp[0]
     template = tar_temp[1]
-    filename = '280321_benchmark_II.csv'
+    filename = '300321_benchmark_II.csv'
     nr_models = 20
     if not os.path.exists(filename):
         with open(filename, 'w') as f:

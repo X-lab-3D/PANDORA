@@ -35,19 +35,25 @@ class Pandora:
             print('\tTarget Peptide: %s' % self.target.peptide)
             print('\tTarget Anchors: %s\n' % self.target.anchors)
 
-        if self.template == None:
+        if self.template == None: # Only find the best template if the user didn't specify one
             if verbose and self.target.M_chain_seq != '' and seq_based_templ_selection:
                 print('\tUsing sequence based template selection')
             elif verbose:
                 print('\tUsing allele type based template selection')
-            self.template = Modelling_functions.find_template(self.target, self.database,
+            #     Find the best template. If the target already exists in the database, also consider the initial loop
+            self.template, self.keep_IL = Modelling_functions.find_template(self.target, self.database,
                                                               seq_based_templ_selection=seq_based_templ_selection,
                                                               benchmark=benchmark)
             self.target.templates = [self.template.id]
             if verbose:
                 print('\tSelected template structure: %s' %self.template.id)
-        elif verbose:
+
+        else:
+            if verbose:
                 print('\tUser defined template structure: %s' %self.template.id)
+            # Check if the target structure and template structure are the same.
+            self.keep_IL = Modelling_functions.check_target_template(self.target, self.template)
+
         if verbose:
             print('\tTemplate Allele:  %s' % self.template.allele_type)
             print('\tTemplate Peptide: %s' % self.template.peptide)
@@ -75,8 +81,9 @@ class Pandora:
 
         '''
         self.alignment = Align.Align(self.target, self.template, output_dir=self.output_dir)
-        # self.alignment = Align.Align()
-        # self.alignment.Align_templates(self.target, self.template, output_dir=self.output_dir)
+
+        # self.alignment = Align.Align2(target = self.target, template=self.template, output_dir=self.output_dir)
+        # self.alignment.align_templates()
 
         if verbose:
             print('\tSuccessfully created alignment file')
@@ -110,7 +117,7 @@ class Pandora:
         if verbose:
             print('\tSuccessfully created the initital model')
 
-    def run_modeller(self, python_script='cmd_modeller.py', benchmark=False, pickle_out=True, verbose = True):
+    def run_modeller(self, python_script='cmd_modeller.py', benchmark=False, pickle_out=True, verbose=True, keep_IL=False):
         ''' Perform the homology modelling.
 
         Args:
@@ -127,7 +134,7 @@ class Pandora:
             print('\tPerforming homology modelling of %s on %s...' %(self.target.id, self.template.id))
         t0 = time.time()
         self.results = Modelling_functions.run_modeller(self.output_dir, self.target, python_script=python_script,
-                                                        benchmark=benchmark, pickle_out=pickle_out)
+                                                        benchmark=benchmark, pickle_out=pickle_out, keep_IL=keep_IL)
         if verbose:
             print('\n\tModelling was successfull and took %s seconds' %(round(time.time() - t0, 2)))
 
@@ -194,7 +201,7 @@ class Pandora:
         # prepare the scripts that run modeller
         self.write_modeller_script(n_models=n_models, n_jobs=n_jobs, stdev=stdev)
         # Do the homology modelling
-        self.run_modeller(benchmark=benchmark, verbose=verbose)
+        self.run_modeller(benchmark=benchmark, verbose=verbose, keep_IL=self.keep_IL)
 
         if verbose and benchmark:
             print('\n\tModel\t\t\t\tMolpdf\t\tL-RMSD\t\tcore L-RMSD')
