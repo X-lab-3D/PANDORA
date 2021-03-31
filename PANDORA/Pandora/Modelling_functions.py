@@ -157,39 +157,50 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
 
         PAM30 = substitution_matrices.load('PAM30')
 
-        ## For MHC I
-        if target.MHC_class == 'I':
+    ## For MHC I
+    if target.MHC_class == 'I':
+    
+        anch_dict = { 8: (1, 7), 9 : (1, 8), 10 : (1, 9),
+                     11 : (1, 10), 12 : (1, 11), 13 : (1, 12),
+                     14 : (1, 13), 15 : (1, 14)}
 
-            # Find template structures with matching alleles
-            putative_templates = {}
-            for ID in database.MHCI_data:
-                if benchmark:
-                    if ID != target.id:
-                        if any(x in database.MHCI_data[ID].allele_type for x in target.allele_type):
-                            putative_templates[ID] = list(
-                                set(target.allele_type) & set(database.MHCI_data[ID].allele_type))
-                else:
-                    if any(x in database.MHCI_data[ID].allele_type for x in target.allele_type):
-                        putative_templates[ID] = list(
-                            set(target.allele_type) & set(database.MHCI_data[ID].allele_type))
-            # update dict with ID:all matching alleles
+        # Find template structures with matching alleles
+        putative_templates = {}
+        for ID in database.MHCI_data:
+            if ID != target.id:
+                if any(x in database.MHCI_data[ID].allele_type for x in target.allele_type):
+                    putative_templates[ID] = list(
+                        set(target.allele_type) & set(database.MHCI_data[ID].allele_type))  # update dict with ID:all matching alleles
+        
+        # If the target template already occured in the database, remove it from the dict of putative templates
+        #putative_templates.pop(target.id)
 
-            # Find the putative template with the best matching peptide
-            # template_id = find_best_template_peptide(target=target,
-            #                                          templates=[database.MHCII_data[i] for i in putative_templates])
-
-            pos_list = []
-            for ID in putative_templates:
-                score = 0
-                temp_pept = database.MHCI_data[ID].peptide
-                min_len = min([len(target.peptide), len(temp_pept)])
-                score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty
-                for i, (aa, bb) in enumerate(zip(target.peptide[:min_len], temp_pept[:min_len])):
-                    try:
-                        # gain = MatrixInfo.pam30[aa, bb]
-                        gain = PAM30[aa, bb]
-                        score += gain
-                    except KeyError:
+        # Find the putative template with the best matching peptide
+        pos_list = []
+        for ID in putative_templates:
+            score = 0
+            try:
+                pept_anchs = target.anchors
+            except:
+                pept_anchs = anch_dict[len(target.peptide)]
+                
+            temp_pept = database.MHCI_data[ID].peptide
+            temp_anchs = database.MHCI_data[ID].anchors
+            aligned_pept, aligned_temp_pept = align_peptides(target.peptide, 
+                                                             pept_anchs[0], pept_anchs[1],
+                                                             temp_pept, 
+                                                             temp_anchs[0], temp_anchs[1])
+            
+            aligned_pept = aligned_pept.replace('-','*')
+            aligned_temp_pept = aligned_temp_pept.replace('-','*')
+            #min_len = min([len(target.peptide), len(temp_pept)])
+            #score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty #Is now handled by normal PAM30
+            for i, (aa, bb) in enumerate(zip(aligned_pept, aligned_temp_pept)):
+                try:
+                    # gain = MatrixInfo.pam30[aa, bb]
+                    gain = PAM30[aa, bb]
+                    score += gain
+                except KeyError:
                         try:
                             # gain = MatrixInfo.pam30[bb, aa]
                             gain = PAM30[bb, aa]
@@ -197,7 +208,7 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
                         except KeyError:
                             score = -50
                             pass
-                pos_list.append((score, temp_pept, ID))
+            pos_list.append((score, temp_pept, ID))
 
             # Take the putative template with the max scoring peptide
             template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
@@ -370,17 +381,17 @@ def write_ini_script(target, template, alignment_file, output_dir):
         cmd_m_temp.close()
 
 
-def write_modeller_script(target, template, alignment_file, output_dir, n_models=20, stdev=0.1, n_jobs = None):
+def write_modeller_script(target, template, alignment_file, output_dir, n_models=20, n_jobs=None, stdev=0.1):
     ''' Write script that refines the loops of the peptide
-
     Args:
         target: Target object
         template: Template object
         alignment_file: (string) path to alignment file
         output_dir: (string) path to output directory
         n_models:  (int) number of models modeller generates per run
+        n_jobs: (int) number of parallel jobs. Is recommended to use as many jobs as the number of models: less will result in
+                a slower run, more will not add any benefit but might occupy cores unnecessarily.
         stdev: (float) standard deviation of modelling restraints. Higher = more flexible restraints.
-
     '''
 
 
@@ -428,8 +439,18 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_models
             elif 'a.loop.ending_model' in line:
                 modscript.write(line % (n_models))
             else:
-                modscript.write(line)
+                if n_jobs != None: #If this is a parallel job
+                    if 'PARALLEL_JOB_LINE_TO_COMPLETE' in line:
+                        modscript.write(line %(str(n_jobs))) #specify the number of cores
+                    else:
+                        modscript.write(line)  #Write the line as it is
+                else: #If this is not a parallel job
+                    if 'PARALLEL_JOB_LINE' in line: #do not write the lines requested for parallelization
+                        pass
+                    else:
+                        modscript.write(line)  #Write the line as it is
         cmd_m_temp.close()
+
 
 
 def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmark = False, pickle_out = True, keep_IL = False):
@@ -513,3 +534,55 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         pickle.dump(results, open("%s/results_%s.pkl" %(output_dir, os.path.basename(os.path.normpath(output_dir))), "wb"))
 
     return results
+
+def align_peptides(seq1, anch1_seq1, anch2_seq1, seq2, anch1_seq2, anch2_seq2):
+    '''
+    Align two MHC-I peptides making overlap the anchors.
+    This function does NOT use an alignment matrix (e.g. BLOSUM, PAM, etc).
+    It computes a simple anchor position alignment and inserts gap in the
+    middle part to make the final sequences have the same lenghts.
+
+    Args:
+        seq1(str) : sequence of the first peptide.
+        anch1_seq1(int) : position of the first anchor of seq1. Position must be given in Python numbering (0-N)
+        anch2_seq1(int) : position of the second anchor of seq1. Position must be given in Python numbering (0-N)
+        seq2(str) : sequence of the second peptide.
+        anch1_seq1(int) : position of the first anchor of seq1. Position must be given in Python numbering (0-N)
+        anch2_seq1(int) : position of the second anchor of seq1. Position must be given in Python numbering (0-N)
+
+    Returns:
+        ali_seq1(str)
+    '''
+
+    seq1_core = anch2_seq1 - anch1_seq1
+    seq2_core = anch2_seq2 - anch1_seq2
+    tail1 = [x for x in seq1[anch2_seq1:]]
+    tail2 = [x for x in seq2[anch1_seq2:]]
+
+    list1 = [x for x in seq1]
+    list2 = [x for x in seq2]
+    #Adding gaps in cores
+    if seq1_core > seq2_core:
+        for x in range(seq1_core - seq2_core):
+            list2.insert(int(len(seq2)/2), '-')
+    elif seq1_core < seq2_core:
+        for x in range(seq2_core - seq1_core):
+            list1.insert(int(len(seq1)/2), '-')
+    ### Adding gaps in heads
+    if anch1_seq1 > anch1_seq2:
+        for x in range(anch1_seq1 - anch1_seq2):
+            list2.insert(0, '-')
+    elif anch1_seq1 < anch1_seq2:
+        for x in range(anch1_seq2 - anch1_seq1):
+            list1.insert(0, '-')
+    ### Adding gaps in heads
+    if len(tail1) > len(tail2):
+        for x in range(len(tail1) - len(tail2)):
+            list2.insert(-1, '-')
+    elif len(tail1) < len(tail2):
+        for x in range(len(tail1) - len(tail2)):
+            list1.insert(-1, '-')
+
+    ali_seq1 = ('').join(list1)
+    ali_seq2 = ('').join(list2)
+    return ali_seq1, ali_seq2
