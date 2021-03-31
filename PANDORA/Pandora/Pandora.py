@@ -51,7 +51,7 @@ class Pandora:
         else:
             if verbose:
                 print('\tUser defined template structure: %s' %self.template.id)
-
+            # Check if the target structure and template structure are the same.
             self.keep_IL = Modelling_functions.check_target_template(self.target, self.template)
 
         if verbose:

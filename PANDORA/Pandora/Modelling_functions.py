@@ -38,7 +38,8 @@ def check_target_template(target, template):
                 if target.M_chain_seq == template.M_chain_seq and target.N_chain_seq == template.N_chain_seq:
                     out = True
     if out:
-        print('\n\t---- THE TARGET HAS THE SAME PEPTIDE AND ALLELE/SEQUENCE INFORMATION AS THE TEMPLATE ----\n')
+        print('\n\t---- THE TARGET HAS THE SAME PEPTIDE AND ALLELE/SEQUENCE INFORMATION AS THE TEMPLATE ----')
+        print('\tYou can find it at: http://www.imgt.org/3Dstructure-DB/cgi/details.cgi?pdbcode=%s\n' %(template.id))
 
     return out
 
@@ -121,11 +122,11 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
 
     '''
     # Check if the target is already in the database
-    templ_present = check_presence(target, database, seq_based_templ_selection = seq_based_templ_selection)
+    # templ_present = check_presence(target, database, seq_based_templ_selection = seq_based_templ_selection)
     # If the template is already present in the db and you're not benchmarking, return this template
-    if templ_present and not benchmark:
-        print('\n\t---- PANDORA FOUND A TEMPLATE WITH THE SAME ALLELE AND PEPTIDE SEQUENCE AS THE TARGET ----\n')
-        return templ_present, True
+    # if templ_present and not benchmark:
+    #     print('\n\t---- PANDORA FOUND A TEMPLATE WITH THE SAME ALLELE AND PEPTIDE SEQUENCE AS THE TARGET ----\n')
+    #     return templ_present, True
 
     # def find_best_template_peptide(target, templates):
     #     ''' Finds the best template based on pairwise alignment
@@ -162,10 +163,16 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
             # Find template structures with matching alleles
             putative_templates = {}
             for ID in database.MHCI_data:
-                if ID != target.id:
+                if benchmark:
+                    if ID != target.id:
+                        if any(x in database.MHCI_data[ID].allele_type for x in target.allele_type):
+                            putative_templates[ID] = list(
+                                set(target.allele_type) & set(database.MHCI_data[ID].allele_type))
+                else:
                     if any(x in database.MHCI_data[ID].allele_type for x in target.allele_type):
                         putative_templates[ID] = list(
-                            set(target.allele_type) & set(database.MHCI_data[ID].allele_type))  # update dict with ID:all matching alleles
+                            set(target.allele_type) & set(database.MHCI_data[ID].allele_type))
+            # update dict with ID:all matching alleles
 
             # Find the putative template with the best matching peptide
             # template_id = find_best_template_peptide(target=target,
@@ -196,7 +203,9 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
             template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
             # Return the Template object of the selected template that will be used for homology modelling
 
-            return database.MHCI_data[template_id], False
+
+
+            return database.MHCI_data[template_id], check_target_template(target, database.MHCI_data[template_id])
 
 
         ## For MHC II
@@ -205,10 +214,15 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
             # Find template structures with matching alleles
             putative_templates = {}
             for ID in database.MHCII_data:
-                if ID != target.id:
-                    if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
-                        putative_templates[ID] = list(
-                            set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
+                if benchmark:
+                    if ID != target.id:
+                        if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
+                            putative_templates[ID] = list(
+                                set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
+                    else:
+                        if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
+                            putative_templates[ID] = list(
+                                set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
 
             # Find the peptide with the highest alignment score. If there are multiple, take the first one with same
             # same anchor positions
@@ -242,7 +256,7 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
             template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
             # Return the Template object of the selected template that will be used for homology modelling
 
-            return database.MHCII_data[template_id], False
+            return database.MHCII_data[template_id], check_target_template(target, database.MHCI_data[template_id])
 
     # Sequence based template search if the sequences of the target are provided
     elif target.M_chain_seq != '' and seq_based_templ_selection:
@@ -270,7 +284,7 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
             # take the template with the best scoring peptide
             best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
 
-            return database.MHCI_data[best_template], False
+            return database.MHCI_data[best_template], check_target_template(target, database.MHCI_data[template_id])
 
         if target.MHC_class == 'II':
             # define target sequences
@@ -295,7 +309,7 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
             # take the template with the best scoring peptide
             best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
 
-            return database.MHCII_data[best_template], False
+            return database.MHCII_data[best_template], check_target_template(target, database.MHCI_data[template_id])
 
 
 def write_ini_script(target, template, alignment_file, output_dir):
@@ -431,7 +445,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     Returns: (list) of Model objects
 
     '''
-
+# output_dir = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/outputs/1SJH_1SJE'
     # Change working directory
     os.chdir(output_dir)
     # run Modeller to perform homology modelling
@@ -450,7 +464,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
 
     # If keep_IL is true (happens if the target and template are the same), also use the initial model as one of the
     # results. This will also happen while benchmarking.
-    if keep_IL or benchmark:
+    if keep_IL:
         # Also take the Initial Loop model. Take the molpdf from the pdb header.
         il_file = [i for i in os.listdir(output_dir) if i.startswith(target.id + '.IL')][0]
         il = open(output_dir + '/' + il_file)
@@ -459,7 +473,13 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
                 il_molpdf = line.split()[-1]
         f.close()
         # Append the filename and molpdf to the rest of the data
-        logf.append((il_file, il_molpdf, None))
+        logf.append((il_file, il_molpdf, ''))
+
+    # Write to output file
+    f = open(output_dir + '/molpdf_DOPE.tsv', 'w')
+    for i in logf:
+        f.write('matched_' + i[0] + ',' + i[1] + ',' + i[2] + '\n')
+    f.close()
 
 
     # Create Model object of each theoretical model and add it to results
@@ -468,7 +488,8 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         try:
             m = Model.Model(target, model_path=output_dir + '/' + logf[i][0], output_dir = output_dir,
                                             molpdf=logf[i][1], dope=logf[i][2])
-            pass
+
+
             if benchmark:
                 try:
                     m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
