@@ -102,6 +102,10 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
 
     ## For MHC I
     if target.MHC_class == 'I':
+    
+        anch_dict = { 8: (1, 7), 9 : (1, 8), 10 : (1, 9),
+                     11 : (1, 10), 12 : (1, 11), 13 : (1, 12),
+                     14 : (1, 13), 15 : (1, 14)}
 
         # Find template structures with matching alleles
         putative_templates = {}
@@ -118,10 +122,23 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
         pos_list = []
         for ID in putative_templates:
             score = 0
+            try:
+                pept_anchs = target.anchors
+            except:
+                pept_anchs = anch_dict[len(target.peptide)]
+                
             temp_pept = database.MHCI_data[ID].peptide
-            min_len = min([len(target.peptide), len(temp_pept)])
-            score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty
-            for i, (aa, bb) in enumerate(zip(target.peptide[:min_len], temp_pept[:min_len])):
+            temp_anchs = database.MHCI_data[ID].anchors
+            aligned_pept, aligned_temp_pept = align_peptides(target.peptide, 
+                                                             pept_anchs[0], pept_anchs[1],
+                                                             temp_pept, 
+                                                             temp_anchs[0], temp_anchs[1])
+            
+            aligned_pept = aligned_pept.replace('-','*')
+            aligned_temp_pept = aligned_temp_pept.replace('-','*')
+            #min_len = min([len(target.peptide), len(temp_pept)])
+            #score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty #Is now handled by normal PAM30
+            for i, (aa, bb) in enumerate(zip(aligned_pept, aligned_temp_pept)):
                 try:
                     # gain = MatrixInfo.pam30[aa, bb]
                     gain = PAM30[aa, bb]
@@ -439,3 +456,55 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         pickle.dump(results, open("%s/results_%s.pkl" %(output_dir, os.path.basename(os.path.normpath(output_dir))), "wb"))
 
     return results
+
+def align_peptides(seq1, anch1_seq1, anch2_seq1, seq2, anch1_seq2, anch2_seq2):
+    '''
+    Align two MHC-I peptides making overlap the anchors.
+    This function does NOT use an alignment matrix (e.g. BLOSUM, PAM, etc).
+    It computes a simple anchor position alignment and inserts gap in the
+    middle part to make the final sequences have the same lenghts.
+
+    Args:
+        seq1(str) : sequence of the first peptide.
+        anch1_seq1(int) : position of the first anchor of seq1. Position must be given in Python numbering (0-N)
+        anch2_seq1(int) : position of the second anchor of seq1. Position must be given in Python numbering (0-N)
+        seq2(str) : sequence of the second peptide.
+        anch1_seq1(int) : position of the first anchor of seq1. Position must be given in Python numbering (0-N)
+        anch2_seq1(int) : position of the second anchor of seq1. Position must be given in Python numbering (0-N)
+
+    Returns:
+        ali_seq1(str)
+    '''
+
+    seq1_core = anch2_seq1 - anch1_seq1
+    seq2_core = anch2_seq2 - anch1_seq2
+    tail1 = [x for x in seq1[anch2_seq1:]]
+    tail2 = [x for x in seq2[anch1_seq2:]]
+
+    list1 = [x for x in seq1]
+    list2 = [x for x in seq2]
+    #Adding gaps in cores
+    if seq1_core > seq2_core:
+        for x in range(seq1_core - seq2_core):
+            list2.insert(int(len(seq2)/2), '-')
+    elif seq1_core < seq2_core:
+        for x in range(seq2_core - seq1_core):
+            list1.insert(int(len(seq1)/2), '-')
+    ### Adding gaps in heads
+    if anch1_seq1 > anch1_seq2:
+        for x in range(anch1_seq1 - anch1_seq2):
+            list2.insert(0, '-')
+    elif anch1_seq1 < anch1_seq2:
+        for x in range(anch1_seq2 - anch1_seq1):
+            list1.insert(0, '-')
+    ### Adding gaps in heads
+    if len(tail1) > len(tail2):
+        for x in range(len(tail1) - len(tail2)):
+            list2.insert(-1, '-')
+    elif len(tail1) < len(tail2):
+        for x in range(len(tail1) - len(tail2)):
+            list1.insert(-1, '-')
+
+    ali_seq1 = ('').join(list1)
+    ali_seq2 = ('').join(list2)
+    return ali_seq1, ali_seq2
