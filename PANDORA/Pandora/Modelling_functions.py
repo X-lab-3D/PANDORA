@@ -489,22 +489,23 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
             m = Model.Model(target, model_path=output_dir + '/' + logf[i][0], output_dir = output_dir,
                                             molpdf=logf[i][1], dope=logf[i][2])
 
-
-            if benchmark:
-                try:
-                    m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
-                except:
-                    print('Something went wrong when calculating l-RMSD for case %s' %target.id)
-                    pass
-                if target.MHC_class == 'II': #only calculate the core L-rmsd for MHCII cases
-                    try:
-                        m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
-                    except:
-                        print('Something went wrong when calculating core l-RMSD for case %s' %target.id)
-                        pass
-            results.append(m)
         except:
             print('Something went wrong when calling Model.Model() for case %s' %target.id)
+        if benchmark:
+            try:
+                m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
+                print('l-RMSD for %s: %f' %(target.id, m.lrmsd))
+            except:
+                print('Something went wrong when calculating l-RMSD for case %s' %target.id)
+                pass
+            if target.MHC_class == 'II': #only calculate the core L-rmsd for MHCII cases
+                try:
+                    m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
+                    print('Core l-RMSD for %s: %f' %(target.id, m.core_lrmsd))
+                except:
+                    print('Something went wrong when calculating core l-RMSD for case %s' %target.id)
+                    pass
+        results.append(m)
 
 
     # Save results as pickle

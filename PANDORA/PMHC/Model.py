@@ -3,6 +3,7 @@ import os
 from Bio.PDB import PDBIO
 import PANDORA
 import sys
+import numpy as np
 
 class Model:
 
@@ -43,7 +44,7 @@ class Model:
         Returns: (float) L-RMSD
         '''
 
-        from pdb2sql import StructureSimilarity
+        from pdb2sql import pdb2sql, superpose, StructureSimilarity
 
         # load target pdb
         if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first
@@ -51,13 +52,35 @@ class Model:
         else:
             ref = reference_pdb
 
+        # Define file names as variables
+        decoy_path = '%s/%s_decoy.pdb' % (self.output_dir, self.target.id)
+        ref_path = '%s/%s_ref.pdb' % (self.output_dir, self.target.id)
+
+        # Define zones to align
+        #M_lzone = list(range(4,73))
+        #N_lzone = list(range(10,80))
+
         # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
         homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id)
 
         os.chdir(self.output_dir)
+        # Produce lzone file for the l-rmsd calculation
+        #lzone = get_Gdomain_lzone(ref_path, self.output_dir, self.target.MHC_class)
+        #TODO: check if it's MHC I or II and adapt for chain M and N
+        # Get decoy structure to superpose
+        #decoy_db = pdb2sql(decoy_path)
+        #decoy_lzone = np.asarray(decoy_db.get('x,y,z', resSeq=M_lzone))
+        
+        # Get ref structure to superpose
+        #ref_db = pdb2sql(ref_path)
+        #ref_lzone = np.asarray(ref_db.get('x,y,z', resSeq=M_lzone))
+        
+        # Align the G domains
+        #superpose.superpose_selection()
+        
         # Calculate l-rmsd between decoy and reference with pdb2sql
-        sim = StructureSimilarity('%s/%s_decoy.pdb' % (self.output_dir, self.target.id), '%s/%s_ref.pdb' % (self.output_dir, self.target.id))
-        # self.lrmsd = sim.compute_lrmsd_fast(method='svd', name=atoms)
+        sim = StructureSimilarity(decoy_path, ref_path)
+        #self.lrmsd = sim.compute_lrmsd_fast(method='svd', name=atoms, lzone = lzone)
         self.lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name = atoms)
 
         # remove intermediate files
@@ -81,17 +104,26 @@ class Model:
         else:
             ref = reference_pdb
 
+        # Define file names as variables
+        decoy_path = '%s/%s_decoy.pdb' % (self.output_dir, self.target.id)
+        ref_path = '%s/%s_ref.pdb' % (self.output_dir, self.target.id)
+
         # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
         homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id, anchors = self.target.anchors)
 
         os.chdir(self.output_dir)
+        # Produce lzone file for the l-rmsd calculation
+        #lzone = get_Gdomain_lzone('%s/%s_ref.pdb' %(self.output_dir, self.target.id), self.output_dir, self.target.MHC_class)
+        # Get decoy structure to superpose
+        #decoy_db = psb2sql()
+        
         # Calculate l-rmsd between decoy and reference with pdb2sql
-        sim = StructureSimilarity('%s/%s_decoy.pdb' % (self.output_dir, self.target.id), '%s/%s_ref.pdb' % (self.output_dir, self.target.id))
+        sim = StructureSimilarity(decoy_path, ref_path)
         self.core_lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name=atoms)
 
 
         # remove intermediate files
-        os.system('rm %s/%s_decoy.pdb %s/%s_ref.pdb' %(self.output_dir, self.target.id, self.output_dir, self.target.id))
+        os.system('rm %s %s' %(decoy_path, ref_path))
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
 
 def merge_chains(pdb):
@@ -180,7 +212,68 @@ def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False):
 
     return decoy, ref
 
-#
+def get_Gdomain_lzone(ref_pdb, output_dir, MHC_class):
+    """ Produce a lzone file for pdb2sql.
+
+    Args:
+        ref_pdb (str): path to the pdb file to use for the lzone
+        output_dir (str): output directory
+        MHC_class (str): Class of the MHC
+
+    Raises:
+        Exception: In case there are unexpected chain names it raises an exception
+        
+    Returns:
+        outfile (str): Path to the output file
+    """
+    
+    ref_name = ref_pdb.split('/')[-1].split('.')[0]
+    outfile = '%s/%s.lzone' %(output_dir, ref_name)
+    if MHC_class == 'I':
+        with open(outfile, 'w') as output:
+            P = PDBParser(QUIET=1)
+            structure = P.get_structure('r', ref_pdb)
+            for chain in structure.get_chains():
+                if chain.id == 'M':
+                    for x in range(2,173):
+                        output.write('zone %s%i-%s%i\n' %(chain.id, x, chain.id, x))
+                    #output.write('zone %s2-%s172\n' %(chain.id, chain.id))
+                    #output.write('zone %s2-%s172:%s2-%s172\n' %(chain.id, chain.id, chain.id, chain.id))
+                elif chain.id == 'P':
+                    pass
+                    #output.write('fit\n')
+                    #for residue in chain:
+                    #    if residue.id[2] == ' ':
+                    #        output.write('rzone %s%s-%s%s\n' %(chain.id, str(residue.id[1]), chain.id, str(residue.id[1])))
+                else:
+                    raise Exception('Unrecognized chain ID, different from M or P. Please check your file')
+            #output.write('fit\n')
+    
+    elif MHC_class == 'II':
+        #Chain M from 4 to 72; Chain N from 10 to 80
+        with open(outfile, 'w') as output:
+            P = PDBParser(QUIET=1)
+            structure = P.get_structure('r', ref_pdb)
+            for chain in structure.get_chains():
+                if chain.id == 'M':
+                    output.write('zone %s4-%s72:%s4-%s72\n' %(chain.id, chain.id, chain.id, chain.id))
+                elif chain.id == 'N':
+                    output.write('zone %s10-%s80:%s10-%s80\n' %(chain.id, chain.id, chain.id, chain.id))
+                elif chain.id == 'P':
+                    pass
+                    #output.write('fit\n')
+                    #for residue in chain:
+                    #    if residue.id[2] == ' ':
+                    #        output.write('rzone %s%s-%s%s\n' %(chain.id, str(residue.id[1]), chain.id, str(residue.id[1])))
+                else:
+                    raise Exception('Unrecognized chain ID, different from M, N or P. Please check your file')
+            #output.write('fit\n')
+    return outfile
+#ValueError: Invalid column name lzone. Possible names are
+#['rowID', 'serial', 'name', 'altLoc', 'resName', 'chainID', 'resSeq',
+# 'iCode', 'x', 'y', 'z', 'occ', 'temp', 'element', 'model']  
+
+
 # decoy_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/outputs/1DLH_1FYT/1FYT.BL00010001.pdb'
 # ref_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/PDBs/pMHCII/1FYT.pdb'
 #
