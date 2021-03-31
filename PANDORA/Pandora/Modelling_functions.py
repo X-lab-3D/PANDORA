@@ -381,17 +381,17 @@ def write_ini_script(target, template, alignment_file, output_dir):
         cmd_m_temp.close()
 
 
-def write_modeller_script(target, template, alignment_file, output_dir, n_models=20, stdev=0.1, n_jobs = None):
+def write_modeller_script(target, template, alignment_file, output_dir, n_models=20, n_jobs=None, stdev=0.1):
     ''' Write script that refines the loops of the peptide
-
     Args:
         target: Target object
         template: Template object
         alignment_file: (string) path to alignment file
         output_dir: (string) path to output directory
         n_models:  (int) number of models modeller generates per run
+        n_jobs: (int) number of parallel jobs. Is recommended to use as many jobs as the number of models: less will result in
+                a slower run, more will not add any benefit but might occupy cores unnecessarily.
         stdev: (float) standard deviation of modelling restraints. Higher = more flexible restraints.
-
     '''
 
 
@@ -439,8 +439,18 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_models
             elif 'a.loop.ending_model' in line:
                 modscript.write(line % (n_models))
             else:
-                modscript.write(line)
+                if n_jobs != None: #If this is a parallel job
+                    if 'PARALLEL_JOB_LINE_TO_COMPLETE' in line:
+                        modscript.write(line %(str(n_jobs))) #specify the number of cores
+                    else:
+                        modscript.write(line)  #Write the line as it is
+                else: #If this is not a parallel job
+                    if 'PARALLEL_JOB_LINE' in line: #do not write the lines requested for parallelization
+                        pass
+                    else:
+                        modscript.write(line)  #Write the line as it is
         cmd_m_temp.close()
+
 
 
 def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmark = False, pickle_out = True, keep_IL = False):
