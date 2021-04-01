@@ -95,8 +95,9 @@ class Wrapper():
                     targets[target_id] = {'peptide_sequence' : peptide_seq, 'allele' : allele}
         self.targets = targets
 
-    def create_targets(self, data_file, db, MHC_class, delimiter = '\t', header=True, IDs_col=None, 
-                       peptides_col=0, allele_col=1, anchors_col=None, benchmark=False, num_models=20):
+    def create_targets(self, data_file, db, MHC_class, delimiter = '\t', header=True, 
+                       IDs_col=None, peptides_col=0, allele_col=1, anchors_col=None, 
+                       benchmark=False, num_models=20, verbose=False):
         """
         
 
@@ -125,7 +126,14 @@ class Wrapper():
         ## Create target objects
         jobs = {}
         for target_id in self.targets:
+            if verbose:
+                print('Target ID: ', target_id)
+                print('Target MHC_class: ', MHC_class)
+                print('Target allele: ', self.targets[target_id]['allele'])
+                print('Target peptide: ', self.targets[target_id]['peptide_sequence'])
             try:
+                if verbose:
+                    print('Target Anchors: ', self.targets[target_id]['anchors'])
                 tar = PMHC.Target(target_id, allele_type=self.targets[target_id]['allele'],
                                   peptide=self.targets[target_id]['peptide_sequence'] ,
                                   MHC_class=MHC_class, anchors=self.targets[target_id]['anchors'])
@@ -141,6 +149,17 @@ class Wrapper():
         self.jobs = jobs
         
     def __run_multiprocessing(self, func, num_cores):
+        """
+        
+
+        Args:
+            func (function): DESCRIPTION.
+            num_cores (int): DESCRIPTION.
+
+        Returns:
+            TYPE: DESCRIPTION.
+
+        """
         with Pool(processes=num_cores) as pool:
             return pool.map(func, list(self.jobs.values()))
 
@@ -149,7 +168,7 @@ class Wrapper():
         
 
         Args:
-            n_cores (TYPE, optional): DESCRIPTION. Defaults to 1.
+            n_cores (int, optional): DESCRIPTION. Defaults to 1.
             benchmark (TYPE, optional): DESCRIPTION. Defaults to False.
 
         Returns:

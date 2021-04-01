@@ -1,7 +1,6 @@
 from Bio.Align import substitution_matrices
 import os
 import PANDORA
-import dill
 import pickle
 from PANDORA.PMHC import Model
 # from Bio import Align
@@ -42,9 +41,6 @@ def check_target_template(target, template):
         print('\tYou can find it at: http://www.imgt.org/3Dstructure-DB/cgi/details.cgi?pdbcode=%s\n' %(template.id))
 
     return out
-
-
-
 
 
 
@@ -160,17 +156,32 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
     ## For MHC I
     if target.MHC_class == 'I':
     
-        anch_dict = { 8: (1, 7), 9 : (1, 8), 10 : (1, 9),
-                     11 : (1, 10), 12 : (1, 11), 13 : (1, 12),
-                     14 : (1, 13), 15 : (1, 14)}
-
+        # Define available alleles in database
+        available_alleles = []
+        for ID in database.MHCI_data:
+            if benchmark and ID == target.id:
+                pass
+            else:
+                available_alleles.extend(database.MHCI_data[ID].allele_type)
+        available_alleles = list(set(available_alleles))
+        
+        # Adapt the target allele name if necessary
+        #target_alleles = [allele_name_adapter(allele, available_alleles) for allele in target.allele_type]
+        target_alleles = allele_name_adapter(target.allele_type, available_alleles)
+        target_alleles = list(set(target_alleles))
+        
         # Find template structures with matching alleles
         putative_templates = {}
         for ID in database.MHCI_data:
-            if ID != target.id:
-                if any(x in database.MHCI_data[ID].allele_type for x in target.allele_type):
-                    putative_templates[ID] = list(
-                        set(target.allele_type) & set(database.MHCI_data[ID].allele_type))  # update dict with ID:all matching alleles
+            if benchmark and ID == target.id:
+                pass
+            else:
+                for tar_allele in target_alleles:
+                    if any(tar_allele in put_temp_allele for put_temp_allele in database.MHCI_data[ID].allele_type):
+                        # update dict with ID:all matching alleles
+                        #TODO: is this list of matching allele obsolete?
+                        putative_templates[ID] = list(
+                            set(target.allele_type) & set(database.MHCI_data[ID].allele_type))  
         
         # If the target template already occured in the database, remove it from the dict of putative templates
         #putative_templates.pop(target.id)
@@ -182,7 +193,7 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
             try:
                 pept_anchs = target.anchors
             except:
-                pept_anchs = anch_dict[len(target.peptide)]
+                pept_anchs = [1, len(target.peptide) -1]
                 
             temp_pept = database.MHCI_data[ID].peptide
             temp_anchs = database.MHCI_data[ID].anchors
@@ -210,13 +221,16 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
                             pass
             pos_list.append((score, temp_pept, ID))
 
-            # Take the putative template with the max scoring peptide
-            template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
-            # Return the Template object of the selected template that will be used for homology modelling
+        print('#########################')
+        print('PT: ', putative_templates)
+        print('PL: ', pos_list)
+        print('#########################')
+        # Take the putative template with the max scoring peptide
+        template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
+        # Return the Template object of the selected template that will be used for homology modelling
 
 
-
-            return database.MHCI_data[template_id], check_target_template(target, database.MHCI_data[template_id])
+        return database.MHCI_data[template_id], check_target_template(target, database.MHCI_data[template_id])
 
 
         ## For MHC II
@@ -499,7 +513,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     # Write to output file
     f = open(output_dir + '/molpdf_DOPE.tsv', 'w')
     for i in logf:
-        f.write('matched_' + i[0] + ',' + i[1] + ',' + i[2] + '\n')
+        f.write('matched_' + i[0] + '\t' + i[1] + '\t' + i[2] + '\n')
     f.close()
 
 
@@ -586,3 +600,90 @@ def align_peptides(seq1, anch1_seq1, anch2_seq1, seq2, anch1_seq2, anch2_seq2):
     ali_seq1 = ('').join(list1)
     ali_seq2 = ('').join(list2)
     return ali_seq1, ali_seq2
+
+def allele_name_adapter(allele, available_alleles):
+    '''
+    Cuts the given allele name to make it consistent with the alleles in allele_ID.
+
+    Args:
+        allele(list) : Allele names
+        allele_ID(dict) : Dictionary of structure IDs (values) in the dataset for each allele (keys)
+    '''
+    #homolog_allele = '--NONE--'
+    for a in range(len(allele)):
+        if allele[a].startswith('HLA'):      # Human
+            if any(allele[a] in key for key in list(available_alleles)):
+                pass
+            elif any(allele[a][:8] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:8]
+            elif any(allele[a][:6] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:6]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('H2'):    # Mouse
+            #homolog_allele = 'RT1'
+            if any(allele[a] in key for key in list(available_alleles)):
+                pass
+            elif any(allele[a][:4] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:4]
+            else:
+                allele[a] = allele[a][:3]
+        elif allele[a].startswith('RT1'):          # Rat
+            #homolog_allele = 'H2'
+            if any(allele[a] in key for key in list(available_alleles)):
+                pass
+            elif any(allele[a][:5] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:5]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('BoLA'):        # Bovine
+            if any(allele[a] in key for key in list(available_alleles)):
+                pass
+            elif any(allele[a][:10] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:10]
+            elif any(allele[a][:7] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:7]
+            else:
+                allele[a] = allele[a][:5]
+        elif allele[a].startswith('SLA'):        # Suine
+            if any(allele[a] in key for key in list(available_alleles)):
+                pass
+            elif any(allele[a][:9] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:9]
+            elif any(allele[a][:6] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:6]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('MH1-B'):        # Chicken
+            if any(allele[a] in key for key in list(available_alleles)):
+                pass
+            elif any(allele[a][:8] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:8]
+            else:
+                allele[a] = allele[a][:6]
+        elif allele[a].startswith('BF2'):        # Chicken
+            if any(allele[a] in key for key in list(available_alleles)):
+                pass
+            elif any(allele[a][:6] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:6]
+            else:
+                allele[a] = allele[a][:4]
+        elif allele[a].startswith('Mamu'):       # Monkey
+            if any(allele[a] in key for key in list(available_alleles)):
+                pass
+            elif any(allele[a][:13] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:13]
+            elif any(allele[a][:9] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:9]
+            else:
+                allele[a] = allele[a][:5]
+        elif allele[a].startswith('Eqca'):        # Horse
+            if any(allele[a] in key for key in list(available_alleles)):
+                pass
+            elif any(allele[a][:10] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:10]
+            elif any(allele[a][:7] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:7]
+            else:
+                allele[a] = allele[a][:5]
+    return(allele)#, homolog_allele)

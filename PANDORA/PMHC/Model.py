@@ -2,8 +2,8 @@ from Bio.PDB import PDBParser
 import os
 from Bio.PDB import PDBIO
 import PANDORA
-import sys
-import numpy as np
+#import sys
+#import numpy as np
 
 class Model:
 
@@ -44,7 +44,8 @@ class Model:
         Returns: (float) L-RMSD
         '''
 
-        from pdb2sql import pdb2sql, superpose, StructureSimilarity
+        #from pdb2sql import pdb2sql, superpose, StructureSimilarity
+        from pdb2sql import StructureSimilarity
 
         # load target pdb
         if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first

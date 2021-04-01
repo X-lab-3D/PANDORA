@@ -40,7 +40,8 @@ class Pandora:
                 print('\tUsing sequence based template selection')
             elif verbose:
                 print('\tUsing allele type based template selection')
-            #     Find the best template. If the target already exists in the database, also consider the initial loop
+            # Find the best template. If the target already exists in the database, 
+            # also consider the initial loop model as a model
             self.template, self.keep_IL = Modelling_functions.find_template(self.target, self.database,
                                                               seq_based_templ_selection=seq_based_templ_selection,
                                                               benchmark=benchmark)
