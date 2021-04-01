@@ -221,10 +221,8 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
                             pass
             pos_list.append((score, temp_pept, ID))
 
-        print('#########################')
-        print('PT: ', putative_templates)
-        print('PL: ', pos_list)
-        print('#########################')
+        if len(pos_list) == 0:
+            raise Exception('Pandora could not find any putative template! Please try to define your own template or contact us for help')
         # Take the putative template with the max scoring peptide
         template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
         # Return the Template object of the selected template that will be used for homology modelling
@@ -277,6 +275,8 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
                             pass
                 pos_list.append((score, temp_pept, ID))
 
+            if len(pos_list) == 0:
+                raise Exception('Pandora could not find any putative template! Please try to define your own template or contact us for help')
             # Take the putative template with the max scoring peptide
             template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
             # Return the Template object of the selected template that will be used for homology modelling
@@ -659,6 +659,13 @@ def allele_name_adapter(allele, available_alleles):
                 pass
             elif any(allele[a][:8] in key for key in list(available_alleles)):
                 allele[a] = allele[a][:8]
+            else:
+                allele[a] = allele[a][:6]
+        elif allele[a].startswith('MH1-N'):        # Chicken
+            if any(allele[a] in key for key in list(available_alleles)):
+                pass
+            elif any(allele[a][:9] in key for key in list(available_alleles)):
+                allele[a] = allele[a][:9]
             else:
                 allele[a] = allele[a][:6]
         elif allele[a].startswith('BF2'):        # Chicken

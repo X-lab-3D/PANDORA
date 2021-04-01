@@ -212,9 +212,13 @@ class Pandora:
                         os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4),
                         round(float(m.lrmsd), 4), round(float(m.core_lrmsd), 4)))
                 except AttributeError:
-                    print('\t%s\t\t%s\t\t%s' % (
-                        os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4),
-                        round(float(m.lrmsd), 4)))
+                    try:
+                        print('\t%s\t\t%s\t\t%s' % (
+                            os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4),
+                            round(float(m.lrmsd), 4)))
+                    except AttributeError:
+                        print('\t%s\t\t%s' % (
+                            os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
         elif verbose and not benchmark:
             print('\n\tModel\t\t\t\tMolpdf')
             for m in self.results:

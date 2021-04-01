@@ -550,11 +550,13 @@ def remove_duplicated_chains(pdb):
     return pdb
 
 
-def find_chains_MHCI(pdb, pept_chain):
+def find_chains_MHCI(pdb, pept_chain, all_MHC_chains):
     ''' Find the MHCI chains
 
     Args:
-        pdb: Bio.PDB object
+        pdb (Bio.PDB.PDBParser): Bio.PDB object of a peptide-MHCI structure
+        pept_chain (str): chain ID of the peptide 
+        all_MHC_chains (list): list of all MHC alpha chains in the pdb file
 
     Returns: list of chains
 
@@ -565,18 +567,20 @@ def find_chains_MHCI(pdb, pept_chain):
     c = [i for i in cont if i[1] == pept_chain or i[5] == pept_chain]
     # Make a list of all chains that contact the peptide chain
     chain_cont = [i for i in sum([[i[1],i[5]] for i in c], []) if i != pept_chain]
+    # Make sure only MHC chains are present in the list
+    chain_cont = [i for i in chain_cont if i in all_MHC_chains]
     # Make sure the chain is longer than 120 residues. This prevents selecting e.g. two peptides in the binding groove
     chain_cont = [i for i in chain_cont if i in [c.id for c in pdb.get_chains() if len(c) > 120]]
 
     # Find the two chains that have the most contacts with the peptide. This should also filter out TCR chains
     if len(set(chain_cont)) >= 1:
-        MHC_chains = sorted([ss for ss in set(chain_cont)], key=chain_cont.count, reverse=True)[0]
-        MHC_chains = [MHC_chains, pept_chain]
+        bound_MHC_chains = sorted([ss for ss in set(chain_cont)], key=chain_cont.count, reverse=True)[0]
+        bound_MHC_chains = [bound_MHC_chains, pept_chain]
     else:
         print('Found >1 MHC I chains')
         raise Exception
 
-    return MHC_chains
+    return bound_MHC_chains
 
 
 def find_chains_MHCII(pdb, pept_chain):
@@ -871,8 +875,9 @@ def parse_pMHCI_pdb(pdb_id,
                 log(pdb_id, 'Could not find a suitable peptide chain', logfile)
                 raise Exception
 
+            alleles = get_chainid_alleles_MHCI(pdb_file)
             try:                 # Find out which chains are the Alpha and Peptide chain
-                MHC_chains = find_chains_MHCI(pdb, pept_chain)
+                MHC_chains = find_chains_MHCI(pdb, pept_chain, list(alleles.keys()))
             except:
                 log(pdb_id, 'Could not locate Alpha chain', logfile)
                 raise Exception
@@ -912,16 +917,16 @@ def parse_pMHCI_pdb(pdb_id,
 
             try:
                 # Get allele per each chain
-                al = get_chainid_alleles_MHCI(pdb_file)
+                #al = get_chainid_alleles_MHCI(pdb_file)
                 try:
-                    alpha = [[k for k, v in i.items()] for i in [al['A'][i] for i in [i for i in al['A'].keys()]]]
+                    alpha = [[k for k, v in i.items()] for i in [alleles['A'][i] for i in [i for i in alleles['A'].keys()]]]
                 except KeyError:
                     try:
                         c = MHC_chains[0]
-                        alpha = [[k for k, v in i.items()] for i in [al[c][i] for i in [i for i in al[c].keys()]]]
+                        alpha = [[k for k, v in i.items()] for i in [alleles[c][i] for i in [i for i in alleles[c].keys()]]]
                     except KeyError:
-                        c = [i for i in al.keys()][0]
-                        alpha = [[k for k, v in i.items()] for i in [al[c][i] for i in [i for i in al[c].keys()]]]
+                        c = [i for i in alleles.keys()][0]
+                        alpha = [[k for k, v in i.items()] for i in [alleles[c][i] for i in [i for i in alleles[c].keys()]]]
 
                 a_allele = sum(alpha, [])
             except:
