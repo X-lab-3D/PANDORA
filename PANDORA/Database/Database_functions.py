@@ -438,7 +438,7 @@ def unzip_pdb(ID, indir, outdir):
     return '%s/%s.pdb' % (outdir, ID)
 
 
-def find_peptide_chain(pdb, min=6, max=26):
+def find_peptide_chain(pdb, min_len=6, max_len=26):
     ''' Find the pdb chain that is most likely the peptide based on its size
 
     Args:
@@ -446,14 +446,14 @@ def find_peptide_chain(pdb, min=6, max=26):
         min: (int) minimal peptide length to consider
         max: (int) maximal peptide length to consider
 
-    Returns: (string) Most likely chain that is the peptide
+    Returns: (str): Most likely chain that is the peptide
 
     '''
 
     # Find most likely peptide chain: first chain to be 7 < len(chain) < 25
     pept_chain = []
     for chain in pdb.get_chains():
-        if len(chain) > min and len(chain) < max:
+        if len(chain) > min_len and len(chain) < max_len:
             # print(chain.id)# Is this chain between 7 and 25?
             heteroatoms = False
             for res in chain:
@@ -903,7 +903,8 @@ def parse_pMHCI_pdb(pdb_id,
 
             try:  # get the chain sequences from the pdb file
                 # seqs = seqs_from_pdb(pdb_file, MHC_chains)
-                seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
+                #seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
+                seqs = {chain.id : seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()}
             except:
                 log(pdb_id, 'Could not fetch chain sequences from pdb file', logfile)
                 raise Exception
@@ -936,7 +937,7 @@ def parse_pMHCI_pdb(pdb_id,
             # Get structure resolution
             resolution = get_resolution(pdb_file)
             # Create MHC_structure object
-            templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs[0], peptide=seqs[-1],  pdb_path=pdb_file, resolution=resolution)
+            templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs[MHC_chains[0]], peptide=seqs[pept_chain],  pdb_path=pdb_file, resolution=resolution)
 
             return templ
 
