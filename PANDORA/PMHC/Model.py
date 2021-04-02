@@ -195,6 +195,10 @@ def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False):
                 if i.id[1] < anchors[0] or i.id[1] > anchors[-1]:
                     ref[0]['P'].detach_child(i.id)
 
+    # remove c-like domain and keep only g domain
+    decoy = remove_C_like_domain(decoy)
+    ref = remove_C_like_domain(ref)
+
     # merge chains of the decoy
     decoy = merge_chains(decoy)
     decoy = renumber(decoy)
@@ -270,6 +274,40 @@ def get_Gdomain_lzone(ref_pdb, output_dir, MHC_class):
                     raise Exception('Unrecognized chain ID, different from M, N or P. Please check your file')
             #output.write('fit\n')
     return outfile
+
+def remove_C_like_domain(pdb):
+    '''Removes the C-like domain from a MHC struture and keeps only the G-like domain
+
+    Args:
+        pdb: (Bio.PDB): Bio.PDB object with chains names M (N for MHCII) and P
+
+    Returns: (Bio.PDB): Bio.PDB object without the C-like domain
+
+    '''
+
+    # If MHCII, remove the C-like domain from the M-chain (res 80 and higher) and the N-chain (res 90 and higher)
+    if 'N' in [chain.id for chain in pdb.get_chains()]:
+
+        residue_ids_to_remove_N = [res.id for res in pdb[0]['N'] if res.id[1] > 90]
+        #  Remove them
+        for id in residue_ids_to_remove_N:
+            pdb[0]['N'].detach_child(id)
+
+        residue_ids_to_remove_M = [res.id for res in pdb[0]['M'] if res.id[1] > 80]
+        #  Remove them
+        for id in residue_ids_to_remove_M:
+            pdb[0]['M'].detach_child(id)
+
+    # If MHCI, remove the C-like domain, which is from residue 180+
+    if 'N' not in [chain.id for chain in pdb.get_chains()]:
+        for chain in pdb.get_chains():
+            if chain.id == 'M':
+                for res in chain:
+                    if res.id[1] > 180:
+                        chain.detach_child(res.id)
+
+    return pdb
+
 #ValueError: Invalid column name lzone. Possible names are
 #['rowID', 'serial', 'name', 'altLoc', 'resName', 'chainID', 'resSeq',
 # 'iCode', 'x', 'y', 'z', 'occ', 'temp', 'element', 'model']  

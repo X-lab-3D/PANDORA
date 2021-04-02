@@ -529,14 +529,14 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         if benchmark:
             try:
                 m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
-                print('l-RMSD for %s: %f' %(target.id, m.lrmsd))
+                # print('l-RMSD for %s: %f' %(target.id, m.lrmsd))
             except:
                 print('Something went wrong when calculating l-RMSD for case %s' %target.id)
                 pass
             if target.MHC_class == 'II': #only calculate the core L-rmsd for MHCII cases
                 try:
                     m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
-                    print('Core l-RMSD for %s: %f' %(target.id, m.core_lrmsd))
+                    # print('Core l-RMSD for %s: %f' %(target.id, m.core_lrmsd))
                 except:
                     print('Something went wrong when calculating core l-RMSD for case %s' %target.id)
                     pass

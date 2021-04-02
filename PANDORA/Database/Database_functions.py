@@ -937,7 +937,7 @@ def parse_pMHCI_pdb(pdb_id,
             # Get structure resolution
             resolution = get_resolution(pdb_file)
             # Create MHC_structure object
-            templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs[MHC_chains[0]], peptide=seqs[pept_chain],  pdb_path=pdb_file, resolution=resolution)
+            templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'], peptide=seqs['P'],  pdb_path=pdb_file, resolution=resolution)
 
             return templ
 
