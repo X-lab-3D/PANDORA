@@ -94,6 +94,41 @@ class Model:
         os.system('rm %s/%s_decoy.pdb %s/%s_ref.pdb' %(self.output_dir, self.target.id, self.output_dir, self.target.id))
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
 
+
+def remove_C_like_domain(pdb):
+    '''Removes the C-like domain from a MHC struture and keeps only the G-like domain
+
+    Args:
+        pdb: (Bio.PDB): Bio.PDB object with chains names M (N for MHCII) and P
+
+    Returns: (Bio.PDB): Bio.PDB object without the C-like domain
+
+    '''
+
+    # If MHCII, remove the C-like domain from the M-chain (res 80 and higher) and the N-chain (res 90 and higher)
+    if 'N' in [chain.id for chain in pdb.get_chains()]:
+
+        residue_ids_to_remove_N = [res.id for res in pdb[0]['N'] if res.id[1] > 90]
+        #  Remove them
+        for id in residue_ids_to_remove_N:
+            pdb[0]['N'].detach_child(id)
+
+        residue_ids_to_remove_M = [res.id for res in pdb[0]['M'] if res.id[1] > 80]
+        #  Remove them
+        for id in residue_ids_to_remove_M:
+            pdb[0]['M'].detach_child(id)
+
+    # If MHCI, remove the C-like domain, which is from residue 180+
+    if 'N' not in [chain.id for chain in pdb.get_chains()]:
+        for chain in pdb.get_chains():
+            if chain.id == 'M':
+                for res in chain:
+                    if res.id[1] > 180:
+                        chain.detach_child(res.id)
+
+    return pdb
+
+
 def merge_chains(pdb):
     ''' Merges two chains of MHCII to one chain. pdb2sql can only calculate L-rmsd with one chain.
 
@@ -162,6 +197,10 @@ def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False):
                 if i.id[1] < anchors[0] or i.id[1] > anchors[-1]:
                     ref[0]['P'].detach_child(i.id)
 
+    # Remove C-like domain and keep only the G-domain
+    decoy = remove_C_like_domain(decoy)
+    ref = remove_C_like_domain(ref)
+
     # merge chains of the decoy
     decoy = merge_chains(decoy)
     decoy = renumber(decoy)
@@ -180,12 +219,47 @@ def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False):
 
     return decoy, ref
 
+# from PANDORA.Database import Database
+# from PANDORA.PMHC import PMHC
+# db = Database.Database().load('27_03_21_Pandora_db')
+# k = '5KSV'
+# target =  PMHC.Target(db.MHCII_data[k].id, db.MHCII_data[k].allele_type, db.MHCII_data[k].peptide,
+#                        M_chain_seq=db.MHCII_data[k].M_chain_seq,
+#                        N_chain_seq=db.MHCII_data[k].N_chain_seq,
+#                        MHC_class=db.MHCII_data[k].MHC_class, anchors=db.MHCII_data[k].anchors)
+# model_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/outputs/5KSV_5KSU/5KSU.BL00010001.pdb'
 #
-# decoy_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/outputs/1DLH_1FYT/1FYT.BL00010001.pdb'
-# ref_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/PDBs/pMHCII/1FYT.pdb'
 #
+# M = Model(target, model_path)
+# M.calc_LRMSD(reference_pdb='/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/PDBs/pMHCII/5KSV.pdb')
+#
+#
+#
+# # N 90:
+# # M 80:
+# #
+# decoy_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/outputs/5KSV_5KSU/5KSU.BL00010001.pdb'
+# ref_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/PDBs/pMHCII/5KSV.pdb'
+# #
 # decoy = PDBParser(QUIET=True).get_structure('Decoy', decoy_path)
 # ref = PDBParser(QUIET=True).get_structure('Ref', ref_path)
+#
+#
+# pdb = decoy
+#
+#
+#
+#
+# x = remove_C_like_domain(decoy)
+#
+# for chain in x.get_chains():
+#     print(chain)
+#
+# io = PDBIO()
+# io.set_structure(x)
+# io.save('test.pdb')
+
+
 #
 #
 # decoy_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/outputs/5KSU_6U3O/6U3O.BL00010001.pdb'
