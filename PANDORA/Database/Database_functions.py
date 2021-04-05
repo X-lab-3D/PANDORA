@@ -843,22 +843,6 @@ def log(ID, error, logfile, verbose=True):
         f.write('%s,%s\n' % (ID, error))
 
 
-# pdb_id = '1ES0'
-# indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles'
-# outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII'
-# bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII'
-#
-# # pdb_file = outdir + '/' + pdb_id + '.pdb'
-#
-# pdb_file = unzip_pdb(pdb_id, indir, outdir)
-# change_sep_in_ser(pdb_file)
-# pdb = PDBParser(QUIET=True).get_structure('MHCI', pdb_file)
-# # Remove waters and duplicated chains, then renumber
-# pdb = remove_duplicated_chains(pdb)
-# pdb = renumber(pdb)
-
-# REMARK 410 [   PEPTIDE (1-27) [D1]
-
 def find_merged_pept_chains(pdb_file):
     ''' Checks if the peptide is merged to another chain (have the same chain ID). If True, return a dict telling
         wich chain the peptide is merged to and which residues belong to the peptide. It takes this info from the header
@@ -902,7 +886,6 @@ def find_merged_pept_chains(pdb_file):
     if pept_chains == {}:
         return False
     return pept_chains
-
 
 
 def un_merge_pept_chain(pdb, pdb_file):
@@ -969,6 +952,26 @@ def un_merge_pept_chain(pdb, pdb_file):
     return pdb
 
 
+def ensure_order(pdb, MHC_chains):
+    ''' Checks if the peptide chain is the last chain, in the pdb, if not reoder them so the MCH chains come before the
+        peptide chain.
+
+    Args:
+        pdb: (Bio.PDB): Bio.PDB object containing the Alpha, (Beta for MHCII) and Peptide chain
+        MHC_chains: (lst): List of the names of the chains in this order: M, N (only for MHCII) and P
+
+    Returns: (Bio.PDB): Bio.PBD object with the MHC chains first and the peptide chain last
+
+    '''
+    # Check if the peptide chain is the last chain, If not --> reorder
+    if [i.id for i in pdb.get_chains()][-1] != MHC_chains[-1]:
+        # Store the peptide chain
+        p_chain = pdb[0][MHC_chains[-1]]
+        # Remove the peptide chain from the pdb
+        pdb[0].detach_child(MHC_chains[-1])
+        # Add chain back to the pdb
+        pdb[0].add(p_chain)
+    return pdb
 
 
 def parse_pMHCI_pdb(pdb_id,
@@ -1033,6 +1036,7 @@ def parse_pMHCI_pdb(pdb_id,
 
             try:                 # Reformat chains
                 pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
+                pdb = ensure_order(pdb, MHC_chains)
                 pdb = replace_chain_names(MHC_chains, pdb,['M', 'P'])  # Rename chains to M,P # Renumber from 1
             except:
                 log(pdb_id, 'Could not reformat structure', logfile)
@@ -1083,7 +1087,7 @@ def parse_pMHCI_pdb(pdb_id,
 
 # lst = ['1ES0','1FNE','1FNG','1HDM','1I3R','1IEA','1IEB','1K8I','1KT2','1KTD','1LNU','2BC4','2IAD','3C5Z','3C60','3C6L','3CUP','3LQZ','3PL6','3RDT','3T0E','3WEX','4AH2','4GRL','4MAY','4P23','4P46','4P4K','4P4R','4P57','4P5K','4P5M','4P5T','4X5X','5DMK','5V4M','5V4N','6BGA','6BLQ','6BLX','6DFW','6DFX','6MFF','6MFG','6MKD','6MKR','6MNM','6MNN','6MNO']
 # parse_pMHCII_pdb('6DFX')
-# pdb_id = '1ES0'
+# pdb_id = '1R5V'
 #
 # for i in lst:
 #     parse_pMHCII_pdb(i)
@@ -1124,8 +1128,6 @@ def parse_pMHCII_pdb(pdb_id,
                 log(pdb_id, 'Could not cut peptide from MHC chain', logfile)
                 raise Exception
 
-            # [i for i in pdb.get_chains()]
-
             try:                # Find the peptide chain
                 pept_chain = find_peptide_chain(pdb)
             except:
@@ -1152,6 +1154,7 @@ def parse_pMHCII_pdb(pdb_id,
 
             try:                 # Reformat chains
                 pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
+                pdb = ensure_order(pdb, MHC_chains)
                 pdb = replace_chain_names(MHC_chains, pdb, ['M', 'N', 'P'])   # Rename chains to M,N,P
             except:
                 log(pdb_id, 'Could not reformat structure', logfile)
