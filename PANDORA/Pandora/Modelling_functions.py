@@ -211,14 +211,13 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
                         if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
                             putative_templates[ID] = list(
                                 set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
-                    else:
-                        if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
-                            putative_templates[ID] = list(
-                                set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
+                else:
+                    if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
+                        putative_templates[ID] = list(
+                            set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
 
             # Find the peptide with the highest alignment score. If there are multiple, take the first one with same
             # same anchor positions
-
             # template_id = find_best_template_peptide(target=target,
             #                                          templates=[database.MHCII_data[i] for i in putative_templates])
 
@@ -250,7 +249,7 @@ def find_template(target, database, seq_based_templ_selection = False, benchmark
             template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
             # Return the Template object of the selected template that will be used for homology modelling
 
-            return database.MHCII_data[template_id], check_target_template(target, database.MHCI_data[template_id])
+            return database.MHCII_data[template_id], check_target_template(target, database.MHCII_data[template_id])
 
     # Sequence based template search if the sequences of the target are provided
     elif target.M_chain_seq != '' and seq_based_templ_selection:
