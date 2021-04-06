@@ -502,13 +502,15 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     if keep_IL:
         # Also take the Initial Loop model. Take the molpdf from the pdb header.
         il_file = [i for i in os.listdir(output_dir) if i.startswith(target.id + '.IL')][0]
-        il = open(output_dir + '/' + il_file)
-        for line in il:
-            if 'MODELLER OBJECTIVE FUNCTION' in line:
-                il_molpdf = line.split()[-1]
-        f.close()
+        # il = open(output_dir + '/' + il_file)
+        # for line in il:
+        #     if 'MODELLER OBJECTIVE FUNCTION' in line:
+        #         il_molpdf = line.split()[-1]
+        # f.close()
+        # Create a fake molpdf score for the IL model: the best molpdf from the real models - 1
+        fake_molpdf = str(float(min(i[1] for i in logf)) - 1)
         # Append the filename and molpdf to the rest of the data
-        logf.append((il_file, il_molpdf, ''))
+        logf.append((il_file, fake_molpdf, ''))
 
     # Write to output file
     f = open(output_dir + '/molpdf_DOPE.tsv', 'w')
