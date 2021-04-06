@@ -708,14 +708,14 @@ def check_pMHC(pdb):
 
     # 2. Check M,N chain length
     if len(chains) == 2:
-        if chain_len[0] > 120:
+        if chain_len['M'] > 120:
             requirements[1] = True
     elif len(chains) == 3:
-        if chain_len[0] > 120 and chain_len[1] > 120:
+        if chain_len['M'] > 120 and chain_len['N'] > 120:
             requirements[1] = True
 
     # 3. Check peptide length
-    if chain_len[-1] > 6 and chain_len[-1] < 26:
+    if chain_len['P'] > 6 and chain_len['P'] < 26:
         requirements[2] = True
 
     # 4. Check numbering. Does every chain start at 1 and end at its chain length?
