@@ -253,6 +253,59 @@ def get_chainid_alleles_MHCII(pdbf):
     return {'Alpha': mhc_a_alleles, 'Beta': mhc_b_alleles}
 
 
+def format_alleles_MHCI(alleles, MHC_chains):
+    ''' Format alleles to a list
+
+    Args:
+        alleles: (dict): output from get_chainid_alleles_MHCI()
+
+    Returns: (lst): list of allele types
+
+    '''
+    try:
+        alpha = [[k for k, v in i.items()] for i in [alleles['A'][i] for i in [i for i in alleles['A'].keys()]]]
+    except KeyError:
+        try:
+            c = MHC_chains[0]
+            alpha = [[k for k, v in i.items()] for i in [alleles[c][i] for i in [i for i in alleles[c].keys()]]]
+        except KeyError:
+            c = [i for i in alleles.keys()][0]
+            alpha = [[k for k, v in i.items()] for i in [alleles[c][i] for i in [i for i in alleles[c].keys()]]]
+
+    a_allele = sum(alpha, [])
+    return a_allele
+
+
+def format_alleles_MHCII(alleles, MHC_chains):
+    ''' Format alleles to a list
+
+    Args:
+        alleles: (dict): output from get_chainid_alleles_MHCI()
+
+    Returns: (lst, lst): tuple of lists of allele types for the alpha and beta chain respectively
+
+    '''
+
+    try:
+        alpha = sum([alleles['Alpha'][i] for i in [i for i in alleles['Alpha'].keys()]], [])
+    except KeyError:
+        try:
+            alpha = sum([alleles[MHC_chains[0]][i] for i in [i for i in alleles[MHC_chains[0]].keys()]], [])
+        except KeyError:
+            alpha = sum([alleles['A'][i] for i in [i for i in alleles['A'].keys()]], [])
+
+    try:
+        beta = sum([alleles['Beta'][i] for i in [i for i in alleles['Beta'].keys()]], [])
+    except KeyError:
+        try:
+            beta = sum([alleles[MHC_chains[1]][i] for i in [i for i in alleles[MHC_chains[1]].keys()]], [])
+        except KeyError:
+            beta = sum([alleles['B'][i] for i in [i for i in alleles['B'].keys()]], [])
+    a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
+    b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
+    return a_allele, b_allele
+
+
 def get_resolution(pdbf):
     ''' Returns the resolution in Angstrom from the given pdb
 
@@ -469,9 +522,9 @@ def find_peptide_chain(pdb, min_len=6, max_len=26):
     ''' Find the pdb chain that is most likely the peptide based on its size
 
     Args:
-        pdb: Bio.PDB object
-        min: (int) minimal peptide length to consider
-        max: (int) maximal peptide length to consider
+        pdb: (Bio.PDB): Bio.PDB object
+        min_len: (int): minimal peptide length to consider
+        max_len: (int): maximal peptide length to consider
 
     Returns: (str): Most likely chain that is the peptide
 
@@ -1002,6 +1055,22 @@ def ensure_order(pdb, MHC_chains):
     return pdb
 
 
+def check_DM_chaperone(alleles):
+    ''' Check if the DM chaperone is involved in this structure by checking the allele type.
+        MHC class II molecules require HLA-DM (H2‑DM in mice) to facilitate the exchange of the CLIP fragment. The
+        involvement of this protein can influence the structure of MHCII
+
+    Args:
+        alleles: (lst): list of allele types
+
+    Returns: (bool): True if there are HLA-DM (human) or H2-DM (mouse)
+
+    '''
+    if any('HLA-DM' in i for i in alleles) or any('H2-DM' in i for i in alleles):
+        return True
+    return False
+
+
 def find_pept_secondary_structure(pdb_file, pept_chain):
     ''' Using the annotation in the IMGT PDB file, find secondary structures in the peptide
 
@@ -1077,7 +1146,13 @@ def parse_pMHCI_pdb(pdb_id,
             # Remove waters and duplicated chains, then renumber
             pdb = remove_duplicated_chains(pdb)
             pdb = renumber(pdb)
-            alleles = get_chainid_alleles_MHCI(pdb_file)
+
+            # Get allele per each chain
+            try:
+                alleles = get_chainid_alleles_MHCI(pdb_file)
+            except:
+                log(pdb_id, 'Failed, Could not find allele type', logfile)
+                raise Exception
 
             try:            #Check if the peptide is merged to the MHC, cut it loose and put it in a new chain
                 pdb, log_message = un_merge_pept_chain(pdb, pdb_file)
@@ -1112,6 +1187,13 @@ def parse_pMHCI_pdb(pdb_id,
                 log(pdb_id, 'Failed, Could not locate Alpha chain. Found: ' + chain_lens, logfile)
                 raise Exception
 
+            # Get allele per each chain
+            try:
+                a_allele = format_alleles_MHCI(alleles, MHC_chains)
+            except:
+                log(pdb_id, 'Failed, Could not format alleles', logfile)
+                raise Exception
+
             hetatm_in_groove, log_message = check_hetatoms_in_binding_groove(pdb, MHC_chains)
             if hetatm_in_groove:
                 log(pdb_id, 'Failed, Heteroatoms in binding groove between the peptide and MHC', logfile)
@@ -1142,23 +1224,6 @@ def parse_pMHCI_pdb(pdb_id,
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
             write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
 
-            try:
-                # Get allele per each chain
-                #al = get_chainid_alleles_MHCI(pdb_file)
-                try:
-                    alpha = [[k for k, v in i.items()] for i in [alleles['A'][i] for i in [i for i in alleles['A'].keys()]]]
-                except KeyError:
-                    try:
-                        c = MHC_chains[0]
-                        alpha = [[k for k, v in i.items()] for i in [alleles[c][i] for i in [i for i in alleles[c].keys()]]]
-                    except KeyError:
-                        c = [i for i in alleles.keys()][0]
-                        alpha = [[k for k, v in i.items()] for i in [alleles[c][i] for i in [i for i in alleles[c].keys()]]]
-
-                a_allele = sum(alpha, [])
-            except:
-                log(pdb_id, 'Could not find allele type', logfile)
-                raise Exception
 
             # Get structure resolution
             resolution = get_resolution(pdb_file)
@@ -1204,7 +1269,13 @@ def parse_pMHCII_pdb(pdb_id,
             # Remove duplicated chains, then renumber
             pdb = remove_duplicated_chains(pdb)
             pdb = renumber(pdb)
-            alleles = get_chainid_alleles_MHCII(pdb_file)
+
+            # Get allele per each chain
+            try:
+                alleles = get_chainid_alleles_MHCII(pdb_file)
+            except:
+                log(pdb_id, 'Failed, Could not find allele type', logfile)
+                raise Exception
 
             try:            #Check if the peptide is merged to the MHC, cut it loose and put it in a new chain
                 pdb, log_message = un_merge_pept_chain(pdb, pdb_file)
@@ -1239,6 +1310,18 @@ def parse_pMHCII_pdb(pdb_id,
                 log(pdb_id, 'Failed, Could not locate Alpha/Beta chain. Found: ' + chain_lens, logfile)
                 raise Exception
 
+            # Get allele per each chain
+            try:
+                a_allele, b_allele = format_alleles_MHCII(alleles, MHC_chains)
+            except:
+                log(pdb_id, 'Failed, Could not format alleles', logfile)
+                raise Exception
+
+            # Check if the DM chaperone is involved
+            if check_DM_chaperone(a_allele + b_allele):
+                log(pdb_id, 'Failed, HLA-DM or H2-DM chaperone protein is involved.', logfile)
+                raise Exception
+
             hetatm_in_groove, log_message = check_hetatoms_in_binding_groove(pdb, MHC_chains)
             if hetatm_in_groove:
                 log(pdb_id, 'Failed, Heteroatoms in binding groove between the peptide and MHC', logfile)
@@ -1255,13 +1338,10 @@ def parse_pMHCII_pdb(pdb_id,
                 raise Exception
 
             try:  # get the chain sequences from the pdb file
-                # seqs = seqs_from_pdb(pdb_file, MHC_chains)
-                # seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
                 seqs = {chain.id : seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()}
             except:
                 log(pdb_id, 'Failed, Could not fetch chain sequences from pdb file', logfile)
                 raise Exception
-
 
             if not check_pMHC(pdb): #test if the pdb is parsed correctly
                 log(pdb_id, 'Failed, Structure did not pass the test.', logfile)
@@ -1269,29 +1349,6 @@ def parse_pMHCII_pdb(pdb_id,
 
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
             write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
-
-            # Get allele per each chain
-            try:
-                try:
-                    alpha = sum([alleles['Alpha'][i] for i in [i for i in alleles['Alpha'].keys()]], [])
-                except KeyError:
-                    try:
-                        alpha = sum([alleles[MHC_chains[0]][i] for i in [i for i in alleles[MHC_chains[0]].keys()]], [])
-                    except KeyError:
-                        alpha = sum([alleles['A'][i] for i in [i for i in alleles['A'].keys()]], [])
-
-                try:
-                    beta = sum([alleles['Beta'][i] for i in [i for i in alleles['Beta'].keys()]], [])
-                except KeyError:
-                    try:
-                        beta = sum([alleles[MHC_chains[1]][i] for i in [i for i in alleles[MHC_chains[1]].keys()]], [])
-                    except KeyError:
-                        beta = sum([alleles['B'][i] for i in [i for i in alleles['B'].keys()]], [])
-                a_allele = list(set([alpha[i - 1] for i in range(3, int(len(alpha)), 4)]))
-                b_allele = list(set([beta[i - 1] for i in range(3, int(len(beta)), 4)]))
-            except:
-                log(pdb_id, 'Failed, Could not find allele type', logfile)
-                raise Exception
 
             # Get structure resolution
             resolution = get_resolution(pdb_file)
