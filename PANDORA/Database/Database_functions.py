@@ -699,22 +699,22 @@ def check_pMHC(pdb):
 
     # 1. Check chain names and the number of chains
     if len(chains) == 2:
-        if 'M' in chains and 'P' in chains and not 'N' in chains:
+        if 'M' == chains[0] and 'P' == chains[-1] and not 'N' in chains:
             requirements[0] = True
     elif len(chains) == 3:
-        if 'M' in chains and 'N' in chains and 'P' in chains:
+        if 'M' == chains[0] and 'N' == chains[1] and 'P' == chains[-1]:
             requirements[0] = True
 
     # 2. Check M,N chain length
     if len(chains) == 2:
-        if chain_len['M'] > 120:
+        if chain_len[0] > 120:
             requirements[1] = True
     elif len(chains) == 3:
-        if chain_len['M'] > 120 and chain_len['N'] > 120:
+        if chain_len[0] > 120 and chain_len[1] > 120:
             requirements[1] = True
 
     # 3. Check peptide length
-    if chain_len['P'] > 6 and chain_len['P'] < 26:
+    if chain_len[-1] > 6 and chain_len[-1] < 26:
         requirements[2] = True
 
     # 4. Check numbering. Does every chain start at 1 and end at its chain length?
