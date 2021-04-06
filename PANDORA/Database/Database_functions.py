@@ -45,6 +45,7 @@ def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_file
         os.system('rm IMGT3DFlatFiles/*.inn.gz')
     if del_kabat_files:
         os.system('rm IMGT3DFlatFiles/*.prot.gz')
+    os.chdir(PANDORA.PANDORA_path)
     #os.chdir('../../../../')
 
 
@@ -1022,7 +1023,7 @@ def find_pept_secondary_structure(pdb_file, pept_chain):
     for i in helix:
         if i[4][0] == pept_chain and i[7][0] == pept_chain:
             log_message.append(
-                'Found an 𝜶-helix in the peptide between residue %s (%s) and %s (%s)' % (i[5], i[3], i[8], i[6]))
+                'Found an alpha-helix in the peptide between residue %s (%s) and %s (%s)' % (i[5], i[3], i[8], i[6]))
 
     # Find Beta sheest
     for i in sheet:
@@ -1032,7 +1033,7 @@ def find_pept_secondary_structure(pdb_file, pept_chain):
                                   [x for x in range(len(line)) if line[x] == pept_chain]]))
             # [i[y + 1] + ':' + i[y + 2] + ' (' + i[y] + ')' for y in [x for x in range(len(i)) if i[x] in aa]]
             log_message.append(
-                'Found a 𝜷-sheet in the peptide between residue ' + min(sheet_res) + ' and ' + max(sheet_res))
+                'Found a beta-sheet in the peptide between residue ' + min(sheet_res) + ' and ' + max(sheet_res))
 
     if log_message == []:
         return False
