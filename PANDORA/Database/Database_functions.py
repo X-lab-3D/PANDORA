@@ -268,13 +268,13 @@ def get_resolution(pdbf):
     return resolution
 
 
-def change_sep_in_ser(pdb_file):
-    '''
+def change_modified_res(pdb_file, change_SEP = True, change_F2F = True, change_CSO = True, change_CIR = True):
+    ''' Change modified residues into regular residues
 
     Args:
-        pdb_file:
+        pdb_file: (str): Path to pdb file
 
-    Returns:
+    Returns: (bool/str): If nothing was changed, return False, else, resturn a message with the changes.
 
     '''
 
@@ -291,29 +291,33 @@ def change_sep_in_ser(pdb_file):
             if line.startswith('ATOM') or line.startswith('HETATM'):
                 # Change SEO into SER
                 if ('SEP' in l[3] or 'SEP' in l[2]) and l[2] not in ['P', 'O1P', 'O2P', 'O3P', 'HA', 'HB2','HB3']:
-                    f.write(line.replace('HETATM', 'ATOM  ').replace('SEP', 'SER'))
-                    res_changed.append('SEP -> SER')
+                    if change_SEP:
+                        f.write(line.replace('HETATM', 'ATOM  ').replace('SEP', 'SER'))
+                        res_changed.append('SEP -> SER')
                 # Change CIR into ARG
                 elif ('CIR' in l[3] or 'CIR' in l[2]) and l[2] not in ['F1', 'F2']:
-                    if l[2] == 'O7':
-                        f.write(line.replace('CIR', 'ARG').replace('O7', 'N2').replace('O', 'N').replace('HETATM', 'ATOM  '))
-                    elif l[2] == 'N2':
-                        f.write(line.replace('HETATM', 'ATOM  ').replace('CIR', 'ARG').replace('N2', 'N '))
-                    elif l[2] == 'C2':
-                        f.write(line.replace('HETATM', 'ATOM  ').replace('CIR', 'ARG').replace('C2', 'CA'))
-                    elif l[2] == 'C1':
-                        f.write(line.replace('HETATM', 'ATOM  ').replace('CIR', 'ARG').replace('C1','C '))
-                    else:
-                        f.write(line.replace('HETATM', 'ATOM  ').replace('CIR', 'ARG'))
-                    res_changed.append('CIR -> ARG')
+                    if change_CIR:
+                        if l[2] == 'O7':
+                            f.write(line.replace('CIR', 'ARG').replace('O7', 'N2').replace('O', 'N').replace('HETATM', 'ATOM  '))
+                        elif l[2] == 'N2':
+                            f.write(line.replace('HETATM', 'ATOM  ').replace('CIR', 'ARG').replace('N2', 'N '))
+                        elif l[2] == 'C2':
+                            f.write(line.replace('HETATM', 'ATOM  ').replace('CIR', 'ARG').replace('C2', 'CA'))
+                        elif l[2] == 'C1':
+                            f.write(line.replace('HETATM', 'ATOM  ').replace('CIR', 'ARG').replace('C1','C '))
+                        else:
+                            f.write(line.replace('HETATM', 'ATOM  ').replace('CIR', 'ARG'))
+                        res_changed.append('CIR -> ARG')
                 # Change F2F into PHE
                 elif ('F2F' in l[3] or 'F2F' in l[2]) and l[2] not in ['F1', 'F2']:
-                    f.write(line.replace('HETATM', 'ATOM  ').replace('F2F', 'PHE'))
-                    res_changed.append('F2F -> PHE')
+                    if change_F2F:
+                        f.write(line.replace('HETATM', 'ATOM  ').replace('F2F', 'PHE'))
+                        res_changed.append('F2F -> PHE')
                 # Change CSO into CYS
                 elif ('CSO' in l[3] or 'CSO' in l[2]) and l[2] not in ['OD']:
-                    f.write(line.replace('HETATM', 'ATOM  ').replace('CSO', 'CYS'))
-                    res_changed.append('CSO -> CYS')
+                    if change_CSO:
+                        f.write(line.replace('HETATM', 'ATOM  ').replace('CSO', 'CYS'))
+                        res_changed.append('CSO -> CYS')
 
                 else:
                     f.write(line)
@@ -1065,7 +1069,7 @@ def parse_pMHCI_pdb(pdb_id,
             # Unzip file (also check if the file is not empty) and save the path of this file
             pdb_file = unzip_pdb(pdb_id, indir, outdir)
 
-            log_message = change_sep_in_ser(pdb_file)
+            log_message = change_modified_res(pdb_file, change_CIR=False)
             if log_message:
                 log(pdb_id, 'Warning, ' + log_message, logfile)
 
@@ -1192,7 +1196,7 @@ def parse_pMHCII_pdb(pdb_id,
             # Unzip file (also check if the file is not empty) and save the path of this file
             pdb_file = unzip_pdb(pdb_id, indir, outdir)
 
-            log_message = change_sep_in_ser(pdb_file)
+            log_message = change_modified_res(pdb_file, change_CIR=False)
             if log_message:
                 log(pdb_id, 'Warning, ' + log_message, logfile)
 
