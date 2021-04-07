@@ -901,6 +901,75 @@ def check_hetatoms_in_binding_groove(pdb, MHC_chains):
 
     return False, log_message
 
+def reorder_chains(pdb_id, outdir):
+    """ Make sure M chain comes before P chain.
+    
+
+    Args:
+        pdb_id (str): PDB ID
+        outdir (str): Input and output directory. 
+        The PDB file with the corresponding ID in this path will be reorganized.
+
+    Returns:
+        None.
+
+    """
+    # Set temporary files names
+    ori_filepath = '%s/%s.pdb' % (outdir, pdb_id)
+    header_filepath = '%s/header_%s.pdb' % (outdir, pdb_id)
+    onlyM_filepath = '%s/onlyM_%s.pdb' % (outdir, pdb_id)
+    onlyP_filepath = '%s/onlyP_%s.pdb' % (outdir, pdb_id)
+
+    ### Write only-header PDB file
+    with open(ori_filepath, 'r') as inpdb:
+        with open(header_filepath, 'w') as outheader:
+            for line in inpdb:
+                if line.startswith('ATOM'):
+                    break
+                else:
+                    outheader.write(line)
+            outheader.close()
+        inpdb.close()
+
+    ### Extract M and P chains in two different PDBs
+    os.system('pdb_selchain -M %s > %s' %(ori_filepath, onlyM_filepath))
+    os.system('pdb_selchain -P %s > %s' %(ori_filepath, onlyP_filepath))
+
+    ### Merge the three PDB files together
+    with open(ori_filepath, 'w') as outpdb:
+        # Write Header
+        with open(header_filepath, 'r') as inheader:
+            for line in inheader:
+                outpdb.write(line)
+            inheader.close()
+        # Write M chain
+        with open(onlyM_filepath, 'r') as inMpdb:
+            for line in inMpdb:
+                if line.startswith('ATOM') or line.startswith('TER'):
+                    outpdb.write(line)
+            inMpdb.close()
+        # Write P chain
+        with open(onlyP_filepath, 'r') as inPpdb:
+            for line in inPpdb:
+                if line.startswith('ATOM') or line.startswith('TER'):
+                    outpdb.write(line)
+            inPpdb.close()
+        outpdb.write('END')
+        outpdb.close()
+
+    ### Remove temporary files
+    try:
+        os.system('rm %s' %header_filepath)
+    except:
+        pass
+    try:
+        os.system('rm %s' %onlyM_filepath)
+    except:
+        pass
+    try:
+        os.system('rm %s' %onlyP_filepath)
+    except:
+        pass
 
 def log(ID, error, logfile, verbose=True):
     ''' Keeps track of what goes wrong while parsing
@@ -1184,6 +1253,7 @@ def parse_pMHCI_pdb(pdb_id,
             try:                # Find the peptide chain
                 pept_chain = find_peptide_chain(pdb)
             except:
+
                 log(pdb_id, 'Failed, Could not find a suitable peptide chain with a length between 7 and 25. Found: ' + chain_lens, logfile)
                 raise Exception
 
@@ -1241,13 +1311,18 @@ def parse_pMHCI_pdb(pdb_id,
 
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
             write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
-
-
+            
+            # Check if M and P chains are in the correct order. If not, reorder them. 
+            chains = [c.id for c in pdb.get_chains()]
+            if chains.index('P') < chains.index('M'):
+                reorder_chains(pdb_id, outdir)
+            
             # Get structure resolution
             resolution = get_resolution(pdb_file)
             # Create MHC_structure object
-            templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'], peptide=seqs['P'],
-                                  pdb_path=pdb_file, resolution=resolution)
+
+            templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'], peptide=seqs['P'],  pdb_path=pdb_file, resolution=resolution)
+
 
             return templ
 

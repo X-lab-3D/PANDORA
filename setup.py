@@ -37,11 +37,11 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    install_requires=[
-        'MODELLER  >= 9.23',
-        'Biopython',
-        'pdb_tools',
-        'muscle',
-        'matplotlib',
-        ],
+    #install_requires=[
+    #    'MODELLER',
+    #    'Biopython',
+    #    'pdb_tools',
+    #    'muscle',
+    #    'matplotlib',
+    #    ],
 )

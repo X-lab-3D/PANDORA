@@ -325,7 +325,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
             for line in MyL_temp:
                 if 'self.residue_range' in line:
-                    myloopscript.write(line % (anch[0], anch[-1]))
+                    myloopscript.write(line % (anch[0]+1, anch[-1]-1))
                 elif 'SPECIAL_RESTRAINTS_BREAK' in line:
                     break
                 elif 'contact_file = open' in line:
@@ -385,7 +385,7 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_models
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
             for line in MyL_temp:
                 if 'self.residue_range' in line:
-                    myloopscript.write(line %(anch[0], anch[-1]))  # write the first anchor
+                    myloopscript.write(line %(anch[0]+1, anch[-1]-1))  # write the first anchor
                 elif 'contact_file = open' in line:
                     myloopscript.write(line %(target.id))
                 elif 'STDEV MARKER' in line:
