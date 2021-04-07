@@ -533,7 +533,7 @@ def find_peptide_chain(pdb, min_len=6, max_len=26):
     # Find most likely peptide chain: first chain to be 7 < len(chain) < 25
     pept_chain = []
     for chain in pdb.get_chains():
-        if len(chain) > min_len and len(chain) < max_len:
+        if len(chain) > min_len and len(chain) < max_len and chain.id != ' ':
             # print(chain.id)# Is this chain between 7 and 25?
             heteroatoms = False
             for res in chain:
@@ -934,6 +934,7 @@ def find_merged_pept_chains(pdb_file):
 
     '''
 
+
     # Get the remarks from the pdb file
     with open(pdb_file) as infile:
         remarks = []
@@ -957,11 +958,14 @@ def find_merged_pept_chains(pdb_file):
             chains[chainID].append(row)
 
     pept_chains = {}
-    for i in chains:
-        for line in chains[i]:
-            if 'PEPTIDE(' in ''.join(line) or '[PEPTIDE' in ''.join(line) :
-                # add the resnr of the peptideto the dict, with the chain as key
-                pept_chains[i] = tuple([int(i) for i in ''.join(line).split('(')[1].split(')')[0].split('-')])
+    try:
+        for i in chains:
+            for line in chains[i]:
+                if 'PEPTIDE(' in ''.join(line) or '[PEPTIDE' in ''.join(line) :
+                    # add the resnr of the peptideto the dict, with the chain as key
+                    pept_chains[i] = tuple([int(i) for i in ''.join(line).split('(')[1].split(')')[0].split('-')])
+    except:
+        pass
 
     if pept_chains == {}:
         return False
@@ -980,57 +984,71 @@ def un_merge_pept_chain(pdb, pdb_file):
     '''
 
     pept_chain = find_merged_pept_chains(pdb_file)
+    # First check if there are no peptide between 7 and 25 in the pdb
+    if not any(c > 7 and c < 26 for c in [len(c) for c in pdb.get_chains()]):
+        if pept_chain: #If it found a merged peptide in the pdb header..
+            # print('Found merged peptide chain')
+            for cn in pept_chain:
+                pept_res = [res for res in pdb[0][cn] if res.id[1] in range(pept_chain[cn][0], pept_chain[cn][1] + 1)]
+                pdb = extract_residues(pept_res, cn, pdb)
 
-    if pept_chain:
-        # print('Found merged peptide chain')
-        for cn in pept_chain:
-            # cn = 'B'
-            # Make a list of the residue in the peptide
-            pept_res = [res for res in pdb[0][cn] if res.id[1] in range(pept_chain[cn][0], pept_chain[cn][1] + 1)]
-            pept_res_keep = pept_res
+            # Renumber the pdb, because some residues got removed, the numbering is now wrong
+            pdb = renumber(pdb)
 
-            # Sometimes there is a gap between the peptide and the end of the peptide-MHC adapter. By calculating the
-            # distance between residues, such a gap can be detected. If there is a gap, then take all residues up to
-            # that gap. (All residues, incl those after the gap, will be deleted from the original chain later)
-
-            # Calculate the distances between every N of residue x and CA of residue x-1.
-            # See 'check_missing_pept_residues()'
-            N_CA_dist = []
-            # Check for missing chain residues
-            prev_atom = [a for a in pept_res[0].get_atoms()][0]
-            for res in pept_res:
-                for atom in res:
-                    if atom.id == 'N':
-                        N_CA_dist.append(atom - prev_atom)
-                    if atom.id == 'CA':
-                        prev_atom = atom
-            # Take all the residues until the gap, if there is a gap
-            if any(i > 3 for i in N_CA_dist):
-                pept_res_keep = pept_res[:next(x for x, val in enumerate(N_CA_dist) if val > 3)]
-
-
-            # Make a new empty chain using a letter that is not a chain in the pdb yet.
-            new_chain_name = [x for x in ascii_uppercase if x not in [i.id for i in pdb.get_chains()]][0]
-            new_chain = Chain.Chain(new_chain_name)
-            pdb[0].add(new_chain)
-
-            # Add residues to the new chain
-            for res in pept_res_keep:
-                pdb[0][new_chain_name].add(res)
-
-            # Remove residues from the old chain
-            for res in pept_res:
-                pdb[0][cn].detach_child(res.id)
-
-            # Also add the parent to the new residues (othewise the Contacts class will complain)
-            for res in pdb[0][new_chain_name]:
-                res.parent = pdb[0][new_chain_name]
-
-        # Renumber the pdb, because some residues got removed, the numbering is now wrong
-        pdb = renumber(pdb)
-
-        return pdb, 'Successfully cut merged peptide from MHC chain'
+            return pdb, 'Successfully cut merged peptide from MHC chain'
     return pdb, False
+
+
+def extract_residues(res_lst, chain_id, pdb):
+    ''' Extract residues from a pdb and put them in a new chain in the same pdb
+
+    Args:
+        res_lst: (lst): List of Bio.PDB <residue> objects (pdb.get_residues())
+        chain_id: (str): name of chain were res_lst originates from
+        pdb: (Bio.PDB): Bio.PDB object
+
+    Returns: (Bio.PDB): Bio.PDB object with the residues from res_lst in a new chain
+
+    '''
+
+    # Sometimes there is a gap between the peptide and the end of the peptide-MHC adapter. By calculating the
+    # distance between residues, such a gap can be detected. If there is a gap, then take all residues up to
+    # that gap. (All residues, incl those after the gap, will be deleted from the original chain later)
+
+    # Calculate the distances between every N of residue x and CA of residue x-1.
+    # See 'check_missing_pept_residues()'
+    N_CA_dist = []
+    # Check for missing chain residues
+    prev_atom = [a for a in res_lst[0].get_atoms()][0]
+    for res in res_lst:
+        for atom in res:
+            if atom.id == 'N':
+                N_CA_dist.append(atom - prev_atom)
+            if atom.id == 'CA':
+                prev_atom = atom
+    # Take all the residues until the gap, if there is a gap
+    pept_res_keep = res_lst
+    if any(i > 3 for i in N_CA_dist):
+        pept_res_keep = res_lst[:next(x for x, val in enumerate(N_CA_dist) if val > 3)]
+
+    # Make a new empty chain using a letter that is not a chain in the pdb yet.
+    new_chain_name = [x for x in ascii_uppercase if x not in [i.id for i in pdb.get_chains()]][0]
+    new_chain = Chain.Chain(new_chain_name)
+    pdb[0].add(new_chain)
+
+    # Add residues to the new chain
+    for res in pept_res_keep:
+        pdb[0][new_chain_name].add(res)
+
+    # Remove residues from the old chain
+    for res in res_lst:
+        pdb[0][chain_id].detach_child(res.id)
+
+    # Also add the parent to the new residues (othewise the Contacts class will complain)
+    for res in pdb[0][new_chain_name]:
+        res.parent = pdb[0][new_chain_name]
+
+    return pdb
 
 
 def ensure_order(pdb, MHC_chains):
@@ -1237,6 +1255,56 @@ def parse_pMHCI_pdb(pdb_id,
             os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
 
 
+def hardcode_cut_peptide(pdb_id, pdb):
+    ''' Some structures were only cleanable by manually cutting the peptide from another chain.
+
+    Args:
+        pdb_id: (str): ID of PDB file
+        pdb: (Bio.PDB): Bio.PDB object
+
+    Returns:  (Bio.PDB): Bio.PDB object with the previously merged peptide in a separate chain
+
+    '''
+
+    if pdb_id in ['6DFS', '4MAY', '3PL6', '4GRL']:
+
+        if pdb_id == '6DFS':
+            chain, res_nr = 'D', [1,14]
+
+        if pdb_id == '4MAY':
+            chain, res_nr = 'D', [1,12]
+
+        if pdb_id == '3PL6':
+            chain, res_nr = 'D', [1,14]
+
+        if pdb_id == '4GRL':
+            chain, res_nr = 'D', [1,14]
+
+
+        pept_res = [res for res in pdb[0][chain] if res.id[1] in range(res_nr[0], res_nr[1] + 1)]
+        pdb = extract_residues(pept_res, chain, pdb)
+        pdb = renumber(pdb)
+
+    return pdb
+
+
+def check_clip_peptide(pdb_file):
+    ''' Checks if the bound peptide is the clip peptide. If it is, this structure is not suitable for modelling.
+
+    Args:
+        pdb_file: (str): path to pdb file
+
+    Returns: (bool)
+
+    '''
+
+    with open(pdb_file) as f:
+        for line in f:
+            if 'clip' in line or 'CLIP' in line:
+                return True
+    return False
+
+
 def parse_pMHCII_pdb(pdb_id,
                       indir=PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                       outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII',
@@ -1265,8 +1333,13 @@ def parse_pMHCII_pdb(pdb_id,
             if log_message:
                 log(pdb_id, 'Warning, ' + log_message, logfile)
 
+            # Check if the CLIP peptide is involved
+            if check_clip_peptide(pdb_file):
+                log(pdb_id, 'Failed, MHC structure is bound to CLIP peptide', logfile)
+                raise Exception
+
+            # Load pdb file as an Bio.PDB object, check for duplicate chains and renumber the pdb
             pdb = PDBParser(QUIET=True).get_structure('MHCII', pdb_file)
-            # Remove duplicated chains, then renumber
             pdb = remove_duplicated_chains(pdb)
             pdb = renumber(pdb)
 
@@ -1278,6 +1351,7 @@ def parse_pMHCII_pdb(pdb_id,
                 raise Exception
 
             try:            #Check if the peptide is merged to the MHC, cut it loose and put it in a new chain
+                pdb = hardcode_cut_peptide(pdb_id, pdb) #For 4 structures, manually cut them loose
                 pdb, log_message = un_merge_pept_chain(pdb, pdb_file)
                 if log_message:
                     log(pdb_id, 'Warning, ' + log_message, logfile)
