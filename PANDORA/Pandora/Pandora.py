@@ -65,7 +65,7 @@ class Pandora:
         '''
         # create an output directory
         try:
-            self.output_dir = '%s/%s_%s' %(self.output_dir, self.template.id, self.target.id)
+            self.output_dir = '%s/%s_%s' %(self.output_dir, self.target.id , self.template.id)
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir)
         except:
@@ -168,6 +168,27 @@ class Pandora:
         Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, 
                                                   self.output_dir, n_models=n_models, n_jobs=n_jobs, stdev=stdev)
 
+    def __log(self, target_id, template_id, error, logfile = PANDORA.PANDORA_data + '/outputs/Pandora_log.txt', verbose=True):
+        ''' Keeps track of what goes wrong while parsing
+
+        Args:
+            target_id: (str): ID of target structure
+            template_id: (str): ID of template structure
+            error: (str): error to append to log file
+            logfile: (str): path to logfile
+            verbose: (bool): print error?
+        '''
+
+        # Create log file
+        if not os.path.exists(logfile):
+            with open(logfile, 'w') as f:
+                f.write('Target\tTemplate\tError\n')
+
+        if verbose:
+            print('\t' + error)
+        with open(logfile, 'a') as f:
+            f.write('%s\t%s\t%s\n' % (target_id, template_id, error))
+
     def model(self, n_models=20, n_jobs=None, stdev=0.1, seq_based_templ_selection = False, benchmark=False, verbose=True):
         ''' Wrapper function that combines all modelling steps.
 
@@ -187,44 +208,90 @@ class Pandora:
 
         # Make sure we're in the root directory
         os.path.dirname(PANDORA.PANDORA_path)
+
         # Find the best template structure given the Target
-        self.find_template(seq_based_templ_selection, benchmark=benchmark, verbose=verbose)
+        try:
+            self.find_template(seq_based_templ_selection, benchmark=benchmark, verbose=verbose)
+        except:
+            self.__log(self.target.id, 'None', 'Could not find a template')
+            raise Exception
+
         # Prepare the output directory
-        self.prep_output_dir()
+        try:
+            self.prep_output_dir()
+        except:
+            self.__log(self.target.id, self.template.id, 'Failed creating output directory')
+            raise Exception
+
         # Perform sequence alignment. This is used to superimpose the target on the template structure in later steps
-        self.align(verbose=verbose)
+        try:
+            self.align(verbose=verbose)
+        except:
+            self.__log(self.target.id, self.template.id, 'Failed aligning target and template')
+            raise Exception
+
         # Prepare the scripts that run modeller
-        self.write_ini_script()
+        try:
+            self.write_ini_script()
+        except:
+            self.__log(self.target.id, self.template.id, 'Failed writing .ini script')
+            raise Exception
+
         # Run modeller to create the initial model
-        self.create_initial_model(verbose=verbose)
+        try:
+            self.create_initial_model(verbose=verbose)
+        except:
+            self.__log(self.target.id, self.template.id, 'Failed creating initial model with modeller')
+            raise Exception
+
         # Calculate anchor restraints
-        self.anchor_contacts(verbose=verbose)
+        try:
+            self.anchor_contacts(verbose=verbose)
+        except:
+            self.__log(self.target.id, self.template.id, 'Failed calculating anchor restraints')
+            raise Exception
+
         # prepare the scripts that run modeller
-        self.write_modeller_script(n_models=n_models, n_jobs=n_jobs, stdev=stdev)
+        try:
+            self.write_modeller_script(n_models=n_models, n_jobs=n_jobs, stdev=stdev)
+        except:
+            self.__log(self.target.id, self.template.id, 'Failed preparing the modeller script')
+            raise Exception
+
         # Do the homology modelling
-        self.run_modeller(benchmark=benchmark, verbose=verbose, keep_IL=self.keep_IL)
+        try:
+            self.run_modeller(benchmark=benchmark, verbose=verbose, keep_IL=self.keep_IL)
+        except:
+            self.__log(self.target.id, self.template.id, 'Failed running modeller')
+            raise Exception
+
 
         if verbose and benchmark:
-            print('\n\tModel\t\t\t\tMolpdf\t\tL-RMSD\t\tcore L-RMSD')
-            for m in self.results:
-                try:
-                    print('\t%s\t\t%s\t\t%s\t\t%s' % (
-                        os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4),
-                        round(float(m.lrmsd), 4), round(float(m.core_lrmsd), 4)))
-                except AttributeError:
+            try:
+                print('\n\tModel\t\t\t\tMolpdf\t\tL-RMSD\t\tcore L-RMSD')
+                for m in self.results:
                     try:
-                        print('\t%s\t\t%s\t\t%s' % (
+                        print('\t%s\t\t%s\t\t%s\t\t%s' % (
                             os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4),
-                            round(float(m.lrmsd), 4)))
+                            round(float(m.lrmsd), 4), round(float(m.core_lrmsd), 4)))
                     except AttributeError:
-                        print('\t%s\t\t%s' % (
-                            os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
+                        try:
+                            print('\t%s\t\t%s\t\t%s' % (
+                                os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4),
+                                round(float(m.lrmsd), 4)))
+                        except AttributeError:
+                            print('\t%s\t\t%s' % (
+                                os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
+            except:
+                self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD')
+                raise Exception
+
         elif verbose and not benchmark:
             print('\n\tModel\t\t\t\tMolpdf')
             for m in self.results:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
 
-
+        self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %n_models)
 
 
 
