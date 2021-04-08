@@ -1,5 +1,6 @@
 import PANDORA
 import dill
+import pickle
 from PANDORA.PMHC import PMHC
 from PANDORA.Database import Database_functions
 
@@ -119,9 +120,10 @@ class Database:
         :param fn: (string) pathname of file
         """
         with open(fn, "wb") as dill_file:
-            dill.dump(self, dill_file)
+            # dill.dump(self, dill_file)
+            pickle.dump(self, dill_file)
 
     def load(cls, fn):
-        return dill.load(open(fn, 'rb'))
+        # return dill.load(open(fn, 'rb'))
+        return pickle.load(open(fn, 'rb'))
 
-#
