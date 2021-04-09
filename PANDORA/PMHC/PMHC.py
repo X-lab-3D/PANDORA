@@ -1,9 +1,9 @@
 
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
-import PANDORA
 from PANDORA.Contacts import Contacts
 from PANDORA.Database import Database_functions
+from PANDORA.Pandora import Modelling_functions
 from PANDORA.PMHC import Anchors
 from abc import ABC, abstractmethod
 
@@ -191,8 +191,10 @@ class Target(PMHC):
             anchors = [anchor_1, anchor_2]
             self.anchors = anchors
         if MHC_class =='II' and anchors == []:
-            print('WARNING: no anchor positions provided. Pandora will assign them to canonical anchor position')
-            raise Exception('This function is not implemented yet. Please provide anchor position for your target peptide')
+            print('WARNING: no anchor positions provided. Pandora will predict them using netMHCIIpan 4.0')
+            self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type)
+
+            # raise Exception('This function is not implemented yet. Please provide anchor position for your target peptide')
 
     def info(self):
         """ Print the basic info of this structure
