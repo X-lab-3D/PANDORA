@@ -1,0 +1,11 @@
+../netMHCIIpan -inptype 1 -f example.pep > example.pep.out
+../netMHCIIpan -inptype 1 -f example.pep -BA > example.pep_BA.out
+../netMHCIIpan -inptype 1 -f example.pep_context -context > example.pep_context.out
+../netMHCIIpan -inptype 1 -f example.pep_context -context -BA > example.pep_context_BA.out
+
+../netMHCIIpan -inptype 0 -f example.fsa > example.fsa.out
+../netMHCIIpan -inptype 0 -f example.fsa -context > example.fsa_context.out
+../netMHCIIpan -f example.fsa -a H-2-IAb -s -u > example.fsa.sorted.out
+
+../netMHCIIpan -f example.fsa -hlaseq DRB10101.fsa > example.fsa_hlaseq.out
+../netMHCIIpan -f example.fsa -hlaseqA alpha.dat -hlaseq beta.dat > example.fsa_hlaseq_A+B.out

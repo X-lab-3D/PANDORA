@@ -1,0 +1,128 @@
+
+
+   NetMHCIIpan 4.0          INSTALLATION INSTRUCTIONS
+
+
+   DESCRIPTION
+
+   The NetMHCIIpan 4.0software predicts  binding of peptides to MHC class II
+   molecules.  The predictions are available for all three human MHC class II
+   isotypes: HLA-DR, HLA-DP and HLA-DQ, as well as for mouse molecules (H-2).
+   The method is described  in detail  in the following articles:
+
+   Improved prediction of MHC II antigen presentation through integration and motif deconvolution of mass spectrometry MHC eluted ligand data.
+   Reynisson B, Barra C, Kaabinejadian S, Hildebrand WH, Peters B, Nielsen M.
+   J. Proteome Res. 2020 Apr 18. doi: 10.1021/acs.jproteome.9b00874.
+
+   Previous version (3.2):
+  Improved methods for predicting peptide binding affinity to MHC class II molecules.
+   Jensen KK, Andreatta M, Marcatili P, Buus S, Greenbaum JA, Yan Z, Sette A, 
+   Peters B, Nielsen M.   
+   Immunology. 2018 Jan 6. doi: 10.1111/imm.12889.  
+
+   The previous version (3.1):
+   
+   Accurate pan-specific prediction of peptide-MHC class II binding
+   affinity with improved binding core identification.
+   Andreatta M, Karosiene E, Rasmussen M, Stryhn A, Buus S and Nielsen M.
+   Immunogenetics, Epub ahead of print, PubMed 26416257, Sep 29, 2015.
+
+   The previous version (3.0):
+
+   NetMHCIIpan-3.0, a common pan-specific MHC class II prediction method
+   including all three human MHC class II isotypes, HLA-DR, HLA-DP and HLA-DQ
+   Karosiene E, Rasmussen M, Blicher T, Lund O, Buus S, and Nielsen M.
+   Immunogenetics Oct;65(10):711-24, 2013.
+
+   More information about the method can be found at:
+   
+      http://www.cbs.dtu.dk/services/NetMHCIIpan-4.0/
+
+   DOWNLOAD
+
+   The NetMHCIIpan 4.0 software is a property of DTU Section for Bioinformatics
+   It may be downloaded only  by special agreement.  For
+   academic users there is a download site at:
+
+        http://www.cbs.dtu.dk/cgi-bin/nph-sw_request?netMHCIIpan
+
+   Other users are requested to contact software@cbs.dtu.dk.
+
+
+   PRE-INSTALLATION
+
+   netMHCIIpan 4.0  currently runs under Darwin (MacOSX)  and Linux  (several
+   vendors). The package consists of two files:
+  
+      netMHCIIpan-4.0.readme         this file
+      netMHCIIpan-4.0.<unix>.tar.Z   compressed TAR archive
+
+   where 'unix' is the UNIX platform on which you are about to install. After
+   installation the software will occupy around 134 Mb of diskspace.
+
+   INSTALLATION
+
+   1. Uncompress and untar the package:
+
+      tar -xvf netMHCIIpan-4.0.<unix>.tar.gz
+
+      This will produce a directory 'netMHCIIpan-4.0.
+
+   2. From the CBS WWW site download the file:
+
+      https://services.healthtech.dtu.dk/services/NetMHCIIpan-4.0/data.tar.gz
+
+      Put it in the 'netMHCIIpan-4.0' directory and then gunzip and untar it:
+      
+      tar -xvf data.tar.gz
+
+      This will produce the directory 'data'.  It is necessary for the
+      NetMHCpanII 4.0 software  to  operate; once it has been  installed the
+      'data.tar.gz' file may be deleted.
+
+   3. In the 'netMHCIIpan-4.0' directory edit the script 'netMHCIIpan':
+   
+      a. At the top of the file  locate the part labelled  "GENERAL SETTINGS:
+         CUSTOMIZE TO YOUR SITE"  and set  the 'NMHOME' variable  to the full
+	 path to the 'netMHCIIpan-4.0' directory on your system;
+
+      b. Set TMPDIR to the full path to the tmp directory of you choice (must
+         be user writable);
+
+   4. In the 'netMHCIIpan-4.0/test' directory test the software:
+
+      > ../netMHCIIpan -f example.fsa -a DRB1_0101 > example.fsa.myout
+      > ../netMHCIIpan -f example.pep -inptype 1 -a DRB1_0101 > example.pep.myout
+      > ../netMHCIIpan -f example.fsa -a H-2-IAb -s -u > example.fsa.sorted.myout
+      > ../netMHCIIpan -f example.fsa -hlaseq DRB10101.fsa > example.fsa_hlaseq.myout
+      > ../netMHCIIpan -f example.fsa -hlaseqA alpha.dat -hlaseq beta.dat > example.fsa_hlaseq_A+B.myout
+
+      The resulting "*.myout" files  should be identical to the corresponding
+      "*.out" files provided in the package.
+
+   5. Finish the installation:
+
+      a. Copy or link  the 'netMHCIIpan' script  to a directory in the users'
+         path.
+
+      b. Copy the 'netMHCIIpan.1' file  to a location  in your manual system.
+         If you need a compiled version try running:
+
+         man -d netMHCIIpan.1 |compress >netMHCIIpan.Z
+
+         or:
+
+         neqn netMHCIIpan.1 |tbl |nroff -man |col |compress >netMHCIIpan.Z
+
+   6. Enjoy ...
+
+
+   PROBLEMS
+
+   Contact packages@cbs.dtu.dk in case of problems.
+   
+   Questions on the _scientific_ aspects of the NetMHCIIpan method  should be
+   sent to dr Morten Nielsen, morni@dtu.dk.
+
+   24 April 2020
+   M. Nielsen

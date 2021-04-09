@@ -43,7 +43,6 @@ def check_target_template(target, template):
     return out
 
 
-
 def check_presence(target, database, seq_based_templ_selection = False):
     ''' Checks if the target the user submitted, already exists in has a template in the database with the same allele
         and peptide.
@@ -104,6 +103,85 @@ def check_presence(target, database, seq_based_templ_selection = False):
                     target_in_db = database.MHCII_data[i]
 
     return target_in_db
+
+
+def predict_anchors_netMHCIIpan(target, verbose = True):
+    '''Uses netMHCIIpan to predict the binding core of a peptide and infer the anchor positions from that.
+
+    Args:
+        target: (Target): Target object containing the peptide sequence and allele type
+
+    Returns: (lst): list of predicted anchor predictions
+
+    '''
+    all_netMHCpan_alleles = []
+    with open(PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/data/allele.list') as f:
+        for line in f:
+            all_netMHCpan_alleles.append(line.replace('\n',''))
+
+    # Format the alles to netMHCIIpan readable format
+    target_alleles = [i.split('-')[-1].replace('*', '_') for i in target.allele_type]
+
+    for i in target_alleles:
+        if 'DRB' not in i:
+            target_alleles = target_alleles + [al for al in all_netMHCpan_alleles if i.replace('_','') in al]
+
+    target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
+    # If there are no target alleles that occur in netMHCIIpan, but there is a mouse allele, use the 2 mouse alleles
+    # that are supported by netMHCIIpan
+    if target_alleles == [] and any(al.startswith('H2') for al in target.allele_type):
+        target_alleles = ['H-2-IAd', 'H-2-IAb']
+    # If there is no target allele that occurs in netMHCIIpan, just use the standard DRB1_0101
+    if target_alleles == []:
+        target_alleles = ['DRB1_0101']
+
+    target_alleles = ','.join(list(set(target_alleles)))
+
+    # Setup files
+    netmhciipan = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/netMHCIIpan'
+    infile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/pep.txt'
+    outfile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/pept_prediction.txt'
+
+    # Write peptide sequence to input file for netMHCIIpan
+    with open(infile, 'w') as f:
+        f.write(target.peptide)
+
+    try:
+        # run netMHCIIpan
+        os.system('%s -f %s -inptype 1 -a %s > %s' %(netmhciipan, infile, target_alleles, outfile))
+
+        # Get the output from the netMHCIIpan prediction
+        # {allele: (offset, core, core_reliability, score_EL, %rank_EL)}
+        pred = {}
+        with open(outfile) as f:
+            for line in f:
+                if target.peptide in line:
+                    ln = [i for i in line[:-1].split(' ') if i != '']
+                    pred[ln[1]] = (int(ln[3]), ln[4], float(ln[5]))
+
+        # For every allele, the binding core is predicted. Take the allele with the highest reliability score
+        best_allele = max((pred[i][2], i) for i in pred)[1]
+    except ValueError:
+        print('Could not predict binding core using netMHCIIpan. Will use the most common anchor positions instead')
+        return [3, 6, 8, 11]
+
+    # save the offset, core and prediction reliability
+    offset, core, core_reliability = pred[best_allele][0], pred[best_allele][1], pred[best_allele][2]
+
+    # Remove output file
+    os.system('rm %s %s' %(infile, outfile))
+
+    # Use the canonical spacing for 9-mer binding cores to predict the anchor positions
+    predicted_anchors = [offset+1,offset+4,offset+6,offset+9]
+    # Make sure the prediction is not longer than the peptide just in case
+    predicted_anchors = [i for i in predicted_anchors if i <= len(target.peptide)]
+
+    if verbose:
+        print('\tPredicted the binding core using netMHCIIpan (4.0):\n')
+        print('\t\toffset:\t%s\n\t\tcore:\t%s\n\t\tprob:\t%s\n' %(offset, core, core_reliability ))
+        print('\t\tPredicted peptide anchor residues (assuming canonical spacing): %s' %predicted_anchors)
+
+    return predicted_anchors
 
 
 def find_template(target, database, seq_based_templ_selection = False, benchmark=False):
