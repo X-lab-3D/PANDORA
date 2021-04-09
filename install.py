@@ -40,7 +40,7 @@ with open('netMHCIIpan') as f:
 with open('netMHCIIpan', 'w') as f:
     for line in netMHCIIpan_script:
         if 'setenv\tNMHOME' in line:
-            f.write('setenv\tNMHOME\t' + wd + '/netMHCIIpan-4.0'))
+            f.write('setenv\tNMHOME\t' + wd + '/netMHCIIpan-4.0')
             f.write('setenv\tTMPDIR\t' + wd + '/netMHCIIpan-4.0/tmp')
         else:
             f.write(line)
