@@ -901,75 +901,77 @@ def check_hetatoms_in_binding_groove(pdb, MHC_chains):
 
     return False, log_message
 
-def reorder_chains(pdb_id, outdir):
-    """ Make sure M chain comes before P chain.
-    
 
-    Args:
-        pdb_id (str): PDB ID
-        outdir (str): Input and output directory. 
-        The PDB file with the corresponding ID in this path will be reorganized.
+# def reorder_chains(pdb_id, outdir):
+#     """ Make sure M chain comes before P chain.
+#
+#
+#     Args:
+#         pdb_id (str): PDB ID
+#         outdir (str): Input and output directory.
+#         The PDB file with the corresponding ID in this path will be reorganized.
+#
+#     Returns:
+#         None.
+#
+#     """
+#     # Set temporary files names
+#     ori_filepath = '%s/%s.pdb' % (outdir, pdb_id)
+#     header_filepath = '%s/header_%s.pdb' % (outdir, pdb_id)
+#     onlyM_filepath = '%s/onlyM_%s.pdb' % (outdir, pdb_id)
+#     onlyP_filepath = '%s/onlyP_%s.pdb' % (outdir, pdb_id)
+#
+#     ### Write only-header PDB file
+#     with open(ori_filepath, 'r') as inpdb:
+#         with open(header_filepath, 'w') as outheader:
+#             for line in inpdb:
+#                 if line.startswith('ATOM'):
+#                     break
+#                 else:
+#                     outheader.write(line)
+#             outheader.close()
+#         inpdb.close()
+#
+#     ### Extract M and P chains in two different PDBs
+#     os.system('pdb_selchain -M %s > %s' %(ori_filepath, onlyM_filepath))
+#     os.system('pdb_selchain -P %s > %s' %(ori_filepath, onlyP_filepath))
+#
+#     ### Merge the three PDB files together
+#     with open(ori_filepath, 'w') as outpdb:
+#         # Write Header
+#         with open(header_filepath, 'r') as inheader:
+#             for line in inheader:
+#                 outpdb.write(line)
+#             inheader.close()
+#         # Write M chain
+#         with open(onlyM_filepath, 'r') as inMpdb:
+#             for line in inMpdb:
+#                 if line.startswith('ATOM') or line.startswith('TER'):
+#                     outpdb.write(line)
+#             inMpdb.close()
+#         # Write P chain
+#         with open(onlyP_filepath, 'r') as inPpdb:
+#             for line in inPpdb:
+#                 if line.startswith('ATOM') or line.startswith('TER'):
+#                     outpdb.write(line)
+#             inPpdb.close()
+#         outpdb.write('END')
+#         outpdb.close()
+#
+#     ### Remove temporary files
+#     try:
+#         os.system('rm %s' %header_filepath)
+#     except:
+#         pass
+#     try:
+#         os.system('rm %s' %onlyM_filepath)
+#     except:
+#         pass
+#     try:
+#         os.system('rm %s' %onlyP_filepath)
+#     except:
+#         pass
 
-    Returns:
-        None.
-
-    """
-    # Set temporary files names
-    ori_filepath = '%s/%s.pdb' % (outdir, pdb_id)
-    header_filepath = '%s/header_%s.pdb' % (outdir, pdb_id)
-    onlyM_filepath = '%s/onlyM_%s.pdb' % (outdir, pdb_id)
-    onlyP_filepath = '%s/onlyP_%s.pdb' % (outdir, pdb_id)
-
-    ### Write only-header PDB file
-    with open(ori_filepath, 'r') as inpdb:
-        with open(header_filepath, 'w') as outheader:
-            for line in inpdb:
-                if line.startswith('ATOM'):
-                    break
-                else:
-                    outheader.write(line)
-            outheader.close()
-        inpdb.close()
-
-    ### Extract M and P chains in two different PDBs
-    os.system('pdb_selchain -M %s > %s' %(ori_filepath, onlyM_filepath))
-    os.system('pdb_selchain -P %s > %s' %(ori_filepath, onlyP_filepath))
-
-    ### Merge the three PDB files together
-    with open(ori_filepath, 'w') as outpdb:
-        # Write Header
-        with open(header_filepath, 'r') as inheader:
-            for line in inheader:
-                outpdb.write(line)
-            inheader.close()
-        # Write M chain
-        with open(onlyM_filepath, 'r') as inMpdb:
-            for line in inMpdb:
-                if line.startswith('ATOM') or line.startswith('TER'):
-                    outpdb.write(line)
-            inMpdb.close()
-        # Write P chain
-        with open(onlyP_filepath, 'r') as inPpdb:
-            for line in inPpdb:
-                if line.startswith('ATOM') or line.startswith('TER'):
-                    outpdb.write(line)
-            inPpdb.close()
-        outpdb.write('END')
-        outpdb.close()
-
-    ### Remove temporary files
-    try:
-        os.system('rm %s' %header_filepath)
-    except:
-        pass
-    try:
-        os.system('rm %s' %onlyM_filepath)
-    except:
-        pass
-    try:
-        os.system('rm %s' %onlyP_filepath)
-    except:
-        pass
 
 def log(ID, error, logfile, verbose=True):
     ''' Keeps track of what goes wrong while parsing
@@ -1201,6 +1203,56 @@ def find_pept_secondary_structure(pdb_file, pept_chain):
         return '; '.join(list(set(log_message)))
 
 
+def hardcode_cut_peptide(pdb_id, pdb):
+    ''' Some structures were only cleanable by manually cutting the peptide from another chain.
+
+    Args:
+        pdb_id: (str): ID of PDB file
+        pdb: (Bio.PDB): Bio.PDB object
+
+    Returns:  (Bio.PDB): Bio.PDB object with the previously merged peptide in a separate chain
+
+    '''
+
+    if pdb_id in ['6DFS', '4MAY', '3PL6', '4GRL']:
+
+        if pdb_id == '6DFS':
+            chain, res_nr = 'D', [1,14]
+
+        if pdb_id == '4MAY':
+            chain, res_nr = 'D', [1,12]
+
+        if pdb_id == '3PL6':
+            chain, res_nr = 'D', [1,14]
+
+        if pdb_id == '4GRL':
+            chain, res_nr = 'D', [1,14]
+
+
+        pept_res = [res for res in pdb[0][chain] if res.id[1] in range(res_nr[0], res_nr[1] + 1)]
+        pdb = extract_residues(pept_res, chain, pdb)
+        pdb = renumber(pdb)
+
+    return pdb
+
+
+def check_clip_peptide(pdb_file):
+    ''' Checks if the bound peptide is the clip peptide. If it is, this structure is not suitable for modelling.
+
+    Args:
+        pdb_file: (str): path to pdb file
+
+    Returns: (bool)
+
+    '''
+
+    with open(pdb_file) as f:
+        for line in f:
+            if 'clip' in line or 'CLIP' in line:
+                return True
+    return False
+
+
 def parse_pMHCI_pdb(pdb_id,
                      indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                      outdir = PANDORA.PANDORA_data + '/PDBs/pMHCI',
@@ -1313,9 +1365,9 @@ def parse_pMHCI_pdb(pdb_id,
             write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
             
             # Check if M and P chains are in the correct order. If not, reorder them. 
-            chains = [c.id for c in pdb.get_chains()]
-            if chains.index('P') < chains.index('M'):
-                reorder_chains(pdb_id, outdir)
+            # chains = [c.id for c in pdb.get_chains()]
+            # if chains.index('P') < chains.index('M'):
+            #     reorder_chains(pdb_id, outdir)
             
             # Get structure resolution
             resolution = get_resolution(pdb_file)
@@ -1328,56 +1380,6 @@ def parse_pMHCI_pdb(pdb_id,
 
         except:  # If something goes wrong, append the ID to the bad_ids list
             os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
-
-
-def hardcode_cut_peptide(pdb_id, pdb):
-    ''' Some structures were only cleanable by manually cutting the peptide from another chain.
-
-    Args:
-        pdb_id: (str): ID of PDB file
-        pdb: (Bio.PDB): Bio.PDB object
-
-    Returns:  (Bio.PDB): Bio.PDB object with the previously merged peptide in a separate chain
-
-    '''
-
-    if pdb_id in ['6DFS', '4MAY', '3PL6', '4GRL']:
-
-        if pdb_id == '6DFS':
-            chain, res_nr = 'D', [1,14]
-
-        if pdb_id == '4MAY':
-            chain, res_nr = 'D', [1,12]
-
-        if pdb_id == '3PL6':
-            chain, res_nr = 'D', [1,14]
-
-        if pdb_id == '4GRL':
-            chain, res_nr = 'D', [1,14]
-
-
-        pept_res = [res for res in pdb[0][chain] if res.id[1] in range(res_nr[0], res_nr[1] + 1)]
-        pdb = extract_residues(pept_res, chain, pdb)
-        pdb = renumber(pdb)
-
-    return pdb
-
-
-def check_clip_peptide(pdb_file):
-    ''' Checks if the bound peptide is the clip peptide. If it is, this structure is not suitable for modelling.
-
-    Args:
-        pdb_file: (str): path to pdb file
-
-    Returns: (bool)
-
-    '''
-
-    with open(pdb_file) as f:
-        for line in f:
-            if 'clip' in line or 'CLIP' in line:
-                return True
-    return False
 
 
 def parse_pMHCII_pdb(pdb_id,
