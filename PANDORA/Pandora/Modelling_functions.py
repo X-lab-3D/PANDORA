@@ -476,7 +476,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         #         il_molpdf = line.split()[-1]
         # f.close()
         # Create a fake molpdf score for the IL model: the best molpdf from the real models - 1
-        fake_molpdf = str(min(float(i[1]) for i in logf) - 1)
+        fake_molpdf = str(float(min(i[1] for i in logf)) - 1)
         # Append the filename and molpdf to the rest of the data
         logf.append((il_file, fake_molpdf, ''))
 
