@@ -410,6 +410,28 @@ def replace_chain_names(chains, pdb, replacement_chains=['M', 'N', 'P']):
     return pdb
 
 
+def remember_IMGT_numbering(pdb_obj, forget=False):
+    ''' Puts the IMGT numbering in the pdb residue id (' ', 1045, 'A') --> (' ', 1045, '1045A')
+
+    Args:
+        pdb: (Bio.PDB): Bio.PDB object
+        forget: (bool): if True, the IMGT numbering will be cleared. This is needed for writing a pdb file
+
+    Returns:  (Bio.PDB): Bio.PDB object with IMGT numbering in the residiue id.
+
+    '''
+    if forget:
+        for res in pdb_obj.get_residues():
+            res.id = (' ', res.id[1], ' ')
+
+        return pdb_obj
+
+    for res in pdb_obj.get_residues():
+        res.id = (' ', res.id[1], str(res.id[1]) + str(res.id[2]).replace(' ', ''))
+
+    return pdb_obj
+
+
 def renumber(pdb):
     ''' Renumbers the pdb. Each chain starts at 1
 
@@ -427,7 +449,7 @@ def renumber(pdb):
             nr += 1
     for chain in pdb.get_chains():
         for res in chain:
-            res.id = (' ', res.id[1], ' ')
+            res.id = (' ', res.id[1], res.id[2])
 
     return pdb
 
@@ -486,7 +508,7 @@ def write_pdb(pdb, out_path, get_header_from=False):
     io.set_structure(pdb)
     io.save(out_path)
 
-    if get_header_from: # Write the original header to pdb file
+    if get_header_from:  # Write the original header to pdb file
         for line in header[::-1]:
             line_prepender(out_path, line)
 
@@ -1025,7 +1047,7 @@ def find_merged_pept_chains(pdb_file):
             chains[chainID] = []
             chains[chainID].append(row)
             flag = True
-        elif flag == True:
+        elif flag:
             chains[chainID].append(row)
 
     pept_chains = {}
@@ -1284,6 +1306,7 @@ def parse_pMHCI_pdb(pdb_id,
             pdb = PDBParser(QUIET=True).get_structure('MHCI', pdb_file)
             # Remove waters and duplicated chains, then renumber
             pdb = remove_duplicated_chains(pdb)
+            pdb = remember_IMGT_numbering(pdb)
             pdb = renumber(pdb)
 
             # Get allele per each chain
@@ -1361,19 +1384,16 @@ def parse_pMHCI_pdb(pdb_id,
                 log(pdb_id, 'Failed, Structure did not pass the test.', logfile)
                 raise Exception
 
-            # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
-            write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
-            
-            # Check if M and P chains are in the correct order. If not, reorder them. 
-            # chains = [c.id for c in pdb.get_chains()]
-            # if chains.index('P') < chains.index('M'):
-            #     reorder_chains(pdb_id, outdir)
-            
             # Get structure resolution
             resolution = get_resolution(pdb_file)
-            # Create MHC_structure object
 
-            templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'], peptide=seqs['P'],  pdb_path=pdb_file, resolution=resolution)
+            # Create MHC_structure object
+            templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'], peptide=seqs['P'],
+                                  pdb=pdb, pdb_path=pdb_file, resolution=resolution)
+
+            clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
+            # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
+            write_pdb(clear_pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
 
 
             return templ
@@ -1418,6 +1438,7 @@ def parse_pMHCII_pdb(pdb_id,
             # Load pdb file as an Bio.PDB object, check for duplicate chains and renumber the pdb
             pdb = PDBParser(QUIET=True).get_structure('MHCII', pdb_file)
             pdb = remove_duplicated_chains(pdb)
+            pdb = remember_IMGT_numbering(pdb)
             pdb = renumber(pdb)
 
             # Get allele per each chain
@@ -1498,15 +1519,16 @@ def parse_pMHCII_pdb(pdb_id,
                 log(pdb_id, 'Failed, Structure did not pass the test.', logfile)
                 raise Exception
 
-            # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
-            write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
-
             # Get structure resolution
             resolution = get_resolution(pdb_file)
 
             # Create MHC_structure object
             templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele, M_chain_seq=seqs['M'], N_chain_seq=seqs['N'],
-                                  peptide=seqs['P'], MHC_class='II', pdb_path=pdb_file, resolution=resolution)
+                                  peptide=seqs['P'], MHC_class='II', pdb=pdb, pdb_path=pdb_file, resolution=resolution)
+
+            clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
+            # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
+            write_pdb(clear_pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
 
             return templ
 
