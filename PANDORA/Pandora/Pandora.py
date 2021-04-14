@@ -5,7 +5,7 @@ from PANDORA.Pandora import Modelling_functions
 import time
 import os
 from Bio.PDB import PDBParser
-
+import statistics
 
 
 class Pandora:
@@ -66,7 +66,10 @@ class Pandora:
         # create an output directory
         try:
             self.output_dir = '%s/%s_%s' %(self.output_dir, self.target.id , self.template.id)
-            if not os.path.exists(self.output_dir):
+            if os.path.exists(self.output_dir):
+                os.system("rm -rf %s" %self.output_dir)
+                os.makedirs(self.output_dir)
+            else:
                 os.makedirs(self.output_dir)
         except:
             pass
@@ -282,6 +285,27 @@ class Pandora:
                         except AttributeError:
                             print('\t%s\t\t%s' % (
                                 os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
+
+                top5 = [i[0] for i in
+                        sorted([(m.model_path, m.dope) for m in self.results], key=lambda x: x[1], reverse=True)[
+                        :5]]
+                try:
+                    top5_rmsds = []
+                    for m in self.results:
+                        if m.model_path in top5:
+                            top5_rmsds.append(m.lrmsd)
+                    print('\n\tThe median L-RMSD of the top 5 best scoring models: %s' %statistics.median(top5_rmsds))
+                except AttributeError:
+                    pass
+                try:
+                    top5_core_rmsds = []
+                    for m in self.results:
+                        if m.model_path in top5:
+                            top5_core_rmsds.append(m.core_lrmsd)
+                    print('\tThe median core L-RMSD of the top 5 best scoring models: %s\n' % statistics.median(top5_core_rmsds))
+                except AttributeError:
+                    pass
+
             except:
                 self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD')
                 raise Exception

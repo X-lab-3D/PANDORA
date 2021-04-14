@@ -71,7 +71,7 @@ class Database:
                     if templ != None:
                         self.MHCII_data[id] = templ
                 except:
-                    pass
+                    print('something went wrong parsing %s' %id)
 
         if save:
             self.save(save)

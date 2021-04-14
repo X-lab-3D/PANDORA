@@ -4,6 +4,7 @@ import PANDORA
 import pickle
 from PANDORA.PMHC import Model
 # from Bio import Align
+from Bio import pairwise2
 from PANDORA.Pandora import Align
 
 def check_target_template(target, template):
@@ -181,6 +182,74 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose = True):
     if verbose:
         print('\tPredicted the binding core using netMHCIIpan (4.0):\n')
         print('\toffset:\t%s\n\tcore:\t%s\n\tprob:\t%s\n' %(offset, core, core_reliability ))
+        print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' %predicted_anchors)
+
+    return predicted_anchors
+
+
+def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
+    '''Uses netMHCIIpan to predict the binding core of a peptide and infer the anchor positions from that.
+
+    Args:
+        peptide: (str): AA sequence of the peptide
+        allele_type: (lst): list of strings of allele types
+        verbose: (bool):
+
+    Returns: (lst): list of predicted anchor predictions
+
+    '''
+    all_netMHCpan_alleles = []
+    with open(PANDORA.PANDORA_path + '/../netMHCpan-4.1/data/allelenames') as f:
+        for line in f:
+            all_netMHCpan_alleles.append(line.split(' ')[0].replace(':',''))
+
+    # Format alleles
+    target_alleles = [i.replace('*','') for i in allele_type]
+    target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
+
+    target_alleles = ','.join(target_alleles)
+
+    # Setup files
+    netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
+    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/pep.txt'
+    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/pept_prediction.txt'
+
+    # Write peptide sequence to input file for netMHCIIpan
+    with open(infile, 'w') as f:
+        f.write(peptide)
+
+    os.system('%s -p %s -a %s > %s' %(netmhcpan, infile, target_alleles, outfile))
+
+    # Get the output from the netMHCIIpan prediction
+    # {allele: (core, %rank_EL)}
+    pred = {}
+    with open(outfile) as f:
+        for line in f:
+            if peptide in line:
+                ln = [i for i in line[:-1].split(' ') if i != '']
+                pred[ln[1]] = (ln[3], float(ln[12]))
+
+    # For every allele, the binding core is predicted. Take the allele with the highest reliability score
+    best_allele = min((pred[i][1], i) for i in pred)[1]
+
+    # Do a quick alignment of the predicted core and the peptide to find the anchors. (the predicted binding core can
+    # contain dashes -. Aligning them makes sure you take the right residue as anchor.
+    alignment = pairwise2.align.globalxx(peptide, pred[best_allele][0])
+
+    # Find the anchors by finding the first non dash from the left and from the right
+    predicted_anchors = [2,len(peptide)]
+    for i in range(len(alignment[0][1])):
+        if alignment[0][1][i] != '-':
+            predicted_anchors[0] = i + 2
+            break
+    for i in range(len(alignment[0][1])):
+        if alignment[0][1][::-1][i] != '-':
+            predicted_anchors[1] = len(alignment[0][1]) - i
+            break
+
+    if verbose:
+        print('\tPredicted the binding core using netMHCpan (4.1):\n')
+        print('\tcore:\t%s\n\t%%Rank EL:\t%s\n' %(pred[best_allele][0], pred[best_allele][1] ))
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' %predicted_anchors)
 
     return predicted_anchors

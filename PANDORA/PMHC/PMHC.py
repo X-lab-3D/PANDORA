@@ -77,7 +77,7 @@ class Template(PMHC):
         if pdb_path and not pdb: # If the path to a pdb file or a Bio.PDB object is given, parse the pdb
             self.parse_pdb()
 
-        if not pdb and anchors == []:
+        if anchors == []:
             self.calc_anchors()
 
     def parse_pdb(self):
@@ -185,11 +185,9 @@ class Target(PMHC):
         
         # If anchors are not provided, predict them from the peptide length
         if MHC_class =='I' and anchors == []:
-            print('WARNING: no anchor positions provided. Pandora will assign them to canonical anchor position')
-            anchor_1 = 2
-            anchor_2 = len(peptide)
-            anchors = [anchor_1, anchor_2]
-            self.anchors = anchors
+            print('WARNING: no anchor positions provided. Pandora will predict them using netMHCpan 4.1')
+            self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type)
+
         if MHC_class =='II' and anchors == []:
             print('WARNING: no anchor positions provided. Pandora will predict them using netMHCIIpan 4.0')
             self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type)

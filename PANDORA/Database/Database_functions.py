@@ -449,7 +449,7 @@ def renumber(pdb):
             nr += 1
     for chain in pdb.get_chains():
         for res in chain:
-            res.id = (' ', res.id[1], res.id[2])
+            res.id = (' ', res.id[1], ' ')
 
     return pdb
 
@@ -1306,7 +1306,7 @@ def parse_pMHCI_pdb(pdb_id,
             pdb = PDBParser(QUIET=True).get_structure('MHCI', pdb_file)
             # Remove waters and duplicated chains, then renumber
             pdb = remove_duplicated_chains(pdb)
-            pdb = remember_IMGT_numbering(pdb)
+            # pdb = remember_IMGT_numbering(pdb)
             pdb = renumber(pdb)
 
             # Get allele per each chain
@@ -1391,9 +1391,9 @@ def parse_pMHCI_pdb(pdb_id,
             templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'], peptide=seqs['P'],
                                   pdb=pdb, pdb_path=pdb_file, resolution=resolution)
 
-            clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
+            # clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
-            write_pdb(clear_pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
+            write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
 
 
             return templ
@@ -1438,7 +1438,7 @@ def parse_pMHCII_pdb(pdb_id,
             # Load pdb file as an Bio.PDB object, check for duplicate chains and renumber the pdb
             pdb = PDBParser(QUIET=True).get_structure('MHCII', pdb_file)
             pdb = remove_duplicated_chains(pdb)
-            pdb = remember_IMGT_numbering(pdb)
+            # pdb = remember_IMGT_numbering(pdb)
             pdb = renumber(pdb)
 
             # Get allele per each chain
@@ -1526,9 +1526,9 @@ def parse_pMHCII_pdb(pdb_id,
             templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele, M_chain_seq=seqs['M'], N_chain_seq=seqs['N'],
                                   peptide=seqs['P'], MHC_class='II', pdb=pdb, pdb_path=pdb_file, resolution=resolution)
 
-            clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
+            # clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
-            write_pdb(clear_pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
+            write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
 
             return templ
 
