@@ -27,7 +27,7 @@ a = MyLoop(env, alnfile = '%s',
 
 
 a.starting_model= 1                          # index of the first model
-a.ending_model  = 1                         # index of the last model
+a.ending_model  = int('%s')                  # index of the last model
 
 # Optimization
 # CG

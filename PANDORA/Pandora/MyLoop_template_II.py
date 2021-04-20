@@ -32,3 +32,9 @@ class MyLoop(MA.loopmodel):
             rsr.add(M.forms.gaussian(group=M.physical.xy_distance,feature=M.features.distance(atoms['%s:%s:%s' %(contact_data[3], contact_data[2], contact_data[1])], atoms['%s:%s:%s' %(contact_data[7], contact_data[6], contact_data[5])]),mean=float(contact_data[8]), stdev=modelling_stdev))
 
         contact_file.close()
+
+        # Central Alpha helix
+        # ALPHA-HELIX-MARKER  ### DO NOT DELETE THIS COMMENT
+
+        # Central Beta hairpin
+        # BETA-SHEET-MARKER  ### DO NOT DELETE THIS COMMENT

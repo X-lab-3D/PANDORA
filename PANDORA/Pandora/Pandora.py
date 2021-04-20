@@ -158,7 +158,7 @@ class Pandora:
                 for i in self.target.anchor_contacts:
                     f.write('\t'.join('%s' % x for x in i) + '\n')
 
-    def write_modeller_script(self, n_models = 20, n_jobs=None, stdev = 0.1):
+    def write_modeller_script(self, n_loop_models=20, n_homology_models = 1, n_jobs=None, stdev=0.1, helix=False, sheet=False):
         ''' Write the script that modeller uses for the final homology modelling.
 
         Args:
@@ -169,7 +169,9 @@ class Pandora:
 
         '''
         Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, 
-                                                  self.output_dir, n_models=n_models, n_jobs=n_jobs, stdev=stdev)
+                                                  self.output_dir, n_loop_models=n_loop_models,
+                                                  n_homology_models=n_homology_models, n_jobs=n_jobs, stdev=stdev,
+                                                  helix=helix, sheet=sheet)
 
     def __log(self, target_id, template_id, error, logfile = PANDORA.PANDORA_data + '/outputs/Pandora_log.txt', verbose=True):
         ''' Keeps track of what goes wrong while parsing
@@ -192,7 +194,8 @@ class Pandora:
         with open(logfile, 'a') as f:
             f.write('%s\t%s\t%s\n' % (target_id, template_id, error))
 
-    def model(self, n_models=20, n_jobs=None, stdev=0.1, seq_based_templ_selection = False, benchmark=False, verbose=True):
+    def model(self, n_loop_models=20, n_homology_models=1, n_jobs=None, stdev=0.1, seq_based_templ_selection = False,
+              benchmark=False, verbose=True, helix=False, sheet=False):
         ''' Wrapper function that combines all modelling steps.
 
         Args:
@@ -256,7 +259,8 @@ class Pandora:
 
         # prepare the scripts that run modeller
         try:
-            self.write_modeller_script(n_models=n_models, n_jobs=n_jobs, stdev=stdev)
+            self.write_modeller_script(n_loop_models=n_loop_models, n_homology_models=n_homology_models, n_jobs=n_jobs,
+                                       stdev=stdev, helix=helix, sheet=sheet)
         except:
             self.__log(self.target.id, self.template.id, 'Failed preparing the modeller script')
             raise Exception
@@ -287,7 +291,7 @@ class Pandora:
                                 os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
 
                 top5 = [i[0] for i in
-                        sorted([(m.model_path, m.dope) for m in self.results], key=lambda x: x[1], reverse=True)[
+                        sorted([(m.model_path, m.dope) for m in self.results], key=lambda x: x[1], reverse=False)[
                         :5]]
                 try:
                     top5_rmsds = []
@@ -315,7 +319,7 @@ class Pandora:
             for m in self.results:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
 
-        self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %n_models)
+        self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %(n_homology_models*n_loop_models))
 
 
 

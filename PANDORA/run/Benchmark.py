@@ -23,13 +23,13 @@ import time
 def run_pandora(tar_temp):
     target = tar_temp[0]
     template = tar_temp[1]
-    filename = '300321_benchmark_II.csv'
-    nr_models = 20
+    filename = '130421_20mod5_sd01_slow_benchmark_II.csv'
+    nr_models = 5
     if not os.path.exists(filename):
         with open(filename, 'w') as f:
             f.write('Target_ID,Target_peptide,Target_alleles,Template_ID,Template_peptide,Template_alleles,%s,%s,%s\n' % (
             ','.join(['molpdf_' + str(i + 1) for i in range(nr_models)]),
-            ','.join(['L-RMSD_' + str(i + 1) for i in range(nr_models)]),
+            ','.join(['L-RMSD_' + str(i + 1) for i in range(nr_models)]),#  ))#,
             ','.join(['core_L-RMSD_' + str(i + 1) for i in range(nr_models)])))
 
     try:
@@ -54,8 +54,8 @@ def run_multiprocessing(func, i, num_cores):
 def bench_MHCII():
     t0 = time.time()
     # print(t0)
-    db = Database.Database().load('./PANDORA_files/data/csv_pkl_files/27_03_21_pandora_db.pkl')
-    num_cores = 8
+    db = Database.Database().load('13_04_21_Pandora_db')
+    num_cores = 10
 
     list_of_targets_templates = []
     for k in db.MHCII_data:
@@ -79,8 +79,8 @@ def bench_MHCII():
 def bench_MHCI():
     t0 = time.time()
     # print(t0)
-    db = Database.Database().load('./PANDORA_files/data/csv_pkl_files/27_03_21_pandora_db.pkl')
-    num_cores = 128
+    db = Database.Database().load('13_04_21_Pandora_db')
+    num_cores = 10
 
     list_of_targets_templates = []
     for k in db.MHCI_data:
@@ -91,7 +91,7 @@ def bench_MHCI():
                                                 anchors=db.MHCI_data[k].anchors)
 
             mod = Pandora.Pandora(tar, db)
-            mod.find_template()
+            mod.find_template(benchmark=True)
             list_of_targets_templates.append((tar, mod.template))
         except:
             pass

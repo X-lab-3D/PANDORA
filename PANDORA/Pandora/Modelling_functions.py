@@ -473,7 +473,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
         with open(output_dir+ '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
             for line in MyL_temp:
-                if 'self.residue_range' in line:
+                if 'self.residue_range' in line and 'M.selection' in line:
                     myloopscript.write(line % (anch[0]+1, anch[-1]-1))
                 elif 'SPECIAL_RESTRAINTS_BREAK' in line:
                     break
@@ -487,7 +487,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
         with open(output_dir + '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r')
             for line in MyL_temp:
-                if 'self.residue_range' in line:
+                if 'self.residue_range' in line and 'M.selection' in line:
                     myloopscript.write(line % (1, anch[0])) # write the first anchor
                     for i in range(len(anch)-1): # Write all the inbetween acnhors if they are there
                         myloopscript.write(line % (anch[i] + 2, anch[i+1]))
@@ -512,17 +512,31 @@ def write_ini_script(target, template, alignment_file, output_dir):
         cmd_m_temp.close()
 
 
-def write_modeller_script(target, template, alignment_file, output_dir, n_models=20, n_jobs=None, stdev=0.1):
+# alignment_file = mod.alignment.alignment_file
+# output_dir = mod.output_dir
+# template = mod.template
+# helix = [3, 8]
+# BETA-SHEET-MARKER
+
+
+def write_modeller_script(target, template, alignment_file, output_dir, n_homology_models=1, n_loop_models = 20, n_jobs=None, stdev=0.1, helix = False, sheet = False):
     ''' Write script that refines the loops of the peptide
     Args:
         target: Target object
         template: Template object
-        alignment_file: (string) path to alignment file
-        output_dir: (string) path to output directory
-        n_models:  (int) number of models modeller generates per run
-        n_jobs: (int) number of parallel jobs. Is recommended to use as many jobs as the number of models: less will result in
+        alignment_file: (str): path to alignment file
+        output_dir: (str): path to output directory
+        n_models:  (int): number of models modeller generates per run
+        n_jobs: (int): number of parallel jobs. Is recommended to use as many jobs as the number of models: less will result in
                 a slower run, more will not add any benefit but might occupy cores unnecessarily.
-        stdev: (float) standard deviation of modelling restraints. Higher = more flexible restraints.
+        stdev: (flt): standard deviation of modelling restraints. Higher = more flexible restraints.
+        helix: (lst): List of the alpha helix start and end-positions as integers. I.e. [3,8] for a helix between
+                        peptide residue 3 and 8.
+        sheet: (lst): List containing: start position of B-sheet 1, start position of B-sheet 2 and the length of the
+                        B-sheet in h-bonds. For example: ["O:2:P","N:54:M",2] for a parallel B-sheet; The sheet starts
+                        at the Oxigen atom of the 2nd residue of chain P and at the Nitrogen of the 54th residue of
+                        chain M and has a length of 2 H-bonds. Or; ["N:6:P", "O:13:P", -3], with -3 denoting an
+                        anti-parallel B-sheet with a length of 3 H-bonds.
     '''
 
 
@@ -533,12 +547,16 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_models
         with open(output_dir.replace('\\ ', ' ') + '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
             for line in MyL_temp:
-                if 'self.residue_range' in line:
+                if 'self.residue_range' in line and 'M.selection' in line:
                     myloopscript.write(line %(anch[0]+1, anch[-1]-1))  # write the first anchor
                 elif 'contact_file = open' in line:
                     myloopscript.write(line %(target.id))
                 elif 'STDEV MARKER' in line:
                     myloopscript.write(line %(stdev))
+                elif helix and 'ALPHA-HELIX-MARKER' in line:
+                    myloopscript.write(line.replace('# ALPHA-HELIX-MARKER', 'rsr.add(M.secondary_structure.alpha(self.residue_range("%s:P", "%s:P")))' %(helix[0], helix[1])))
+                elif sheet and 'BETA-SHEET-MARKER' in line:
+                    myloopscript.write(line.replace('# BETA-SHEET-MARKER', 'rsr.add(M.secondary_structure.sheet(atoms["%s"], atoms["%s"], sheet_h_bonds=%s))' %(sheet[0], sheet[1], sheet[2])))
                 else:
                     myloopscript.write(line)
             MyL_temp.close()
@@ -547,7 +565,7 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_models
         with open(output_dir.replace('\\ ', ' ') + '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r')
             for line in MyL_temp:
-                if 'self.residue_range' in line:
+                if 'self.residue_range' in line and 'M.selection' in line:
                     myloopscript.write(line % (1, anch[0]))  # write the first anchor
                     for i in range(len(anch) - 1):  # Write all the inbetween acnhors if they are there
                         myloopscript.write(line %(anch[i] + 2, anch[i + 1]))
@@ -556,6 +574,10 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_models
                     myloopscript.write(line %(target.id))
                 elif 'STDEV MARKER' in line:
                     myloopscript.write(line %(stdev))
+                elif helix and 'ALPHA-HELIX-MARKER' in line:
+                    myloopscript.write(line.replace('# ALPHA-HELIX-MARKER', 'rsr.add(M.secondary_structure.alpha(self.residue_range("%s:P", "%s:P")))' %(helix[0], helix[1])))
+                elif sheet and 'BETA-SHEET-MARKER' in line:
+                    myloopscript.write(line.replace('# BETA-SHEET-MARKER', 'rsr.add(M.secondary_structure.sheet(atoms["%s"], atoms["%s"], sheet_h_bonds=%s))' %(sheet[0], sheet[1], sheet[2])))
                 else:
                     myloopscript.write(line)
             MyL_temp.close()
@@ -567,8 +589,10 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_models
                 modscript.write(line %(os.path.basename(alignment_file)))
             elif 'knowns' in line:
                 modscript.write(line %(template.id, target.id))
+            elif 'a.ending_model' in line:
+                modscript.write(line % (n_homology_models))
             elif 'a.loop.ending_model' in line:
-                modscript.write(line % (n_models))
+                modscript.write(line % (n_loop_models))
             else:
                 if n_jobs != None: #If this is a parallel job
                     if 'PARALLEL_JOB_LINE_TO_COMPLETE' in line:
