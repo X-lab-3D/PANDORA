@@ -17,6 +17,23 @@ from Bio.PDB import Chain
 from string import ascii_uppercase
 
 
+def fresh_parse_dirs():
+    ''' Removes all parsed files + log files for a fresh start. Used for development.
+
+    '''
+
+    dirs_to_clean = ['/PDBs/pMHCI', '/PDBs/pMHCII', '/PDBs/Bad/pMHCI', '/PDBs/Bad/pMHCII']
+    files = [PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI/log_MHCI.csv',
+             PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII/log_MHCI.csv']
+
+    for d in dirs_to_clean:
+        files = files + [PANDORA.PANDORA_data + d + '/' + i for i in os.listdir(PANDORA.PANDORA_data + d)]
+
+    for f in files:
+        os.remove(f)
+
+
+
 def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_files = True, del_kabat_files = True):
     ''' Downloads the complete structural dataset
 

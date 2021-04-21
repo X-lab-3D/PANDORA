@@ -9,7 +9,8 @@ from abc import ABC, abstractmethod
 
 class PMHC(ABC):
 
-    def __init__(self, id, allele_type, peptide = '', MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = []):
+    def __init__(self, id, allele_type, peptide = '', MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [],
+                 helix=False, sheet=False):
         ''' pMHC class. Acts as a parent class to Template and Target
 
         Args:
@@ -30,6 +31,8 @@ class PMHC(ABC):
         self.N_chain_seq = N_chain_seq
         self.allele_type = allele_type
         self.anchors = anchors
+        self.helix = helix
+        self.sheet = sheet
 
 
         @abstractmethod
@@ -47,7 +50,7 @@ class PMHC(ABC):
 
 class Template(PMHC):
 
-    def __init__(self, id, allele_type, peptide = '', MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], pdb_path = False, pdb = False, resolution=None):
+    def __init__(self, id, allele_type, peptide='', MHC_class='I', M_chain_seq='', N_chain_seq='', anchors=[], helix=False, sheet=False, pdb_path=False, pdb=False, resolution=None):
         ''' Template structure class. This class holds all information of a template structure that is used for
             homology modelling. This class needs a id, allele and the path to a pdb file to work. (sequence info of
             the chains and peptide can be fetched from the pdb)
@@ -65,11 +68,12 @@ class Template(PMHC):
             pdb: (Bio.PDB) Biopython PBD object
             resolution: (float) Structure resolution in Angstrom
         '''
-        super().__init__(id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors)
+        super().__init__(id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors, helix, sheet)
         self.pdb_path = pdb_path
         self.pdb = pdb
         self.contacts = False
         self.resolution = resolution
+
 
         if not pdb_path and not pdb:
             raise Exception('Provide a PDB structure to the Template object first')
@@ -156,7 +160,8 @@ class Template(PMHC):
 
 class Target(PMHC):
 
-    def __init__(self, id, allele_type, peptide, MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], templates = False):
+    def __init__(self, id, allele_type, peptide, MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [],
+                 helix=False, sheet=False, templates = False):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
         Args:
@@ -171,7 +176,7 @@ class Target(PMHC):
             templates: Template object. The user can specify that PANDORA uses a certain structure as template.
         '''
 
-        super().__init__(id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors)
+        super().__init__(id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors, helix, sheet)
         self.templates = templates
         self.initial_model = False
         self.contacts = False
