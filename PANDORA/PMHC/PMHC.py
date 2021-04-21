@@ -128,6 +128,11 @@ class Template(PMHC):
 
         print('Peptide: %s' % self.peptide)
         print('Anchors: %s' %self.anchors)
+
+        if self.sheet:
+            print('Beta-sheet: %s' % self.sheet)
+        if self.helix:
+            print('Alpha-helix: %s' % self.helix)
         if self.pdb_path:
             print('Path to PDB file: %s' %self.pdb_path)
         if not self.pdb:
@@ -218,6 +223,10 @@ class Target(PMHC):
             print('Beta chain: %s' % self.N_chain_seq)
         print('Peptide: %s' % self.peptide)
         print('Anchors: %s' % self.anchors)
+        if self.sheet:
+            print('Beta-sheet: %s' % self.sheet)
+        if self.helix:
+            print('Alpha-helix: %s' % self.helix)
         if self.templates:
             print('Using template %s for homology modelling' %self.templates)
         if self.initial_model:

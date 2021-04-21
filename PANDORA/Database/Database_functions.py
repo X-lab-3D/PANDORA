@@ -23,14 +23,18 @@ def fresh_parse_dirs():
     '''
 
     dirs_to_clean = ['/PDBs/pMHCI', '/PDBs/pMHCII', '/PDBs/Bad/pMHCI', '/PDBs/Bad/pMHCII']
-    files = [PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI/log_MHCI.csv',
-             PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII/log_MHCI.csv']
+    files = [PANDORA.PANDORA_data + '/PDBs/Bad/log_MHCI.csv',
+             PANDORA.PANDORA_data + '/PDBs/Bad/log_MHCII.csv']
 
     for d in dirs_to_clean:
         files = files + [PANDORA.PANDORA_data + d + '/' + i for i in os.listdir(PANDORA.PANDORA_data + d)]
 
+    cnt = 0
     for f in files:
-        os.remove(f)
+        if os.path.exists(f):
+            os.remove(f)
+            cnt+=1
+    print('Removed %s files' %cnt)
 
 
 
@@ -941,77 +945,6 @@ def check_hetatoms_in_binding_groove(pdb, MHC_chains):
     return False, log_message
 
 
-# def reorder_chains(pdb_id, outdir):
-#     """ Make sure M chain comes before P chain.
-#
-#
-#     Args:
-#         pdb_id (str): PDB ID
-#         outdir (str): Input and output directory.
-#         The PDB file with the corresponding ID in this path will be reorganized.
-#
-#     Returns:
-#         None.
-#
-#     """
-#     # Set temporary files names
-#     ori_filepath = '%s/%s.pdb' % (outdir, pdb_id)
-#     header_filepath = '%s/header_%s.pdb' % (outdir, pdb_id)
-#     onlyM_filepath = '%s/onlyM_%s.pdb' % (outdir, pdb_id)
-#     onlyP_filepath = '%s/onlyP_%s.pdb' % (outdir, pdb_id)
-#
-#     ### Write only-header PDB file
-#     with open(ori_filepath, 'r') as inpdb:
-#         with open(header_filepath, 'w') as outheader:
-#             for line in inpdb:
-#                 if line.startswith('ATOM'):
-#                     break
-#                 else:
-#                     outheader.write(line)
-#             outheader.close()
-#         inpdb.close()
-#
-#     ### Extract M and P chains in two different PDBs
-#     os.system('pdb_selchain -M %s > %s' %(ori_filepath, onlyM_filepath))
-#     os.system('pdb_selchain -P %s > %s' %(ori_filepath, onlyP_filepath))
-#
-#     ### Merge the three PDB files together
-#     with open(ori_filepath, 'w') as outpdb:
-#         # Write Header
-#         with open(header_filepath, 'r') as inheader:
-#             for line in inheader:
-#                 outpdb.write(line)
-#             inheader.close()
-#         # Write M chain
-#         with open(onlyM_filepath, 'r') as inMpdb:
-#             for line in inMpdb:
-#                 if line.startswith('ATOM') or line.startswith('TER'):
-#                     outpdb.write(line)
-#             inMpdb.close()
-#         # Write P chain
-#         with open(onlyP_filepath, 'r') as inPpdb:
-#             for line in inPpdb:
-#                 if line.startswith('ATOM') or line.startswith('TER'):
-#                     outpdb.write(line)
-#             inPpdb.close()
-#         outpdb.write('END')
-#         outpdb.close()
-#
-#     ### Remove temporary files
-#     try:
-#         os.system('rm %s' %header_filepath)
-#     except:
-#         pass
-#     try:
-#         os.system('rm %s' %onlyM_filepath)
-#     except:
-#         pass
-#     try:
-#         os.system('rm %s' %onlyP_filepath)
-#     except:
-#         pass
-
-
 def log(ID, error, logfile, verbose=True):
     ''' Keeps track of what goes wrong while parsing
 
@@ -1199,16 +1132,21 @@ def check_DM_chaperone(alleles):
     return False
 
 
-def find_pept_secondary_structure(pdb_file, pept_chain):
+def find_pept_secondary_structure(pdb_file, pdb, pept_chain, MHC_chains):
     ''' Using the annotation in the IMGT PDB file, find secondary structures in the peptide
 
     Args:
         pdb_file: (str): Path to the pdb file
+        pdb: (Bio.PDB): Bio.PDB object
         pept_chain: (str): Name of the peptide chain
+        MHC_chains: (lst): List of the Alpha-chain(, Beta-chain) and Peptide-chain in this order.
 
-    Returns: (str/bool): False if there are no B-sheets or A-helices, or a string with their location
+    Returns: (dct, str/bool): dictionairy with [sheet] or [helix] denoting the location of the structure in MODELLER
+                format, False if there are no B-sheets or A-helices, or a string with their location
 
     '''
+
+    snd_struc = {}
 
     log_message = []
     with open(pdb_file) as f:
@@ -1223,23 +1161,55 @@ def find_pept_secondary_structure(pdb_file, pept_chain):
     # Find Alpha helices
     for i in helix:
         if i[4][0] == pept_chain and i[7][0] == pept_chain:
+            snd_struc['helix'] = [i[5], i[8]]
             log_message.append(
                 'Found an alpha-helix in the peptide between residue %s (%s) and %s (%s)' % (i[5], i[3], i[8], i[6]))
 
     # Find Beta sheest
+    sheets = []
     for i in sheet:
         if any(x == pept_chain for x in i[3:]):
             line = i[3:]
-            sheet_res = list(set([line[y + 1] + ' (' + line[y - 1] + ')' for y in
-                                  [x for x in range(len(line)) if line[x] == pept_chain]]))
-            # [i[y + 1] + ':' + i[y + 2] + ' (' + i[y] + ')' for y in [x for x in range(len(i)) if i[x] in aa]]
-            log_message.append(
-                'Found a beta-sheet in the peptide between residue ' + min(sheet_res) + ' and ' + max(sheet_res))
+            sheets.append(list(set([line[y + 1] for y in [x for x in range(len(line)) if line[x] == pept_chain]])))
+    if sheets != []:
+        # Find the beginning and end of the B-sheet
+        sheet_start, sheet_stop = min([int(i) for i in sum(sheets,[])]), max([int(i) for i in sum(sheets,[])])
+        # Find out how long the sheet is
+        len_sheet = sheet_stop-sheet_start+1
+
+        hairpin = False
+        if len_sheet >= 4:
+            start_CA = [res for res in pdb[0][pept_chain] if res.id[1] == sheet_start][0]['CA']
+            end_CA = [res for res in pdb[0][pept_chain] if res.id[1] == sheet_stop][0]['CA']
+            if start_CA-end_CA < 6:
+                hairpin = True
+
+        if hairpin:
+            # format for modeller
+            snd_struc['sheet']=["N:%s:P" %sheet_start, "O:%s:P" %sheet_stop, int(-(len_sheet - 2)/2)]
+            log_message.append('Found a beta-sheet hairpin in the peptide chain. Starts at %s; %s for %s h-bonds' %(snd_struc['sheet'][0], snd_struc['sheet'][1], (len_sheet - 2)/2))
+        else:
+             # Find the distance between O and N atoms of the peptide and MHC in a radius of 4 A (typical Bsheet is ~3.5A)
+            atoms = sum([[a for a in c.get_atoms() if a.id in ['O', 'N']] for c in pdb.get_chains() if c.id in MHC_chains], [])
+            atom_dist = NeighborSearch(atom_list=atoms).search_all(4)
+
+            out = []
+            # Find the residue from the MHC chain that contacts the O or N of the starting bsheet res of the peptide
+            for pair in atom_dist:
+                if pair[1].get_parent().get_parent().id == pept_chain and pair[0].get_parent().get_parent().id != pept_chain:
+                    if pair[1].get_parent().id[1] == sheet_start and pair[0].get_parent() != pair[1].get_parent():
+                        if pair[1].get_parent().id[1] == sheet_start:
+                            out.append((pair[0] - pair[1],pair[1], pair[1].get_parent(),pair[0], pair[0].get_parent()))
+            # take the closest one
+            out = min(out)
+            #  format for modeller
+            snd_struc['sheet'] = ["%s:%s:P" %(out[1].id, out[2].id[1]), "%s:%s:M" %(out[3].id, out[4].id[1]), len_sheet]
+            log_message.append('Found a beta-sheet between the peptide and MHC. Starts at %s; %s for %s h-bonds' %(snd_struc['sheet'][0], snd_struc['sheet'][1], snd_struc['sheet'][2]))
 
     if log_message == []:
-        return False
+        return False, False
     else:
-        return '; '.join(list(set(log_message)))
+        return snd_struc, '; '.join(list(set(log_message)))
 
 
 def hardcode_cut_peptide(pdb_id, pdb):
@@ -1349,10 +1319,6 @@ def parse_pMHCI_pdb(pdb_id,
                 log(pdb_id, 'Failed, Could not find a suitable peptide chain with a length between 7 and 25. Found: ' + chain_lens, logfile)
                 raise Exception
 
-            log_message = find_pept_secondary_structure(pdb_file, pept_chain)
-            if log_message:
-                log(pdb_id, 'Warning, ' + log_message, logfile)
-
             if check_non_canonical_res(pdb[0][pept_chain]):
                 log(pdb_id, 'Failed, Non canonical residues in the peptide chain', logfile)
                 raise Exception
@@ -1366,6 +1332,16 @@ def parse_pMHCI_pdb(pdb_id,
             except:
                 log(pdb_id, 'Failed, Could not locate Alpha chain. Found: ' + chain_lens, logfile)
                 raise Exception
+
+            helix, sheet = False, False
+            snd_struc, log_message = find_pept_secondary_structure(pdb_file, pdb, pept_chain, MHC_chains)
+            if log_message:
+                log(pdb_id, 'Warning, ' + log_message, logfile)
+                if 'helix' in snd_struc:
+                    helix = snd_struc['helix']
+                if 'sheet' in snd_struc:
+                    sheet = snd_struc['sheet']
+
 
             # Get allele per each chain
             try:
@@ -1406,7 +1382,7 @@ def parse_pMHCI_pdb(pdb_id,
 
             # Create MHC_structure object
             templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'], peptide=seqs['P'],
-                                  pdb=pdb, pdb_path=pdb_file, resolution=resolution)
+                                  pdb=pdb, pdb_path=pdb_file, resolution=resolution, sheet=sheet, helix=helix)
 
             # clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
@@ -1481,10 +1457,6 @@ def parse_pMHCII_pdb(pdb_id,
                 log(pdb_id, 'Failed, Could not find a suitable peptide chain with a length between 7 and 25. Found: ' + chain_lens, logfile)
                 raise Exception
 
-            log_message = find_pept_secondary_structure(pdb_file, pept_chain)
-            if log_message:
-                log(pdb_id, 'Warning, ' + log_message, logfile)
-
             if check_non_canonical_res(pdb[0][pept_chain]):
                 log(pdb_id, 'Failed, Non canonical residues in the peptide chain', logfile)
                 raise Exception
@@ -1498,6 +1470,15 @@ def parse_pMHCII_pdb(pdb_id,
             except:
                 log(pdb_id, 'Failed, Could not locate Alpha/Beta chain. Found: ' + chain_lens, logfile)
                 raise Exception
+
+            helix, sheet = False, False
+            snd_struc, log_message = find_pept_secondary_structure(pdb_file, pdb, pept_chain, MHC_chains)
+            if log_message:
+                log(pdb_id, 'Warning, ' + log_message, logfile)
+                if 'helix' in snd_struc:
+                    helix = snd_struc['helix']
+                if 'sheet' in snd_struc:
+                    sheet = snd_struc['sheet']
 
             # Get allele per each chain
             try:
@@ -1541,7 +1522,8 @@ def parse_pMHCII_pdb(pdb_id,
 
             # Create MHC_structure object
             templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele, M_chain_seq=seqs['M'], N_chain_seq=seqs['N'],
-                                  peptide=seqs['P'], MHC_class='II', pdb=pdb, pdb_path=pdb_file, resolution=resolution)
+                                  peptide=seqs['P'], MHC_class='II', pdb=pdb, pdb_path=pdb_file, resolution=resolution,
+                                  helix=helix, sheet=sheet)
 
             # clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
