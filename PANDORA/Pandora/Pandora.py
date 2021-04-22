@@ -5,7 +5,6 @@ from PANDORA.Pandora import Modelling_functions
 import time
 import os
 from Bio.PDB import PDBParser
-import statistics
 from datetime import datetime
 
 
@@ -294,25 +293,12 @@ class Pandora:
                             print('\t%s\t\t%s' % (
                                 os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
 
-                top5 = [i[0] for i in
-                        sorted([(m.model_path, m.dope) for m in self.results], key=lambda x: x[1], reverse=False)[
-                        :5]]
-                try:
-                    top5_rmsds = []
-                    for m in self.results:
-                        if m.model_path in top5:
-                            top5_rmsds.append(m.lrmsd)
-                    print('\n\tThe median L-RMSD of the top 5 best scoring models: %s' %statistics.median(top5_rmsds))
-                except AttributeError:
-                    pass
-                try:
-                    top5_core_rmsds = []
-                    for m in self.results:
-                        if m.model_path in top5:
-                            top5_core_rmsds.append(m.core_lrmsd)
-                    print('\tThe median core L-RMSD of the top 5 best scoring models: %s\n' % statistics.median(top5_core_rmsds))
-                except AttributeError:
-                    pass
+                # Get top 5
+                median_rmsd, median_core = Modelling_functions.top5_from_results(self.results)
+                if median_rmsd:
+                    print('\n\tThe median L-RMSD of the top 5 best scoring models: %s' %median_rmsd)
+                if median_core:
+                    print('\tThe median core L-RMSD of the top 5 best scoring models: %s\n' %median_core)
 
             except:
                 self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD')

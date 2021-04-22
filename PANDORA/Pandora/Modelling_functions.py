@@ -6,6 +6,8 @@ from PANDORA.PMHC import Model
 # from Bio import Align
 from Bio import pairwise2
 from PANDORA.Pandora import Align
+import statistics
+
 
 def check_target_template(target, template):
     """ Checks if the target and the template are the same. If the user gave sequence info in the target, use that, else
@@ -691,6 +693,42 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         pickle.dump(results, open("%s/results_%s.pkl" %(output_dir, os.path.basename(os.path.normpath(output_dir))), "wb"))
 
     return results
+
+
+def top5_from_results(results):
+    ''' Get the median RMSD of the top 5 best molpdf models
+
+    Args:
+        results: (lst): list of models
+
+    Returns: (tpl): median LRMSD and median core LRMSD
+
+    '''
+    top5 = [i[0] for i in
+            sorted([(m.model_path, m.moldpf) for m in results], key=lambda x: x[1], reverse=False)[
+            :5]]
+
+    median_rmsd, median_core = False, False
+    try:
+        top5_rmsds = []
+        for m in results:
+            if m.model_path in top5:
+                top5_rmsds.append(m.lrmsd)
+        median_rmsd = statistics.median(top5_rmsds)
+    except AttributeError:
+        pass
+
+    try:
+        top5_core_rmsds = []
+        for m in results:
+            if m.model_path in top5:
+                top5_core_rmsds.append(m.core_lrmsd)
+        median_core = statistics.median(top5_core_rmsds)
+    except AttributeError:
+        pass
+
+    return median_rmsd, median_core
+
 
 def align_peptides(seq1, anch1_seq1, anch2_seq1, seq2, anch1_seq2, anch2_seq2):
     '''
