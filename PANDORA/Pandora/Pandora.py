@@ -6,11 +6,12 @@ import time
 import os
 from Bio.PDB import PDBParser
 import statistics
+from datetime import datetime
 
 
 class Pandora:
 
-    def __init__(self, target, database = None, template = None, output_dir = PANDORA.PANDORA_data + '/outputs'):
+    def __init__(self, target, database=None, template=None, output_dir=PANDORA.PANDORA_data + '/outputs'):
         self.target = target
         self.template = template
         self.database = database
@@ -60,19 +61,21 @@ class Pandora:
             print('\tTemplate Peptide: %s' % self.template.peptide)
             print('\tTemplate Anchors: %s\n' % self.template.anchors)
 
-    def prep_output_dir(self):
+    def prep_output_dir(self, output_dir=PANDORA.PANDORA_data + '/outputs'):
         ''' Create an output directory and move the template pdb there
         '''
         # create an output directory
-        try:
-            self.output_dir = '%s/%s_%s' %(self.output_dir, self.target.id , self.template.id)
-            if os.path.exists(self.output_dir):
-                os.system("rm -rf %s" %self.output_dir)
-                os.makedirs(self.output_dir)
-            else:
-                os.makedirs(self.output_dir)
-        except:
-            pass
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        # dd/mm/YY H:M:S
+        date_time = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
+        # Create the output dir of the specific case
+        self.output_dir = '%s/%s_%s_%s' %(output_dir, self.target.id, self.template.id, date_time)
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+
+        # copy the template structure to the output file
         os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
 
     def align(self, verbose = True):
@@ -194,7 +197,8 @@ class Pandora:
         with open(logfile, 'a') as f:
             f.write('%s\t%s\t%s\n' % (target_id, template_id, error))
 
-    def model(self, n_loop_models=20, n_homology_models=1, n_jobs=None, stdev=0.1, seq_based_templ_selection = False,
+    def model(self, output_dir=PANDORA.PANDORA_data + '/outputs', n_loop_models=20, n_homology_models=1, n_jobs=None,
+              stdev=0.1, seq_based_templ_selection = False,
               benchmark=False, verbose=True, helix=False, sheet=False):
         ''' Wrapper function that combines all modelling steps.
 
@@ -224,7 +228,7 @@ class Pandora:
 
         # Prepare the output directory
         try:
-            self.prep_output_dir()
+            self.prep_output_dir(output_dir=output_dir)
         except:
             self.__log(self.target.id, self.template.id, 'Failed creating output directory')
             raise Exception

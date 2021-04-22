@@ -1189,9 +1189,9 @@ def find_pept_secondary_structure(pdb_file, pdb, pept_chain, MHC_chains):
             snd_struc['sheet']=["N:%s:P" %sheet_start, "O:%s:P" %sheet_stop, int(-(len_sheet - 2)/2)]
             log_message.append('Found a beta-sheet hairpin in the peptide chain. Starts at %s; %s for %s h-bonds' %(snd_struc['sheet'][0], snd_struc['sheet'][1], (len_sheet - 2)/2))
         else:
-             # Find the distance between O and N atoms of the peptide and MHC in a radius of 4 A (typical Bsheet is ~3.5A)
+             # Find the distance between O and N atoms of the peptide and MHC in a radius of 5 A (typical Bsheet is ~3.5A)
             atoms = sum([[a for a in c.get_atoms() if a.id in ['O', 'N']] for c in pdb.get_chains() if c.id in MHC_chains], [])
-            atom_dist = NeighborSearch(atom_list=atoms).search_all(4)
+            atom_dist = NeighborSearch(atom_list=atoms).search_all(5)
 
             out = []
             # Find the residue from the MHC chain that contacts the O or N of the starting bsheet res of the peptide
@@ -1201,7 +1201,7 @@ def find_pept_secondary_structure(pdb_file, pdb, pept_chain, MHC_chains):
                         if pair[1].get_parent().id[1] == sheet_start:
                             out.append((pair[0] - pair[1],pair[1], pair[1].get_parent(),pair[0], pair[0].get_parent()))
             # take the closest one
-            out = min(out)
+            out = min(out, default=[sheet_start, sheet_stop, len_sheet])
             #  format for modeller
             snd_struc['sheet'] = ["%s:%s:P" %(out[1].id, out[2].id[1]), "%s:%s:M" %(out[3].id, out[4].id[1]), len_sheet]
             log_message.append('Found a beta-sheet between the peptide and MHC. Starts at %s; %s for %s h-bonds' %(snd_struc['sheet'][0], snd_struc['sheet'][1], snd_struc['sheet'][2]))
@@ -1471,14 +1471,18 @@ def parse_pMHCII_pdb(pdb_id,
                 log(pdb_id, 'Failed, Could not locate Alpha/Beta chain. Found: ' + chain_lens, logfile)
                 raise Exception
 
-            helix, sheet = False, False
-            snd_struc, log_message = find_pept_secondary_structure(pdb_file, pdb, pept_chain, MHC_chains)
-            if log_message:
-                log(pdb_id, 'Warning, ' + log_message, logfile)
-                if 'helix' in snd_struc:
-                    helix = snd_struc['helix']
-                if 'sheet' in snd_struc:
-                    sheet = snd_struc['sheet']
+            try:
+                helix, sheet = False, False
+                snd_struc, log_message = find_pept_secondary_structure(pdb_file, pdb, pept_chain, MHC_chains)
+                if log_message:
+                    log(pdb_id, 'Warning, ' + log_message, logfile)
+                    if 'helix' in snd_struc:
+                        helix = snd_struc['helix']
+                    if 'sheet' in snd_struc:
+                        sheet = snd_struc['sheet']
+            except:
+                log(pdb_id, 'Failed, Error in finding secondary structures', logfile)
+                raise Exception
 
             # Get allele per each chain
             try:
