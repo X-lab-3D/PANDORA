@@ -259,6 +259,54 @@ def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
     return predicted_anchors
 
 
+def score_peptide_alignment_MHCI(target, template, substitution_matrix='PAM30'):
+    ''' Calculate the alignment score of the target and template peptide
+
+    Args:
+        target: (Target): Target object
+        template: (Template): Template object
+        substitution_matrix: (str): name of subtitution matrix, default is PAM30 (BLOSUM80 etc)
+
+    Returns: (flt): alignment score
+
+    '''
+    # Dario don't worry, I didn't change the code, I just moved it to a function, so peptide similarity can be
+    # calculated for user defined templates as well.
+    substitution_matrix = substitution_matrices.load(substitution_matrix)
+    score = 0
+    try:
+        pept_anchs = target.anchors
+    except:
+        pept_anchs = [1, len(target.peptide) - 1]
+
+    temp_pept = template.peptide
+    temp_anchs = template.anchors
+    aligned_pept, aligned_temp_pept = align_peptides(target.peptide,
+                                                     pept_anchs[0], pept_anchs[1],
+                                                     temp_pept,
+                                                     temp_anchs[0], temp_anchs[1])
+
+    aligned_pept = aligned_pept.replace('-', '*')
+    aligned_temp_pept = aligned_temp_pept.replace('-', '*')
+    # min_len = min([len(target.peptide), len(temp_pept)])
+    # score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty #Is now handled by normal PAM30
+    for i, (aa, bb) in enumerate(zip(aligned_pept, aligned_temp_pept)):
+        try:
+            # gain = MatrixInfo.pam30[aa, bb]
+            gain = substitution_matrix[aa, bb]
+            score += gain
+        except KeyError:
+            try:
+                # gain = MatrixInfo.pam30[bb, aa]
+                gain = substitution_matrix[bb, aa]
+                score += gain
+            except KeyError:
+                score = -50
+                pass
+
+    return score
+
+
 def score_peptide_alignment_MHCII(target, template, substitution_matrix='PAM30'):
     ''' Calculate the alignment score of the target and template peptide using pairwise alignment
 
@@ -348,37 +396,8 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
         # Find the putative template with the best matching peptide
         pos_list = []
         for ID in putative_templates:
-            score = 0
-            try:
-                pept_anchs = target.anchors
-            except:
-                pept_anchs = [1, len(target.peptide) -1]
-
-            temp_pept = database.MHCI_data[ID].peptide
-            temp_anchs = database.MHCI_data[ID].anchors
-            aligned_pept, aligned_temp_pept = align_peptides(target.peptide,
-                                                             pept_anchs[0], pept_anchs[1],
-                                                             temp_pept,
-                                                             temp_anchs[0], temp_anchs[1])
-
-            aligned_pept = aligned_pept.replace('-','*')
-            aligned_temp_pept = aligned_temp_pept.replace('-','*')
-            #min_len = min([len(target.peptide), len(temp_pept)])
-            #score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty #Is now handled by normal PAM30
-            for i, (aa, bb) in enumerate(zip(aligned_pept, aligned_temp_pept)):
-                try:
-                    # gain = MatrixInfo.pam30[aa, bb]
-                    gain = PAM30[aa, bb]
-                    score += gain
-                except KeyError:
-                        try:
-                            # gain = MatrixInfo.pam30[bb, aa]
-                            gain = PAM30[bb, aa]
-                            score += gain
-                        except KeyError:
-                            score = -50
-                            pass
-            pos_list.append((score, temp_pept, ID))
+            score = score_peptide_alignment_MHCI(target, database.MHCI_data[ID], substitution_matrix='PAM30')
+            pos_list.append((score, database.MHCI_data[ID].peptide, ID))
 
         if len(pos_list) == 0:
             raise Exception('Pandora could not find any putative template! Please try to define your own template or contact us for help')
@@ -424,7 +443,6 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
         # Find the putative template with the best matching peptide
         pos_list = []
         for ID in putative_templates:
-
             score = score_peptide_alignment_MHCII(target, database.MHCII_data[ID], substitution_matrix='PAM30')
             pos_list.append((score, database.MHCII_data[ID].peptide, ID))
 

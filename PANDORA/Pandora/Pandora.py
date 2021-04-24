@@ -40,7 +40,7 @@ class Pandora:
             #     print('\tUsing sequence based template selection')
             if verbose:
                 print('\tUsing allele type based template selection')
-            # Find the best template. If the target already exists in the database, 
+            # Find the best template. If the target already exists in the database,
             # also consider the initial loop model as a model
             self.template, self.pept_ali_scores, self.keep_IL = Modelling_functions.find_template(self.target,
                                                                     self.database,
@@ -54,9 +54,17 @@ class Pandora:
             if verbose:
                 print('\tUser defined template structure: %s' %([i.id for i in self.template]))
             # Check if the target structure and template structure are the same.
-            self.keep_IL = any(Modelling_functions.check_target_template(self.target, tmpl) for tmpl in self.templates)
-
-
+            self.keep_IL = any(Modelling_functions.check_target_template(self.target, tmpl) for tmpl in self.template)
+            # determine peptide alignment scores of the target and the template(s)
+            self.pept_ali_scores = []
+            for templ in self.template:
+                if self.target.id == 'I':
+                    score = Modelling_functions.score_peptide_alignment_MHCI(self.target, templ, 'PAM30')
+                    self.pept_ali_scores.append((score, templ.peptide, templ.id))
+                elif self.target.id == 'II':
+                    score = Modelling_functions.score_peptide_alignment_MHCII(self.target, templ, 'PAM30')
+                    self.pept_ali_scores.append((score, templ.peptide, templ.id))
+            self.pept_ali_scores = self.pept_ali_scores[:best_n_templates]
 
 
 
