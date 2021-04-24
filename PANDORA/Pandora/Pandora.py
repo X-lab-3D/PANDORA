@@ -48,11 +48,11 @@ class Pandora:
                                                                     benchmark=benchmark)
             self.target.templates = [i.id for i in self.template]
             if verbose:
-                print('\tSelected template structure: %s' %([i.id for i in self.template]))
+                print('\tSelected template structure (%s): %s' %(len(self.template), [i.id for i in self.template]))
 
         else:
             if verbose:
-                print('\tUser defined template structure: %s' %([i.id for i in self.template]))
+                print('\tUser defined template structure (%s): %s' %(len(self.template), [i.id for i in self.template]))
             # Check if the target structure and template structure are the same.
             self.keep_IL = any(Modelling_functions.check_target_template(self.target, tmpl) for tmpl in self.template)
             # determine peptide alignment scores of the target and the template(s)
@@ -174,7 +174,8 @@ class Pandora:
                 for i in self.target.anchor_contacts:
                     f.write('\t'.join('%s' % x for x in i) + '\n')
 
-    def write_modeller_script(self, n_loop_models=20, n_homology_models = 1, n_jobs=None, stdev=0.1, helix=False, sheet=False):
+    def write_modeller_script(self, n_loop_models=20, n_homology_models = 1, loop_refinement='slow',
+                              n_jobs=None, stdev=0.1, helix=False, sheet=False):
         ''' Write the script that modeller uses for the final homology modelling.
 
         Args:
@@ -186,8 +187,8 @@ class Pandora:
         '''
         Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, 
                                                   self.output_dir, n_loop_models=n_loop_models,
-                                                  n_homology_models=n_homology_models, n_jobs=n_jobs, stdev=stdev,
-                                                  helix=helix, sheet=sheet)
+                                                  n_homology_models=n_homology_models, loop_refinement=loop_refinement,
+                                                  n_jobs=n_jobs, stdev=stdev, helix=helix, sheet=sheet)
 
     def __log(self, target_id, template_id, error, logfile = PANDORA.PANDORA_data + '/outputs/Pandora_log.txt', verbose=True):
         ''' Keeps track of what goes wrong while parsing
@@ -211,7 +212,7 @@ class Pandora:
             f.write('%s\t%s\t%s\n' % (target_id, template_id, error))
 
     def model(self, output_dir=PANDORA.PANDORA_data + '/outputs', n_loop_models=20, n_homology_models=1,
-              best_n_templates=1, n_jobs=None,
+              best_n_templates=1, n_jobs=None, loop_refinement='slow',
               stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False):
         ''' Wrapper function that combines all modelling steps.
 
@@ -278,7 +279,8 @@ class Pandora:
 
         # prepare the scripts that run modeller
         try:
-            self.write_modeller_script(n_loop_models=n_loop_models, n_homology_models=n_homology_models, n_jobs=n_jobs,
+            self.write_modeller_script(n_loop_models=n_loop_models, n_homology_models=n_homology_models,
+                                       loop_refinement=loop_refinement, n_jobs=n_jobs,
                                        stdev=stdev, helix=helix, sheet=sheet)
         except:
             self.__log(self.target.id, '_'.join([i.id for i in self.template]), 'Failed preparing the modeller script')

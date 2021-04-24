@@ -39,7 +39,7 @@ a.max_molpdf = 1e6                            # do not stop unless obj.func. > 1
 
 a.loop.starting_model = 1           # First loop model
 a.loop.ending_model   = int('%s')          # Last loop model
-a.loop.md_level       = MA.refine.slow # Loop model refinement level
+a.loop.md_level       = MA.refine.slow   # Loop model refinement level
 
 #MD
 a.md_level = MA.refine.slow                      # model refinement level

@@ -582,16 +582,19 @@ def write_ini_script(target, template, alignment_file, output_dir):
 # BETA-SHEET-MARKER
 
 
-def write_modeller_script(target, template, alignment_file, output_dir, n_homology_models=1, n_loop_models = 20, n_jobs=None, stdev=0.1, helix = False, sheet = False):
+def write_modeller_script(target, template, alignment_file, output_dir, n_homology_models=1, n_loop_models = 20,
+                          loop_refinement='slow', n_jobs=None, stdev=0.1, helix = False, sheet = False):
     ''' Write script that refines the loops of the peptide
     Args:
         target: Target object
         template: Template object
         alignment_file: (str): path to alignment file
         output_dir: (str): path to output directory
-        n_models:  (int): number of models modeller generates per run
-        n_jobs: (int): number of parallel jobs. Is recommended to use as many jobs as the number of models: less will result in
-                a slower run, more will not add any benefit but might occupy cores unnecessarily.
+        n_homology_models: (int): number of homology models that are generated per run.
+        n_loop_models:  (int): number of loop models modeller generates per homology model
+        n_jobs: (int): number of parallel jobs. Is recommended to use as many jobs as the number of models: less will
+                        result in a slower run, more will not add any benefit but might occupy cores unnecessarily.
+        loop_refinement: (str): Level of loop refinement: very_fast,fast,slow,very_slow,slow_large. default = slow
         stdev: (flt): standard deviation of modelling restraints. Higher = more flexible restraints.
         helix: (lst): List of the alpha helix start and end-positions as integers. I.e. [3,8] for a helix between
                         peptide residue 3 and 8.
@@ -601,8 +604,6 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
                         chain M and has a length of 2 H-bonds. Or; ["N:6:P", "O:13:P", -3], with -3 denoting an
                         anti-parallel B-sheet with a length of 3 H-bonds.
     '''
-
-
 
     anch = target.anchors
 
@@ -657,6 +658,8 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
                 modscript.write(line % (n_homology_models))
             elif 'a.loop.ending_model' in line:
                 modscript.write(line % (n_loop_models))
+            elif 'a.loop.md_level' in line:
+                modscript.write('a.loop.md_level = MA.refine.%s   # Loop model refinement level' %(loop_refinement))
             else:
                 if n_jobs != None: #If this is a parallel job
                     if 'PARALLEL_JOB_LINE_TO_COMPLETE' in line:
