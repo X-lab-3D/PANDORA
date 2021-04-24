@@ -42,19 +42,19 @@ jobs:
           pip install Biopython muscle pdb2sql dill pytest modeller
 
       # /opt/hostedtoolcache/Python/3.8.8/x64/lib/python3.8/site-packages
-      - name: Run a multi-line script
-        run: |
-          echo test,
-          pip show modeller
-
-          cd /opt/hostedtoolcache/Python/3.8.8/x64
-          ls -la
-          echo 1
-          cd /opt/hostedtoolcache/Python/3.8.8/x64/bin
-          ls -la
-          echo 2
-          cd /opt/hostedtoolcache/Python/3.8.8/x64/lib
-          ls -la
+#      - name: Run a multi-line script
+#        run: |
+#          echo test,
+#          pip show modeller
+#
+#          cd /opt/hostedtoolcache/Python/3.8.8/x64
+#          ls -la
+#          echo 1
+#          cd /opt/hostedtoolcache/Python/3.8.8/x64/bin
+#          ls -la
+#          echo 2
+#          cd /opt/hostedtoolcache/Python/3.8.8/x64/lib
+#          ls -la
 
       - name: Test with pytest
         run: pytest
