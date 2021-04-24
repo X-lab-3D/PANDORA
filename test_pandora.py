@@ -112,7 +112,7 @@ def test_clean_MHCII_structure():
     assert x.peptide == 'SGEGSFQPSQENP' and [i.id for i in x.pdb.get_chains()] == ['M', 'N', 'P']
 
 
-# @pytest.mark.skip
+@pytest.mark.skip
 def test_construct_database():
     test_data = PANDORA.PANDORA_path + '/../test/test_data/'
     bad1, bad2 = test_data + 'PDBs/Bad/pMHCI/6C6A.pdb', test_data + 'PDBs/Bad/pMHCII/1K8I.pdb'
