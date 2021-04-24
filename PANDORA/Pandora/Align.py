@@ -163,9 +163,9 @@ class Align:
                                  SeqIO.parse('%s/pept_cores.afa' % (self.__output_dir), "fasta")}
 
                 # Remove intermediate files
-                os.system(
-                    'rm %s/*.fasta %s/*.afa' % (
-                    self.__output_dir.replace(' ', '\\ '), self.__output_dir.replace(' ', '\\ ')))
+                # os.system(
+                #     'rm %s/*.fasta %s/*.afa' % (
+                #     self.__output_dir.replace(' ', '\\ '), self.__output_dir.replace(' ', '\\ ')))
 
                 # Add aligned cores in between anchors
                 for k, v in id_pept_anch.items():

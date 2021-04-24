@@ -159,7 +159,7 @@ def test_template_select_MHCI():
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
     mod.find_template(benchmark=True)
 
-    assert mod.template.id == '2X4R' and mod.template.peptide == 'NLVPMVATV'
+    assert mod.template[0].id == '2X4R' and mod.template[0].peptide == 'NLVPMVATV'
 
 
 def test_template_select_MHCII():
@@ -178,7 +178,7 @@ def test_template_select_MHCII():
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
     mod.find_template(benchmark=True)
 
-    assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
+    assert mod.template[0].id == '4Z7U' and mod.template[0].peptide == 'PSGEGSFQPSQENPQ'
 
 
 @pytest.mark.skip
@@ -194,7 +194,7 @@ def test_pandora_MHCI_modelling():
 
     # Perform modelling
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
-    mod.model(n_models=1, stdev=0.1, benchmark=True)
+    mod.model(n_models=1, stdev=0.1, benchmark=True, loop_refinement='very_fast')
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
@@ -222,7 +222,7 @@ def test_pandora_MHCII_modelling():
 
     # Perform modelling
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
-    mod.model(n_models=1, stdev=0.2, benchmark=True)
+    mod.model(n_models=1, stdev=0.2, benchmark=True, loop_refinement='very_fast')
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
@@ -251,6 +251,6 @@ def test_rmsd():
     m.calc_LRMSD(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
     m.calc_Core_LRMSD(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
     # Check if the rmsds are between 0.5 and 2 (I gave some slack for the cases that modeller gets lucky.
-    pass_test = m.lrmsd > 0.5 and m.lrmsd < 2 and m.core_lrmsd > 0.5 and m.core_lrmsd < 2
+    pass_test = m.lrmsd > 1 and m.lrmsd < 1.5 and m.core_lrmsd > 1 and m.core_lrmsd < 1.5
 
     assert pass_test
