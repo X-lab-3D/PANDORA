@@ -42,9 +42,10 @@ class Pandora:
                 print('\tUsing allele type based template selection')
             # Find the best template. If the target already exists in the database, 
             # also consider the initial loop model as a model
-            self.template, self.keep_IL = Modelling_functions.find_template(self.target, self.database,
-                                                                            best_n_templates=best_n_templates,
-                                                                            benchmark=benchmark)
+            self.template, self.pept_ali_scores, self.keep_IL = Modelling_functions.find_template(self.target,
+                                                                    self.database,
+                                                                    best_n_templates=best_n_templates,
+                                                                    benchmark=benchmark)
             self.target.templates = [i.id for i in self.template]
             if verbose:
                 print('\tSelected template structure: %s' %([i.id for i in self.template]))

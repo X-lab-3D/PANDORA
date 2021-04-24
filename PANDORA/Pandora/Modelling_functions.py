@@ -7,6 +7,7 @@ from PANDORA.PMHC import Model
 from Bio import pairwise2
 from PANDORA.Pandora import Align
 import statistics
+from Bio.Align import PairwiseAligner
 
 
 def check_target_template(target, template):
@@ -108,7 +109,7 @@ def check_presence(target, database, seq_based_templ_selection = False):
     return target_in_db
 
 
-def predict_anchors_netMHCIIpan(peptide, allele_type, verbose = True):
+def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     '''Uses netMHCIIpan to predict the binding core of a peptide and infer the anchor positions from that.
 
     Args:
@@ -120,7 +121,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose = True):
     all_netMHCpan_alleles = []
     with open(PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/data/allele.list') as f:
         for line in f:
-            all_netMHCpan_alleles.append(line.replace('\n',''))
+            all_netMHCpan_alleles.append(line.replace('\n', ''))
 
     # Format the alles to netMHCIIpan readable format
     target_alleles = [i.split('-')[-1].replace('*', '_') for i in allele_type]
@@ -129,7 +130,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose = True):
     # So take the first 3 partially matched allele combinations
     for i in target_alleles:
         if 'DRB' not in i:
-            target_alleles = target_alleles + [al for al in all_netMHCpan_alleles if i.replace('_','') in al][:3]
+            target_alleles = target_alleles + [al for al in all_netMHCpan_alleles if i.replace('_', '') in al][:3]
 
     target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
     # If there are no target alleles that occur in netMHCIIpan, but there is a mouse allele, use the 2 mouse alleles
@@ -153,7 +154,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose = True):
 
     try:
         # run netMHCIIpan
-        os.system('%s -f %s -inptype 1 -a %s > %s' %(netmhciipan, infile, target_alleles, outfile))
+        os.system('%s -f %s -inptype 1 -a %s > %s' % (netmhciipan, infile, target_alleles, outfile))
 
         # Get the output from the netMHCIIpan prediction
         # {allele: (offset, core, core_reliability, score_EL, %rank_EL)}
@@ -164,27 +165,28 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose = True):
                     ln = [i for i in line[:-1].split(' ') if i != '']
                     pred[ln[1]] = (int(ln[3]), ln[4], float(ln[5]))
 
-        # For every allele, the binding core is predicted. Take the allele with the highest reliability score
-        best_allele = max((pred[i][2], i) for i in pred)[1]
+        # For each predicted core offset, show the best prediction
+        max_scores = [max((i[::-1]) for i in list(pred.values()) if i[0] == s) for s in set([pred[i][0] for i in pred])]
+        # order to offset, core, core_reliability
+        max_scores = [i[::-1] for i in sorted(max_scores, reverse=True)]
+
     except ValueError:
         print('Could not predict binding core using netMHCIIpan. Will use the most common anchor positions instead')
         return [3, 6, 8, 11]
 
-    # save the offset, core and prediction reliability
-    offset, core, core_reliability = pred[best_allele][0], pred[best_allele][1], pred[best_allele][2]
-
     # Remove output file
-    os.system('rm %s %s' %(infile, outfile))
+    os.system('rm %s %s' % (infile, outfile))
 
+    offset, core, core_reliability = max_scores[0]
     # Use the canonical spacing for 9-mer binding cores to predict the anchor positions
-    predicted_anchors = [offset+1,offset+4,offset+6,offset+9]
+    predicted_anchors = [offset + 1, offset + 4, offset + 6, offset + 9]
     # Make sure the prediction is not longer than the peptide just in case
     predicted_anchors = [i for i in predicted_anchors if i <= len(peptide)]
 
     if verbose:
         print('\tPredicted the binding core using netMHCIIpan (4.0):\n')
-        print('\toffset:\t%s\n\tcore:\t%s\n\tprob:\t%s\n' %(offset, core, core_reliability ))
-        print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' %predicted_anchors)
+        print('\toffset:\t%s\n\tcore:\t%s\n\tprob:\t%s\n' % (offset, core, core_reliability))
+        print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' % predicted_anchors)
 
     return predicted_anchors
 
@@ -256,8 +258,44 @@ def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
 
     return predicted_anchors
 
-# database = db
-# benchmark = True
+
+def score_peptide_alignment_MHCII(target, template, substitution_matrix='PAM30'):
+    ''' Calculate the alignment score of the target and template peptide using pairwise alignment
+
+    Args:
+        target: (Target): Target object
+        template: (Template): Template object
+        substitution_matrix: (str): name of subtitution matrix, default is PAM30 (BLOSUM80 etc)
+
+    Returns: (flt): alignment score
+
+    '''
+
+    # define the peptide and p1 anchor position
+    temp_pept = template.peptide
+    temp_p1 = template.anchors[0]
+    tar_pept = target.peptide
+    tar_p1 = target.anchors[0]
+
+    # align based on first anchor position, fill in the ends with '-' to make them equal length
+    temp_pept = '*' * (tar_p1 - temp_p1) + temp_pept
+    tar_pept = '*' * (temp_p1 - tar_p1) + tar_pept
+    temp_pept = temp_pept + '*' * (len(tar_pept) - len(temp_pept))
+    tar_pept = tar_pept + '*' * (len(temp_pept) - len(tar_pept))
+
+    # Perform a pairwise alignment. Make sure no gaps are introduced.
+    aligner = PairwiseAligner()
+    aligner.substitution_matrix = substitution_matrices.load(substitution_matrix)
+    aligner.gap_score = -1000
+    aligner.end_open_gap_score = -1000000
+    aligner.internal_open_gap_score = -10000
+
+    # Align the sequences
+    aligned = aligner.align(tar_pept, temp_pept)
+
+    return aligned.score
+
+
 def find_template(target, database, best_n_templates = 1, benchmark=False):
     ''' Selects the template structure that is best suited as template for homology modelling of the target
 
@@ -349,11 +387,12 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
         # Return the Template object of the selected template that will be used for homology modelling
 
         template_id = [i[-1] for i in sorted(pos_list, key=lambda elem: elem[0], reverse=True)][:best_n_templates]
+        scores = sorted(pos_list, key=lambda elem: elem[0], reverse=True)[:best_n_templates]
 
         templates = [database.MHCI_data[tmpl] for tmpl in template_id]
         keep_IL = any(check_target_template(target, tmpl) for tmpl in templates)
 
-        return templates, keep_IL
+        return templates, scores, keep_IL
 
 
         ## For MHC II
@@ -372,6 +411,11 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
                     putative_templates[ID] = list(
                         set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
 
+        # Make sure there is no template with only 3 anchors for benchmarking.
+        if benchmark:
+            putative_templates = {k:v for k,v in putative_templates.items() if len(database.MHCII_data[k].anchors) == 4}
+
+
         # Find the peptide with the highest alignment score. If there are multiple, take the first one with same
         # same anchor positions
         # template_id = find_best_template_peptide(target=target,
@@ -380,37 +424,23 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
         # Find the putative template with the best matching peptide
         pos_list = []
         for ID in putative_templates:
-            score = 0
-            temp_pept = database.MHCII_data[ID].peptide
-            min_len = min([len(target.peptide), len(temp_pept)])
-            score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty
-            for i, (aa, bb) in enumerate(zip(target.peptide[:min_len], temp_pept[:min_len])):
-                try:
-                    # gain = MatrixInfo.pam30[aa, bb]
-                    gain = PAM30[aa, bb]
-                    score += gain
-                except KeyError:
-                    try:
-                        # gain = MatrixInfo.pam30[bb, aa]
-                        gain = PAM30[bb, aa]
-                        score += gain
-                    except KeyError:
-                        score = -50
-                        pass
-            pos_list.append((score, temp_pept, ID))
+
+            score = score_peptide_alignment_MHCII(target, database.MHCII_data[ID], substitution_matrix='PAM30')
+            pos_list.append((score, database.MHCII_data[ID].peptide, ID))
 
         if len(pos_list) == 0:
             raise Exception('Pandora could not find any putative template! Please try to define your own template or contact us for help')
         # Take the putative template with the max scoring peptide
-        # template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
-        # Return the Template object of the selected template that will be used for homology modelling
+        # template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]        # Return the Template object of the selected template that will be used for homology modelling
+
 
         template_id = [i[-1] for i in sorted(pos_list, key=lambda elem: elem[0], reverse=True)][:best_n_templates]
+        scores = sorted(pos_list, key=lambda elem: elem[0], reverse=True)[:best_n_templates]
 
         templates = [database.MHCII_data[tmpl] for tmpl in template_id]
         keep_IL = any(check_target_template(target, tmpl) for tmpl in templates)
 
-        return templates, keep_IL
+        return templates, scores, keep_IL
 
             # return database.MHCII_data[template_id], check_target_template(target, database.MHCII_data[template_id])
 
