@@ -132,11 +132,25 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
         if 'DRB' not in i:
             target_alleles = target_alleles + [al for al in all_netMHCpan_alleles if i.replace('_', '') in al][:3]
 
+    # for the DQ and DP cases, alleles are matched (e.g. 'HLA-DQA10102-DQB10602')
+    # If two alleles are present is such a combi case, select that combi case as the target allele
+    target_alleles_matched = []
+    for al in target_alleles:
+        hits = 0
+        for part in [i.split('*')[-1] for i in allele_type]:
+            if part in al:
+                hits +=1
+        if hits == 2:
+            target_alleles_matched.append(al)
+    if len(target_alleles_matched) > 0:
+        target_alleles = target_alleles_matched
+
     target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
-    # If there are no target alleles that occur in netMHCIIpan, but there is a mouse allele, use the 2 mouse alleles
+    # If there are no target alleles that occur in netMHCIIpan, but there is a mouse allele, use all mouse alleles
     # that are supported by netMHCIIpan
     if target_alleles == [] and any(al.startswith('H2') for al in allele_type):
-        target_alleles = ['H-2-IAd', 'H-2-IAb']
+        target_alleles = [i for i in all_netMHCpan_alleles if i.startswith('H-')]
+
     # If there is no target allele that occurs in netMHCIIpan, just use the standard DRB1_0101
     if target_alleles == []:
         target_alleles = ['DRB1_0101']
