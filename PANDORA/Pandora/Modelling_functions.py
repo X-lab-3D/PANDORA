@@ -715,10 +715,11 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         #     if 'MODELLER OBJECTIVE FUNCTION' in line:
         #         il_molpdf = line.split()[-1]
         # f.close()
-        # Create a fake molpdf score for the IL model: the best molpdf from the real models - 1
+        # Create a fake molpdf/dope score for the IL model: the best molpdf/dope from the real models - 1
         fake_molpdf = str(min(float(i[1]) for i in logf) - 1)
+        fake_dope = str(min(float(i[2]) for i in logf) - 1)
         # Append the filename and molpdf to the rest of the data
-        logf.append((il_file, fake_molpdf, ''))
+        logf.append((il_file, fake_molpdf, fake_dope))
 
     # Write to output file
     f = open(output_dir + '/molpdf_DOPE.tsv', 'w')

@@ -130,7 +130,7 @@ def pMHCII_anchors(pdb):
         cont_p1 = Contacts.Contacts(pdb, pept_contacts=True, M_only=[51],
                                     N_only=[], cutoff=12).chain_contacts
         # Make sure the first chain is P, second chain is M or N, not the other way around
-        cont_p1 = cont_p1 + [(i[4], i[5], i[6], i[7], i[0], i[1], i[2], i[3], i[8]) for i in cont if
+        cont_p1 = cont_p1 + [(i[4], i[5], i[6], i[7], i[0], i[1], i[2], i[3], i[8]) for i in cont_p1 if
                        i[1] == 'P' or i[5] == 'P']
         cont_p1 = list(dict.fromkeys(cont_p1))
         # Check the Alpha, Beta and Gamma carbon molecules of the peptide residues.
