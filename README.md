@@ -3,8 +3,20 @@
 
 ## Installation
 
+To install PANDORA and all the required dependencies, ```pip3``` is required.
 To create all the required directories, run:
->>> python install.py
+> python install.py
+
+To install dependencies: 
+('XXXX' is the Modeller license key)
+
+> alias KEY_MODELLER='XXXX'
+> conda install -c salilab modeller
+> conda install -c conda-forge biopython
+> conda install dill
+> conda install -c bioconda muscle
+> pip install pdb-tools
+> pip install pdb2sql
 
 # Dependencies
 
@@ -23,6 +35,7 @@ muscle
 profit (only for RMSD calculation)
 
 pdb2sql (only for RMSD calculation)
+
 
 
 ## PANDORA modules
