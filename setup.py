@@ -43,5 +43,7 @@ setup(
     #    'pdb_tools',
     #    'muscle',
     #    'matplotlib',
+    #    'dill',
+    #    'pathos'
     #    ],
 )

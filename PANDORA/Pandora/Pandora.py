@@ -214,56 +214,56 @@ class Pandora:
             self.find_template(seq_based_templ_selection, benchmark=benchmark, verbose=verbose)
         except:
             self.__log(self.target.id, 'None', 'Could not find a template')
-            raise Exception
+            raise Exception('Could not find a template')
 
         # Prepare the output directory
         try:
             self.prep_output_dir()
         except:
             self.__log(self.target.id, self.template.id, 'Failed creating output directory')
-            raise Exception
+            raise Exception('Failed creating output directory')
 
         # Perform sequence alignment. This is used to superimpose the target on the template structure in later steps
         try:
             self.align(verbose=verbose)
         except:
             self.__log(self.target.id, self.template.id, 'Failed aligning target and template')
-            raise Exception
+            raise Exception('Failed aligning target and template')
 
         # Prepare the scripts that run modeller
         try:
             self.write_ini_script()
         except:
             self.__log(self.target.id, self.template.id, 'Failed writing .ini script')
-            raise Exception
+            raise Exception('Failed writing .ini script')
 
         # Run modeller to create the initial model
         try:
             self.create_initial_model(verbose=verbose)
         except:
             self.__log(self.target.id, self.template.id, 'Failed creating initial model with modeller')
-            raise Exception
+            raise Exception('Failed creating initial model with modeller')
 
         # Calculate anchor restraints
         try:
             self.anchor_contacts(verbose=verbose)
         except:
             self.__log(self.target.id, self.template.id, 'Failed calculating anchor restraints')
-            raise Exception
+            raise Exception('Failed calculating anchor restraints')
 
         # prepare the scripts that run modeller
         try:
             self.write_modeller_script(n_models=n_models, n_jobs=n_jobs, stdev=stdev)
         except:
             self.__log(self.target.id, self.template.id, 'Failed preparing the modeller script')
-            raise Exception
+            raise Exception('Failed preparing the modeller script')
 
         # Do the homology modelling
         try:
             self.run_modeller(benchmark=benchmark, verbose=verbose, keep_IL=self.keep_IL)
         except:
             self.__log(self.target.id, self.template.id, 'Failed running modeller')
-            raise Exception
+            raise Exception('Failed running modeller')
 
 
         if verbose and benchmark:
@@ -284,7 +284,7 @@ class Pandora:
                                 os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
             except:
                 self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD')
-                raise Exception
+                raise Exception('Could not calculate L-RMSD')
 
         elif verbose and not benchmark:
             print('\n\tModel\t\t\t\tMolpdf')
