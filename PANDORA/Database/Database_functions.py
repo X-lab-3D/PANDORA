@@ -1223,7 +1223,7 @@ def hardcode_cut_peptide(pdb_id, pdb):
 
     '''
 
-    if pdb_id in ['6DFS', '4MAY', '3PL6', '4GRL']:
+    if pdb_id in ['6DFS', '4MAY', '3PL6', '4GRL', '1IAO']:
 
         if pdb_id == '6DFS':
             chain, res_nr = 'D', [1,14]
@@ -1236,6 +1236,9 @@ def hardcode_cut_peptide(pdb_id, pdb):
 
         if pdb_id == '4GRL':
             chain, res_nr = 'D', [1,14]
+
+        if pdb_id == '1IAO':
+            chain, res_nr = 'B', [1,14]
 
 
         pept_res = [res for res in pdb[0][chain] if res.id[1] in range(res_nr[0], res_nr[1] + 1)]

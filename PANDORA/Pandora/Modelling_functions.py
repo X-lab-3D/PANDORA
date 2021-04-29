@@ -689,7 +689,8 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
 
 
 
-def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmark = False, pickle_out = True, keep_IL = False):
+def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmark = False, pickle_out = True,
+                 keep_IL = False, RMSD_atoms = ['C', 'CA', 'N', 'O']):
     ''' Perform the homology modelling.
 
     Args:
@@ -753,14 +754,16 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
             print('Something went wrong when calling Model.Model() for case %s' %target.id)
         if benchmark:
             try:
-                m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
+                m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb',
+                             atoms = RMSD_atoms)
                 # print('l-RMSD for %s: %f' %(target.id, m.lrmsd))
             except:
                 print('Something went wrong when calculating l-RMSD for case %s' %target.id)
                 pass
             if target.MHC_class == 'II': #only calculate the core L-rmsd for MHCII cases
                 try:
-                    m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb')
+                    m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb',
+                             atoms = RMSD_atoms)
                     # print('Core l-RMSD for %s: %f' %(target.id, m.core_lrmsd))
                 except:
                     print('Something went wrong when calculating core l-RMSD for case %s' %target.id)

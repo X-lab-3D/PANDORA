@@ -137,7 +137,8 @@ class Pandora:
         if verbose:
             print('\tSuccessfully created the initital model')
 
-    def run_modeller(self, python_script='cmd_modeller.py', benchmark=False, pickle_out=True, verbose=True, keep_IL=False):
+    def run_modeller(self, python_script='cmd_modeller.py', benchmark=False, pickle_out=True, verbose=True,
+                     keep_IL=False, RMSD_atoms=['C', 'CA', 'N', 'O']):
         ''' Perform the homology modelling.
 
         Args:
@@ -154,7 +155,8 @@ class Pandora:
             print('\tPerforming homology modelling of %s on %s...' %(self.target.id, '_'.join([t.id for t in self.template])))
         t0 = time.time()
         self.results = Modelling_functions.run_modeller(self.output_dir, self.target, python_script=python_script,
-                                                        benchmark=benchmark, pickle_out=pickle_out, keep_IL=keep_IL)
+                                                        benchmark=benchmark, pickle_out=pickle_out, keep_IL=keep_IL,
+                                                        RMSD_atoms=RMSD_atoms)
         if verbose:
             print('\n\tModelling was successfull and took %s seconds' %(round(time.time() - t0, 2)))
 
@@ -213,7 +215,7 @@ class Pandora:
 
     def model(self, output_dir=PANDORA.PANDORA_data + '/outputs', n_loop_models=20, n_homology_models=1,
               best_n_templates=1, n_jobs=None, loop_refinement='slow',
-              stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False):
+              stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, RMSD_atoms=['C', 'CA', 'N', 'O']):
         ''' Wrapper function that combines all modelling steps.
 
         Args:
@@ -288,7 +290,8 @@ class Pandora:
 
         # Do the homology modelling
         try:
-            self.run_modeller(benchmark=benchmark, verbose=verbose, keep_IL=self.keep_IL)
+            self.run_modeller(benchmark=benchmark, verbose=verbose, keep_IL=self.keep_IL,
+                              RMSD_atoms=RMSD_atoms)
         except:
             self.__log(self.target.id, '_'.join([i.id for i in self.template]), 'Failed running modeller')
             raise Exception
