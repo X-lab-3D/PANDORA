@@ -64,6 +64,7 @@ class Model:
         # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
         homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id)
 
+        start_dir = os.getcwd()
         os.chdir(self.output_dir)
         # Produce lzone file for the l-rmsd calculation
         #lzone = get_Gdomain_lzone(ref_path, self.output_dir, self.target.MHC_class)
@@ -86,7 +87,8 @@ class Model:
 
         # remove intermediate files
         os.system('rm %s/%s_decoy.pdb %s/%s_ref.pdb' %(self.output_dir, self.target.id, self.output_dir, self.target.id))
-        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+        #os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+        os.chdir(start_dir)
 
     def calc_Core_LRMSD(self, reference_pdb, atoms = ['C', 'CA', 'N', 'O']):
         ''' Calculate the L-RMSD between the decoy and reference structure (ground truth)
