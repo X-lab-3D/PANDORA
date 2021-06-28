@@ -342,11 +342,20 @@ def change_modified_res(pdb_file, change_SEP = True, change_F2F = True, change_C
         for line in infile:
             l = [x for x in line.split(' ') if x != '']
             if line.startswith('ATOM') or line.startswith('HETATM'):
+                
                 # Change SEO into SER
                 if ('SEP' in l[3] or 'SEP' in l[2]) and l[2] not in ['P', 'O1P', 'O2P', 'O3P', 'HA', 'HB2','HB3']:
                     if change_SEP:
                         f.write(line.replace('HETATM', 'ATOM  ').replace('SEP', 'SER'))
                         res_changed.append('SEP -> SER')
+                    else:
+                        f.write(line)
+                elif ('SEP' in l[3] or 'SEP' in l[2]) and l[2] in ['P', 'O1P', 'O2P', 'O3P', 'HA', 'HB2','HB3']:
+                    if change_SEP:
+                        pass
+                    else:
+                        f.write(line)
+                        
                 # Change CIR into ARG
                 elif ('CIR' in l[3] or 'CIR' in l[2]) and l[2] not in ['F1', 'F2']:
                     if change_CIR:
@@ -361,17 +370,41 @@ def change_modified_res(pdb_file, change_SEP = True, change_F2F = True, change_C
                         else:
                             f.write(line.replace('HETATM', 'ATOM  ').replace('CIR', 'ARG'))
                         res_changed.append('CIR -> ARG')
+                    else:
+                        f.write(line)
+                elif ('CIR' in l[3] or 'CIR' in l[2]) and l[2] in ['F1', 'F2']:
+                    if change_CIR:
+                        pass
+                    else:
+                        f.write(line)
+                        
                 # Change F2F into PHE
                 elif ('F2F' in l[3] or 'F2F' in l[2]) and l[2] not in ['F1', 'F2']:
                     if change_F2F:
                         f.write(line.replace('HETATM', 'ATOM  ').replace('F2F', 'PHE'))
                         res_changed.append('F2F -> PHE')
+                    else:
+                        f.write(line)
+                elif ('F2F' in l[3] or 'F2F' in l[2]) and l[2] in ['F1', 'F2']:
+                    if change_F2F:
+                        pass
+                    else:
+                        f.write(line)
+                        
                 # Change CSO into CYS
                 elif ('CSO' in l[3] or 'CSO' in l[2]) and l[2] not in ['OD']:
                     if change_CSO:
                         f.write(line.replace('HETATM', 'ATOM  ').replace('CSO', 'CYS'))
                         res_changed.append('CSO -> CYS')
-
+                    else:
+                        f.write(line)
+                elif ('CSO' in l[3] or 'CSO' in l[2]) and l[2] in ['OD']:
+                    if change_F2F:
+                        pass
+                    else:
+                        f.write(line)
+                
+                # Keep all the other lines unchanged
                 else:
                     f.write(line)
             else:
@@ -518,7 +551,7 @@ def unzip_pdb(ID, indir, outdir):
     return '%s/%s.pdb' % (outdir, ID)
 
 
-def find_peptide_chain(pdb, min_len=7, max_len=26):
+def find_peptide_chain(pdb, min_len=6, max_len=26):
     ''' Find the pdb chain that is most likely the peptide based on its size
 
     Args:
