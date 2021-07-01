@@ -22,7 +22,7 @@ class Model:
 
         self.target = target
         self.model_path = model_path
-        self.moldpf = molpdf
+        self.molpdf = molpdf
         self.dope = dope
         self.output_dir = output_dir
 
@@ -114,6 +114,7 @@ class Model:
         # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
         homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id, anchors = self.target.anchors)
 
+        start_dir = os.getcwd()
         os.chdir(self.output_dir)
         # Produce lzone file for the l-rmsd calculation
         #lzone = get_Gdomain_lzone('%s/%s_ref.pdb' %(self.output_dir, self.target.id), self.output_dir, self.target.MHC_class)
@@ -127,7 +128,8 @@ class Model:
 
         # remove intermediate files
         os.system('rm %s %s' %(decoy_path, ref_path))
-        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+        #os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+        os.chdir(start_dir)
 
 def merge_chains(pdb):
     ''' Merges two chains of MHCII to one chain. pdb2sql can only calculate L-rmsd with one chain.
@@ -313,29 +315,4 @@ def remove_C_like_domain(pdb):
 #ValueError: Invalid column name lzone. Possible names are
 #['rowID', 'serial', 'name', 'altLoc', 'resName', 'chainID', 'resSeq',
 # 'iCode', 'x', 'y', 'z', 'occ', 'temp', 'element', 'model']  
-
-
-# decoy_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/outputs/1DLH_1FYT/1FYT.BL00010001.pdb'
-# ref_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/PDBs/pMHCII/1FYT.pdb'
-#
-# decoy = PDBParser(QUIET=True).get_structure('Decoy', decoy_path)
-# ref = PDBParser(QUIET=True).get_structure('Ref', ref_path)
-#
-#
-# decoy_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/outputs/5KSU_6U3O/6U3O.BL00010001.pdb'
-# ref_path = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA_remaster/PANDORA/PANDORA_files/data/PDBs/pMHCII/6U3O.pdb'
-#
-# m = Model(mod.target, mod.output_dir, model_path=decoy_path)
-# m.calc_LRMSD(ref_path)
-# m.calc_Core_LRMSD(ref_path)
-# print(m.lrmsd)
-# print(m.core_lrmsd)
-
-# 1A6A_3PDO/3PDO.BL00010001.pdb
-# /Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/outputs/1DLH_1JWM/1JWM.BL00010001.pdb
-# anchors = db.MHCII_data['3PDO'].anchors
-# decoy = PDBParser(QUIET=True).get_structure('MHC', '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/outputs/1A6A_3PDO/3PDO.BL00010001.pdb')
-# ref = PDBParser(QUIET=True).get_structure('MHC', '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/PDBs/pMHCII/3PDO.pdb')
-
-
 

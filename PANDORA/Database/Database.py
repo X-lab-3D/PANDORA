@@ -124,6 +124,16 @@ class Database:
             pickle.dump(self, dill_file)
 
     def load(cls, fn):
-        # return dill.load(open(fn, 'rb'))
+        """Loads a pre-generated database
+        
+
+        Args:
+            cls (TYPE): DESCRIPTION.
+            fn (TYPE): Dabase file name.
+
+        Returns:
+            Database.Database: Database object.
+
+        """
         return pickle.load(open(fn, 'rb'))
 

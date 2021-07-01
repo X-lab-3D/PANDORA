@@ -33,7 +33,7 @@ class Pandora:
             print('\tTarget MHC Class: %s' % self.target.MHC_class)
             print('\tTarget Allele:  %s' % self.target.allele_type)
             print('\tTarget Peptide: %s' % self.target.peptide)
-            print('\tTarget Anchors: %s\n' % self.target.anchors)
+            print('\tTarget Anchors: %s,%s\n' % (self.target.anchors[0],self.target.anchors[1]))
 
         if self.template == None: # Only find the best template if the user didn't specify one
             if verbose and self.target.M_chain_seq != '' and seq_based_templ_selection:
@@ -58,7 +58,7 @@ class Pandora:
         if verbose:
             print('\tTemplate Allele:  %s' % self.template.allele_type)
             print('\tTemplate Peptide: %s' % self.template.peptide)
-            print('\tTemplate Anchors: %s\n' % self.template.anchors)
+            print('\tTemplate Anchors: %s,%s\n' % (self.target.anchors[0],self.target.anchors[1]))
 
     def prep_output_dir(self):
         ''' Create an output directory and move the template pdb there

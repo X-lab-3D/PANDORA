@@ -10,8 +10,8 @@ from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 from PANDORA.Wrapper.run_model import run_model
-from pathos.multiprocessing import ProcessingPool as Pool
-from pathos.multiprocessing import freeze_support
+#from pathos.multiprocessing import ProcessingPool as Pool
+#from pathos.multiprocessing import freeze_support
 import time
 import csv
 import os
@@ -19,8 +19,8 @@ import os
 #test joblib
 from joblib import Parallel, delayed
 from multiprocessing import Manager
-from joblib.externals.loky import set_loky_pickler
-set_loky_pickler("dill")
+#from joblib.externals.loky import set_loky_pickler
+#set_loky_pickler("dill")
 
 
 class Wrapper():
@@ -97,7 +97,7 @@ class Wrapper():
 
     def create_targets(self, data_file, db, MHC_class, delimiter = '\t', header=True, 
                        IDs_col=None, peptides_col=0, allele_col=1, anchors_col=None, 
-                       benchmark=False, num_models=20, verbose=False):
+                       benchmark=False, verbose=False):
         """
         
 
@@ -146,8 +146,9 @@ class Wrapper():
                 try:
                     mod.find_template(benchmark=benchmark)
                     jobs[target_id] = [tar, mod.template]
-                except Exception:
-                    print('Skipping Target %s' %target_id)
+                except Exception as err:
+                    print('Skipping Target %s for the following reason:' %target_id)
+                    print(("Exception: {0}".format(err)))
             except: ### TODO: test and specify exception for this except
                 print('An unidentified problem occurred with Target %s. Please check your target info' %target_id)
         self.jobs = jobs
