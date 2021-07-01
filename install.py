@@ -18,6 +18,8 @@ try:
 except OSError:
     pass
 
+'''
+#Install dependenciess
 os.popen("alias KEY_MODELLER='XXXX'").read()
 os.popen("conda install -y -c salilab modeller").read()
 os.popen("conda install -y -c conda-forge biopython").read()
@@ -27,3 +29,4 @@ os.popen("pip install pdb-tools").read()
 os.popen("pip install pdb2sql").read()
 
 os.popen("pip install -e ./").read()
+'''
