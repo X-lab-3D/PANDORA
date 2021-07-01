@@ -119,21 +119,23 @@ class Database:
 
         :param fn: (string) pathname of file
         """
-        with open(fn, "wb") as dill_file:
+        with open(fn, "wb") as pkl_file:
             # dill.dump(self, dill_file)
-            pickle.dump(self, dill_file)
+            pickle.dump(self, pkl_file)
 
-    def load(cls, fn):
-        """Loads a pre-generated database
-        
+def load(fn):
+    """Loads a pre-generated database
+    
 
-        Args:
-            cls (TYPE): DESCRIPTION.
-            fn (TYPE): Dabase file name.
+    Args:
+        cls (TYPE): DESCRIPTION.
+        fn (TYPE): Dabase file name.
 
-        Returns:
-            Database.Database: Database object.
+    Returns:
+        Database.Database: Database object.
 
-        """
-        return pickle.load(open(fn, 'rb'))
+    """
+    with open(fn, 'rb') as inpkl:
+        db = pickle.load(inpkl)
+    return db
 
