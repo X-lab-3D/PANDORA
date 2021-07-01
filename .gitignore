@@ -17,6 +17,7 @@
 /william
 
 # Misc
+*.egg-info
 */__pycache__/
 /PANDORA/__pycache__/
 .DS_Store
