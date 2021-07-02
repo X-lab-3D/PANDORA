@@ -1,22 +1,20 @@
 import os
 
-try:
-    os.mkdir('./PANDORA_files')
-    os.mkdir('./PANDORA_files/data')
-    os.mkdir('./PANDORA_files/data/csv_pkl_files')
-    os.mkdir('./PANDORA_files/data/PDBs')
-    os.mkdir('./PANDORA_files/data/PDBs/pMHCI')
-    os.mkdir('./PANDORA_files/data/PDBs/pMHCII')
-    os.mkdir('./PANDORA_files/data/PDBs/Bad')
-    os.mkdir('./PANDORA_files/data/PDBs/Bad/pMHCI')
-    os.mkdir('./PANDORA_files/data/PDBs/Bad/pMHCII')
-    os.mkdir('./PANDORA_files/data/PDBs/IMGT_retrieved/')
-    os.mkdir('./test/test_data/PDBs/Bad')
-    os.mkdir('./test/test_data/PDBs/Bad/pMHCI')
-    os.mkdir('./test/test_data/PDBs/Bad/pMHCII')
-    os.mkdir('./test/test_data/csv_pkl_files')
-except OSError:
-    pass
+dirs = [
+        './PANDORA_files', './PANDORA_files/data', './PANDORA_files/data/csv_pkl_files', 
+        './PANDORA_files/data/csv_pkl_files/mhcseqs', './PANDORA_files/data/PDBs', 
+        './PANDORA_files/data/PDBs/pMHCI', './PANDORA_files/data/PDBs/pMHCII', 
+        './PANDORA_files/data/PDBs/Bad', './PANDORA_files/data/PDBs/Bad/pMHCI',
+        './PANDORA_files/data/PDBs/Bad/pMHCII', './PANDORA_files/data/PDBs/IMGT_retrieved',
+        './test/test_data/PDBs/Bad', './test/test_data/PDBs/Bad/pMHCI', 
+        './test/test_data/PDBs/Bad/pMHCII', './test/test_data/csv_pkl_files',
+        ]
+    
+for D in dirs:
+    try:
+        os.mkdir(D)
+    except OSError:
+        print('Could not make directory: ' + D)
 
 '''
 #Install dependenciess

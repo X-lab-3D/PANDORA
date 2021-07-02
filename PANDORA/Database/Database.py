@@ -34,16 +34,23 @@ class Database:
                                                    indir = data_dir + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                                                    outdir = data_dir + '/PDBs/pMHCII',
                                                    bad_dir = data_dir + '/PDBs/Bad/pMHCII')
-
-    def construct_database(self, save, data_dir = PANDORA.PANDORA_data, MHCI=True, MHCII=True, download=True):
+    
+    def __update_ref_sequences(self):
+        """Downloads and parse HLA and other MHC sequences to compile reference fastas  """
+        Database_functions.generate_mhcseq_database()
+        
+    def construct_database(self, save, data_dir = PANDORA.PANDORA_data, 
+                           MHCI=True, MHCII=True, download=True,
+                           update_ref_sequences=True):
         ''' Construct the database. Download, clean and add all structures
 
         Args:
-            save: (string/bool) Filename of database, can be False if you don't want to save the database
-            data_dir: (string) Path of data directory
-            MHCI: (bool) Parse data for MHCI
-            MHCII: (bool) Parse data for MHCII
-            download: (bool) Download the data? If you already downloaded the data, this can be set to False
+            save (str/bool): Filename of database, can be False if you don't want to save the database
+            data_dir (str): Path of data directory. Defaults to PANDORA.PANDORA_data.
+            MHCI (bool): Parse data for MHCI. Defaults to True.
+            MHCII (bool): Parse data for MHCII. Defaults to True.
+            download (bool): If True, download the structures data from IMGT. Defaults to True.
+            update_ref_sequences (bool): If True, downloads and parse reference sequence strcutres. Defaults to True
 
         Returns: Database object
 
@@ -51,7 +58,7 @@ class Database:
         # Download the data
         self.download_data(download = download, data_dir = data_dir)
 
-        # Construct the MHCII database
+        # Construct the MHCI database
         if MHCI:
             # Parse all MHCI files
             for id in self.__IDs_list_MHCI:
@@ -75,19 +82,25 @@ class Database:
 
         if save:
             self.save(save)
+        
+        #Download and parse HLA and MHC sequences reference data
+        if update_ref_sequences:
+            self.__update_ref_sequences()
+        
+        print('Database correctly generated')
 
     def add_structure(self, id, allele_type, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
         ''' Add a single structure to the database
 
         Args:
-            id: (string) PDB identifier
-            allele_type: (list) list of MHC alleles (or allele)
-            peptide: (string) peptide sequence
-            MHC_class: (string) either 'I' or 'II' denoting MHC class I and MHC class II respectively
-            chain_seq: (list) list of chain sequence(s) for the M and N (Alpha and Beta) chain respectively
-            anchors: (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
+            id: (str) PDB identifier
+            allele_type: (lst) list of MHC alleles (or allele)
+            peptide: (str) peptide sequence
+            MHC_class: (str) either 'I' or 'II' denoting MHC class I and MHC class II respectively
+            chain_seq: (lst) list of chain sequence(s) for the M and N (Alpha and Beta) chain respectively
+            anchors: (lst) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
                         during the modelling. MHC class I typically has 2 anchors, while MHC class II typically has 4.
-            pdb_path: (string) path to pdb file
+            pdb_path: (str) path to pdb file
             pdb: (Bio.PDB) Biopython PBD object
 
         '''
@@ -106,7 +119,7 @@ class Database:
         ''' Removes a structure (by id) from the database
 
         Args:
-            id: (string) PDB ID
+            id: (str) PDB ID
 
         '''
 
@@ -117,7 +130,7 @@ class Database:
     def save(self, fn = 'db.pkl'):
         """Save the database as a pickle file
 
-        :param fn: (string) pathname of file
+        :param fn: (str) pathname of file
         """
         with open(fn, "wb") as pkl_file:
             # dill.dump(self, dill_file)
@@ -128,7 +141,7 @@ def load(file_name):
     
 
     Args:
-        file_name (TYPE): Dabase file name/path.
+        file_name (str): Dabase file name/path.
 
     Returns:
         Database.Database: Database object.
