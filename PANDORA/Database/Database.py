@@ -9,6 +9,7 @@ class Database:
     def __init__(self):
         self.MHCI_data = {}
         self.MHCII_data = {}
+        self.ref_MHCI_sequences = {}
         self.__IDs_list_MHCI = []
         self.__IDs_list_MHCII = []
 
@@ -36,8 +37,9 @@ class Database:
                                                    bad_dir = data_dir + '/PDBs/Bad/pMHCII')
     
     def __update_ref_sequences(self):
-        """Downloads and parse HLA and other MHC sequences to compile reference fastas  """
-        Database_functions.generate_mhcseq_database()
+        """Downloads and parse HLA and other MHC sequences to compile reference fastas.
+        Returns a dictionary that can be used to select the desired reference sequence"""
+        self.ref_MHCI_sequences = Database_functions.generate_mhcseq_database()
         
     def construct_database(self, save, data_dir = PANDORA.PANDORA_data, 
                            MHCI=True, MHCII=True, download=True,

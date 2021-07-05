@@ -1564,11 +1564,20 @@ def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/',
     #HLAs: https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta
     #MHCs: https://raw.githubusercontent.com/ANHIG/IPDMHC/Latest/MHC_prot.fasta
     
-    ### Download and parse Human data
+
     # Changing working directory
+    start_dir = os.getcwd()
     os.chdir(data_dir)
-    generate_hla_database()
-    generate_nonhla_database()
+    
+    # Download and parse sequences
+    # Human sequences
+    ref_mhc_sequences = generate_hla_database()
+    # Non-human sequences
+    ref_mhc_sequences.update(generate_nonhla_database())
+    
+    # Change back working directory
+    os.chdir(start_dir)
+    return ref_MHCI_sequences
     
     
 def generate_hla_database(HLA_out = 'Human_MHC_data.fasta'):
@@ -1620,18 +1629,18 @@ def generate_hla_database(HLA_out = 'Human_MHC_data.fasta'):
     for allele in HLAs:
         #If there is only one sequence for the allele
         if len(HLAs[allele]) == 1:
-            to_write[allele] = str(HLAs[allele][0].seq)
+            to_write['HLA-'+allele] = str(HLAs[allele][0].seq)
         else:
             #print(HLAs[allele])
             putatives = sorted(HLAs[allele], key=len, reverse=True)
             #print(putatives, allele)
             #No further filtering criteria are used and the first sequence is taken as reference.
-            to_write[allele] = str(putatives[0].seq)
+            to_write['HLA-'+allele] = str(putatives[0].seq)
     
     #Write output fasta file
     with open(HLA_out, 'w') as outfile:
         for allele in to_write:
-            outfile.write('>HLA-'+allele+'\n')
+            outfile.write('>'+allele+'\n')
             for i in range(len(to_write[allele])):
                 outfile.write(to_write[allele][i])
                 if (i + 1) % 60 == 0: #add line break each time pgcd equal 0
@@ -1644,6 +1653,8 @@ def generate_hla_database(HLA_out = 'Human_MHC_data.fasta'):
         os.system('rm OLD_hla_prot.fasta')
     except:
         pass
+
+    return to_write
 
 def generate_nonhla_database(nonHLA_out = 'NonHuman_MHC_data.fasta'):
     """
@@ -1723,3 +1734,4 @@ def generate_nonhla_database(nonHLA_out = 'NonHuman_MHC_data.fasta'):
     except:
         pass
     
+    return to_write
