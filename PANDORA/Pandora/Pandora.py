@@ -70,7 +70,13 @@ class Pandora:
                 os.makedirs(self.output_dir)
         except:
             pass
-        os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
+        
+        if os.path.isfile(self.template.pdb_path):
+            os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
+        else:
+            print('Template object could not be found. Please check the path: %s.' %self.template.pdb_path)
+            print('If the path is not available, you can use Database.repath.')
+            raise Exception('Template file not found.')
 
     def align(self, verbose = True):
         ''' Create the alignment file for modeller

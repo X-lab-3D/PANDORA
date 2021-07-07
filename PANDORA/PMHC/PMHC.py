@@ -279,11 +279,21 @@ class Target(PMHC):
         fasta_sequences = SeqIO.parse(input_file,'fasta')
         
         # Return the right sequences
+        seq_flag = False
         for seq in fasta_sequences:
             if seq.id == self.allele_type:
                 self.M_chain_seq = str(seq.seq)
+                seq_flag = True
                 break
             else:
                 pass
+        
+        if seq_flag == True:
+            print('MHC sequence correctly retrieved')
+        else:
+            print('WARNING: No MHC seq could be retrieved with the given MHC allele name')
+            print("The model will be generated using the best template's MHC sequence.")
+            print("To be sure you use the right sequence, please double check your MHC allele name")
+            print("Or provide the MHC sequence as target.M_chain_seq")
 
 

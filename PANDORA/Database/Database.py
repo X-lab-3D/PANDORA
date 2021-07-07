@@ -1,8 +1,8 @@
 import PANDORA
-import dill
 import pickle
 from PANDORA.PMHC import PMHC
 from PANDORA.Database import Database_functions
+import os
 
 class Database:
     #todo Integrate Anchor calculation with Rafaellas code to do all the anchor calcs while initiating the db
@@ -128,6 +128,41 @@ class Database:
         # Remove structure from database
         self.MHCI_data.pop(id, None)
         self.MHCII_data.pop(id, None)
+    
+    def repath(self, new_folder_path, save):
+        """
+        Necessary if the absolut path to the templates structures is different
+        from the one used while generating the database.
+        It changes the template.pdb_path for each template object in the database
+        and returns the modified database.
+
+        Args:
+            new_folder_path (str): New path to the 'PDBs' directory contaning template structures.
+            save (str/bool): If False, doesn't save the modified database. If str, saves the modified database to the specified file path.'
+
+        Returns:
+            None.
+            
+        Example:
+            >>> MyDatabase.repath('/home/Users/MyUserName/PANDORA/PDBs/', './MyHome_Database.pkl')
+
+        """
+        
+        if type(new_folder_path) != str:
+            raise Exception('Non-string argument detected. Please provide a valid path as argument.')
+        
+        if self.MHCI_data != {}:
+            for id in self.MHCI_data:
+                from_pMHCI_path = os.path.join(*os.path.normpath(self.MHCI_data[id].pdb_path).split('/')[-2:])
+                self.MHCI_data[id].pdb_path = os.path.join(new_folder_path, from_pMHCI_path)
+        
+        if self.MHCII_data != {}:
+            for id in self.MHCII_data:
+                from_pMHCII_path = os.path.join(*os.path.normpath(self.MHCII_data[id].pdb_path).split('/')[-2:])
+                self.MHCII_data[id].pdb_path = os.path.join(new_folder_path, from_pMHCII_path)
+                
+        if save:
+            self.save(save)
 
     def save(self, fn = 'db.pkl'):
         """Save the database as a pickle file
@@ -135,7 +170,6 @@ class Database:
         :param fn: (str) pathname of file
         """
         with open(fn, "wb") as pkl_file:
-            # dill.dump(self, dill_file)
             pickle.dump(self, pkl_file)
 
 def load(file_name):

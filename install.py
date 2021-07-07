@@ -5,9 +5,10 @@ dirs = [
         './PANDORA_files/data/csv_pkl_files/mhcseqs', './PANDORA_files/data/PDBs', 
         './PANDORA_files/data/PDBs/pMHCI', './PANDORA_files/data/PDBs/pMHCII', 
         './PANDORA_files/data/PDBs/Bad', './PANDORA_files/data/PDBs/Bad/pMHCI',
-        './PANDORA_files/data/PDBs/Bad/pMHCII', './PANDORA_files/data/PDBs/IMGT_retrieved',
-        './test/test_data/PDBs/Bad', './test/test_data/PDBs/Bad/pMHCI', 
-        './test/test_data/PDBs/Bad/pMHCII', './test/test_data/csv_pkl_files',
+        './PANDORA_files/data/PDBs/Bad/pMHCII', './PANDORA_files/data/PDBs/IMGT_retrieved','./PANDORA_files/data'
+        './PANDORA_files/data/outputs', './test/test_data/PDBs/Bad',
+        './test/test_data/PDBs/Bad/pMHCI', './test/test_data/PDBs/Bad/pMHCII',
+         './test/test_data/csv_pkl_files'
         ]
     
 for D in dirs:
