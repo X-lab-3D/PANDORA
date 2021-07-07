@@ -5,6 +5,7 @@ from copy import deepcopy
 from Bio.PDB import PDBParser
 from Bio.PDB import PDBIO
 from Bio.PDB import parse_pdb_header
+from Bio import SeqIO
 import gzip
 import shutil
 import PANDORA
@@ -15,6 +16,7 @@ from Bio.PDB import NeighborSearch
 from Bio.SeqUtils import seq1
 from Bio.PDB import Chain
 from string import ascii_uppercase
+import re
 
 
 def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_files = True, del_kabat_files = True):
@@ -1543,3 +1545,193 @@ def parse_pMHCII_pdb(pdb_id,
 
         except:  # If something goes wrong, append the ID to the bad_ids list
             os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
+     
+def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/', HLA_out = 'Human_MHC_data.fasta',
+                             nonHLA_out = 'NonHuman_MHC_data.fasta'):
+    """
+    Downloads and parse HLA and other MHC sequences to compile reference fastas 
+
+    Args:
+        data_dir (str, optional): Data directory. Defaults to PANDORA.PANDORA_data/csv_pkl_files/.
+        HLA_out (str, optional): Output file for HLA sequences. Defaults to 'Human_MHC_data.fasta'.
+        nonHLA_out (str, optional): Output file for non human MHCs. Defaults to 'NonHuman_MHC_data.fasta'.
+
+    Returns:
+        None.
+
+    """
+    
+    #HLAs: https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta
+    #MHCs: https://raw.githubusercontent.com/ANHIG/IPDMHC/Latest/MHC_prot.fasta
+    
+
+    # Changing working directory
+    start_dir = os.getcwd()
+    os.chdir(data_dir)
+    
+    # Download and parse sequences
+    # Human sequences
+    ref_mhc_sequences = generate_hla_database()
+    # Non-human sequences
+    ref_mhc_sequences.update(generate_nonhla_database())
+    
+    # Change back working directory
+    os.chdir(start_dir)
+    return ref_MHCI_sequences
+    
+    
+def generate_hla_database(HLA_out = 'Human_MHC_data.fasta'):
+    """
+    Downloads and parse HLA sequences
+
+    Args:
+        HLA_out (str, optional): Output file for HLA sequences. Defaults to 'Human_MHC_data.fasta'.
+
+    Returns:
+        None.
+
+    """
+    ###
+    # Human alleles
+    ###
+    # Rename pre-existing raw file
+    try:
+        os.system('mv hla_prot.fasta OLD_hla_prot.fasta')
+    except:
+        pass
+    
+    # Download Human data
+    os.system('wget https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta')
+    
+    HLAs = {}
+    to_write = {}
+    
+    #Parse the fasta files
+    for seq_record in SeqIO.parse('hla_prot.fasta', "fasta"):
+        allele_fullname = seq_record.description.split(' ')[1]
+        allele_significant = allele_fullname[:8]
+        #If the allele name ends with ':', trim it away
+        if allele_significant[-1] == ':':
+            allele_significant = allele_significant[:-1]
+        #If the gene name is A, B, C, E, F, G
+        if allele_fullname.split('*')[0] in ['A', 'B', 'C', 'E', 'F', 'G']:
+            if allele_fullname.endswith('N') or allele_fullname.endswith('Q'):
+                pass
+            elif int(seq_record.description.split(' ')[2]) < 350 or int(seq_record.description.split(' ')[2]) > 380:
+                pass
+            else:
+                try:
+                    HLAs[allele_significant].append(seq_record)
+                except KeyError:
+                    HLAs[allele_significant] = [seq_record]
+    
+    #Sort HLA sequences by length. Keep the longest
+    for allele in HLAs:
+        #If there is only one sequence for the allele
+        if len(HLAs[allele]) == 1:
+            to_write['HLA-'+allele] = str(HLAs[allele][0].seq)
+        else:
+            #print(HLAs[allele])
+            putatives = sorted(HLAs[allele], key=len, reverse=True)
+            #print(putatives, allele)
+            #No further filtering criteria are used and the first sequence is taken as reference.
+            to_write['HLA-'+allele] = str(putatives[0].seq)
+    
+    #Write output fasta file
+    with open(HLA_out, 'w') as outfile:
+        for allele in to_write:
+            outfile.write('>'+allele+'\n')
+            for i in range(len(to_write[allele])):
+                outfile.write(to_write[allele][i])
+                if (i + 1) % 60 == 0: #add line break each time pgcd equal 0
+                    outfile.write('\n')
+                elif i == len(to_write[allele])-1:
+                    outfile.write('\n')
+    
+    # Remove pre-existing raw file
+    try:
+        os.system('rm OLD_hla_prot.fasta')
+    except:
+        pass
+
+    return to_write
+
+def generate_nonhla_database(nonHLA_out = 'NonHuman_MHC_data.fasta'):
+    """
+    Downloads and parse non human MHC sequences
+
+    Args:
+        nonHLA_out (str, optional): Output file for non human MHCs. Defaults to 'NonHuman_MHC_data.fasta'.
+
+    Returns:
+        None.
+
+    """
+    ###
+    # Other animals alleles
+    ###
+    # Rename pre-existing raw file
+    try:
+        os.system('mv MHC_prot.fasta OLD_MHC_prot.fasta')
+    except:
+        pass
+    
+    # Download other animlas data
+    os.system('wget https://raw.githubusercontent.com/ANHIG/IPDMHC/Latest/MHC_prot.fasta')
+    
+    MHCs = {}
+    to_write = {}
+    #Parse the fasta files
+    fastas = [x for x in os.listdir('./') if x.startswith('MHC_prot.fasta')]
+    for fasta in fastas:
+        for seq_record in SeqIO.parse(fasta, "fasta"):
+            allele_fullname = seq_record.description.split(' ')[1]
+            #allele_significant = allele_fullname[:8]
+            #If the allele name ends with ':', trim it away
+            #if allele_significant[-1] == ':':
+            #    allele_significant = allele_significant[:-1]
+            #If the gene name is Spieces name (Xxxx-A*0 or SLA-A*0)
+            #regexp = re.search(r'([A-Z]{1}[a-z]{3}|[A-Z]{3})[-][A-Z0-9]{1:2}[*][0-9]{2:3}[:][0-9]{2:3}',allele_fullname.split('-')[0])
+            #if regexp is not None:
+                #print(regexp.group(0))
+            if allele_fullname.endswith('N') or allele_fullname.endswith('Q'):
+                pass
+            elif int(seq_record.description.split(' ')[2]) < 350 or int(seq_record.description.split(' ')[2]) > 380:
+                pass
+            else:
+                try:
+                    MHCs[allele_fullname].append(seq_record)
+                except KeyError:
+                    MHCs[allele_fullname] = [seq_record]
+    
+    #Sort MHC sequences by length. Keep the longest
+    for allele in MHCs:
+        #If there is only one sequence for the allele
+        if len(MHCs[allele]) == 1:
+            to_write[allele] = str(MHCs[allele][0].seq)
+        else:
+            #print(HLAs[allele])
+            putatives = sorted(MHCs[allele], key=len, reverse=True)
+            #print(putatives, allele)
+            #No further filtering criteria are used and the first sequence is taken as reference.
+            to_write[allele] = str(putatives[0].seq)
+    
+    #Write output fasta file    
+    with open(nonHLA_out, 'w') as outfile:
+        for allele in to_write:
+            outfile.write('>'+allele+'\n')
+            for i in range(len(to_write[allele])):
+                outfile.write(to_write[allele][i])
+                if (i + 1) % 60 == 0: #add line break each time pgcd equal 0
+                    outfile.write('\n')
+                elif i == len(to_write[allele])-1:
+                    outfile.write('\n')
+            #outfile.write(to_write[allele]+'\n')
+                
+    # Remove pre-existing raw file
+    try:
+        os.system('rm OLD_MHC_prot.fasta')
+    except:
+        pass
+    
+    return to_write

@@ -114,7 +114,6 @@ class Align:
 
         # Remove all intermediate files
         os.system('rm %s/*.fasta %s/*.afa' % (self.__output_dir.replace(' ', '\\ '), self.__output_dir.replace(' ', '\\ ')))
-
         return {**seqs, **aligned_pepts}
 
     def __align_peptides(self):
@@ -163,10 +162,10 @@ class Align:
                                  SeqIO.parse('%s/pept_cores.afa' % (self.__output_dir), "fasta")}
 
                 # Remove intermediate files
-                os.system(
-                    'rm %s/*.fasta %s/*.afa' % (
-                    self.__output_dir.replace(' ', '\\ '), self.__output_dir.replace(' ', '\\ ')))
-
+                #os.system(
+                #    'rm %s/*.fasta %s/*.afa' % (
+                #    self.__output_dir.replace(' ', '\\ '), self.__output_dir.replace(' ', '\\ ')))
+                
                 # Add aligned cores in between anchors
                 for k, v in id_pept_anch.items():
                     id_pept_anch[k] = (v[0][:v[1][0]] + aligned_cores[k] + v[0][(v[1][1]) - 1:], v[1])

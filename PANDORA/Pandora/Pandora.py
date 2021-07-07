@@ -70,7 +70,13 @@ class Pandora:
                 os.makedirs(self.output_dir)
         except:
             pass
-        os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
+        
+        if os.path.isfile(self.template.pdb_path):
+            os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
+        else:
+            print('Template object could not be found. Please check the path: %s.' %self.template.pdb_path)
+            print('If the path is not available, you can use Database.repath.')
+            raise Exception('Template file not found.')
 
     def align(self, verbose = True):
         ''' Create the alignment file for modeller
@@ -272,16 +278,16 @@ class Pandora:
                 for m in self.results:
                     try:
                         print('\t%s\t\t%s\t\t%s\t\t%s' % (
-                            os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4),
+                            os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4),
                             round(float(m.lrmsd), 4), round(float(m.core_lrmsd), 4)))
                     except AttributeError:
                         try:
                             print('\t%s\t\t%s\t\t%s' % (
-                                os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4),
+                                os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4),
                                 round(float(m.lrmsd), 4)))
                         except AttributeError:
                             print('\t%s\t\t%s' % (
-                                os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
+                                os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4)))
             except:
                 self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD')
                 raise Exception('Could not calculate L-RMSD')
@@ -289,7 +295,7 @@ class Pandora:
         elif verbose and not benchmark:
             print('\n\tModel\t\t\t\tMolpdf')
             for m in self.results:
-                print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
+                print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4)))
 
         self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %n_models)
 
