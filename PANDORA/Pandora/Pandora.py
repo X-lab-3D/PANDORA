@@ -69,7 +69,7 @@ class Pandora:
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir)
         except:
-            pass
+            raise Exception('A problem occurred while creating output directory')
         
         if os.path.isfile(self.template.pdb_path):
             os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
@@ -116,9 +116,15 @@ class Pandora:
         # Change working directory
         os.chdir(self.output_dir)
         # Run Modeller
-        os.popen('python %s' %python_script).read()
-        # Load initial model into target object
-        self.target.initial_model = PDBParser(QUIET=True).get_structure(self.target.id, self.target.id + '.ini')
+        os.popen('python %s > modeller_ini.log' %python_script).read()
+        
+        try:
+            # Load initial model into target object
+            self.target.initial_model = PDBParser(QUIET=True).get_structure(self.target.id, self.target.id + '.ini')
+        except FileExistsError:
+            # If the file does not exist, raise an exception to prompt the user to check MODELLER installation
+            raise Exception('.ini file could not be modelled. Please check modeller_ini.log. Is your MODELLER correctly installed?')
+        
         # Change working directory back
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
         if verbose:
@@ -246,7 +252,7 @@ class Pandora:
         # Run modeller to create the initial model
         try:
             self.create_initial_model(verbose=verbose)
-        except:
+        except Exception:
             self.__log(self.target.id, self.template.id, 'Failed creating initial model with modeller')
             raise Exception('Failed creating initial model with modeller')
 

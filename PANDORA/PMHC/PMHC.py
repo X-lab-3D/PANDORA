@@ -270,7 +270,7 @@ class Target(PMHC):
         
         # Define correct fasta file
         if input_file == None:
-            if self.allele_type.startswith('HLA'):
+            if self.allele_type[0].startswith('HLA'):
                 input_file = PANDORA.PANDORA_data+ '/csv_pkl_files/Human_MHC_data.fasta'
             else:
                 input_file = PANDORA.PANDORA_data+ '/csv_pkl_files/NonHuman_MHC_data.fasta'
@@ -281,7 +281,7 @@ class Target(PMHC):
         # Return the right sequences
         seq_flag = False
         for seq in fasta_sequences:
-            if seq.id == self.allele_type:
+            if seq.id == self.allele_type[0]:
                 self.M_chain_seq = str(seq.seq)
                 seq_flag = True
                 break

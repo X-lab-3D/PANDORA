@@ -36,7 +36,7 @@ class Database:
                                                    outdir = data_dir + '/PDBs/pMHCII',
                                                    bad_dir = data_dir + '/PDBs/Bad/pMHCII')
     
-    def __update_ref_sequences(self):
+    def update_ref_sequences(self):
         """Downloads and parse HLA and other MHC sequences to compile reference fastas.
         Returns a dictionary that can be used to select the desired reference sequence"""
         self.ref_MHCI_sequences = Database_functions.generate_mhcseq_database()
@@ -87,7 +87,7 @@ class Database:
         
         #Download and parse HLA and MHC sequences reference data
         if update_ref_sequences:
-            self.__update_ref_sequences()
+            self.update_ref_sequences()
         
         print('Database correctly generated')
 
