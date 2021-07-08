@@ -1571,9 +1571,9 @@ def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/',
     
     # Download and parse sequences
     # Human sequences
-    ref_mhc_sequences = generate_hla_database()
+    ref_MHCI_sequences = generate_hla_database()
     # Non-human sequences
-    ref_mhc_sequences.update(generate_nonhla_database())
+    ref_MHCI_sequences.update(generate_nonhla_database())
     
     # Change back working directory
     os.chdir(start_dir)
