@@ -193,16 +193,32 @@ class Target(PMHC):
         if MHC_class == 'II' and N_chain_seq != '' and M_chain_seq == '':
             raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
         
-        # If anchors are not provided, predict them from the peptide length
+        # If anchors are not provided, predict them from the peptide length. If netMHCpan is not installed, promt the
+        # user to install it with netMHCpan_install.py
         if MHC_class =='I' and anchors == []:
-            print('WARNING: no anchor positions provided. Pandora will predict them using netMHCpan 4.1')
-            self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type)
+            print('WARNING: no anchor positions provided. Pandora will predict them using netMHCpan')
+
+            netMHCpan_dir = [i for i in os.listdir(PANDORA.PANDORA_path + '/../') if
+                             i.startswith('netMHCpan') and os.path.isdir(i)]
+            if os.path.isfile(PANDORA.PANDORA_path + '/../' + netMHCpan_dir[0] + '/netMHCpan'):
+                # predict the anchors
+                self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type)
+
+            else:
+                print("Need netMHCpan to predict anchor positions. Please install by running 'netMHCpan_install.py'.")
+
 
         if MHC_class =='II' and anchors == []:
-            print('WARNING: no anchor positions provided. Pandora will predict them using netMHCIIpan 4.0')
-            self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type)
+            print('WARNING: no anchor positions provided. Pandora will predict them using netMHCIIpan')
 
-            # raise Exception('This function is not implemented yet. Please provide anchor position for your target peptide')
+            netMHCIIpan_dir = [i for i in os.listdir(PANDORA.PANDORA_path + '/../') if
+                             i.startswith('netMHCIIpan') and os.path.isdir(i)]
+            if os.path.isfile(PANDORA.PANDORA_path + '/../' + netMHCIIpan_dir[0] + '/netMHCIIpan'):
+                # predict the anchors
+                self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type)
+            else:
+                print("Need netMHCIIpan to predict anchor positions. Please install by running 'netMHCpan_install.py'.")
+
 
     def info(self):
         """ Print the basic info of this structure
@@ -243,7 +259,3 @@ class Target(PMHC):
             self.anchor_contacts = Contacts.Contacts(self.initial_model, anchors=self.anchors).anchor_contacts
         else:
             raise Exception('Provide an initial model (.ini PDB) and anchor positions to the Target object first')
-
-
-
-
