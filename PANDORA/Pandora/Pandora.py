@@ -24,8 +24,11 @@ class Pandora:
         ''' Find the best template structure given a Target object
 
         Args:
-            seq_based_templ_selection: (bool) Use template selection based on template sequences instead of allele.
-            verbose: (bool) Print information
+            best_n_templates: (int, optional): how many template structures are used for modelling. The best n are used.
+                                                Default = 1
+            benchmark: (bool): Perform L-RMSD calculations? only works if the target id is an existing pdb id.
+                                                Default = False
+            verbose: (bool): Print information. Default = True
 
         '''
 
@@ -75,7 +78,12 @@ class Pandora:
 
     def prep_output_dir(self, output_dir=PANDORA.PANDORA_data + '/outputs'):
         ''' Create an output directory and move the template pdb there
+
+        Args:
+            output_dir: (str): Path to output directory. Default = <PANDORA_location>/PANDORA_files/data/outputs
+
         '''
+
         # create an output directory
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
@@ -92,12 +100,10 @@ class Pandora:
             os.system('cp %s %s/%s.pdb' %(t.pdb_path, self.output_dir, t.id))
 
     def align(self, verbose=True):
-        ''' Create the alignment file for modeller
+        ''' Create the alignment file for modeller.
 
         Args:
-            verbose:  (bool) Print information
-
-        Returns: (dict) dict of alignment of the chains with the chains as keys
+            verbose: (bool): Print information
 
         '''
         self.alignment = Align.Align(self.target, self.template, output_dir=self.output_dir)
@@ -109,7 +115,7 @@ class Pandora:
             print('\tSuccessfully created alignment file')
 
     def write_ini_script(self):
-        ''' Write the scipt that modeller uses for creating the initial model'''
+        ''' Write the python scipt that modeller uses for creating the initial model'''
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
         Modelling_functions.write_ini_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
 
@@ -120,10 +126,8 @@ class Pandora:
 
 
         Args:
-            python_script:  (string) path to script that performs the modeller modelling. cmd_modeller_ini.py
-            verbose:  (bool) Print information
-
-        Returns: (BIO.PDB object) self.target.initial_model
+            python_script:  (str): path to script that performs the modeller modelling. Default = cmd_modeller_ini.py
+            verbose:  (bool): Print information. Default = True
 
         '''
         # Change working directory
@@ -139,15 +143,18 @@ class Pandora:
 
     def run_modeller(self, python_script='cmd_modeller.py', benchmark=False, pickle_out=True, verbose=True,
                      keep_IL=False, RMSD_atoms=['C', 'CA', 'N', 'O']):
-        ''' Perform the homology modelling.
+        ''' Perform the homology modelling of a target structure on template model(s). Models are saved in the output
+            directory and in pandora.results[].
 
         Args:
-            python_script: (string) path to script that performs the modeller modelling. cmd_modeller.py
-            benchmark: (bool) Perform L-RMSD calculations? only works if the target id is an existing pdb id
-            pickle_out: (bool) Save a .pkl with the results
-            verbose:  (bool) Print information
-
-        Returns: (list) list of Model objects
+            python_script: (str): path to script that performs the modeller modelling. Default = cmd_modeller.py
+            benchmark: (bool): Perform L-RMSD calculations? only works if the target id is an existing pdb id.
+                                Default = False
+            pickle_out: (bool): Save a .pkl with the results. Default = True
+            verbose: (bool): Print information. Default = True
+            keep_IL: (bool): Keep the initial homology model (non optimized loops). Default = False
+            RMSD_atoms: (list[str]): atoms used for the L-RMSD calculation. Default = ['C', 'CA', 'N', 'O'], which is
+                                    the backbone
 
         '''
 
@@ -164,7 +171,7 @@ class Pandora:
         ''' Calculate anchor contacts and writes a contacts.list file that modeller uses for restraints.
 
         Args:
-            verbose: (bool) Print information
+            verbose: (bool): Print information. Default = True
 
         '''
 
@@ -178,15 +185,28 @@ class Pandora:
 
     def write_modeller_script(self, n_loop_models=20, n_homology_models = 1, loop_refinement='slow',
                               n_jobs=None, stdev=0.1, helix=False, sheet=False):
-        ''' Write the script that modeller uses for the final homology modelling.
+        ''' Write the script that modeller uses for the final homology modelling. Most modelling settings are set in
+            this script.
 
         Args:
-            n_models: (int) number of models that Pandora generates
-            n_jobs: (int) number of parallel jobs. Is recommended to use as many jobs as the number of models: less will result in
-                a slower run, more will not add any benefit but might occupy cores unnecessarily.
-            stdev: (float) standard deviation of modelling restraints. Higher = more flexible restraints.
+            n_loop_models: (int): number of loop refinement models PANDORA will generate. Default = 20
+            n_homology_models: (int): number of generated homology models PANDORA generates. Default = 1
+            loop_refinement: (str): levels of loop refinements. Default = slow. Supported: very_fast, fast, slow,
+                                    very_slow, slow_large.
+            n_jobs: (int): number of parallel jobs. Is recommended to use as many jobs as the number of models:
+            less will result in a slower run, more will not add any benefit but might occupy cores unnecessarily.
+            stdev: (float): standard deviation of modelling restraints that is allowed during modelling. Default = 0.1.
+                A stdev of 0.2 is recommended for modelling MHC II
+            helix: (bool/list): False if no alpha-helix must be modelled. Otherwise, a list of the alpha helix start
+                and end-positions as integers. I.e. [3,8] for a helix between peptide residue 3 and 8.
+            sheet: (bool/list): False if no beta-sheet must be modelled. Otherwise, a list containing: start position
+                of B-sheet 1, start position of B-sheet 2 and the length of the B-sheet in h-bonds. For example:
+                ["O:2:P","N:54:M",2] for a parallel B-sheet; The sheet starts at the Oxigen atom of the 2nd residue of
+                chain P and at the Nitrogen of the 54th residue of chain M and has a length of 2 H-bonds. Or;
+                ["N:6:P", "O:13:P", -3], with -3 denoting an anti-parallel B-sheet with a length of 3 H-bonds.
 
         '''
+
         Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, 
                                                   self.output_dir, n_loop_models=n_loop_models,
                                                   n_homology_models=n_homology_models, loop_refinement=loop_refinement,
