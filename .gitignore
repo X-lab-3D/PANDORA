@@ -17,6 +17,7 @@
 /william
 
 # Misc
+*/__pycache__/
 .DS_Store
 /PANDORA/junk/modelling/.DS_Store
 /PANDORA/tools/contact-chainID_allAtoms

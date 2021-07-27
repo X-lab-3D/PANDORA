@@ -561,7 +561,7 @@ def unzip_pdb(ID, indir, outdir):
     return '%s/%s.pdb' % (outdir, ID)
 
 
-def find_peptide_chain(pdb, min_len=6, max_len=26):
+def find_peptide_chain(pdb, min_len=7, max_len=26):
     ''' Find the pdb chain that is most likely the peptide based on its size
 
     Args:
