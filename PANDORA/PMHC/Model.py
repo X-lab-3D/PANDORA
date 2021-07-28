@@ -4,6 +4,17 @@ from Bio.PDB import PDBIO
 import PANDORA
 #import sys
 #import numpy as np
+# from copy import deepcopy
+
+
+
+# target = y.target
+# model_path = y.model_path
+# output_dir = PANDORA.PANDORA_data
+# pdb = deepcopy(y.pdb)
+# reference_pdb = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/PDBs/pMHCII/1HXY.pdb'
+
+
 
 class Model:
 
@@ -131,6 +142,50 @@ class Model:
         #os.chdir(os.path.dirname(PANDORA.PANDORA_path))
         os.chdir(start_dir)
 
+    def calc_flanking_LRMSD(self, reference_pdb, atoms=['C', 'CA', 'N', 'O']):
+        ''' Calculate the L-RMSD between the decoy and reference structure (ground truth)
+
+        Args:
+            reference_pdb: Bio.PDB object or path to pdb file
+
+        Returns: (float) L-RMSD
+        '''
+
+        from pdb2sql import StructureSimilarity
+
+        # load target pdb
+        if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first
+            ref = PDBParser(QUIET=True).get_structure('MHC', reference_pdb)
+        else:
+            ref = reference_pdb
+
+        # Define file names as variables
+        decoy_path = '%s/%s_decoy.pdb' % (self.output_dir, self.target.id)
+        ref_path = '%s/%s_ref.pdb' % (self.output_dir, self.target.id)
+        #
+        # decoy_path = '%s/%s_decoy.pdb' % (output_dir, target.id)
+        # ref_path = '%s/%s_ref.pdb' % (output_dir, target.id)
+
+        # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
+        homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id, anchors=self.target.anchors, flanking=True)
+
+        # homogenize_pdbs(pdb, ref, output_dir, target.id, anchors=target.anchors, flanking=True)
+
+        os.chdir(self.output_dir)
+        # Produce lzone file for the l-rmsd calculation
+        # lzone = get_Gdomain_lzone('%s/%s_ref.pdb' %(self.output_dir, self.target.id), self.output_dir, self.target.MHC_class)
+        # Get decoy structure to superpose
+        # decoy_db = psb2sql()
+
+        # Calculate l-rmsd between decoy and reference with pdb2sql
+        sim = StructureSimilarity(decoy_path, ref_path)
+        self.flanking_lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name=atoms)
+
+        # remove intermediate files
+        os.system('rm %s %s' % (decoy_path, ref_path))
+        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+
+
 def merge_chains(pdb):
     ''' Merges two chains of MHCII to one chain. pdb2sql can only calculate L-rmsd with one chain.
 
@@ -175,8 +230,18 @@ def renumber(pdb):
 
     return pdb
 
+# decoy = PDBParser(QUIET=True).get_structure('MHC', y.model_path)
+#
+#
+# for i in decoy[0]['P']:
+#     print(i.id)
+#
+# decoy = deepcopy(y.pdb)
+# target_id = target.id
+# anchors=target.anchors
+# flanking=True
 
-def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False):
+def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False, flanking=False):
     ''' Make sure that the decoy and reference structure have the same structure sequences.
 
     Args:
@@ -190,7 +255,7 @@ def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False):
 
     # If you give the anchors, the core L-RMSD will be calculated.
     # The peptide residues before and after the first and last anchor residue will be discarded.
-    if anchors:
+    if anchors and not flanking:
         for x in range(len(decoy[0]['P'])):
             for i in decoy[0]['P']:
                 if i.id[1] < anchors[0] or i.id[1] > anchors[-1]:
@@ -198,6 +263,19 @@ def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False):
             for i in ref[0]['P']:
                 if i.id[1] < anchors[0] or i.id[1] > anchors[-1]:
                     ref[0]['P'].detach_child(i.id)
+
+    # If you give the anchors AND flanking = True, the flanking L-RMSD will be calculated. Only if the peptide is
+    # also longer than the binding core. The peptide binding core will be discarded
+    if anchors and flanking and len(decoy[0]['P']) > 9:
+        for x in range(len(decoy[0]['P'])):
+            for i in decoy[0]['P']:
+                if i.id[1] >= anchors[0] and i.id[1] <= anchors[-1]:
+                    decoy[0]['P'].detach_child(i.id)
+            for i in ref[0]['P']:
+                if i.id[1] >= anchors[0] and i.id[1] <= anchors[-1]:
+                    ref[0]['P'].detach_child(i.id)
+
+
 
     # remove c-like domain and keep only g domain
     decoy = remove_C_like_domain(decoy)

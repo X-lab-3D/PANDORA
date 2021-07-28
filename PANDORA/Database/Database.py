@@ -15,8 +15,9 @@ class Database:
 
     def download_data(self, data_dir = PANDORA.PANDORA_data, download = True):
         """ Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
-        print('Downloading structures ...')
+
         if download:
+            print('Downloading structures ...')
             Database_functions.download_unzip_imgt_structures(data_dir = data_dir, del_inn_files=True, del_kabat_files=True)
         self.__IDs_list_MHCI = Database_functions.download_ids_imgt('MH1', data_dir = data_dir, out_tsv='all_MHI_IDs.tsv')
         self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', data_dir = data_dir, out_tsv='all_MHII_IDs.tsv')
@@ -80,7 +81,7 @@ class Database:
                     if templ != None:
                         self.MHCII_data[id] = templ
                 except:
-                    pass
+                    print('something went wrong parsing %s' %id)
 
         if save:
             self.save(save)

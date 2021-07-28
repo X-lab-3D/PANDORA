@@ -1,15 +1,16 @@
 
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
-import PANDORA
 from PANDORA.Contacts import Contacts
 from PANDORA.Database import Database_functions
+from PANDORA.Pandora import Modelling_functions
 from PANDORA.PMHC import Anchors
 from abc import ABC, abstractmethod
 
 class PMHC(ABC):
 
-    def __init__(self, id, allele_type, peptide = '', MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = []):
+    def __init__(self, id, allele_type, peptide = '', MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [],
+                 helix=False, sheet=False):
         ''' pMHC class. Acts as a parent class to Template and Target
 
         Args:
@@ -30,6 +31,8 @@ class PMHC(ABC):
         self.N_chain_seq = N_chain_seq
         self.allele_type = allele_type
         self.anchors = anchors
+        self.helix = helix
+        self.sheet = sheet
 
 
         @abstractmethod
@@ -47,7 +50,7 @@ class PMHC(ABC):
 
 class Template(PMHC):
 
-    def __init__(self, id, allele_type, peptide = '', MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], pdb_path = False, pdb = False, resolution=None):
+    def __init__(self, id, allele_type, peptide='', MHC_class='I', M_chain_seq='', N_chain_seq='', anchors=[], helix=False, sheet=False, pdb_path=False, pdb=False, resolution=None):
         ''' Template structure class. This class holds all information of a template structure that is used for
             homology modelling. This class needs a id, allele and the path to a pdb file to work. (sequence info of
             the chains and peptide can be fetched from the pdb)
@@ -65,19 +68,20 @@ class Template(PMHC):
             pdb: (Bio.PDB) Biopython PBD object
             resolution: (float) Structure resolution in Angstrom
         '''
-        super().__init__(id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors)
+        super().__init__(id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors, helix, sheet)
         self.pdb_path = pdb_path
         self.pdb = pdb
         self.contacts = False
         self.resolution = resolution
 
+
         if not pdb_path and not pdb:
             raise Exception('Provide a PDB structure to the Template object first')
 
-        if not pdb_path or not pdb: # If the path to a pdb file or a Bio.PDB object is given, parse the pdb
+        if pdb_path and not pdb: # If the path to a pdb file or a Bio.PDB object is given, parse the pdb
             self.parse_pdb()
 
-        if not pdb and anchors == []:
+        if anchors == []:
             self.calc_anchors()
 
     def parse_pdb(self):
@@ -124,6 +128,11 @@ class Template(PMHC):
 
         print('Peptide: %s' % self.peptide)
         print('Anchors: %s' %self.anchors)
+
+        if self.sheet:
+            print('Beta-sheet: %s' % self.sheet)
+        if self.helix:
+            print('Alpha-helix: %s' % self.helix)
         if self.pdb_path:
             print('Path to PDB file: %s' %self.pdb_path)
         if not self.pdb:
@@ -156,7 +165,8 @@ class Template(PMHC):
 
 class Target(PMHC):
 
-    def __init__(self, id, allele_type, peptide, MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [], templates = False):
+    def __init__(self, id, allele_type, peptide, MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [],
+                 helix=False, sheet=False, templates = False):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
         Args:
@@ -171,7 +181,7 @@ class Target(PMHC):
             templates: Template object. The user can specify that PANDORA uses a certain structure as template.
         '''
 
-        super().__init__(id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors)
+        super().__init__(id, allele_type, peptide, MHC_class, M_chain_seq, N_chain_seq, anchors, helix, sheet)
         self.templates = templates
         self.initial_model = False
         self.contacts = False
@@ -182,7 +192,7 @@ class Target(PMHC):
             raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
         if MHC_class == 'II' and N_chain_seq != '' and M_chain_seq == '':
             raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
-        
+
         # If the user does not provide sequence info, retrieve them from the reference sequences.
         # WARNING: currently available only for MHC I
         if MHC_class == 'I' and M_chain_seq =='':
@@ -209,14 +219,29 @@ class Target(PMHC):
         
         # If anchors are not provided, predict them from the peptide length
         if MHC_class =='I' and anchors == []:
-            print('WARNING: no anchor positions provided. Pandora will assign them to canonical anchor position')
-            anchor_1 = 2
-            anchor_2 = len(peptide)
-            anchors = [anchor_1, anchor_2]
-            self.anchors = anchors
+            print('WARNING: no anchor positions provided. Pandora will predict them using netMHCpan')
+
+            netMHCpan_dir = [i for i in os.listdir(PANDORA.PANDORA_path + '/../') if
+                             i.startswith('netMHCpan') and os.path.isdir(i)]
+            if os.path.isfile(PANDORA.PANDORA_path + '/../' + netMHCpan_dir[0] + '/netMHCpan'):
+                # predict the anchors
+                self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type)
+
+            else:
+                print("Need netMHCpan to predict anchor positions. Please install by running 'netMHCpan_install.py'.")
+
+
         if MHC_class =='II' and anchors == []:
-            print('WARNING: no anchor positions provided. Pandora will assign them to canonical anchor position')
-            raise Exception('This function is not implemented yet. Please provide anchor position for your target peptide')
+            print('WARNING: no anchor positions provided. Pandora will predict them using netMHCIIpan')
+
+            netMHCIIpan_dir = [i for i in os.listdir(PANDORA.PANDORA_path + '/../') if
+                             i.startswith('netMHCIIpan') and os.path.isdir(i)]
+            if os.path.isfile(PANDORA.PANDORA_path + '/../' + netMHCIIpan_dir[0] + '/netMHCIIpan'):
+                # predict the anchors
+                self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type)
+            else:
+                print("Need netMHCIIpan to predict anchor positions. Please install by running 'netMHCpan_install.py'.")
+
 
     def info(self):
         """ Print the basic info of this structure
@@ -237,6 +262,10 @@ class Target(PMHC):
             print('Beta chain: %s' % self.N_chain_seq)
         print('Peptide: %s' % self.peptide)
         print('Anchors: %s' % self.anchors)
+        if self.sheet:
+            print('Beta-sheet: %s' % self.sheet)
+        if self.helix:
+            print('Alpha-helix: %s' % self.helix)
         if self.templates:
             print('Using template %s for homology modelling' %self.templates)
         if self.initial_model:
@@ -295,5 +324,3 @@ class Target(PMHC):
             print("The model will be generated using the best template's MHC sequence.")
             print("To be sure you use the right sequence, please double check your MHC allele name")
             print("Or provide the MHC sequence as target.M_chain_seq")
-
-
