@@ -17,7 +17,9 @@
 /william
 
 # Misc
+*.egg-info
 */__pycache__/
+/PANDORA/__pycache__/
 .DS_Store
 /PANDORA/junk/modelling/.DS_Store
 /PANDORA/tools/contact-chainID_allAtoms
@@ -51,6 +53,6 @@
 /27_03_21_Pandora_db
 /PANDORA/contact-chainID_allAtoms
 /PANDORA/contact-chainID_allAtoms.cpp
+/netMHCIIpan-4.0/
 /netMHCIIpan-4.0/data/
 /netMHCIIpan-4.0/data/netMHCIIpan-4.0_thresholds/
-

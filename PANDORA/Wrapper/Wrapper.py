@@ -10,8 +10,8 @@ from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 from PANDORA.Wrapper.run_model import run_model
-from pathos.multiprocessing import ProcessingPool as Pool
-from pathos.multiprocessing import freeze_support
+#from pathos.multiprocessing import ProcessingPool as Pool
+#from pathos.multiprocessing import freeze_support
 import time
 import csv
 import os
@@ -19,8 +19,8 @@ import os
 #test joblib
 from joblib import Parallel, delayed
 from multiprocessing import Manager
-from joblib.externals.loky import set_loky_pickler
-set_loky_pickler("dill")
+#from joblib.externals.loky import set_loky_pickler
+#set_loky_pickler("dill")
 
 
 class Wrapper():
@@ -43,7 +43,7 @@ class Wrapper():
         
         
     def __get_targets_from_file(self, data_file, delimiter='\t', header=True, IDs_col=None, 
-                                peptides_col=0, allele_col=1, anchors_col=None):
+                                peptides_col=0, allele_col=1, anchors_col=None, start_row=None, end_row=None):
         """Extracts peptide sequences, alleles and anchors (if specified) from the target file.
            Default input should be a .tsv file without any header with the following structure:
                peptides_sequence_col \t alleles_name_col
@@ -57,47 +57,61 @@ class Wrapper():
             peptides_col (TYPE, optional): DESCRIPTION. Defaults to 0.
             allele_col (TYPE, optional): DESCRIPTION. Defaults to 1.
             anchors_col (TYPE, optional): DESCRIPTION. Defaults to None.
+            start_row
+            end_row
 
         Returns:
             None.
 
         """
-
+            
         targets = {}
         with open(data_file, 'r') as infile:
             spamreader = csv.reader(infile, delimiter=delimiter)
             if header == True:
                 next(spamreader)
+            #if start_row != None:
+            #    for skip in range(start_row):
+            #        next(spamreader)
+            #    start = start_row
+            #if end_row != None:
+            #    end = end_row
             for i, row in enumerate(spamreader):
-                ## Assign target ID
-                if IDs_col != None:
-                    target_id = row[IDs_col]
+                if start_row != None and i < start_row:
+                    pass
+                elif end_row != None and i >= end_row:
+                    break
                 else:
-                    target_id = 'Target_%i' %(i+1)
+                    ## Assign target ID
+                    if IDs_col != None:
+                        target_id = row[IDs_col]
+                    else:
+                        target_id = 'Target_%i' %(i+1)
+                        
+                    ## Assign peptide sequence
+                    peptide_seq = row[peptides_col]
                     
-                ## Assign peptide sequence
-                peptide_seq = row[peptides_col]
-                
-                ## Assign allele name
-                allele = row[allele_col].split(';')
-                
-                ## Assign anchors
-                if anchors_col:
-                    anchors = tuple([int(x) for x in row[anchors_col].split(',')])
-                #if 'HLA' in allele:
-                #    star_allele = (allele[0:5]+'*'+allele[5:])
-                #    targets.append((target_id, seq, star_allele))
-                #else:
-                
-                    targets[target_id] = {'peptide_sequence' : peptide_seq, 'allele' : allele,
-                                          'anchors' : anchors}
-                else:
-                    targets[target_id] = {'peptide_sequence' : peptide_seq, 'allele' : allele}
+                    ## Assign allele name
+                    allele = row[allele_col].split(';')
+                    
+                    ## Assign anchors
+                    if anchors_col:
+                        anchors = tuple([int(x) for x in row[anchors_col].split(',')])
+                    #if 'HLA' in allele:
+                    #    star_allele = (allele[0:5]+'*'+allele[5:])
+                    #    targets.append((target_id, seq, star_allele))
+                    #else:
+                    
+                        targets[target_id] = {'peptide_sequence' : peptide_seq, 'allele' : allele,
+                                              'anchors' : anchors}
+                    else:
+                        targets[target_id] = {'peptide_sequence' : peptide_seq, 'allele' : allele}
+                        
         self.targets = targets
 
     def create_targets(self, data_file, db, MHC_class, delimiter = '\t', header=True, 
                        IDs_col=None, peptides_col=0, allele_col=1, anchors_col=None, 
-                       benchmark=False, num_models=20, verbose=False):
+                       benchmark=False, verbose=False, start_row=None, end_row=None):
         """
         
 
@@ -121,7 +135,8 @@ class Wrapper():
         
         ## Extract targets from data_file
         self.__get_targets_from_file(data_file, delimiter=delimiter, header=header, IDs_col=IDs_col, 
-                                     peptides_col=peptides_col, allele_col=allele_col, anchors_col=anchors_col)
+                                     peptides_col=peptides_col, allele_col=allele_col, anchors_col=anchors_col,
+                                     start_row=start_row, end_row=end_row)
         
         ## Create target objects
         jobs = {}
@@ -146,8 +161,9 @@ class Wrapper():
                 try:
                     mod.find_template(benchmark=benchmark)
                     jobs[target_id] = [tar, mod.template]
-                except Exception:
-                    print('Skipping Target %s' %target_id)
+                except Exception as err:
+                    print('Skipping Target %s for the following reason:' %target_id)
+                    print(("Exception: {0}".format(err)))
             except: ### TODO: test and specify exception for this except
                 print('An unidentified problem occurred with Target %s. Please check your target info' %target_id)
         self.jobs = jobs
@@ -200,7 +216,7 @@ class Wrapper():
 
         for job in self.jobs:
             self.jobs[job].extend([num_models, n_jobs, benchmark])
-        Parallel(n_jobs = num_cores, verbose = 1, backend='loky')(delayed(run_model)(job) for job in list(self.jobs.values()))
+        Parallel(n_jobs = num_cores, verbose = 1)(delayed(run_model)(job) for job in list(self.jobs.values()))
 '''
 ## To test
 

@@ -36,7 +36,7 @@ class Pandora:
             print('\tTarget MHC Class: %s' % self.target.MHC_class)
             print('\tTarget Allele:  %s' % self.target.allele_type)
             print('\tTarget Peptide: %s' % self.target.peptide)
-            print('\tTarget Anchors: %s\n' % self.target.anchors)
+            print('\tTarget Anchors: %s,%s\n' % (self.target.anchors[0],self.target.anchors[1]))
 
         if self.template is None: # Only find the best template if the user didn't specify one
             # if verbose and self.target.M_chain_seq != '' and seq_based_templ_selection:
@@ -85,8 +85,19 @@ class Pandora:
         '''
 
         # create an output directory
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        try:
+            self.output_dir = '%s/%s_%s' %(self.output_dir, self.target.id , self.template.id)
+            if not os.path.exists(self.output_dir):
+                os.makedirs(self.output_dir)
+        except:
+            raise Exception('A problem occurred while creating output directory')
+        
+        if os.path.isfile(self.template.pdb_path):
+            os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
+        else:
+            print('Template object could not be found. Please check the path: %s.' %self.template.pdb_path)
+            print('If the path is not available, you can use Database.repath.')
+            raise Exception('Template file not found.')
 
         # dd/mm/YY H:M:S
         date_time = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
@@ -133,9 +144,15 @@ class Pandora:
         # Change working directory
         os.chdir(self.output_dir)
         # Run Modeller
-        os.popen('python %s' %python_script).read()
-        # Load initial model into target object
-        self.target.initial_model = PDBParser(QUIET=True).get_structure(self.target.id, self.target.id + '.ini')
+        os.popen('python %s > modeller_ini.log' %python_script).read()
+        
+        try:
+            # Load initial model into target object
+            self.target.initial_model = PDBParser(QUIET=True).get_structure(self.target.id, self.target.id + '.ini')
+        except FileExistsError:
+            # If the file does not exist, raise an exception to prompt the user to check MODELLER installation
+            raise Exception('.ini file could not be modelled. Please check modeller_ini.log. Is your MODELLER correctly installed?')
+        
         # Change working directory back
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
         if verbose:
@@ -288,7 +305,7 @@ class Pandora:
         # Run modeller to create the initial model
         try:
             self.create_initial_model(verbose=verbose)
-        except:
+        except Exception:
             self.__log(self.target.id, self.template.id, 'Failed creating initial model with modeller')
             raise Exception('Failed creating initial model with modeller')
 
@@ -323,12 +340,12 @@ class Pandora:
                 for m in self.results:
                     try:
                         print('\t%s\t\t%s\t\t%s\t\t%s' % (
-                            os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4),
+                            os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4),
                             round(float(m.lrmsd), 4), round(float(m.core_lrmsd), 4)))
                     except AttributeError:
                         try:
                             print('\t%s\t\t%s\t\t%s' % (
-                                os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4),
+                                os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4),
                                 round(float(m.lrmsd), 4)))
                         except AttributeError:
                             print('\t%s\t\t%s' % (
@@ -348,7 +365,7 @@ class Pandora:
         elif verbose and not benchmark:
             print('\n\tModel\t\t\t\tMolpdf')
             for m in self.results:
-                print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
+                print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4)))
 
         self.__log(self.target.id, '_'.join([i.id for i in self.template]), 'Successfully modelled %s models' %(n_homology_models*n_loop_models))
 
