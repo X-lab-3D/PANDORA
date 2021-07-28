@@ -136,7 +136,7 @@ def test_construct_database():
 
 
 def test_load_db():
-    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
     # test if items in the database are correct
     pass_test = False
     if '1A1O' in db.MHCI_data and '4Z7U' in db.MHCII_data:
@@ -147,7 +147,7 @@ def test_load_db():
 
 
 def test_template_select_MHCI():
-    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
     # Create target object
     target = PMHC.Target('1A1O',
                          db.MHCI_data['1A1O'].allele_type,
@@ -164,7 +164,7 @@ def test_template_select_MHCI():
 
 def test_template_select_MHCII():
     # Load database
-    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
     # Create target object
     target = PMHC.Target('2NNA',
                          db.MHCII_data['2NNA'].allele_type,
@@ -184,7 +184,7 @@ def test_template_select_MHCII():
 @pytest.mark.skip
 def test_pandora_MHCI_modelling():
     # Load database
-    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
     # Create target object
     target = PMHC.Target('1A1O',
                          db.MHCI_data['1A1O'].allele_type,
@@ -210,7 +210,7 @@ def test_pandora_MHCI_modelling():
 @pytest.mark.skip
 def test_pandora_MHCII_modelling():
     # Load database
-    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
     # Create target object
     target = PMHC.Target('2NNA',
                          db.MHCII_data['2NNA'].allele_type,
@@ -236,7 +236,7 @@ def test_pandora_MHCII_modelling():
 
 def test_rmsd():
     # Load database
-    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
     # Create target object
     target = PMHC.Target('1A1O',
                          db.MHCI_data['1A1O'].allele_type,
