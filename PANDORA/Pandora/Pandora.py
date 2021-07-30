@@ -55,38 +55,71 @@ class Pandora:
 
         else:
             if verbose:
-                print('\tUser defined template structure (%s): %s' %(len(self.template), [i.id for i in self.template]))
+                if type(self.template)==list:
+                    print('\tUser defined template structure (%s): %s' %(len(self.template), [i.id for i in self.template]))
+                else:
+                    print('\tUser defined template structure: %s' %self.template.id)
             # Check if the target structure and template structure are the same.
-            self.keep_IL = any(Modelling_functions.check_target_template(self.target, tmpl) for tmpl in self.template)
+            if type(self.template)==list:
+                self.keep_IL = any(Modelling_functions.check_target_template(self.target, tmpl) for tmpl in self.template)
+            else:
+                self.keep_IL = Modelling_functions.check_target_template(self.target, self.template)
             # determine peptide alignment scores of the target and the template(s)
             self.pept_ali_scores = []
-            for templ in self.template:
+            
+            if type(self.template)==list:
+                for templ in self.template:
+                    if self.target.id == 'I':
+                        score = Modelling_functions.score_peptide_alignment_MHCI(self.target, templ, 'PAM30')
+                        self.pept_ali_scores.append((score, templ.peptide, templ.id))
+                    elif self.target.id == 'II':
+                        score = Modelling_functions.score_peptide_alignment_MHCII(self.target, templ, 'PAM30')
+                        self.pept_ali_scores.append((score, templ.peptide, templ.id))
+            else:
                 if self.target.id == 'I':
-                    score = Modelling_functions.score_peptide_alignment_MHCI(self.target, templ, 'PAM30')
-                    self.pept_ali_scores.append((score, templ.peptide, templ.id))
+                    score = Modelling_functions.score_peptide_alignment_MHCI(self.target, self.template, 'PAM30')
+                    self.pept_ali_scores.append((score, self.template.peptide, self.template.id))
                 elif self.target.id == 'II':
-                    score = Modelling_functions.score_peptide_alignment_MHCII(self.target, templ, 'PAM30')
-                    self.pept_ali_scores.append((score, templ.peptide, templ.id))
+                    score = Modelling_functions.score_peptide_alignment_MHCII(self.target, self.template, 'PAM30')
+                    self.pept_ali_scores.append((score, self.template.peptide, self.template.id))
             self.pept_ali_scores = self.pept_ali_scores[:best_n_templates]
 
 
 
         if verbose:
-            print('\tTemplate Allele:  %s' %([i.allele_type for i in self.template]))
-            print('\tTemplate Peptide: %s' %([i.peptide for i in self.template]))
-            print('\tTemplate Anchors: %s\n' %([i.anchors for i in self.template]))
+            if type(self.template)==list:
+                print('\tTemplates Allele:  %s' %([i.allele_type for i in self.template]))
+                print('\tTemplates Peptide: %s' %([i.peptide for i in self.template]))
+                print('\tTemplates Anchors: %s\n' %([i.anchors for i in self.template]))
+            else:
+                print('\tTemplate Allele:  %s' %self.template.allele_type)
+                print('\tTemplate Peptide: %s' %self.template.peptide)
+                print('\tTemplate Anchors: %s\n' %self.template.anchors)
+        
+        #TODO: remove this line only after implementing issue #32.
+        if type(self.template)==list:
+            self.template = self.template[0]
 
-    def prep_output_dir(self, output_dir=PANDORA.PANDORA_data + '/outputs'):
+    def prep_output_dir(self):
         ''' Create an output directory and move the template pdb there
+            Uses self.output_dir (str): Path to output directory. Default = <PANDORA_location>/PANDORA_files/data/outputs
 
         Args:
-            output_dir: (str): Path to output directory. Default = <PANDORA_location>/PANDORA_files/data/outputs
+            None
+            
 
         '''
 
-        # create an output directory
+        # Create an output directory
         try:
             self.output_dir = '%s/%s_%s' %(self.output_dir, self.target.id , self.template.id)
+            #if len(self.template) == 1:
+            #    self.output_dir = '%s/%s_%s' %(self.output_dir, self.target.id , self.template[0].id)
+            #elif len(self.template) > 1:
+            #    self.output_dir = '%s/%s_MultiTemplate' %(self.output_dir, self.target.id)
+            #else:
+            #    raise Exception('Something went wrong, no templates available.')
+                
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir)
         except:
@@ -100,15 +133,15 @@ class Pandora:
             raise Exception('Template file not found.')
 
         # dd/mm/YY H:M:S
-        date_time = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
+        #date_time = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
         # Create the output dir of the specific case
-        self.output_dir = '%s/%s_%s_%s' %(output_dir, self.target.id, '_'.join([i.id for i in self.template]), date_time)
-        if not os.path.exists(self.output_dir):
-            os.makedirs(self.output_dir)
+        #self.output_dir = '%s/%s_%s_%s' %(output_dir, self.target.id, '_'.join([i.id for i in self.template]), date_time)
+        #if not os.path.exists(self.output_dir):
+        #    os.makedirs(self.output_dir)
 
         # copy the template structure to the output file
-        for t in self.template:
-            os.system('cp %s %s/%s.pdb' %(t.pdb_path, self.output_dir, t.id))
+        #for t in self.template:
+        os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
 
     def align(self, verbose=True):
         ''' Create the alignment file for modeller.
@@ -176,7 +209,10 @@ class Pandora:
         '''
 
         if verbose:
-            print('\tPerforming homology modelling of %s on %s...' %(self.target.id, '_'.join([t.id for t in self.template])))
+            if type(self.template)==list:
+                print('\tPerforming homology modelling of %s on %s...' %(self.target.id, '_'.join([t.id for t in self.template])))
+            else:
+                print('\tPerforming homology modelling of %s on %s...' %(self.target.id, self.template.id))
         t0 = time.time()
         self.results = Modelling_functions.run_modeller(self.output_dir, self.target, python_script=python_script,
                                                         benchmark=benchmark, pickle_out=pickle_out, keep_IL=keep_IL,
@@ -250,7 +286,7 @@ class Pandora:
         with open(logfile, 'a') as f:
             f.write('%s\t%s\t%s\n' % (target_id, template_id, error))
 
-    def model(self, output_dir=PANDORA.PANDORA_data + '/outputs', n_loop_models=20, n_homology_models=1,
+    def model(self, n_loop_models=20, n_homology_models=1,
               best_n_templates=1, n_jobs=None, loop_refinement='slow',
               stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, RMSD_atoms=['C', 'CA', 'N', 'O']):
         ''' Wrapper function that combines all modelling steps.
@@ -281,7 +317,7 @@ class Pandora:
 
         # Prepare the output directory
         try:
-            self.prep_output_dir(output_dir=output_dir)
+            self.prep_output_dir()
         except:
             self.__log(self.target.id, self.template.id, 'Failed creating output directory')
             raise Exception('Failed creating output directory')
@@ -367,7 +403,10 @@ class Pandora:
             for m in self.results:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4)))
 
-        self.__log(self.target.id, '_'.join([i.id for i in self.template]), 'Successfully modelled %s models' %(n_homology_models*n_loop_models))
+        if type(self.template)==list:
+            self.__log(self.target.id, '_'.join([i.id for i in self.template]), 'Successfully modelled %s models' %(n_homology_models*n_loop_models))
+        else:
+            self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %(n_homology_models*n_loop_models))
 
 
 

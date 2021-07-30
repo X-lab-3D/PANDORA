@@ -5,20 +5,20 @@ Created on Thu Mar 25 17:46:39 2021
 
 @author: Dario Marzella
 """
-import PANDORA
+#import PANDORA
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
-from PANDORA.Database import Database
+#from PANDORA.Database import Database
 from PANDORA.Wrapper.run_model import run_model
-#from pathos.multiprocessing import ProcessingPool as Pool
-#from pathos.multiprocessing import freeze_support
-import time
+from pathos.multiprocessing import ProcessingPool as Pool
+from pathos.multiprocessing import freeze_support
+#import time
 import csv
-import os
+#import os
 
 #test joblib
 from joblib import Parallel, delayed
-from multiprocessing import Manager
+#from multiprocessing import Manager
 #from joblib.externals.loky import set_loky_pickler
 #set_loky_pickler("dill")
 
@@ -111,7 +111,8 @@ class Wrapper():
 
     def create_targets(self, data_file, db, MHC_class, delimiter = '\t', header=True, 
                        IDs_col=None, peptides_col=0, allele_col=1, anchors_col=None, 
-                       benchmark=False, verbose=False, start_row=None, end_row=None):
+                       benchmark=False, verbose=False, start_row=None, end_row=None,
+                       use_netmhcpan=False):
         """
         
 
@@ -125,6 +126,8 @@ class Wrapper():
             peptides_col (TYPE, optional): DESCRIPTION. Defaults to 0.
             allele_col (TYPE, optional): DESCRIPTION. Defaults to 1.
             anchors_col (TYPE, optional): DESCRIPTION. Defaults to 2.
+            use_netmhcpan (bool, optional): If True, uses local installation of netMHCPan
+                                            to predict anchor positions for each target.
 
         Returns:
             None.
@@ -152,11 +155,13 @@ class Wrapper():
                         print('Target Anchors: ', self.targets[target_id]['anchors'])
                     tar = PMHC.Target(target_id, allele_type=self.targets[target_id]['allele'],
                                       peptide=self.targets[target_id]['peptide_sequence'] ,
-                                      MHC_class=MHC_class, anchors=self.targets[target_id]['anchors'])
+                                      MHC_class=MHC_class, anchors=self.targets[target_id]['anchors'],
+                                      use_netmhcpan=use_netmhcpan)
                 except KeyError:
                     tar = PMHC.Target(target_id, allele_type=self.targets[target_id]['allele'],
                                       peptide=self.targets[target_id]['peptide_sequence'],
-                                      MHC_class=MHC_class)
+                                      MHC_class=MHC_class,
+                                      use_netmhcpan=use_netmhcpan)
                 mod = Pandora.Pandora(tar, db)
                 try:
                     mod.find_template(benchmark=benchmark)
@@ -164,8 +169,9 @@ class Wrapper():
                 except Exception as err:
                     print('Skipping Target %s for the following reason:' %target_id)
                     print(("Exception: {0}".format(err)))
-            except: ### TODO: test and specify exception for this except
+            except Exception as err: ### TODO: test and specify exception for this except
                 print('An unidentified problem occurred with Target %s. Please check your target info' %target_id)
+                print(("Exception: {0}".format(err)))
         self.jobs = jobs
         
     def __run_multiprocessing(self, func, num_cores):
@@ -183,7 +189,7 @@ class Wrapper():
         with Pool(processes=num_cores) as pool:
             return pool.map(func, list(self.jobs.values()))
 
-    def run_pandora(self, num_cores=1, num_models=20, n_jobs=None, benchmark=False):
+    def run_pandora(self, num_cores=1, n_loop_models=20, n_jobs=None, benchmark=False):
         """
         
 
@@ -198,10 +204,11 @@ class Wrapper():
         
         freeze_support()
         for job in self.jobs:
-            self.jobs[job].extend([num_models, n_jobs, benchmark])
+            self.jobs[job].extend([n_loop_models, n_jobs, benchmark])
         self.__run_multiprocessing(run_model, num_cores)
     
-    def run_pandora_joblib(self, num_cores=1, num_models=20, n_jobs=None, benchmark=False):
+    def run_pandora_joblib(self, num_cores=1, n_loop_models=20, 
+                           n_jobs=None, benchmark=False, output_dir=False):
         """
         
 
@@ -215,26 +222,10 @@ class Wrapper():
         """
 
         for job in self.jobs:
-            self.jobs[job].extend([num_models, n_jobs, benchmark])
+            if output_dir:
+                self.jobs[job].extend([n_loop_models, n_jobs, benchmark, output_dir])
+            else:
+                self.jobs[job].extend([n_loop_models, n_jobs, benchmark])
         Parallel(n_jobs = num_cores, verbose = 1)(delayed(run_model)(job) for job in list(self.jobs.values()))
-'''
-## To test
-
-import dill
-with open('PANDORA_files/data/csv_pkl_files/database.pkl', 'rb') as inpkl:
-    db = dill.load(inpkl)
-wrap = Wrapper()
-wrap.create_targets('PANDORA_files/data/csv_pkl_files/test_datafile.tsv', db, 
-                    MHC_class='I', header=False, IDs_col=0, peptides_col=1, 
-                    allele_col=2, benchmark=True)
-wrap.run_pandora(num_cores=6, num_models=20, benchmark=True)
-MHC_class='I'
-for target in wrap.targets:
-    tar = PMHC.Target(target, allele_type=wrap.targets[target]['allele'], peptide=wrap.targets[target]['peptide_sequence'], MHC_class=MHC_class)
-    break
-tar.allele_type
-mod = Pandora.Pandora(tar, db)
-mod.find_template()
-'''
     
 

@@ -3,6 +3,8 @@ import os
 # netMHCII Pan install
 
 wd = os.path.dirname(os.path.abspath(__file__))
+#Create netMHCII Pan folder
+os.system('mkdir ./netMHCIIpan-4.0')
 # Changing working directory
 os.chdir(wd + '/netMHCIIpan-4.0')
 # Downloading data folder for netMHCIIpan
@@ -31,6 +33,9 @@ with open('netMHCIIpan', 'w') as f:
 
 # netMHC Pan install
 
+#Create netMHCII Pan folder
+os.system('mkdir ./netMHCpan-4.1')
+#Changing working directory
 os.chdir(wd + '/netMHCpan-4.1')
 # Downloading data folder for netMHCIIpan
 os.system('wget https://services.healthtech.dtu.dk/services/NetMHCpan-4.1/data.tar.gz ')
@@ -58,7 +63,7 @@ with open('netMHCpan', 'w') as f:
 
 # Changing working directory back
 os.chdir(wd)
-
+'''
 os.popen("alias KEY_MODELLER='XXXX'").read()
 os.popen("conda install -y -c salilab modeller").read()
 os.popen("conda install -y -c conda-forge biopython").read()
@@ -68,3 +73,4 @@ os.popen("pip install pdb-tools").read()
 os.popen("pip install pdb2sql").read()
 
 os.popen("pip install -e ./").read()
+'''

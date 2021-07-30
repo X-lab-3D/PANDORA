@@ -219,7 +219,8 @@ def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
     all_netMHCpan_alleles = []
     with open(PANDORA.PANDORA_path + '/../netMHCpan-4.1/data/allelenames') as f:
         for line in f:
-            all_netMHCpan_alleles.append(line.split(' ')[0].replace(':',''))
+            all_netMHCpan_alleles.append(line.split(' ')[0])#.replace(':',''))
+            #all_netMHCpan_alleles.append(line.split(' ')[0].replace(':',''))
 
     # Format alleles
     target_alleles = [i.replace('*','') for i in allele_type]
@@ -229,8 +230,8 @@ def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
 
     # Setup files
     netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/pep.txt'
-    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/pept_prediction.txt'
+    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s.txt' %peptide
+    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_prediction.txt' %peptide
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
@@ -243,7 +244,7 @@ def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
     pred = {}
     with open(outfile) as f:
         for line in f:
-            if peptide in line:
+            if peptide in line and not line.startswith('#'):
                 ln = [i for i in line[:-1].split(' ') if i != '']
                 pred[ln[1]] = (ln[3], float(ln[12]))
 
@@ -270,6 +271,9 @@ def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
         print('\tcore:\t%s\n\t%%Rank EL:\t%s\n' %(pred[best_allele][0], pred[best_allele][1] ))
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' %predicted_anchors)
 
+    os.system('rm %s' %infile)
+    os.system('rm %s' %outfile)
+    
     return predicted_anchors
 
 
@@ -582,8 +586,12 @@ def write_ini_script(target, template, alignment_file, output_dir):
             if 'alnfile' in line:
                 modscript.write(line % os.path.basename(alignment_file))
             elif 'knowns' in line:
-                modscript.write(
-                    'knowns = (%s), sequence = "%s",\n' % (','.join(['"' + i.id + '"' for i in template]), target.id))
+                if type(template)==list:
+                    modscript.write(
+                        'knowns = (%s), sequence = "%s",\n' % (','.join(['"' + i.id + '"' for i in template]), target.id))
+                else:
+                    modscript.write(
+                        'knowns = (%s), sequence = "%s",\n' % ('"' + template.id + '"', target.id))
                 # modscript.write(line % ('(' + ','.join([i.id for i in template]) + ')', target.id))
             else:
                 modscript.write(line)
@@ -666,7 +674,12 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
             if 'alnfile' in line:
                 modscript.write(line %(os.path.basename(alignment_file)))
             elif 'knowns' in line:
-                modscript.write('knowns = (%s), sequence = "%s",\n' %(','.join(['"' + i.id + '"' for i in template]), target.id))
+                if type(template)==list:
+                    modscript.write(
+                        'knowns = (%s), sequence = "%s",\n' % (','.join(['"' + i.id + '"' for i in template]), target.id))
+                else:
+                    modscript.write(
+                        'knowns = (%s), sequence = "%s",\n' % ('"' + template.id + '"', target.id))
                 # modscript.write(line %(','.join([i.id for i in template]), target.id))
             elif 'a.ending_model' in line:
                 modscript.write(line % (n_homology_models))
