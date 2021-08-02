@@ -84,20 +84,25 @@ class Pandora:
 
         '''
 
+        # [i.id for i in self.template]
+
         # create an output directory
         try:
-            self.output_dir = '%s/%s_%s' %(self.output_dir, self.target.id , self.template.id)
+            # self.output_dir = '%s/%s_%s' %(self.output_dir, self.target.id, self.template.id)
+            self.output_dir = '%s/%s_%s' % (self.output_dir, self.target.id, '_'.join([i.id for i in self.template]))
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir)
         except:
             raise Exception('A problem occurred while creating output directory')
+
+        for templ in self.template:
         
-        if os.path.isfile(self.template.pdb_path):
-            os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
-        else:
-            print('Template object could not be found. Please check the path: %s.' %self.template.pdb_path)
-            print('If the path is not available, you can use Database.repath.')
-            raise Exception('Template file not found.')
+            if os.path.isfile(templ.pdb_path):
+                os.system('cp %s %s/%s.pdb' %(templ.pdb_path, self.output_dir, templ.id))
+            else:
+                print('Template object could not be found. Please check the path: %s.' %templ.pdb_path)
+                print('If the path is not available, you can use Database.repath.')
+                raise Exception('Template file not found.')
 
         # dd/mm/YY H:M:S
         date_time = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
