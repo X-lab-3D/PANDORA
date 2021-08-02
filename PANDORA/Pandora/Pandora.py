@@ -356,12 +356,6 @@ class Pandora:
                             print('\t%s\t\t%s' % (
                                 os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
 
-                # Get top 5
-                median_rmsd, median_core = Modelling_functions.top5_from_results(self.results)
-                if median_rmsd:
-                    print('\n\tThe median L-RMSD of the top 5 best scoring models: %s' %median_rmsd)
-                if median_core:
-                    print('\tThe median core L-RMSD of the top 5 best scoring models: %s\n' %median_core)
 
             except:
                 self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD')
