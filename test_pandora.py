@@ -159,7 +159,7 @@ def test_template_select_MHCI():
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
     mod.find_template(benchmark=True)
 
-    assert mod.template[0].id == '2X4R' and mod.template[0].peptide == 'NLVPMVATV'
+    assert mod.template.id == '2X4R' and mod.template.peptide == 'NLVPMVATV'
 
 
 def test_template_select_MHCII():
@@ -178,7 +178,7 @@ def test_template_select_MHCII():
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
     mod.find_template(benchmark=True)
 
-    assert mod.template[0].id == '4Z7U' and mod.template[0].peptide == 'PSGEGSFQPSQENPQ'
+    assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
 
 
 @pytest.mark.skip
