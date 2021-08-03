@@ -7,7 +7,7 @@
 - [Installation](#Installation)
 - [Quick Tutorial](#Tutorial)
 - [License](./LICENSE)
-- [Issues & Contributing](#Issues-and-Contributing)
+- [Issues](#Issues)
 
 
 ## Installation
@@ -56,8 +56,6 @@ mod = Pandora.Pandora(target, db)
 mod.model(n_models=20, stdev=0.1, seq_based_templ_selection=True, benchmark=False)
 ```
 
-## Issues and Contributing
+## Issues
 
 If you have questions or find a bug, please report the issue in the [Github issue channel](https://github.com/DarioMarzella/PANDORA/issues).
-
-If you want to change or further develop DeepRank code, please check the [Developer Guideline](./developer_guideline.md) to see how to conduct further development.
