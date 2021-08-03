@@ -10,8 +10,8 @@ from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 #from PANDORA.Database import Database
 from PANDORA.Wrapper.run_model import run_model
-from pathos.multiprocessing import ProcessingPool as Pool
-from pathos.multiprocessing import freeze_support
+#from pathos.multiprocessing import ProcessingPool as Pool
+#from pathos.multiprocessing import freeze_support
 #import time
 import csv
 #import os
