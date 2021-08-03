@@ -1,5 +1,14 @@
 # PANDORA
-## (Peptide ANchored mODelling fRAmework)
+(Peptide ANchored mODelling fRAmework)
+
+### Contents
+
+- [Overview](#Overview)
+- [Installation](#Installation)
+- [Quick Tutorial](#Tutorial)
+- [License](./LICENSE)
+- [Issues & Contributing](#Issues-and-Contributing)
+
 
 ## Installation
 
@@ -12,7 +21,7 @@ where 'XXXX' is your MODELLER license key
 > python install.py
 
 
-# Dependencies
+### Dependencies
 
 Python 3
 
@@ -27,28 +36,7 @@ muscle
 pdb2sql (only for RMSD calculation)
 
 
-
-## PANDORA content
-
-# Contacts
-
-# Database
-Contains all the parsing scripts to create database object, retrieve IDs from IMGT, download and clean the structure.
-
-# Pandora
-Main class necessary for modelling
-
-# PMHC
-Contains PMHC class, superclass of Template, Target and Model 
-
-# run
-Running scripts to be removed before the last commit
-
-## PANDORA_files content
-Data. Default output directory
-
-
-## Example run script
+## Tutorial
 
 ```
 from PANDORA.PMHC import PMHC
@@ -67,3 +55,9 @@ target = PMHC.Target('1A1M',
 mod = Pandora.Pandora(target, db)
 mod.model(n_models=20, stdev=0.1, seq_based_templ_selection=True, benchmark=False)
 ```
+
+## Issues and Contributing
+
+If you have questions or find a bug, please report the issue in the [Github issue channel](https://github.com/DarioMarzella/PANDORA/issues).
+
+If you want to change or further develop DeepRank code, please check the [Developer Guideline](./developer_guideline.md) to see how to conduct further development.
