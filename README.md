@@ -4,33 +4,19 @@
 ## Installation
 
 To install PANDORA and all the required dependencies, ```pip3``` is required.
-To create all the required directories, run:
+To create all the required directories and install all dependencies:
+1. set:
+> alias KEY_MODELLER='XXXX'
+where 'XXXX' is your MODELLER license key
+2. run:
 > python install.py
 
-To install dependencies: 
-('XXXX' is the Modeller license key)
-
-> alias KEY_MODELLER='XXXX'
-> 
-> conda install -c salilab modeller
-> 
-> conda install -c conda-forge biopython
-> 
-> conda install dill
-> 
-> conda install -c bioconda muscle
-> 
-> pip install pdb-tools
-> 
-> pip install pdb2sql
 
 # Dependencies
 
-Python 3 (Preferred)
+Python 3
 
 BioPython
-
-Dill
 
 Modeller 9.23 or later
 
@@ -38,34 +24,28 @@ pdb_tools
 
 muscle
 
-profit (only for RMSD calculation)
-
 pdb2sql (only for RMSD calculation)
 
 
 
-## PANDORA modules
+## PANDORA content
 
-# parsing
-Contains all the parsing scripts to retrieve IDs from IMGT, download and clean the structure and parse MODELLER log output
+# Contacts
 
-# modelling
+# Database
+Contains all the parsing scripts to create database object, retrieve IDs from IMGT, download and clean the structure.
 
-Contains the scripts necessary for modelling
+# Pandora
+Main class necessary for modelling
 
-# tools
-
-Contains mics scripts, mainly for atom contacts and RMSD calculation
+# PMHC
+Contains PMHC class, superclass of Template, Target and Model 
 
 # run
+Running scripts to be removed before the last commit
 
-Contains the main run scripts for downloading the dataset and perform large scale modelling.
-
-## PANDORA_files
-
-## Benchmark
-
-## Cluster_run_scripts
+## PANDORA_files content
+Data. Default output directory
 
 
 ## Example run script
@@ -85,5 +65,5 @@ target = PMHC.Target('1A1M',
     anchors = db.MHCI_data['1A1M'].anchors)
 
 mod = Pandora.Pandora(target, db)
-mod.model(n_models=5, stdev=0.1, seq_based_templ_selection=True, benchmark=True)
+mod.model(n_models=20, stdev=0.1, seq_based_templ_selection=True, benchmark=False)
 ```
