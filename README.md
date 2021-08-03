@@ -9,10 +9,16 @@
 - [License](./LICENSE)
 - [Issues](#Issues)
 
+## Overview
+
+PANDORA is a MODELLER-based, anchor restrained modelling pipeline for peptide-MHC structures.
+
+PANDORA contains multiple functions to pre-process data and it's able to exploit different crucial domain knowledge provided by the user to guide its modelling.
 
 ## Installation
 
-To install PANDORA and all the required dependencies, ```pip3``` is required.
+To install PANDORA and all the required dependencies, ```pip3``` and conda are required.
+Also, being based on MODELLER, Pandora needs a functioning MODELLER installation. Please request your MODELLER license at: https://salilab.org/modeller/registration.html
 To create all the required directories and install all dependencies:
 1. set:
 > alias KEY_MODELLER='XXXX'
@@ -24,15 +30,10 @@ where 'XXXX' is your MODELLER license key
 ### Dependencies
 
 Python 3
-
 BioPython
-
 Modeller 9.23 or later
-
-pdb_tools
-
+pdb_tols
 muscle
-
 pdb2sql (only for RMSD calculation)
 
 
