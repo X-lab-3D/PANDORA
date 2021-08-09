@@ -230,8 +230,8 @@ def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
 
     # Setup files
     netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s.txt' %peptide
-    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_prediction.txt' %peptide
+    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s.txt' %(peptide, target_alleles)
+    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_prediction.txt' %(peptide, target_alleles)
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
