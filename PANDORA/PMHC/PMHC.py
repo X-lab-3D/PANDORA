@@ -235,7 +235,7 @@ class Target(PMHC):
                 print('WARNING: no anchor positions provided. Pandora will predict them using NetMHCpan')
     
                 netMHCpan_dir = [i for i in os.listdir(PANDORA.PANDORA_path + '/../') if
-                                 i.startswith('netMHCpan') and os.path.isdir(i)]
+                                 i.startswith('netMHCpan') and os.path.isdir(PANDORA.PANDORA_path + '/../'+i)]
                 if os.path.isfile(PANDORA.PANDORA_path + '/../' + netMHCpan_dir[0] + '/netMHCpan'):
                     # predict the anchors
                     self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type)
@@ -249,7 +249,7 @@ class Target(PMHC):
             print('WARNING: no anchor positions provided. Pandora will predict them using netMHCIIpan.')
 
             netMHCIIpan_dir = [i for i in os.listdir(PANDORA.PANDORA_path + '/../') if
-                             i.startswith('netMHCIIpan') and os.path.isdir(i)]
+                             i.startswith('netMHCIIpan') and os.path.isdir(PANDORA.PANDORA_path + '/../'+i)]
             if os.path.isfile(PANDORA.PANDORA_path + '/../' + netMHCIIpan_dir[0] + '/netMHCIIpan'):
                 # predict the anchors
                 self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type)

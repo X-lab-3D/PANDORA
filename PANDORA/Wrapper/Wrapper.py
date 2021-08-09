@@ -144,34 +144,38 @@ class Wrapper():
         ## Create target objects
         jobs = {}
         for target_id in self.targets:
+            #try:
+            if verbose:
+                print('Target ID: ', target_id)
+                print('Target MHC_class: ', MHC_class)
+                print('Target allele: ', self.targets[target_id]['allele'])
+                print('Target peptide: ', self.targets[target_id]['peptide_sequence'])
             try:
                 if verbose:
-                    print('Target ID: ', target_id)
-                    print('Target MHC_class: ', MHC_class)
-                    print('Target allele: ', self.targets[target_id]['allele'])
-                    print('Target peptide: ', self.targets[target_id]['peptide_sequence'])
-                try:
-                    if verbose:
-                        print('Target Anchors: ', self.targets[target_id]['anchors'])
-                    tar = PMHC.Target(target_id, allele_type=self.targets[target_id]['allele'],
-                                      peptide=self.targets[target_id]['peptide_sequence'] ,
-                                      MHC_class=MHC_class, anchors=self.targets[target_id]['anchors'],
-                                      use_netmhcpan=use_netmhcpan)
-                except KeyError:
-                    tar = PMHC.Target(target_id, allele_type=self.targets[target_id]['allele'],
-                                      peptide=self.targets[target_id]['peptide_sequence'],
-                                      MHC_class=MHC_class,
-                                      use_netmhcpan=use_netmhcpan)
+                    print('Target Anchors: ', self.targets[target_id]['anchors'])
+                tar = PMHC.Target(target_id, allele_type=self.targets[target_id]['allele'],
+                                  peptide=self.targets[target_id]['peptide_sequence'] ,
+                                  MHC_class=MHC_class, anchors=self.targets[target_id]['anchors'],
+                                  use_netmhcpan=use_netmhcpan)
+            except KeyError:
+                tar = PMHC.Target(target_id, allele_type=self.targets[target_id]['allele'],
+                                  peptide=self.targets[target_id]['peptide_sequence'],
+                                  MHC_class=MHC_class,
+                                  use_netmhcpan=use_netmhcpan)
+            try:
                 mod = Pandora.Pandora(tar, db)
-                try:
-                    mod.find_template(benchmark=benchmark)
-                    jobs[target_id] = [tar, mod.template]
-                except Exception as err:
-                    print('Skipping Target %s for the following reason:' %target_id)
-                    print(("Exception: {0}".format(err)))
-            except Exception as err: ### TODO: test and specify exception for this except
-                print('An unidentified problem occurred with Target %s. Please check your target info' %target_id)
+            except Exception as err:
+                print('Skipping Target %s at Pandora object generation step for the following reason:' %target_id)
                 print(("Exception: {0}".format(err)))
+            try:
+                mod.find_template(benchmark=benchmark)
+                jobs[target_id] = [tar, mod.template]
+            except Exception as err:
+                print('Skipping Target %s at template selection step for the following reason:' %target_id)
+                print(("Exception: {0}".format(err)))
+            #except Exception as err: ### TODO: test and specify exception for this except
+            #    print('An unidentified problem occurred with Target %s. Please check your target info' %target_id)
+            #    print(("Exception: {0}".format(err)))
         self.jobs = jobs
         
     def __run_multiprocessing(self, func, num_cores):
