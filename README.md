@@ -15,26 +15,26 @@ PANDORA is a MODELLER-based, anchor restrained modelling pipeline for generating
 
 PANDORA contains multiple functions to pre-process data and it's able to exploit different crucial domain knowledge provided by the user to guide the modelling.
 
+### Dependencies
+
+- Python 3
+- conda
+- pip3
+- BioPython
+- [Modeller](https://salilab.org/modeller/download_installation.html) 9.23 or later
+- [pdb_tools](https://github.com/haddocking/pdb-tools)
+- muscle
+- [pdb2sql](https://github.com/DeepRank/pdb2sql) (optional, only for RMSD calculation)
+
 ## Installation
 
-To install PANDORA and all the required dependencies, ```pip3``` and conda are required.
-Also, being based on MODELLER, PANDORA needs a functioning MODELLER installation. Please request your MODELLER license at: https://salilab.org/modeller/registration.html
+PANDORA needs a functioning MODELLER installation. Please request your MODELLER license at: https://salilab.org/modeller/registration.html
 To create all the required directories and install all dependencies:
 1. set:
 > alias KEY_MODELLER='XXXX'
 where 'XXXX' is your MODELLER license key
 2. run:
 > python install.py
-
-
-### Dependencies
-
-- Python 3
-- BioPython
-- Modeller 9.23 or later
-- [pdb_tools](https://github.com/haddocking/pdb-tools)
-- muscle
-- [pdb2sql](https://github.com/DeepRank/pdb2sql) (optional, only for RMSD calculation)
 
 
 ## Tutorial
