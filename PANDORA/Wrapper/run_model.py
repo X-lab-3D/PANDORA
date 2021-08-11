@@ -8,14 +8,16 @@ Created on Thu Mar 25 22:15:39 2021
 from PANDORA.Pandora import Pandora
 
 def run_model(args):
-    """
+    """Runs one modelling job. Meant to be runned from Pandora.Wrapper
     
-
     Args:
-        target (TYPE): DESCRIPTION.
-        template (TYPE): DESCRIPTION.
-        n_loop_models (TYPE, optional): DESCRIPTION. Defaults to 20.
-        benchmark (TYPE, optional): DESCRIPTION. Defaults to False.
+        args (list): List of arguments. Should be containing the following, in
+            order.
+        target (Pandora.PMHC.PMHC.Target): Target object.
+        template (Pandora.PMHC.PMHC.Template): Template object.
+        n_loop_models (int, optional): Number of loop models. Defaults to 20.
+        benchmark (bool, optional): Set True if running a benchmark to retrieve
+            models RMSD with reference structures. Defaults to False.
 
     Returns:
         None.
@@ -35,9 +37,11 @@ def run_model(args):
        
     # Create Pandora Object
     if output_dir:
-        mod = Pandora.Pandora(target, template = template, output_dir=output_dir)
+        mod = Pandora.Pandora(target, template=template, 
+                              output_dir=output_dir)
     else:
         mod = Pandora.Pandora(target, template = template)
 
     # Run the modelling
-    mod.model(n_loop_models=n_loop_models, n_jobs=n_jobs, stdev=0.1, benchmark=benchmark)
+    mod.model(n_loop_models=n_loop_models, n_jobs=n_jobs,
+              stdev=0.1, benchmark=benchmark)

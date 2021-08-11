@@ -374,10 +374,6 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
 
     '''
 
-    # if not seq_based_templ_selection:
-
-    PAM30 = substitution_matrices.load('PAM30')
-
     ## For MHC I
     if target.MHC_class == 'I':
 

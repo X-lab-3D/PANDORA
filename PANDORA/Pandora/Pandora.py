@@ -24,11 +24,11 @@ class Pandora:
         ''' Find the best template structure given a Target object
 
         Args:
-            best_n_templates: (int, optional): how many template structures are used for modelling. The best n are used.
-                                                Default = 1
-            benchmark: (bool): Perform L-RMSD calculations? only works if the target id is an existing pdb id.
-                                                Default = False
-            verbose: (bool): Print information. Default = True
+            best_n_templates (int, optional): how many template structures are
+                used for modelling. The best n are used. Defaults to 1.
+            benchmark (bool): Perform L-RMSD calculations? only works if the 
+                target id is an existing pdb id. Defaults to False.
+            verbose: (bool): Print information. Defaults to True.
 
         '''
 
@@ -102,7 +102,8 @@ class Pandora:
 
     def prep_output_dir(self):
         ''' Create an output directory and move the template pdb there
-            Uses self.output_dir (str): Path to output directory. Default = <PANDORA_location>/PANDORA_files/data/outputs
+            Uses self.output_dir (str): Path to output directory. 
+                Defaults to <PANDORA_location>/PANDORA_files/data/outputs.
 
         Args:
             None
