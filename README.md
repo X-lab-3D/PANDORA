@@ -1,6 +1,8 @@
 # PANDORA
 (Peptide ANchored mODelling fRAmework)
 
+![alt text](https://github.com/DarioMarzella/PANDORA/issue_90/PANDORA_pMHCI_flowchart.png?raw=true)
+
 ### Contents
 
 - [Overview](#Overview)
@@ -45,15 +47,18 @@ from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
+## 1. Create local Database
 db = Database.Database()
 db.construct_database()
 
+## 2. Create Target object
 target = PMHC.Target('1A1M',
     db.MHCI_data['1A1M'].allele_type,
     db.MHCI_data['1A1M'].peptide,
     M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
     anchors = db.MHCI_data['1A1M'].anchors)
 
+## 3. Perform modelling
 mod = Pandora.Pandora(target, db)
 mod.model(n_models=20, stdev=0.1, seq_based_templ_selection=True, benchmark=False)
 ```
