@@ -1,7 +1,7 @@
 # PANDORA
 (Peptide ANchored mODelling fRAmework)
 
-![alt text](https://github.com/DarioMarzella/PANDORA/issue_90/PANDORA_pMHCI_flowchart.png?raw=true)
+![PANDORA](https://github.com/DarioMarzella/PANDORA/blob/issue_90/flowchart_pMHCI.png?raw=true)
 
 ### Contents
 
