@@ -17,7 +17,7 @@ PANDORA is a MODELLER-based, anchor restrained modelling pipeline for generating
 
 PANDORA contains multiple functions to pre-process data and it's able to exploit different crucial domain knowledge provided by the user to guide the modelling.
 
-### Installation
+## Installation
 
 #### Dependencies
 
@@ -40,9 +40,11 @@ where 'XXXX' is your MODELLER license key
 > python install.py
 
 
-## Tutorial
+## Quick examples
 
-```
+#### Example1 : Reproducing a pMHCI complex with known experimental PDB structure
+
+```python
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
