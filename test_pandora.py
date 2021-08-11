@@ -8,7 +8,7 @@ from PANDORA.Database import Database_functions
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.PMHC import Model
-from PANDORA.Wrapper import Wrapper
+#from PANDORA.Wrapper import Wrapper
 
 def test_PMHC_target():
     # Create target object
