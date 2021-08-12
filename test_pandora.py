@@ -269,7 +269,7 @@ def test_pandora_MHCII_modelling():
 
 def test_rmsd():
     # Load database
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_.pkl')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
     target = PMHC.Target('1A1O',
                          db.MHCI_data['1A1O'].allele_type,
