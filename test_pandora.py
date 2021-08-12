@@ -181,7 +181,7 @@ def test_template_select_MHCII():
 
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
 
-
+@pytest.mark.skip
 def test_database_repath():
     # Load database
     db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
