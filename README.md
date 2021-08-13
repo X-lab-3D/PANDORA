@@ -1,15 +1,17 @@
 # PANDORA
-(Peptide ANchored mODelling fRAmework)
+### Peptide ANchored mODelling fRAmework for peptide-MHC complexes
+
 
 ![PANDORA](https://github.com/DarioMarzella/PANDORA/blob/issue_90/flowchart_pMHCI.png?raw=true)
 
 ### Contents
 
-- [Overview](#Overview)
-- [Installation](#Installation)
-- [Quick Tutorial](#Tutorial)
+- [Overview](#overview)
+- [Dependencies](#dependencies)
+- [Installation](#installation)
+- [Tutorial](#tutorial)
 - [License](./LICENSE)
-- [Issues](#Issues)
+- [Issues](#issues)
 
 ## Overview
 
@@ -17,9 +19,8 @@ PANDORA is a MODELLER-based, anchor restrained modelling pipeline for generating
 
 PANDORA contains multiple functions to pre-process data and it's able to exploit different crucial domain knowledge provided by the user to guide the modelling.
 
-## Installation
 
-#### Dependencies
+## Dependencies
 
 - Python 3
 - conda
@@ -30,16 +31,19 @@ PANDORA contains multiple functions to pre-process data and it's able to exploit
 - muscle
 - [pdb2sql](https://github.com/DeepRank/pdb2sql) (optional, only for RMSD calculation)
 
+## Installation
 
+#### 1. Setup MODELLER installation:
 PANDORA needs a functioning MODELLER installation. Please request your MODELLER license at: https://salilab.org/modeller/registration.html
 To create all the required directories and install all dependencies:
-1. set:
+
 > alias KEY_MODELLER='XXXX'
 where 'XXXX' is your MODELLER license key
-2. run:
+
+#### 2. run:
 > python install.py
 
-## Quick examples
+## Tutorial
 
 #### Example1 : Reproducing a pMHCI complex with known experimental PDB structure
 
@@ -65,45 +69,15 @@ mod.model(n_models=20, stdev=0.1, seq_based_templ_selection=True, benchmark=Fals
 ```
 ## File Structure
 
-The code scripts are managed in an Object-Oriented structure, to be more comrehensible and make a user-friendly package
-```
-PANDORA
-   ├── Contacts
-   │   └── Contacts.py
-   ├── Database
-   │   ├── Database_functions.py
-   │   └── Database.py
-   ├── Pandora
-   │   ├── Align.py
-   │   ├── cmd_modeller_ini.py
-   │   ├── cmd_modeller_template.py
-   │   ├── Modelling_functions.py
-   │   ├── MyLoop_template_II.py
-   │   ├── MyLoop_template.py
-   │   └── Pandora.py
-   ├── PMHC
-   │   ├── Anchors.py
-   │   ├── Model.py
-   │   └── PMHC.py
-   ├── run
-   │   ├── benchmark_model.py
-   │   └── Benchmark.py
-   ├── tools
-   │   ├── contact-chainID_allAtoms.cpp
-   │   └── plot_success_rate_hit_rate.py
-   └── Wrapper
-       ├── run_model.py
-       └── Wrapper.py
-```
 The following file structure is prepared to store the Database and PDB files.
 Also the modelling results consisting genretaed models are stored in *./PANDORA_files/data/outputs* directory
 ```
 PANDORA_files
   └── data
      ├── csv_pkl_files
-      │   └── mhcseqs
-      ├── outputs
-       └── PDBs
+     │   └── mhcseqs
+     ├── outputs
+     └── PDBs
            ├── Bad
            ├── IMGT_retrieved
            ├── pMHCI
