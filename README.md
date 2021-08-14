@@ -15,37 +15,53 @@
 
 ## Overview
 
-PANDORA is a MODELLER-based, anchor restrained modelling pipeline for generating peptide-MHC structures.
+PANDORA is anchor restrained modelling pipeline for generating peptide-MHC structures.
 
 PANDORA contains multiple functions to pre-process data and it's able to exploit different crucial domain knowledge provided by the user to guide the modelling.
 
 
 ## Dependencies
+PANDORA requires MODELLER, python and some python libraries to be installed. You can install the dependencies via the installation process in PANDORA or install from source.
+Installation from source provides you the latest version(recommended).
 
-- Python 3
+- [Python](https://www.python.org/) 3
 - conda
 - pip3
-- BioPython
-- [Modeller](https://salilab.org/modeller/download_installation.html) 9.23 or later
+- [BioPython](https://anaconda.org/conda-forge/biopython)
+- [Modeller](https://anaconda.org/salilab/modeller) 9.23 or later
 - [pdb_tools](https://github.com/haddocking/pdb-tools)
-- muscle
+- [muscle](https://anaconda.org/bioconda/muscle)
 - [pdb2sql](https://github.com/DeepRank/pdb2sql) (optional, only for RMSD calculation)
 
 ## Installation
 
-#### 1. Setup MODELLER installation:
-PANDORA needs a functioning MODELLER installation. Please request your MODELLER license at: https://salilab.org/modeller/registration.html
-To create all the required directories and install all dependencies:
+#### 1. Setup MODELLER License:
+Prior to PANDORA installation, you need to first activate MODELLER's license. Please request MODELLER license at: https://salilab.org/modeller/registration.html
 
-> alias KEY_MODELLER='XXXX'
-where 'XXXX' is your MODELLER license key
+Replace XXXX with your MODELLER License key and run the command:
+```
+alias KEY_MODELLER='XXXX'
+```
 
-#### 2. run:
-> python install.py
+#### 2. Installation process
+
+Clone the repository:
+```
+git clone https://github.com/DarioMarzella/PANDORA.git
+```
+Enter the cloned directory and then install all the dependencies!
+```
+cd PANDORA
+
+python install.py
+```
 
 ## Tutorial
 
-#### Example1 : Reproducing a pMHCI complex with known experimental PDB structure
+
+#### Example1 : generating a pMHCI complex with peptide sequence and allele name
+
+#### Example2 : Reproducing a pMHCI complex with known experimental PDB structure
 
 ```python
 from PANDORA.PMHC import PMHC
@@ -69,19 +85,20 @@ mod.model(n_models=20, stdev=0.1, seq_based_templ_selection=True, benchmark=Fals
 ```
 ## File Structure
 
-The following file structure is prepared to store the Database and PDB files.
-Also the modelling results consisting genretaed models are stored in *./PANDORA_files/data/outputs* directory
+The following file structure is prepared to store the Database, PDB files and output data.
+Please note that the modelling results consisting genretaed models are stored in *./PANDORA_files/data/outputs* directory
+
 ```
 PANDORA_files
   └── data
-     ├── csv_pkl_files
+     ├── csv_pkl_files            Generated Database and csv files containing peptide data to be modelled
      │   └── mhcseqs
-     ├── outputs
-     └── PDBs
-           ├── Bad
-           ├── IMGT_retrieved
-           ├── pMHCI
-           └── pMHCII
+     ├── outputs                  Directory in which all your modelled cases are stored
+     └── PDBs                     PDB files downloaded from IMGT
+           ├── Bad                Problematic PDB files deleted from the databse
+           ├── IMGT_retrieved     
+           ├── pMHCI              
+           └── pMHCII             
 ```
 
 ## Issues
