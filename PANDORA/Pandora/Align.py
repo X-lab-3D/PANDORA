@@ -9,7 +9,7 @@ import os
 
 class Align:
 
-    def __init__(self, target, template, output_dir = PANDORA.PANDORA_data + '/outputs'):
+    def __init__(self, target, template, output_dir=PANDORA.PANDORA_data + '/outputs'):
         ''' Performs a alignment of the target and template(s). Will spit out a filename that will be used for modeller.
 
         Args:
