@@ -228,7 +228,14 @@ class Target(PMHC):
                 self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type)
 
             else:
-                print("Need netMHCpan to predict anchor positions. Please install by running 'netMHCpan_install.py'.")
+                print("Need netMHCIIpan to predict anchor positions. Please download and install netMHCIIpan.\n\n"
+                      "The user needs to manually download the netMHCIIpan software, since it requires agreement to an academic license agreement.\n"
+                      "1. Go to: https://services.healthtech.dtu.dk/service.php?NetMHCIIpan-4.0\n"
+                      "2. press the download button\n"
+                      "3. Download the most recent version appropriate for your operating system\n"
+                      "4. Untar the file and put it in the root directory of your PANDORA install\n"
+                      "5. Follow the readme or simply run netMHCpan_install.py to configure netMHCpan")
+
 
 
         if MHC_class =='II' and anchors == []:
@@ -240,7 +247,13 @@ class Target(PMHC):
                 # predict the anchors
                 self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type)
             else:
-                print("Need netMHCIIpan to predict anchor positions. Please install by running 'netMHCpan_install.py'.")
+                print("Need netMHCpan to predict anchor positions. Please download and install netMHCIIpan.\n\n"
+                      "The user needs to manually download the netMHCpan software, since it requires agreement to an academic license agreement.\n"
+                      "1. Go to: https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1\n"
+                      "2. press the download button\n"
+                      "3. Download the most recent version appropriate for your operating system\n"
+                      "4. Untar the file and put it in the root directory of your PANDORA install\n"
+                      "5. Follow the readme or simply run netMHCpan_install.py to configure netMHCIIpan")
 
 
     def info(self):
