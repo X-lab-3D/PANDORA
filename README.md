@@ -69,30 +69,50 @@ python netMHCpan_install.py
 ## Tutorial
 
 
-#### Example1 : generating a pMHCI complex with peptide sequence and allele name
+#### Example 1 : generating a pMHCI complex with peptide sequence and allele name
 
-#### Example2 : Reproducing a pMHCI complex with known experimental PDB structure
+#### Example 2 : Reproducing a pMHCI complex with known experimental PDB structure
 
 ```python
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
-## 1. Create local Database
+## A. Create local Database
 db = Database.Database()
-db.construct_database()
+db.construct_database(save='pandora.Database')
 
-## 2. Create Target object
+## B. Create Target object
 target = PMHC.Target('1A1M',
     db.MHCI_data['1A1M'].allele_type,
     db.MHCI_data['1A1M'].peptide,
     M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
     anchors = db.MHCI_data['1A1M'].anchors)
 
-## 3. Perform modelling
+## C. Perform modelling
 mod = Pandora.Pandora(target, db)
 mod.model(n_models=20, stdev=0.1, seq_based_templ_selection=True, benchmark=False)
 ```
+
+#### Example 3: Modelling many peptide cases using the Wrapper function
+
+
+```python
+from PANDORA.Wrapper import Wrapper
+
+## A. Load pregenerated database of all pMHC PDBs
+db = Database.load('pandora.Database')
+
+## B. Run the modelling of many cases using the wrapper Class
+wrap =  Wrapper()
+
+## C. Create all Target Objects
+wrap.create_targets('datafile.tsv', db, MHC_class='II')
+
+## C. Perform modelling
+wrap.run_pandora(num_cores=128)
+```
+
 ## File Structure
 
 The following file structure is prepared to store the Database, PDB files and output data.
