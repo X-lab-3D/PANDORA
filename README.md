@@ -28,10 +28,12 @@ Installation from source provides you the latest version(recommended).
 - conda
 - pip3
 - [BioPython](https://anaconda.org/conda-forge/biopython)
+- [muscle](https://anaconda.org/bioconda/muscle)
 - [Modeller](https://anaconda.org/salilab/modeller) 9.23 or later
 - [pdb_tools](https://github.com/haddocking/pdb-tools)
-- [muscle](https://anaconda.org/bioconda/muscle)
-- [pdb2sql](https://github.com/DeepRank/pdb2sql) (optional, only for RMSD calculation)
+- [pdb2sql](https://github.com/DeepRank/pdb2sql) (Optional, only for RMSD calculation)
+- [NetMHCpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wills to predict peptide:MHC class I anchors)
+- [NetMHCIIpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wills to predict peptide:MHC class II anchors)
 
 ## Installation
 
@@ -43,7 +45,7 @@ Replace XXXX with your MODELLER License key and run the command:
 alias KEY_MODELLER='XXXX'
 ```
 
-#### 2. Installation process
+#### 2. Install PANDORA
 
 Clone the repository:
 ```
@@ -54,6 +56,14 @@ Enter the cloned directory and then install all the dependencies!
 cd PANDORA
 
 python install.py
+```
+#### 3. (Optional) Install NetMHCpan and/or NetMHCIIpan
+
+PANDORA lets the user if he wills to predict peptide's anchor residues instead of using conventional predefined anchor residues for each allele.
+In that case you need to install NetMHCpan (for peptide:MHC class I) and/or NetMHCIIpan (for peptide:MHC class II).
+You can install from the [source](https://services.healthtech.dtu.dk/software.php) or simply run:
+```
+python netMHCpan_install.py
 ```
 
 ## Tutorial
@@ -86,14 +96,14 @@ mod.model(n_models=20, stdev=0.1, seq_based_templ_selection=True, benchmark=Fals
 ## File Structure
 
 The following file structure is prepared to store the Database, PDB files and output data.
-Please note that the modelling results consisting genretaed models are stored in *./PANDORA_files/data/outputs* directory
+Please note that the modelling results consisting genretaed models are stored in *./PANDORA_files/data/outputs/* directory
 
 ```
 PANDORA_files
   └── data
      ├── csv_pkl_files            Generated Database and csv files containing peptide data to be modelled
      │   └── mhcseqs
-     ├── outputs                  Directory in which all your modelled cases are stored
+     ├── outputs                  Directory to save output (Modelled cases, restraints, alignment file, log file, etc.)
      └── PDBs                     PDB files downloaded from IMGT
            ├── Bad                Problematic PDB files deleted from the databse
            ├── IMGT_retrieved     
