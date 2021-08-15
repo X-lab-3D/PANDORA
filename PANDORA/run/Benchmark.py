@@ -26,7 +26,7 @@ import PANDORA
 def run_pandora(tar_temp):
     target = tar_temp[0]
     template = tar_temp[1]
-    filename = '290421_1mod20_sd02_slow_templ3_benchmark_II.csv'
+    filename = '280721_default_benchmark_I.csv'
     nr_models = 20
     if not os.path.exists(PANDORA.PANDORA_path + '/../' + filename):
         with open(PANDORA.PANDORA_path + '/../' + filename, 'w') as f:
@@ -38,9 +38,11 @@ def run_pandora(tar_temp):
 
     try:
         mod = Pandora.Pandora(target, template=template)
+        # mod.model( output_dir=PANDORA.PANDORA_data + '/outputs/' + filename.replace('.csv', ''),
+        #            stdev=0.2, benchmark=True, best_n_templates=3, n_homology_models=1,
+        #            n_loop_models=nr_models, loop_refinement='slow')
         mod.model( output_dir=PANDORA.PANDORA_data + '/outputs/' + filename.replace('.csv', ''),
-                   stdev=0.2, benchmark=True, best_n_templates=3, n_homology_models=1,
-                   n_loop_models=nr_models, loop_refinement='slow')
+                   benchmark=True, n_loop_models=nr_models)
 
 
 
@@ -103,7 +105,7 @@ def bench_MHCI():
     t0 = time.time()
     # print(t0)
     db = Database.Database().load('25_04_21_Pandora_db')
-    num_cores = 8
+    num_cores = 4
 
     list_of_targets_templates = []
     for k in db.MHCI_data:
@@ -128,8 +130,8 @@ def bench_MHCI():
 if __name__ == "__main__":
     # Parallel(n_jobs=num_cores)(delayed(run_pandora)(target) for target in list_of_targets[:2])
     freeze_support()  # required to use multiprocessing
-    bench_MHCII()
-    # bench_MHCI()
+    # bench_MHCII()
+    bench_MHCI()
 
 
 
