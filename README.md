@@ -41,22 +41,109 @@ pdb2sql (only for RMSD calculation)
 
 ## Tutorial
 
+### Quick start
 ```
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 db = Database.Database()
-db.construct_database()
+db.construct_database(save = 'a_saved_Pandora_database')
 
-target = PMHC.Target('1A1M',
-    db.MHCI_data['1A1M'].allele_type,
-    db.MHCI_data['1A1M'].peptide,
-    M_chain_seq = db.MHCI_data['1A1M'].M_chain_seq,
-    anchors = db.MHCI_data['1A1M'].anchors)
+target = PMHC.Target(id = '1A1M',
+    allele_type = ['HLA-B*5301', 'HLA-B*5301'],
+    peptide = 'TPYDINQML',
+    anchors = [2,9])
 
-mod = Pandora.Pandora(target, db)
-mod.model(n_models=20, stdev=0.1, seq_based_templ_selection=True, benchmark=False)
+case = Pandora.Pandora(target, db)
+case.model()
+```
+
+### Example 1: Create many loop models in a specific directory and calculate the backbone L-RMSD
+
+```
+from PANDORA.PMHC import PMHC
+from PANDORA.Pandora import Pandora
+from PANDORA.Database import Database
+
+db = Database.load('a_saved_Pandora_database')
+
+target = PMHC.Target(id = '1A1M',
+    allele_type = ['HLA-B*5301', 'HLA-B*5301'],
+    peptide = 'TPYDINQML',
+    anchors = [2,9])
+
+case = Pandora.Pandora(target, db)
+# to calculate the L-RMSD, the target id must be a PDB id of a template structure present in the database
+case.model(output_dir = '/anywhere', n_loop_models = 100, benchmark=True)
+
+```
+
+### Example 2: Model a peptide:MHCI complex with an alpha helix in the peptide
+
+```
+from PANDORA.PMHC import PMHC
+from PANDORA.Pandora import Pandora
+from PANDORA.Database import Database
+
+db = Database.load('a_saved_Pandora_database')
+
+target = PMHC.Target(id = '2YF5',
+    allele_type = ['MH1-B*2101', 'MH1-B*2101'],
+    peptide = 'TAGQSNYDRL',
+    anchors = [2,10],
+    helix = ['4', '9'])
+
+case = Pandora.Pandora(target, db)
+case.model(helix=target.helix)
+
+```
+
+### Example 3: Predict peptide anchor positions with NetMHCpan
+
+```
+from PANDORA.PMHC import PMHC
+
+# Predicting peptide anchor positions requires installation of NetMHCPan (https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1)
+target = PMHC.Target(id = '1A1M',
+    allele_type = ['HLA-B*5301', 'HLA-B*5301'],
+    peptide = 'TPYDINQML)
+
+```
+
+### Example 4: Model many peptide:MHCI complexes in parallel
+
+```
+from PANDORA.Pandora import Pandora
+from PANDORA.Database import Database
+from PANDORA.Wrapper import Wrapper
+
+db = Database.load('a_saved_Pandora_database')
+
+wrap = Pandora.Wrapper()
+wrap.create_targets('datafile.tsv', db)
+wrap.run_pandora(num_cores = 128)
+
+```
+
+### Example 5: Model a peptide:MHCII complex
+
+```
+from PANDORA.PMHC import PMHC
+from PANDORA.Pandora import Pandora
+from PANDORA.Database import Database
+
+db = Database.load('a_saved_Pandora_database')
+
+target = PMHC.Target(id = '2IAM',
+    MHC_class='II',
+    allele_type = ['HLA-DRA*0102', 'HLA-DRA*0101', 'HLA-DRB1*0101'],
+    peptide = 'GELIGILNAAKVPAD',
+    anchors = [4, 7, 9, 12])
+
+case = Pandora.Pandora(target, db)
+case.model(stdev=0.2)
+
 ```
 
 ## Issues
