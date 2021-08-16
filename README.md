@@ -10,6 +10,8 @@
 - [Dependencies](#dependencies)
 - [Installation](#installation)
 - [Tutorial](#tutorial)
+- [Code Design](#diagram)
+- [Output File structure](#output)
 - [License](./LICENSE)
 - [Issues](#issues)
 
@@ -22,6 +24,7 @@ PANDORA contains multiple functions to pre-process data and it's able to exploit
 
 ## Dependencies
 PANDORA requires MODELLER, python and some python libraries to be installed. You can install the dependencies via the installation process in PANDORA or install from source.
+
 Installation from source provides you the latest version(recommended).
 
 - [Python](https://www.python.org/) 3
@@ -69,18 +72,50 @@ python netMHCpan_install.py
 ## Tutorial
 
 
-#### Example 1 : generating a pMHCI complex with peptide sequence and allele name
+#### Example 1 : Generating a peptide:MHC complex given the peptide sequence
+PANDORA requires these information to generate models:
+- Peptide sequence
+- MHC allele
 
-#### Example 2 : Reproducing a pMHCI complex with known experimental PDB structure
+A. The database of all templates need to be generated (retrieving pMHC PDBs from IMGT). 
+   You can save the database with your given name, to skip the downloading phase for later usage.
+   
+B. Creating a Template object based on the given information
 
-```python
+C. Generating n number of pMHC models
+
+```
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. Create local Database
 db = Database.Database()
-db.construct_database(save='pandora.Database')
+db.construct_database(save='pandora.Database')     
+
+## B. Create Target object
+target = PMHC.Target(
+    dallele_type='HLA-A*0201'
+    peptide='LLFGYPVYV',
+    MHC_class='I'
+    anchors = [2,9]
+
+## C. Perform modelling
+mod = Pandora.Pandora(target, db)
+mod.model(n_loop_models=20, seq_based_templ_selection=False)  # Generates 20 models
+```
+
+#### Example 2 : Reproducing a pMHCI complex with known experimental PDB structure
+
+If the target experimental structure is available, you can provide the PDB ID and set *benchmark=True* to calculate L-RMSD value.
+
+```
+from PANDORA.PMHC import PMHC
+from PANDORA.Pandora import Pandora
+from PANDORA.Database import Database
+
+## A. Load pregenerated database of all pMHC PDBs
+db = Database.load('pandora.Database')  
 
 ## B. Create Target object
 target = PMHC.Target('1A1M',
@@ -91,19 +126,20 @@ target = PMHC.Target('1A1M',
 
 ## C. Perform modelling
 mod = Pandora.Pandora(target, db)
-mod.model(n_models=20, stdev=0.1, seq_based_templ_selection=True, benchmark=False)
+mod.model(n_mloop_odels=20, seq_based_templ_selection=True, benchmark=True)  
 ```
 
-#### Example 3: Modelling many peptide cases using the Wrapper function
+#### Example 3: Modelling of many peptide cases
+PANDORA can modell more than one peptide, in parallel. You need to provide the following petide information in a csv file, including:
+- Peptide sequence,  Allele name, PDB ID (Optional, only used when reproducing models of known peptide:MHC structures)
 
-
-```python
+```
 from PANDORA.Wrapper import Wrapper
 
 ## A. Load pregenerated database of all pMHC PDBs
 db = Database.load('pandora.Database')
 
-## B. Run the modelling of many cases using the wrapper Class
+## B. Create the wrapper object
 wrap =  Wrapper()
 
 ## C. Create all Target Objects
@@ -112,10 +148,17 @@ wrap.create_targets('datafile.tsv', db, MHC_class='II')
 ## C. Perform modelling
 wrap.run_pandora(num_cores=128)
 ```
+## Diagram
+PANDORA is designed in an Object-oriented programming. This provides a comprehensible and user-friendly framework.
 
-## File Structure
+Pandora class: represents a user defined modelling case(s)
+
+[Diagram](https://github.com/DarioMarzella/PANDORA/blob/issue_90/class_diagram.png?raw=true)
+
+## Output
 
 The following file structure is prepared to store the Database, PDB files and output data.
+
 Please note that the modelling results consisting genretaed models are stored in *./PANDORA_files/data/outputs/* directory
 
 ```
