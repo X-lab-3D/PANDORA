@@ -77,12 +77,15 @@ PANDORA requires these information to generate models:
 - Peptide sequence
 - MHC allele
 
+Steps:
+
 A. The database of all templates need to be generated (retrieving pMHC PDBs from IMGT). 
    You can save the database with your given name, to skip the downloading phase for later usage.
    
 B. Creating a Template object based on the given information
 
 C. Generating n number of pMHC models
+
 
 ```
 from PANDORA.PMHC import PMHC
@@ -131,6 +134,7 @@ mod.model(n_mloop_odels=20, seq_based_templ_selection=True, benchmark=True)
 
 #### Example 3: Modelling of many peptide cases
 PANDORA can modell more than one peptide, in parallel. You need to provide the following petide information in a csv file, including:
+
 - Peptide sequence,  Allele name, PDB ID (Optional, only used when reproducing models of known peptide:MHC structures)
 
 ```
