@@ -82,7 +82,7 @@ PANDORA requires at least these information to generate models:
 Steps:
 
 A. The database of all templates need to be generated (retrieving pMHC PDBs from IMGT). 
-   We strongly recommended to save the database once (set argument *save=<your_database_name> in Database.construct_database() function), to skip downloading            all templates again for later usage.
+   We strongly recommended to save the database once (set argument *save=<your_database_name>*), to skip downloading all templates again for later usage.
    
 B. Creating a Template object based on the given target information
 
@@ -114,7 +114,7 @@ There are some options provided that you can input them as arguments to the func
 
 For instance if you want to generate 100 models for your modelling case, and also specify the output directory yourself.
 
-Please note that, if you do not input *anchors* info it will automatically run NetMHCpan to predict anchors.
+Please note that, if you do not input *anchors*, it will automatically run NetMHCpan to predict anchors.
 
 ```python
 from PANDORA.PMHC import PMHC
@@ -131,7 +131,7 @@ target = PMHC.Target(
 
 ## C. Perform modelling
 case = Pandora.Pandora(target, db)
-case.model(n_loop_models=100, output_dir = '/anywhere')  # Generates 100 models
+case.model(n_loop_models=100, output_dir = '/your/directory/')  # Generates 100 models
 ```
 
 #### Example 3 : Reproducing a pMHCI complex with known experimental PDB structure
@@ -175,7 +175,7 @@ case = Pandora.Pandora(target, db)
 case.model(helix=target.helix)
 ```
 #### Example 5: Modelling of many peptide cases
-PANDORA can modell more than one peptide, in parallel. You need to provide the following petide information in a *.tsv* file, including:
+PANDORA can modell more than one peptide, in parallel. You need to provide the following petide information in a *.tsv* file:
 
 - *Peptide sequence,  Allele name, PDB ID* (Optional, only used when reproducing models of known peptide:MHC structures)
 
@@ -190,14 +190,14 @@ db = Database.load('pandora_Database')
 ## B. Create the wrapper object
 wrap =  Wrapper()
 
-## C. Create all Target Objects
+## C. Create all Target Objects based on peptides in the .tsv file
 wrap.create_targets('datafile.tsv', db)
 
 ## C. Perform modelling
 wrap.run_pandora(num_cores=128)
 ```
 #### Example 6: Generating a peptide:MHC class II complex given the peptide sequence
-When you want to model a peptide:MHC class II complex, you only need to specify that in *PMHC.Target()* function: as MHC_class='II' (By default it is set to model MHC class I).
+To model a peptide:MHC class II complex, you only need to specify that in *PMHC.Target()* function: as *MHC_class='II'* (By default it is set to model MHC class I).
 
 ```python
 from PANDORA.PMHC import PMHC
@@ -219,9 +219,7 @@ case.model()
 
 
 ## Diagram
-PANDORA has been implemented in an Object-Oriented Design (OOD). Resulting in a comprehensible and user-friendly framework.
-
-Pandora class: represents a user defined modelling case(s)
+PANDORA has been implemented in an Object-Oriented Design(OOD). Resulting in a comprehensible and user-friendly framework.
 
 [Diagram](https://github.com/DarioMarzella/PANDORA/blob/issue_90/class_diagram.png?raw=true)
 
@@ -241,7 +239,7 @@ PANDORA_files
            ├── IMGT_retrieved     
            ├── pMHCI              
            └── pMHCII  
-     └── outputs                       Directory to save output 
+     └── outputs                       Default directory to save output 
            ├── MyLoop.py               MODELLER script to set loop modelling parameters for the peptide               
            ├── cmd_modeller_ini.py     MODELLER script to generate an initial model to extract restraints from
            ├── cmd_modeller.py         MODELLER script to set the main modelling parameters
