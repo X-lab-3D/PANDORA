@@ -11,7 +11,7 @@
 - [Installation](#installation)
 - [Tutorial](#tutorial)
 - [Code Design](#diagram)
-- [Output File structure](#output)
+- [Output](#output)
 - [License](./LICENSE)
 - [Issues](#issues)
 
@@ -82,7 +82,7 @@ PANDORA requires at least these information to generate models:
 Steps:
 
 A. The database of all templates need to be generated (retrieving pMHC PDBs from IMGT). 
-   We strongly recommended to save the database once (set argument save=<your_database_name> in Database.construct_database() function), to skip downloading            all templates again for later usage.
+   We strongly recommended to save the database once (set argument *save=<your_database_name> in Database.construct_database() function), to skip downloading            all templates again for later usage.
    
 B. Creating a Template object based on the given target information
 
@@ -229,19 +229,30 @@ Pandora class: represents a user defined modelling case(s)
 
 The following file structure is prepared to store the Database, PDB files and output data.
 
-Please note that the modelling results consisting genretaed models are stored in *./PANDORA_files/data/outputs/* directory
+Please note that the modelling results consisting genretaed models by default are stored in *./PANDORA_files/data/outputs/* directory
 
 ```
 PANDORA_files
   └── data
-     ├── csv_pkl_files            Generated Database and csv files containing peptide data to be modelled
+     ├── csv_pkl_files                 Generated Database and csv files containing peptide data to be modelled
      │   └── mhcseqs
-     ├── outputs                  Directory to save output (Modelled cases, restraints, alignment file, log file, etc.)
-     └── PDBs                     PDB files downloaded from IMGT
-           ├── Bad                Problematic PDB files deleted from the databse
+     ├── PDBs                          PDB files downloaded from IMGT
+           ├── Bad                     Problematic PDB files deleted from the databse
            ├── IMGT_retrieved     
            ├── pMHCI              
-           └── pMHCII             
+           └── pMHCII  
+     └── outputs                       Directory to save output 
+           ├── MyLoop.py               MODELLER script to set loop modelling parameters for the peptide               
+           ├── cmd_modeller_ini.py     MODELLER script to generate an initial model to extract restraints from
+           ├── cmd_modeller.py         MODELLER script to set the main modelling parameters
+           ├── *.ali                   Alignment of template(s) and target
+           ├── contacts_6OPD.list      Contact restraints
+           ├── molpdf_DOPE.tsv         Ranking all models by molpdf and DOPE modeller's scoring functions
+           ├── *IL*,pdb                Initial loop model
+           ├── *BL*.pdb                Final models
+           └── ... 
+     
+           
 ```
 
 ## Issues
