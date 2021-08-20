@@ -80,7 +80,7 @@ PANDORA requires at least these information to generate models:
 
 Steps:
 
-A. The database of all templates need to be generated (retrieving pMHC PDBs from IMGT). 
+A. The database of all templates need to be generated (retrieving all available pMHC PDBs in [IMGT](http://www.imgt.org/3Dstructure-DB/) database). 
    We strongly recommended to save the database once (set argument *save=<your_database_name>*), to skip downloading all templates again for later usage.
    
 B. Creating a Template object based on the given target information
