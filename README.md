@@ -35,10 +35,9 @@ The installation process will take care of installing the following dependencies
 - [BioPython](https://anaconda.org/conda-forge/biopython)
 - [muscle](https://anaconda.org/bioconda/muscle)
 - [Modeller](https://anaconda.org/salilab/modeller) 9.23 or later
-- [pdb_tools](https://github.com/haddocking/pdb-tools)
 - [pdb2sql](https://github.com/DeepRank/pdb2sql) (Optional, only for RMSD calculation)
-- [NetMHCpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wills to predict peptide:MHC class I anchors)
-- [NetMHCIIpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wills to predict peptide:MHC class II anchors)
+- [NetMHCpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class I anchors)
+- [NetMHCIIpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class II anchors)
 
 ## Installation
 
@@ -64,7 +63,7 @@ python install.py
 ```
 #### 3. (Optional) Install NetMHCpan and/or NetMHCIIpan
 
-PANDORA lets the user if he wills to predict peptide's anchor residues instead of using conventional predefined anchor residues.
+PANDORA lets the user if he wants to predict peptide's anchor residues instead of using conventional predefined anchor residues.
 In that case you need to install NetMHCpan (for peptide:MHC class I) and/or NetMHCIIpan (for peptide:MHC class II).
 To install, you can simply run:
 ```
@@ -88,7 +87,7 @@ B. Creating a Template object based on the given target information
 
 C. Generating *n* number of pMHC models (Default n=20)
 
-
+Please note that you can specify output directory yourself, otherwise will be generated in a default directory
 ```python
 ## import requested modules
 from PANDORA.PMHC import PMHC
@@ -101,20 +100,24 @@ db.construct_database(save='pandora_Database')
 
 ## B. Create Target object
 target = PMHC.Target(
-    allele_type='HLA-A*0201'
+    allele_ty:pe='HLA-A*0201'
     peptide='LLFGYPVYV',
     anchors = [2,9])
 
 ## C. Perform modelling
 case = Pandora.Pandora(target, db)
-case.model()  
+case.model(output_dir = '/your/directory/')  
 ```
 #### Example 2 : Create many loop models in a specific directory 
 There are some options provided that you can input them as arguments to the functions. 
 
-For instance if you want to generate 100 models for your modelling case, and also specify the output directory yourself.
+For instance:
+- Generate more models for your modelling case
+- Specify the output directory yourself
+- Give your target a name
+- Predict anchors by NetMHCpan
 
-Please note that, if you do not input *anchors*, it will automatically run NetMHCpan to predict anchors.
+Please note that, if you do not input *anchors* yourself, it will automatically run NetMHCpan to predict anchors.
 
 ```python
 from PANDORA.PMHC import PMHC
@@ -125,7 +128,7 @@ from PANDORA.Database import Database
 db = Database.load('pandora_Database')   
 
 ## B. Create Target object
-target = PMHC.Target(
+target = PMHC.Target(id='myTestCase'
     allele_type = ['HLA-B*5301', 'HLA-B*5301'],
     peptide = 'TPYDINQML')
 
@@ -134,8 +137,11 @@ case = Pandora.Pandora(target, db)
 case.model(n_loop_models=100, output_dir = '/your/directory/')  # Generates 100 models
 ```
 
-#### Example 3 : Reproducing a pMHCI complex with known experimental PDB structure
-If the target experimental structure is available, you can provide the PDB ID and set *benchmark=True* to calculate L-RMSD value.
+#### Example 3 : Benchmark PANDORA on one modelling case
+If you want to evaluate the framework on a target with experimental structure:
+- Provide the PDB ID for the *Target* class 
+- Set *benchmark=True* for the modelling 
+  (calculates L-RMSD to show how far the model is from the near-native structure)
 
 ```python
 from PANDORA.PMHC import PMHC
@@ -176,10 +182,12 @@ target = PMHC.Target(
 case = Pandora.Pandora(target, db)
 case.model(helix=target.helix)
 ```
-#### Example 5: Modelling of many peptide cases on multiple cores
+#### Example 5: Benchmark PANDORA on multiple cases (running in parallel on multiple cores)
 PANDORA can modell more than one peptide, in parallel. You need to provide the following petide information in a *.tsv* file:
 
 - *Peptide sequence,  Allele name, PDB ID* (Optional, only used when reproducing models of known peptide:MHC structures)
+
+The Wrapper class is implemented to run PANDORA in parallel on multiple cores.
 
 ```python
 from PANDORA.Pandora import Pandora
