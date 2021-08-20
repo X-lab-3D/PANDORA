@@ -106,9 +106,9 @@ target = PMHC.Target(
 
 ## C. Perform modelling
 case = Pandora.Pandora(target, db)
-case.model(output_dir = '/your/directory/')  
+case.model()  
 ```
-#### Example 2 : Create many loop models in a specific directory 
+#### Example 2 : Create multiple loop models in a your given directory 
 There are some options provided that you can input them as arguments to the functions. 
 
 For instance:
@@ -138,7 +138,7 @@ case.model(n_loop_models=100, output_dir = '/your/directory/')  # Generates 100 
 ```
 
 #### Example 3 : Benchmark PANDORA on one modelling case
-If you want to evaluate the framework on a target with experimental structure:
+If you want to evaluate the framework on a target with a known experimental structure:
 - Provide the PDB ID for the *Target* class 
 - Set *benchmark=True* for the modelling 
   (calculates L-RMSD to show how far the model is from the near-native structure)
