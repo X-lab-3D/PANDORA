@@ -10,7 +10,7 @@
 - [Dependencies](#dependencies)
 - [Installation](#installation)
 - [Tutorial](#tutorial)
-- [Code Design](#diagram)
+- [Code Design](#code-design)
 - [Output](#output)
 - [License](./LICENSE)
 - [Issues](#issues)
@@ -228,10 +228,10 @@ case.model()
 ```
 
 
-## Diagram
+## Code Design
 PANDORA has been implemented in an Object-Oriented Design(OOD). Resulting in a comprehensible and user-friendly framework.
 
-[Diagram](https://github.com/DarioMarzella/PANDORA/blob/issue_90/class_diagram.png?raw=true)
+see [Class Diagram](https://github.com/DarioMarzella/PANDORA/blob/issue_90/class_diagram.png?raw=true)
 
 ## Output
 
