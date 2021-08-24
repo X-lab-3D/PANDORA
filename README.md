@@ -2,7 +2,7 @@
 ### Peptide ANchored mODelling fRAmework for peptide-MHC complexes
 
 
-![PANDORA](https://github.com/DarioMarzella/PANDORA/blob/issue_90/flowchart_pMHCI.png?raw=true)
+![PANDORA](https://github.com/DarioMarzella/PANDORA/blob/master/images/flowchart_pMHCI.png?raw=true)
 
 ### Contents
 
@@ -231,7 +231,7 @@ case.model()
 ## Code Design
 PANDORA has been implemented in an Object-Oriented Design(OOD). Resulting in a comprehensible and user-friendly framework.
 
-see [Class Diagram](https://github.com/DarioMarzella/PANDORA/blob/issue_90/class_diagram.png?raw=true)
+see [Class Diagram](https://github.com/DarioMarzella/PANDORA/blob/master/images/class_diagram.png?raw=true)
 
 ## Output
 
