@@ -8,6 +8,7 @@ from Bio import pairwise2
 from PANDORA.Pandora import Align
 import statistics
 from Bio.Align import PairwiseAligner
+from datetime import datetime
 
 
 def check_target_template(target, template):
@@ -155,12 +156,14 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     if target_alleles == []:
         target_alleles = ['DRB1_0101']
 
-    target_alleles = ','.join(list(set(target_alleles)))
+    target_alleles_str = ','.join(target_alleles)
 
     # Setup files
     netmhciipan = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/netMHCIIpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/pep.txt'
-    outfile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/pept_prediction.txt'
+    infile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s.txt' %(
+        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+    outfile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s_prediction.txt' %(
+        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
@@ -168,7 +171,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
 
     try:
         # run netMHCIIpan
-        os.system('%s -f %s -inptype 1 -a %s > %s' % (netmhciipan, infile, target_alleles, outfile))
+        os.system('%s -f %s -inptype 1 -a %s > %s' % (netmhciipan, infile, target_alleles_str, outfile))
 
         # Get the output from the netMHCIIpan prediction
         # {allele: (offset, core, core_reliability, score_EL, %rank_EL)}
@@ -226,18 +229,20 @@ def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
     target_alleles = [i.replace('*','') for i in allele_type]
     target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
 
-    target_alleles = ','.join(target_alleles)
+    target_alleles_str = ','.join(target_alleles)
 
     # Setup files
     netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s.txt' %(peptide, target_alleles)
-    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_prediction.txt' %(peptide, target_alleles)
+    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s.txt' %(
+        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s_prediction.txt' %(
+        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
         f.write(peptide)
 
-    os.system('%s -p %s -a %s > %s' %(netmhcpan, infile, target_alleles, outfile))
+    os.system('%s -p %s -a %s > %s' %(netmhcpan, infile, target_alleles_str, outfile))
 
     # Get the output from the netMHCIIpan prediction
     # {allele: (core, %rank_EL)}
@@ -746,7 +751,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         logf.append((il_file, fake_molpdf, fake_dope))
 
     # Sort output by molpdf
-    logf.sort(key=lambda tup:float(tup[1]))
+    logf.sort(key=lambda tup:tup[1])
     # Write to output file
     f = open(output_dir + '/molpdf_DOPE.tsv', 'w')
     for i in logf:
@@ -799,7 +804,7 @@ def top5_from_results(results):
 
     '''
     top5 = [i[0] for i in
-            sorted([(m.model_path, m.moldpf) for m in results], key=lambda x: x[1], reverse=False)[
+            sorted([(m.model_path, m.molpdf) for m in results], key=lambda x: x[1], reverse=False)[
             :5]]
 
     median_rmsd, median_core = False, False
