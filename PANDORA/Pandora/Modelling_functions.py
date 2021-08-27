@@ -209,7 +209,8 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
 
 
 def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
-    '''Uses netMHCIIpan to predict the binding core of a peptide and infer the anchor positions from that.
+    '''Uses netMHCIIpan to predict the binding core of a peptide and infer the 
+    anchor positions from that.
 
     Args:
         peptide: (str): AA sequence of the peptide
@@ -225,18 +226,26 @@ def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
             all_netMHCpan_alleles.append(line.split(' ')[0])#.replace(':',''))
             #all_netMHCpan_alleles.append(line.split(' ')[0].replace(':',''))
 
-    # Format alleles
+    ## Format alleles
     target_alleles = [i.replace('*','') for i in allele_type]
+    ## Make sure only netMHCpan available alleles are used
+    #if any(i for i in target_alleles if i in all_netMHCpan_alleles):
     target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
+    #else:
+    #    pass
+
+    if len(target_alleles) == 0:
+        print('ERROR: The provided Target allele is not available in NetMHCpan-4.1')
+        return None
 
     target_alleles_str = ','.join(target_alleles)
 
     # Setup files
     netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
     infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s.txt' %(
-        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+        peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
     outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s_prediction.txt' %(
-        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+        peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
@@ -253,6 +262,10 @@ def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
                 ln = [i for i in line[:-1].split(' ') if i != '']
                 pred[ln[1]] = (ln[3], float(ln[12]))
 
+    if len(pred) == 0:
+        print('ERROR: NetMHCpan-4.1 was not able to find any binding core for')
+        print('the provided peptide and MHC allele')
+        return None
     # For every allele, the binding core is predicted. Take the allele with the highest reliability score
     best_allele = min((pred[i][1], i) for i in pred)[1]
 

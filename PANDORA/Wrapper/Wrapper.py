@@ -31,7 +31,8 @@ class Wrapper():
         
     def __get_targets_from_file(self, data_file, delimiter='\t', header=True, 
                                IDs_col=None, peptides_col=0, allele_col=1, 
-                               anchors_col=None, start_row=None, end_row=None):
+                               anchors_col=None, M_chain_col=None,
+                               start_row=None, end_row=None):
         """Extracts peptide sequences, alleles and anchors (if specified) 
             from the target file.
            Default input should be a .tsv file without any header with 
@@ -55,13 +56,15 @@ class Wrapper():
                 the targets alleles. Umbiguous allele cases (where the allele
                 might have multiple names) should be separated by a 
                 semicolon (';'). Defaults to 1.
-            anchors_col (int, optional): Column of data_file containing
+            anchors_col (None or int, optional): Column of data_file containing
                 the targets anchors. Anchors should be two numbers separated
                 by a semicolon (';'). Defaults to 2.
-            start_row (None or int): Starting row of data_file, to use when 
+            M_chain_col (None or int, optional): Column of data_file containing
+                the targets M chain sequences.
+            start_row (None or int, optional): Starting row of data_file, to use when 
                 splitting the data_file into multiple batches. This allows to 
                 specify from which row the samples for this job start.
-            end_row (None or int): Ending row of data_file, to use when 
+            end_row (None or int, optional): Ending row of data_file, to use when 
                 splitting the data_file into multiple batches. This allows to 
                 specify at which row the samples for this job end.
 
@@ -93,22 +96,33 @@ class Wrapper():
                     ## Assign allele name
                     allele = row[allele_col].split(';')
                     
+                    ## Make target entry
+                    targets[target_id] = {'peptide_sequence' : peptide_seq,
+                                              'allele' : allele}
+                    
+                    ## Assign optional arguments. Be sure the empty values correspond
+                    ## to the default values in PMHC.Target.__init__()
                     ## Assign anchors
                     if anchors_col:
                         anchors = tuple([int(x) for x in row[anchors_col].split(';')])
-                        targets[target_id] = {'peptide_sequence' : peptide_seq,
-                                              'allele' : allele,
-                                              'anchors' : anchors}
+                        targets[target_id]['anchors'] = anchors
                     else:
-                        targets[target_id] = {'peptide_sequence' : peptide_seq,
-                                              'allele' : allele}
+                        targets[target_id]['anchors'] = []
+                    
+                    ## Assign M chain sequence
+                    if M_chain_col:
+                        M_chain_seq = row[M_chain_col]
+                        targets[target_id]['M_chain_seq'] = M_chain_seq
+                    else:
+                        targets[target_id]['M_chain_seq'] = ''
                         
         self.targets = targets
 
     def create_targets(self, data_file, database, MHC_class, delimiter = '\t', 
                        header=True, IDs_col=None, peptides_col=0, allele_col=1,
-                       anchors_col=None, benchmark=False, verbose=False, 
-                       start_row=None, end_row=None, use_netmhcpan=False):
+                       anchors_col=None, M_chain_col=None, benchmark=False, 
+                       verbose=False, start_row=None, end_row=None, 
+                       use_netmhcpan=False):
         """
         
 
@@ -134,6 +148,8 @@ class Wrapper():
             anchors_col (int, optional): Column of data_file containing
                 the targets anchors. Anchors should be two numbers separated
                 by a semicolon (';'). Defaults to 2.
+            M_chain_col (None or int, optional): Column of data_file containing
+                the targets M chain sequences.
             benchmark (bool, optional): Set True only for benchmarking purpose,
                 if target structures are available. Defaults to False.
             start_row (None or int): Starting row of data_file, to use when 
@@ -155,29 +171,29 @@ class Wrapper():
         ## Extract targets from data_file
         self.__get_targets_from_file(data_file, delimiter=delimiter, header=header, IDs_col=IDs_col, 
                                      peptides_col=peptides_col, allele_col=allele_col, anchors_col=anchors_col,
-                                     start_row=start_row, end_row=end_row)
+                                     M_chain_col=M_chain_col, start_row=start_row, end_row=end_row)
         
         ## Create target objects
         jobs = {}
         for target_id in self.targets:
-            try:
+            #try:
                 if verbose:
                     print('Target ID: ', target_id)
                     print('Target MHC_class: ', MHC_class)
                     print('Target allele: ', self.targets[target_id]['allele'])
                     print('Target peptide: ', self.targets[target_id]['peptide_sequence'])
-                try:
-                    if verbose:
-                        print('Target Anchors: ', self.targets[target_id]['anchors'])
-                    tar = PMHC.Target(target_id, allele_type=self.targets[target_id]['allele'],
-                                      peptide=self.targets[target_id]['peptide_sequence'] ,
-                                      MHC_class=MHC_class, anchors=self.targets[target_id]['anchors'],
-                                      use_netmhcpan=use_netmhcpan)
-                except KeyError:
-                    tar = PMHC.Target(target_id, allele_type=self.targets[target_id]['allele'],
-                                      peptide=self.targets[target_id]['peptide_sequence'],
-                                      MHC_class=MHC_class,
-                                      use_netmhcpan=use_netmhcpan)
+                    print('Target M chain seq: ', self.targets[target_id]['M_chain_seq'])
+                if verbose:
+                    print('Target Anchors: ', self.targets[target_id]['anchors'])
+                #try:
+                tar = PMHC.Target(target_id, allele_type=self.targets[target_id]['allele'],
+                                  peptide=self.targets[target_id]['peptide_sequence'] ,
+                                  MHC_class=MHC_class, anchors=self.targets[target_id]['anchors'],
+                                  M_chain_seq=self.targets[target_id]['M_chain_seq'], 
+                                  use_netmhcpan=use_netmhcpan)
+                #except Exception as err:
+                #    print('Skipping Target %s at Target object generation step for the following reason:' %target_id)
+                #    print(("Exception: {0}".format(err)))
                 try:
                     mod = Pandora.Pandora(tar, self.db)
                 except Exception as err:
@@ -189,9 +205,9 @@ class Wrapper():
                 except Exception as err:
                     print('Skipping Target %s at template selection step for the following reason:' %target_id)
                     print(("Exception: {0}".format(err)))
-            except Exception as err:
-                print('An unidentified problem occurred with Target %s. Please check your target info' %target_id)
-                print(("Exception: {0}".format(err)))
+            #except Exception as err:
+            #    print('An unidentified problem occurred with Target %s. Please check your target info' %target_id)
+            #    print(("Exception: {0}".format(err)))
         self.jobs = jobs
         
     def run_pandora(self, num_cores=1, n_loop_models=20, n_jobs=None,  
