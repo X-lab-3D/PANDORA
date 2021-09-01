@@ -232,7 +232,7 @@ class Target(PMHC):
                 anchors = [anchor_1, anchor_2]
                 self.anchors = anchors
             #Use NetMHCpan to predict the anchors
-            else use_netmhcpan == True:
+            else:
                 print('WARNING: no anchor positions provided. Pandora will predict them using NetMHCpan')
     
                 netMHCpan_dir = [i for i in os.listdir(PANDORA.PANDORA_path + '/../') if
