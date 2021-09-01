@@ -225,15 +225,11 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     with open(PANDORA.PANDORA_path + '/../netMHCpan-4.1/data/allelenames') as f:
         for line in f:
             all_netMHCpan_alleles.append(line.split(' ')[0])#.replace(':',''))
-            #all_netMHCpan_alleles.append(line.split(' ')[0].replace(':',''))
 
     ## Format alleles
     target_alleles = [i.replace('*','') for i in allele_type]
     ## Make sure only netMHCpan available alleles are used
-    #if any(i for i in target_alleles if i in all_netMHCpan_alleles):
     target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
-    #else:
-    #    pass
 
     if len(target_alleles) == 0:
         print('ERROR: The provided Target allele is not available in NetMHCpan-4.1')
@@ -255,14 +251,13 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     os.system('%s -p %s -a %s > %s' %(netmhcpan, infile, target_alleles_str, outfile))
 
     # Get the output from the netMHCIIpan prediction
-    # {allele: (Icore, %rank_EL)}
+    # {allele: (core, %rank_EL)}
     pred = {}
     with open(outfile) as f:
         for line in f:
             if peptide in line and not line.startswith('#'):
                 ln = [i for i in line[:-1].split(' ') if i != '']
-                #pred[ln[1]] = (ln[3], float(ln[12]))
-                #pred[ln[1]] = (ln[9], float(ln[12]))
+                #ln[3] is core, ln[9] is Icore
                 try:
                     pred[ln[1]].append((ln[3], float(ln[12])))
                 except KeyError:
@@ -271,10 +266,6 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     # Sort each allele result per Rank_EL
     for allele in pred:
         pred[allele] = list(sorted(pred[allele], key=lambda x:x[1]))
-    
-    #if verbose:
-    #    print('NetMHCpan full prediction:')
-    #    print(pred)
 
     if len(pred) == 0:
         print('ERROR: NetMHCpan-4.1 was not able to find any binding core for')
@@ -282,7 +273,6 @@ def predict_anchors_netMHCpan(peptide, allele_type,
         return None
     # For every allele, the binding core is predicted. Take the allele with the highest reliability score
     best_allele = min((pred[i][0][1], i) for i in pred)[1]
-    #best_allele = min((pred[i][1], i) for i in pred)[1]
 
     # Do a quick alignment of the predicted core and the peptide to find the anchors. (the predicted binding core can
     # contain dashes -. Aligning them makes sure you take the right residue as anchor.
@@ -305,13 +295,12 @@ def predict_anchors_netMHCpan(peptide, allele_type,
         print(pept2)
     # Find the anchors by finding the first non dash from the left and from the right
     predicted_anchors = [2,len(peptide)]
-    #for i in range(len(pept2)):
-    #    if pept2[i] != '-':
-    #        predicted_anchors[0] = i + 2 #(+1 for the numbering and +1 because the anchor is the second residue in netMHCpan core)
-    #        break
+    
+    # Find the first anchor
     p1 = 0
     p2 = 0
     for i in range(len(pept2)):
+        # if the second position has no gaps
         if i == 1 and pept2[i] != '-' and pept1[i] != '-':
             predicted_anchors[0] = p1 + 1
             break
@@ -322,12 +311,8 @@ def predict_anchors_netMHCpan(peptide, allele_type,
             p1 += 1
         if pept2[i] != '-':
             p2 += 1
-        
-    #for i in range(len(pept2)):
-    #    if pept2[::-1][i] != '-':
-    #        predicted_anchors[1] = len(pept2) - i
-    #        break
 
+    # Find the second anchor
     for i in range(len(pept2)):
         if pept2[::-1][i] != '-':
             predicted_anchors[1] = len([j for j in pept1[:len(pept1) -i] if j != '-'])
