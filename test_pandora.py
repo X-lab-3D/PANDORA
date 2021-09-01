@@ -8,6 +8,7 @@ from PANDORA.Database import Database_functions
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.PMHC import Model
+#from PANDORA.Wrapper import Wrapper
 
 def test_PMHC_target():
     # Create target object
@@ -136,7 +137,7 @@ def test_construct_database():
 
 
 def test_load_db():
-    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # test if items in the database are correct
     pass_test = False
     if '1A1O' in db.MHCI_data and '4Z7U' in db.MHCII_data:
@@ -147,7 +148,7 @@ def test_load_db():
 
 
 def test_template_select_MHCI():
-    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
     target = PMHC.Target('1A1O',
                          db.MHCI_data['1A1O'].allele_type,
@@ -159,12 +160,12 @@ def test_template_select_MHCI():
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
     mod.find_template(benchmark=True)
 
-    assert mod.template[0].id == '2X4R' and mod.template[0].peptide == 'NLVPMVATV'
+    assert mod.template.id == '2X4R' and mod.template.peptide == 'NLVPMVATV'
 
 
 def test_template_select_MHCII():
     # Load database
-    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
     target = PMHC.Target('2NNA',
                          db.MHCII_data['2NNA'].allele_type,
@@ -178,13 +179,27 @@ def test_template_select_MHCII():
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
     mod.find_template(benchmark=True)
 
-    assert mod.template[0].id == '4Z7U' and mod.template[0].peptide == 'PSGEGSFQPSQENPQ'
+    assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
 
-
+@pytest.mark.skip
+def test_database_repath():
+    # Load database
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
+    # Repath database
+    db.repath(PANDORA.PANDORA_path + '/../test/test_data/PDBs', save=PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
+    
+    MHCI_flag = False
+    if db.MHCI_data['1A1O'].pdb_path == PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb':
+        MHCI_flag = True
+    MHCI_flag = False
+    if db.MHCII_data['2NNA'].pdb_path == PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCII/2NNA.pdb':
+        MHCII_flag = True
+    assert  MHCI_flag and MHCII_flag
+    
 @pytest.mark.skip
 def test_pandora_MHCI_modelling():
     # Load database
-    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
     # Create target object
     target = PMHC.Target('1A1O',
                          db.MHCI_data['1A1O'].allele_type,
@@ -193,8 +208,8 @@ def test_pandora_MHCI_modelling():
                          anchors=db.MHCI_data['1A1O'].anchors)
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
-    mod.model(n_models=1, stdev=0.1, benchmark=True, loop_refinement='very_fast')
+    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/')
+    mod.model(n_loop_models=1, stdev=0.1, benchmark=True, loop_refinement='very_fast')
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
@@ -206,11 +221,30 @@ def test_pandora_MHCI_modelling():
 
     assert pass_test
 
-
+@pytest.mark.skip
+def test_wrapper_MHCI():
+    # Load database
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
+    # Create Wrapper object
+    wrap = Wrapper.Wrapper()
+    # Define data_file
+    data_file =  PANDORA.PANDORA_path + '/../test/test_data/test_MHCI_datafile.tsv'
+    # Create targets
+    wrap.create_targets(data_file, db, MHC_class='I', header=True, 
+                        delimiter='/t', IDs_col=0, peptides_col=1, 
+                        allele_col=3, anchors_col=2)
+    # Check if the jobs went as expected
+    
+    # Define output directory
+    output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test'
+    # Run the modellings
+    wrap.run_pandora(num_cores=2, n_loop_models=20, 
+                     benchmark=False, output_dir=output_dir)
+    
 @pytest.mark.skip
 def test_pandora_MHCII_modelling():
     # Load database
-    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
     # Create target object
     target = PMHC.Target('2NNA',
                          db.MHCII_data['2NNA'].allele_type,
@@ -221,7 +255,7 @@ def test_pandora_MHCII_modelling():
                          anchors=db.MHCII_data['2NNA'].anchors)
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
+    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/')
     mod.model(n_models=1, stdev=0.2, benchmark=True, loop_refinement='very_fast')
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
@@ -233,10 +267,9 @@ def test_pandora_MHCII_modelling():
     os.system('rm -r %s' % (mod.output_dir))
     assert pass_test
 
-
 def test_rmsd():
     # Load database
-    db = Database.Database().load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
     target = PMHC.Target('1A1O',
                          db.MHCI_data['1A1O'].allele_type,

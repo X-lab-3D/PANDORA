@@ -1,7 +1,8 @@
 
 """
-The user needs to manually download the netMHCpan or netMHCIIpan software, since it requires agreement to an
-academic license agreement
+The user needs to manually download the netMHCpan or netMHCIIpan software, 
+since it requires agreement to an academic license
+
 
 1. Go to: https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1 and https://services.healthtech.dtu.dk/service.php?NetMHCIIpan-4.0
 2. press the download button
@@ -87,13 +88,3 @@ try:
 except:
     print('Something went wrong with configuring netMHCIIpan')
     os.chdir(wd)
-
-# os.popen("alias KEY_MODELLER='XXXX'").read()
-# os.popen("conda install -y -c salilab modeller").read()
-# os.popen("conda install -y -c conda-forge biopython").read()
-# os.popen("conda install -y dill").read()
-# os.popen("conda install -y -c bioconda muscle").read()
-# os.popen("pip install pdb-tools").read()
-# os.popen("pip install pdb2sql").read()
-#
-# os.popen("pip install -e ./").read()

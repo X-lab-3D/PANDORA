@@ -8,6 +8,7 @@ from Bio import pairwise2
 from PANDORA.Pandora import Align
 import statistics
 from Bio.Align import PairwiseAligner
+from datetime import datetime
 
 
 def check_target_template(target, template):
@@ -155,12 +156,14 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     if target_alleles == []:
         target_alleles = ['DRB1_0101']
 
-    target_alleles = ','.join(list(set(target_alleles)))
+    target_alleles_str = ','.join(target_alleles)
 
     # Setup files
     netmhciipan = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/netMHCIIpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/pep.txt'
-    outfile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/pept_prediction.txt'
+    infile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s.txt' %(
+        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+    outfile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s_prediction.txt' %(
+        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
@@ -168,7 +171,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
 
     try:
         # run netMHCIIpan
-        os.system('%s -f %s -inptype 1 -a %s > %s' % (netmhciipan, infile, target_alleles, outfile))
+        os.system('%s -f %s -inptype 1 -a %s > %s' % (netmhciipan, infile, target_alleles_str, outfile))
 
         # Get the output from the netMHCIIpan prediction
         # {allele: (offset, core, core_reliability, score_EL, %rank_EL)}
@@ -205,8 +208,10 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     return predicted_anchors
 
 
-def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
-    '''Uses netMHCIIpan to predict the binding core of a peptide and infer the anchor positions from that.
+def predict_anchors_netMHCpan(peptide, allele_type, 
+                              verbose=True, rm_output=True):
+    '''Uses netMHCIIpan to predict the binding core of a peptide and infer the 
+    anchor positions from that.
 
     Args:
         peptide: (str): AA sequence of the peptide
@@ -219,57 +224,110 @@ def predict_anchors_netMHCpan(peptide, allele_type, verbose = True):
     all_netMHCpan_alleles = []
     with open(PANDORA.PANDORA_path + '/../netMHCpan-4.1/data/allelenames') as f:
         for line in f:
-            all_netMHCpan_alleles.append(line.split(' ')[0].replace(':',''))
+            all_netMHCpan_alleles.append(line.split(' ')[0])#.replace(':',''))
 
-    # Format alleles
+    ## Format alleles
     target_alleles = [i.replace('*','') for i in allele_type]
+    ## Make sure only netMHCpan available alleles are used
     target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
 
-    target_alleles = ','.join(target_alleles)
+    if len(target_alleles) == 0:
+        print('ERROR: The provided Target allele is not available in NetMHCpan-4.1')
+        return None
+
+    target_alleles_str = ','.join(target_alleles)
 
     # Setup files
     netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/pep.txt'
-    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/pept_prediction.txt'
+    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s.txt' %(
+        peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
+    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s_prediction.txt' %(
+        peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
         f.write(peptide)
 
-    os.system('%s -p %s -a %s > %s' %(netmhcpan, infile, target_alleles, outfile))
+    os.system('%s -p %s -a %s > %s' %(netmhcpan, infile, target_alleles_str, outfile))
 
     # Get the output from the netMHCIIpan prediction
     # {allele: (core, %rank_EL)}
     pred = {}
     with open(outfile) as f:
         for line in f:
-            if peptide in line:
+            if peptide in line and not line.startswith('#'):
                 ln = [i for i in line[:-1].split(' ') if i != '']
-                pred[ln[1]] = (ln[3], float(ln[12]))
+                #ln[3] is core, ln[9] is Icore
+                try:
+                    pred[ln[1]].append((ln[3], float(ln[12])))
+                except KeyError:
+                    pred[ln[1]] = [(ln[3], float(ln[12]))]
+                    
+    # Sort each allele result per Rank_EL
+    for allele in pred:
+        pred[allele] = list(sorted(pred[allele], key=lambda x:x[1]))
 
+    if len(pred) == 0:
+        print('ERROR: NetMHCpan-4.1 was not able to find any binding core for')
+        print('the provided peptide and MHC allele')
+        return None
     # For every allele, the binding core is predicted. Take the allele with the highest reliability score
-    best_allele = min((pred[i][1], i) for i in pred)[1]
+    best_allele = min((pred[i][0][1], i) for i in pred)[1]
 
     # Do a quick alignment of the predicted core and the peptide to find the anchors. (the predicted binding core can
     # contain dashes -. Aligning them makes sure you take the right residue as anchor.
-    alignment = pairwise2.align.globalxx(peptide, pred[best_allele][0])
-
+    alignment = pairwise2.align.globalxx(peptide, pred[best_allele][0][0])
+    pept1 = alignment[0][0]
+    pept2 = alignment[0][1]
+    
+    # Remove gaps if in the same position
+    to_remove = []
+    for i, (aa1, aa2) in enumerate(zip(pept1, pept2)):
+        if aa1 == aa2 == '-' and i != 0:
+            to_remove.append(i)
+    for x in reversed(to_remove):
+       pept1 = pept1[0:x:]+pept1[x+1::]
+       pept2 = pept2[0:x:]+pept2[x+1::]
+    
+    if verbose:
+        print('Query peptide aligned to the core:')
+        print(pept1)
+        print(pept2)
     # Find the anchors by finding the first non dash from the left and from the right
     predicted_anchors = [2,len(peptide)]
-    for i in range(len(alignment[0][1])):
-        if alignment[0][1][i] != '-':
-            predicted_anchors[0] = i + 2
+    
+    # Find the first anchor
+    p1 = 0
+    p2 = 0
+    for i in range(len(pept2)):
+        # if the second position has no gaps
+        if i == 1 and pept2[i] != '-' and pept1[i] != '-':
+            predicted_anchors[0] = p1 + 1
             break
-    for i in range(len(alignment[0][1])):
-        if alignment[0][1][::-1][i] != '-':
-            predicted_anchors[1] = len(alignment[0][1]) - i
+        elif i > 1 and pept2[i] != '-':
+            predicted_anchors[0] = p1 + 1
+            break
+        if pept1[i] != '-':
+            p1 += 1
+        if pept2[i] != '-':
+            p2 += 1
+
+    # Find the second anchor
+    for i in range(len(pept2)):
+        if pept2[::-1][i] != '-':
+            predicted_anchors[1] = len([j for j in pept1[:len(pept1) -i] if j != '-'])
+            #predicted_anchors[1] = len([j for j in pept2[::-1][i] if j != '-'])
             break
 
     if verbose:
         print('\tPredicted the binding core using netMHCpan (4.1):\n')
-        print('\tcore:\t%s\n\t%%Rank EL:\t%s\n' %(pred[best_allele][0], pred[best_allele][1] ))
+        print('\tIcore:\t%s\n\t%%Rank EL:\t%s\n' %(pred[best_allele][0][0], pred[best_allele][0][1] ))
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' %predicted_anchors)
 
+    if rm_output:
+        os.system('rm %s' %infile)
+        os.system('rm %s' %outfile)
+    
     return predicted_anchors
 
 
@@ -369,10 +427,6 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
     Returns: Template object
 
     '''
-
-    # if not seq_based_templ_selection:
-
-    PAM30 = substitution_matrices.load('PAM30')
 
     ## For MHC I
     if target.MHC_class == 'I':
@@ -582,8 +636,12 @@ def write_ini_script(target, template, alignment_file, output_dir):
             if 'alnfile' in line:
                 modscript.write(line % os.path.basename(alignment_file))
             elif 'knowns' in line:
-                modscript.write(
-                    'knowns = (%s), sequence = "%s",\n' % (','.join(['"' + i.id + '"' for i in template]), target.id))
+                if type(template)==list:
+                    modscript.write(
+                        'knowns = (%s), sequence = "%s",\n' % (','.join(['"' + i.id + '"' for i in template]), target.id))
+                else:
+                    modscript.write(
+                        'knowns = (%s), sequence = "%s",\n' % ('"' + template.id + '"', target.id))
                 # modscript.write(line % ('(' + ','.join([i.id for i in template]) + ')', target.id))
             else:
                 modscript.write(line)
@@ -666,7 +724,12 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
             if 'alnfile' in line:
                 modscript.write(line %(os.path.basename(alignment_file)))
             elif 'knowns' in line:
-                modscript.write('knowns = (%s), sequence = "%s",\n' %(','.join(['"' + i.id + '"' for i in template]), target.id))
+                if type(template)==list:
+                    modscript.write(
+                        'knowns = (%s), sequence = "%s",\n' % (','.join(['"' + i.id + '"' for i in template]), target.id))
+                else:
+                    modscript.write(
+                        'knowns = (%s), sequence = "%s",\n' % ('"' + template.id + '"', target.id))
                 # modscript.write(line %(','.join([i.id for i in template]), target.id))
             elif 'a.ending_model' in line:
                 modscript.write(line % (n_homology_models))
@@ -736,6 +799,8 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         # Append the filename and molpdf to the rest of the data
         logf.append((il_file, fake_molpdf, fake_dope))
 
+    # Sort output by molpdf
+    logf.sort(key=lambda tup:tup[1])
     # Write to output file
     f = open(output_dir + '/molpdf_DOPE.tsv', 'w')
     for i in logf:
@@ -776,7 +841,6 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         pickle.dump(results, open("%s/results_%s.pkl" %(output_dir, os.path.basename(os.path.normpath(output_dir))), "wb"))
 
     return results
-
 
 def align_peptides(seq1, anch1_seq1, anch2_seq1, seq2, anch1_seq2, anch2_seq2):
     '''
