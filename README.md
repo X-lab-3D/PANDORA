@@ -1,6 +1,6 @@
 # PANDORA
-### Peptide ANchored mODelling fRAmework for peptide-MHC complexes
 
+### Peptide ANchored mODelling fRAmework for peptide-MHC complexes
 
 ![PANDORA](https://github.com/DarioMarzella/PANDORA/blob/master/images/flowchart_pMHCI.png?raw=true)
 
@@ -72,6 +72,7 @@ python netMHCpan_install.py
 
 ## Tutorial
 
+db = Database.load('a_saved_Pandora_database')
 
 #### Example 1 : Generating a peptide:MHC complex given the peptide sequence
 PANDORA requires at least these information to generate models:
@@ -270,4 +271,5 @@ PANDORA_files
 
 ## Issues
 
-If you have questions or find a bug, please report the issue in the [Github issue channel](https://github.com/DarioMarzella/PANDORA/issues).
+If you have questions or find a bug, please report the issue in the [Github issue channel](https://github.com/X-lab-3D/PANDORA/issues).
+

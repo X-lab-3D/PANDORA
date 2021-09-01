@@ -223,6 +223,7 @@ class Target(PMHC):
         
         # If anchors are not provided, predict them from the peptide length
         if MHC_class =='I' and anchors == []:
+            #Use Canonical anchors
             if use_netmhcpan == False:
                 print('WARNING: no anchor positions provided. Pandora will assign them to canonical anchor position.')
                 print('If you want PANDORA to use NetMHCpan to predict the anchors set use_netmhcpan as True')
@@ -230,8 +231,8 @@ class Target(PMHC):
                 anchor_2 = len(peptide)
                 anchors = [anchor_1, anchor_2]
                 self.anchors = anchors
-            
-            if use_netmhcpan == True:
+            #Use NetMHCpan to predict the anchors
+            else:
                 print('WARNING: no anchor positions provided. Pandora will predict them using NetMHCpan')
     
                 netMHCpan_dir = [i for i in os.listdir(PANDORA.PANDORA_path + '/../') if
@@ -242,8 +243,13 @@ class Target(PMHC):
                     print('Predicted anchors: %s' %self.anchors)
     
                 else:
-                    print("Need netMHCpan to predict anchor positions. Please install by running 'netMHCpan_install.py'.")
-
+                    print("Need netMHCIIpan to predict anchor positions. Please download and install netMHCpan.\n\n"
+                      "The user needs to manually download the netMHCIIpan software, since it requires agreement to an academic license agreement.\n"
+                      "1. Go to: https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1\n"
+                      "2. press the download button\n"
+                      "3. Download the most recent version appropriate for your operating system\n"
+                      "4. Untar the file and put it in the root directory of your PANDORA install\n"
+                      "5. Follow the readme or simply run netMHCpan_install.py to configure netMHCpan")
 
         if MHC_class =='II' and anchors == []:
             print('WARNING: no anchor positions provided. Pandora will predict them using netMHCIIpan.')
@@ -254,7 +260,13 @@ class Target(PMHC):
                 # predict the anchors
                 self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type)
             else:
-                print("Need netMHCIIpan to predict anchor positions. Please install by running 'netMHCpan_install.py' or provide anchor positions.")
+                print("Need netMHCpan to predict anchor positions. Please download and install netMHCIIpan.\n\n"
+                      "The user needs to manually download the netMHCpan software, since it requires agreement to an academic license agreement.\n"
+                      "1. Go to: https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1\n"
+                      "2. press the download button\n"
+                      "3. Download the most recent version appropriate for your operating system\n"
+                      "4. Untar the file and put it in the root directory of your PANDORA install\n"
+                      "5. Follow the readme or simply run netMHCpan_install.py to configure netMHCIIpan")
 
 
     def info(self):
