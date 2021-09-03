@@ -113,22 +113,22 @@ class Pandora:
 
         # create an output directory
         try:
-            # self.output_dir = '%s/%s_%s' %(self.output_dir, self.target.id, self.template.id)
-            self.output_dir = '%s/%s_%s' % (self.output_dir, self.target.id, '_'.join([i.id for i in self.template]))
+            self.output_dir = '%s/%s_%s' %(self.output_dir, self.target.id, self.template.id)
+            #self.output_dir = '%s/%s_%s' % (self.output_dir, self.target.id, '_'.join([i.id for i in self.template]))
 
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir)
         except:
             raise Exception('A problem occurred while creating output directory')
 
-        for templ in self.template:
+        #for templ in self.template:
         
-            if os.path.isfile(templ.pdb_path):
-                os.system('cp %s %s/%s.pdb' %(templ.pdb_path, self.output_dir, templ.id))
-            else:
-                print('Template object could not be found. Please check the path: %s.' %templ.pdb_path)
-                print('If the path is not available, you can use Database.repath.')
-                raise Exception('Template file not found.')
+        if os.path.isfile(self.template.pdb_path):
+            os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
+        else:
+            print('Template object could not be found. Please check the path: %s.' %self.template.pdb_path)
+            print('If the path is not available, you can use Database.repath.')
+            raise Exception('Template file not found.')
 
         # dd/mm/YY H:M:S
         #date_time = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
@@ -313,11 +313,13 @@ class Pandora:
             self.__log(self.target.id, 'None', 'Could not find a template')
             raise Exception('Could not find a template')
 
+        print('###############')
+        print('TEMPLATE: ', self.template)
         # Prepare the output directory
         try:
             self.prep_output_dir()
         except:
-            self.__log(self.target.id, '_'.join([i.id for i in self.template], 'Failed creating output directory'))
+            self.__log(self.target.id, self.template.id, 'Failed creating output directory')
             raise Exception('Failed creating output directory')
 
 
@@ -326,28 +328,28 @@ class Pandora:
         try:
             self.align(verbose=verbose)
         except:
-            self.__log(self.target.id, '_'.join([i.id for i in self.template], 'Failed aligning target and template'))
+            self.__log(self.target.id, self.template.id, 'Failed aligning target and template')
             raise Exception('Failed aligning target and template')
 
         # Prepare the scripts that run modeller
         try:
             self.write_ini_script()
         except:
-            self.__log(self.target.id, '_'.join([i.id for i in self.template], 'Failed writing .ini script'))
+            self.__log(self.target.id, self.template.id, 'Failed writing .ini script')
             raise Exception('Failed writing .ini script')
 
         # Run modeller to create the initial model
         try:
             self.create_initial_model(verbose=verbose)
         except Exception:
-            self.__log(self.target.id, '_'.join([i.id for i in self.template], 'Failed creating initial model with modeller'))
+            self.__log(self.target.id, self.template.id, 'Failed creating initial model with modeller')
             raise Exception('Failed creating initial model with modeller')
 
         # Calculate anchor restraints
         try:
             self.anchor_contacts(verbose=verbose)
         except:
-            self.__log(self.target.id, '_'.join([i.id for i in self.template], 'Failed calculating anchor restraints'))
+            self.__log(self.target.id, self.template.id, 'Failed calculating anchor restraints')
             raise Exception('Failed calculating anchor restraints')
 
         # prepare the scripts that run modeller
@@ -356,7 +358,7 @@ class Pandora:
                                        loop_refinement=loop_refinement, n_jobs=n_jobs,
                                        stdev=stdev, helix=helix, sheet=sheet)
         except:
-            self.__log(self.target.id, '_'.join([i.id for i in self.template], 'Failed preparing the modeller script'))
+            self.__log(self.target.id, self.template.id, 'Failed preparing the modeller script')
             raise Exception('Failed preparing the modeller script')
 
         # Do the homology modelling
@@ -364,7 +366,7 @@ class Pandora:
             self.run_modeller(benchmark=benchmark, verbose=verbose, keep_IL=self.keep_IL,
                               RMSD_atoms=RMSD_atoms, pickle_out=pickle_out)
         except:
-            self.__log(self.target.id, '_'.join([i.id for i in self.template], 'Failed running modeller'))
+            self.__log(self.target.id, self.template.id, 'Failed running modeller')
             raise Exception('Failed running modeller')
 
 
@@ -387,7 +389,7 @@ class Pandora:
 
 
             except:
-                self.__log(self.target.id, '_'.join([i.id for i in self.template], 'Could not calculate L-RMSD'))
+                self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD')
                 raise Exception('Could not calculate L-RMSD')
 
         elif verbose and not benchmark:
@@ -396,7 +398,7 @@ class Pandora:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4)))
 
         if type(self.template)==list:
-            self.__log(self.target.id, '_'.join([i.id for i in self.template]), 'Successfully modelled %s models' %(n_homology_models*n_loop_models))
+            self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %(n_homology_models*n_loop_models))
         else:
             self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %(n_homology_models*n_loop_models))
 
