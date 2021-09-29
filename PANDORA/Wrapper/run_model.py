@@ -28,12 +28,13 @@ def run_model(args):
     n_loop_models = args[2]
     n_jobs=args[3]
     benchmark = args[4]
+    pickle_out = args[5]
     
     # Check if the output directory is provided
-    if len(args) == 5:
+    if len(args) == 6:
         output_dir = False
-    elif len(args) == 6:
-        output_dir = args[5]
+    elif len(args) == 7:
+        output_dir = args[6]
        
     # Create Pandora Object
     if output_dir:
@@ -44,4 +45,4 @@ def run_model(args):
 
     # Run the modelling
     mod.model(n_loop_models=n_loop_models, n_jobs=n_jobs,
-              stdev=0.1, benchmark=benchmark)
+              stdev=0.1, benchmark=benchmark, pickle_out=pickle_out)

@@ -211,7 +211,7 @@ class Wrapper():
         self.jobs = jobs
         
     def run_pandora(self, num_cores=1, n_loop_models=20, n_jobs=None,  
-                    benchmark=False, output_dir=False):
+                    benchmark=False, output_dir=False, pickle_out=False):
         """Runs Pandora in parallel jobs.
         
 
@@ -226,6 +226,8 @@ class Wrapper():
                 if target structures are available. Defaults to False.
             output_dir (str, optional): Output directory path. 
                 Defaults to False.
+            pickle_out (bool, optional): If True, outputs a pickle file
+                containing every model object. Defaults to False.
 
         Returns:
             None.
@@ -234,9 +236,9 @@ class Wrapper():
 
         for job in self.jobs:
             if output_dir:
-                self.jobs[job].extend([n_loop_models, n_jobs, benchmark, output_dir])
+                self.jobs[job].extend([n_loop_models, n_jobs, benchmark, pickle_out, output_dir])
             else:
-                self.jobs[job].extend([n_loop_models, n_jobs, benchmark])
+                self.jobs[job].extend([n_loop_models, n_jobs, benchmark, pickle_out])
         Parallel(n_jobs = num_cores, verbose = 1)(delayed(run_model)(job) for job in list(self.jobs.values()))
     
 
