@@ -314,7 +314,7 @@ class Pandora:
             raise Exception('Could not find a template')
 
         print('###############')
-        print('TEMPLATE: ', self.template)
+        print('TEMPLATE: ', self.template.id)
         # Prepare the output directory
         try:
             self.prep_output_dir()
@@ -373,7 +373,8 @@ class Pandora:
         if verbose and benchmark:
             try:
                 print('\n\tModel\t\t\t\tMolpdf\t\tL-RMSD\t\tcore L-RMSD')
-                for m in self.results:
+                molsort = sorted(self.results, key=lambda m: float(m.molpdf))
+                for m in molsort:
                     try:
                         print('\t%s\t\t%s\t\t%s\t\t%s' % (
                             os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4),

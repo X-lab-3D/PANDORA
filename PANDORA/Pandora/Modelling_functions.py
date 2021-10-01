@@ -800,7 +800,8 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         logf.append((il_file, fake_molpdf, fake_dope))
 
     # Sort output by molpdf
-    logf.sort(key=lambda tup:tup[1])
+    logf.sort(key=lambda tup:float(tup[1]))
+    
     # Write to output file
     f = open(output_dir + '/molpdf_DOPE.tsv', 'w')
     for i in logf:
