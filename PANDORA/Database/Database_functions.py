@@ -1320,6 +1320,9 @@ def parse_pMHCI_pdb(pdb_id,
     # Check if file exists
     if os.path.isfile('%s/IMGT-%s.pdb.gz' % (indir, pdb_id)):
         print('Parsing %s' % pdb_id)
+        if pdb_id == '3RGV':
+            log(pdb_id, 'Skipped, non canonical template related to issue #47', logfile)
+            raise Exception
         try:
             # Unzip file (also check if the file is not empty) and save the path of this file
             pdb_file = unzip_pdb(pdb_id, indir, outdir)
