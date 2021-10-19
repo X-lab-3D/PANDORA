@@ -53,7 +53,7 @@ alias KEY_MODELLER='XXXX'
 
 Clone the repository:
 ```
-git clone https://github.com/DarioMarzella/PANDORA.git
+git clone https://github.com/X-lab-3D/PANDORA.git
 ```
 Enter the cloned directory and then install the dependencies!
 ```
@@ -71,8 +71,6 @@ python netMHCpan_install.py
 ```
 
 ## Tutorial
-
-db = Database.load('a_saved_Pandora_database')
 
 #### Example 1 : Generating a peptide:MHC complex given the peptide sequence
 PANDORA requires at least these information to generate models:
