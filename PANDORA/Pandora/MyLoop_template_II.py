@@ -15,7 +15,7 @@ class MyLoop(MA.loopmodel):
     
     def select_loop_atoms(self):
         # Two residue ranges (both will be refined simultaneously)
-        return M.selection(self.residue_range('%i:P', '%i:P'))# Be sure those arguments are always in the same line!
+        return M.selection(self.residue_range('%i:P', '%i:P'), self.residue_range('%i:P', '%i:P'))# Be sure those arguments are always in the same line!
         # note: the residue numbers and chain IDs refer to the built model, not to the template(s).
 
     ### SPECIAL_RESTRAINTS_BREAK ###  DO NOT DELETE THIS COMMENT

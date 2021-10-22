@@ -370,30 +370,31 @@ class Pandora:
             raise Exception('Failed running modeller')
 
 
-        if verbose and benchmark:
-            try:
-                print('\n\tModel\t\t\t\tMolpdf\t\tL-RMSD\t\tcore L-RMSD')
-                molsort = sorted(self.results, key=lambda m: float(m.molpdf))
-                for m in molsort:
-                    try:
-                        print('\t%s\t\t%s\t\t%s\t\t%s' % (
-                            os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4),
-                            round(float(m.lrmsd), 4), round(float(m.core_lrmsd), 4)))
-                    except AttributeError:
-                        try:
-                            print('\t%s\t\t%s\t\t%s' % (
-                                os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4),
-                                round(float(m.lrmsd), 4)))
-                        except AttributeError:
-                            print('\t%s\t\t%s' % (
-                                os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
+        # if verbose and benchmark:
+        #     try:
+        #         print('\n\tModel\t\t\t\tMolpdf\t\tL-RMSD\t\tcore L-RMSD')
+        #         molsort = sorted(self.results, key=lambda m: float(m.molpdf))
+        #         for m in molsort:
+        #             try:
+        #                 print('\t%s\t\t%s\t\t%s\t\t%s' % (
+        #                     os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4),
+        #                     round(float(m.lrmsd), 4), round(float(m.core_lrmsd), 4)))
+        #             except AttributeError:
+        #                 try:
+        #                     print('\t%s\t\t%s\t\t%s' % (
+        #                         os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4),
+        #                         round(float(m.lrmsd), 4)))
+        #                 except AttributeError:
+        #                     print('\t%s\t\t%s' % (
+        #                         os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
 
 
-            except:
-                self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD')
-                raise Exception('Could not calculate L-RMSD')
+        #     except:
+        #         self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD')
+        #         raise Exception('Could not calculate L-RMSD')
 
-        elif verbose and not benchmark:
+        # elif verbose and not benchmark:
+        if verbose:
             print('\n\tModel\t\t\t\tMolpdf')
             for m in self.results:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4)))
