@@ -393,7 +393,7 @@ class Pandora:
         #         self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD')
         #         raise Exception('Could not calculate L-RMSD')
 
-        #elif verbose and not benchmark:
+        # elif verbose and not benchmark:
         if verbose:
             print('\n\tModel\t\t\t\tMolpdf')
             for m in self.results:

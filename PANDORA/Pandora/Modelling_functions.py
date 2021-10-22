@@ -618,10 +618,19 @@ def write_ini_script(target, template, alignment_file, output_dir):
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r')
             for line in MyL_temp:
                 if 'self.residue_range' in line and 'M.selection' in line:
-                    myloopscript.write(line % (1, anch[0])) # write the first anchor
-                    for i in range(len(anch)-1): # Write all the inbetween acnhors if they are there
-                        myloopscript.write(line % (anch[i] + 2, anch[i+1]))
-                    myloopscript.write(line % (anch[-1] + 2, len(target.peptide))) # Write the last anchor
+                    if anch[0] == 0:
+                        anch_1 = 1
+                    else:
+                        anch_1 = anch[0]
+                    if anch[-1] == (len(target.peptide)-1):
+                        anch_term = len(target.peptide)
+                    else:
+                        anch_term = anch[-1]
+                    #Write first and last anchors, to keep only the flanking regions flexible
+                    myloopscript.write(line % (1, anch_1, anch_term, len(target.peptide))) 
+                    #for i in range(len(anch)-1): # Write all the inbetween acnhors if they are there
+                    #    myloopscript.write(line % (anch[i] + 2, anch[i+1]))
+                    #myloopscript.write(line % (anch[-1] + 2, len(target.peptide))) # Write the last anchor
                 elif 'SPECIAL_RESTRAINTS_BREAK' in line:
                     break
                 elif 'contact_file = open' in line:
@@ -702,10 +711,19 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r')
             for line in MyL_temp:
                 if 'self.residue_range' in line and 'M.selection' in line:
-                    myloopscript.write(line % (1, anch[0]))  # write the first anchor
-                    for i in range(len(anch) - 1):  # Write all the inbetween acnhors if they are there
-                        myloopscript.write(line %(anch[i] + 2, anch[i + 1]))
-                    myloopscript.write(line %(anch[-1] + 2, len(target.peptide)))  # Write the last anchor
+                    if anch[0] == 0:
+                        anch_1 = 1
+                    else:
+                        anch_1 = anch[0]
+                    if anch[-1] == (len(target.peptide)-1):
+                        anch_term = len(target.peptide)
+                    else:
+                        anch_term = anch[-1]
+                    #Write first and last anchors, to keep only the flanking regions flexible
+                    myloopscript.write(line % (1, anch_1, anch_term, len(target.peptide))) 
+                    #for i in range(len(anch)-1): # Write all the inbetween acnhors if they are there
+                    #    myloopscript.write(line % (anch[i] + 2, anch[i+1]))
+                    #myloopscript.write(line % (anch[-1] + 2, len(target.peptide))) # Write the last anchor
                 elif 'contact_file = open' in line:
                     myloopscript.write(line %(target.id))
                 elif 'STDEV MARKER' in line:
