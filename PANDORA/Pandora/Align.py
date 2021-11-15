@@ -9,13 +9,18 @@ import os
 
 class Align:
 
-    def __init__(self, target, template, output_dir=PANDORA.PANDORA_data + '/outputs'):
+    def __init__(self, target, template, 
+                 output_dir=PANDORA.PANDORA_data + '/outputs', remove_terms=True):
         ''' Performs a alignment of the target and template(s). Will spit out a filename that will be used for modeller.
 
         Args:
-            target: (Target object) The target object that will be aligned to the template structures
-            template: (Template object) can be either a single Target object or a list of Target objects
-            output_dir: (string)
+            target: (Target object) The target object that will be aligned to 
+                the template structures
+            template: (Template object) can be either a single Target object 
+                or a list of Target objects
+            output_dir: (string) output directory
+            remove_terms (bool): if True, removes N-terminal and C-terminal 
+                regions not present in the template sequence
         '''
 
         # Assign target and template. If the template is not given as a list, put in in a list.
@@ -53,6 +58,10 @@ class Align:
 
         # Perform alignment
         self.aligned_seqs_and_pept = self.__align_chains()
+        # Cut extra N-terminal and C-terminal
+        if remove_terms==True:
+            self.__remove_terms()
+        #Write alignment file for MODELLER
         self.alignment_file = self.__write_ali_file()
 
 
@@ -199,6 +208,45 @@ class Align:
         return {k + ' P': v[0] for k, v in id_pept_anch.items()}
 
 
+    def __remove_terms(self):
+        '''Removes N-terminal and C-terminal regions not present in the template'''
+        if self.__MHC_class == 'I':
+            chains = ['M']
+        elif self.__MHC_class == 'II':
+            chains = ['M', 'N']
+            
+        for chain in chains:
+            templ_seq = self.aligned_seqs_and_pept['%s %s' %(self.__template[0].id, chain)]
+            
+            #N terminal excess
+            N_term_excess = 0
+            if templ_seq.startswith('-'):
+                for aa in templ_seq:
+                    if aa == '-':
+                        N_term_excess += 1
+                    else:
+                        break
+
+                #Cut N-terminal excess regions
+                self.aligned_seqs_and_pept['%s %s' %(self.__template[0].id, chain)] = self.aligned_seqs_and_pept['%s %s' %(self.__template[0].id, chain)][N_term_excess:]
+                self.aligned_seqs_and_pept['%s %s' %(self.__target.id, chain)] = self.aligned_seqs_and_pept['%s %s' %(self.__target.id, chain)][N_term_excess:]
+                
+                
+            
+            #C terminal excess
+            C_term_excess = 0
+            if templ_seq.endswith('-'):
+                for aa in templ_seq[::-1]:
+                    if aa == '-':
+                        C_term_excess += 1
+                    else:
+                        break
+            
+                #Cut C-terminal excess regions
+                self.aligned_seqs_and_pept['%s %s' %(self.__template[0].id, chain)] = self.aligned_seqs_and_pept['%s %s' %(self.__template[0].id, chain)][:-C_term_excess]
+                self.aligned_seqs_and_pept['%s %s' %(self.__target.id, chain)] = self.aligned_seqs_and_pept['%s %s' %(self.__target.id, chain)][:-C_term_excess]
+            print('Chain %s, excess N %i, C %i' %(chain, N_term_excess, C_term_excess))        
+        
 
     def __write_ali_file(self):
         ''' Writes the alignement file from self.aligned_seqs_and_pept '''
