@@ -47,9 +47,9 @@ setup(
        'pathos'
        ],
 
-    extras_require=[
+    extras_require={
         'doc': ['recommonmark', 'sphinx', 'sphinx_rtd_theme'],
         'test': ['pytest', 'pytest-runner',
-                 'coverage', 'coveralls', 'pycodestyle'],
-    ]
+                 'coverage', 'coveralls', 'pycodestyle']
+    }
 )
