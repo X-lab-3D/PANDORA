@@ -50,7 +50,6 @@ alias KEY_MODELLER='XXXX'
 ```
 
 
-
 #### 2. Install Muscle
 PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) that can be installed via bioconda
 
@@ -58,7 +57,7 @@ PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) that can be inst
 conda install -c bioconda muscle
 ```
 
-#### 2. Install PANDORA
+#### 3. Install PANDORA
 
 Clone the repository:
 ```
@@ -70,7 +69,7 @@ cd PANDORA
 pip install -e .
 
 ```
-#### 3. (Optional) Install NetMHCpan and/or NetMHCIIpan
+#### 4. (Optional) Install NetMHCpan and/or NetMHCIIpan
 
 PANDORA lets the user if he wants to predict peptide's anchor residues instead of using conventional predefined anchor residues.
 In that case you need to install NetMHCpan (for peptide:MHC class I) and/or NetMHCIIpan (for peptide:MHC class II).
