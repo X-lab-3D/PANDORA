@@ -4,8 +4,8 @@ from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 import os
-from pathos.multiprocessing import ProcessingPool as Pool
-from pathos.multiprocessing import freeze_support
+# from pathos.multiprocessing import ProcessingPool as Pool
+# from pathos.multiprocessing import freeze_support
 import time
 import PANDORA
 

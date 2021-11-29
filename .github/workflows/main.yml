@@ -9,6 +9,7 @@ on:
     branches:
       - master
       - PANDORA_remaster
+      - cleanup_install
   pull_request:
     branches:
       - master
@@ -36,10 +37,12 @@ jobs:
           python-version: 3.8
       - name: Set up directories
         run: python test/install_git_test.py
-      - name: Install dependencies
+      - name: Install package
         run: |
+          conda install -c bioconda muscle
+          conda install -c salilab modeller
           python -m pip install --upgrade pip
-          pip install Biopython muscle pdb2sql dill pytest modeller
+          pip install .[test]
 
       # /opt/hostedtoolcache/Python/3.8.8/x64/lib/python3.8/site-packages
 #      - name: Run a multi-line script
@@ -57,4 +60,4 @@ jobs:
 #          ls -la
 
       - name: Test with pytest
-        run: pytest
+        run: pytest test/

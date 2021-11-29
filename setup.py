@@ -37,13 +37,19 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    #install_requires=[
-    #    'MODELLER',
-    #    'Biopython',
-    #    'pdb_tools',
-    #    'muscle',
-    #    'matplotlib',
-    #    'dill',
-    #    'pathos'
-    #    ],
+
+
+    install_requires=[
+       'Biopython',
+       'pdb_tools',
+       'pdb2sql',
+       'dill',
+       'matplotlib'
+       ],
+
+    extras_require={
+        'doc': ['recommonmark', 'sphinx', 'sphinx_rtd_theme'],
+        'test': ['pytest', 'pytest-runner',
+                 'coverage', 'coveralls', 'pycodestyle']
+    }
 )
