@@ -9,6 +9,7 @@ on:
     branches:
       - master
       - PANDORA_remaster
+      - cleanup_install
   pull_request:
     branches:
       - master
