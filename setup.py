@@ -37,14 +37,13 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
+
+
     install_requires=[
        'Biopython',
        'pdb_tools',
        'pdb2sql',
-       'muscle',
-       'matplotlib',
-       'dill',
-       'pathos'
+       'matplotlib'
        ],
 
     extras_require={
