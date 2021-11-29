@@ -23,7 +23,7 @@ It contains multiple functions to pre-process data and it's able to exploit diff
 
 
 ## Dependencies
-PANDORA requires MODELLER, python and some python libraries to be installed. 
+PANDORA requires MODELLER, python and some python libraries to be installed.
 The following installations are required to start PANDORA installation:
 
 - [Python](https://www.python.org/) 3
@@ -34,14 +34,14 @@ The installation process will take care of installing the following dependencies
 
 - [BioPython](https://anaconda.org/conda-forge/biopython)
 - [muscle](https://anaconda.org/bioconda/muscle)
-- [Modeller](https://anaconda.org/salilab/modeller) 9.23 or later
+<!-- - [Modeller](https://anaconda.org/salilab/modeller) 9.23 or later -->
 - [pdb2sql](https://github.com/DeepRank/pdb2sql) (Optional, only for RMSD calculation)
 - [NetMHCpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class I anchors)
 - [NetMHCIIpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class II anchors)
 
 ## Installation
 
-#### 1. Setup MODELLER License:
+#### 1. Install Modeller:
 Prior to PANDORA installation, you need to first activate MODELLER's license. Please request MODELLER license at: https://salilab.org/modeller/registration.html
 
 Replace XXXX with your MODELLER License key and run the command:
@@ -58,8 +58,8 @@ git clone https://github.com/X-lab-3D/PANDORA.git
 Enter the cloned directory and then install the dependencies!
 ```
 cd PANDORA
+pip install -e .
 
-python install.py
 ```
 #### 3. (Optional) Install NetMHCpan and/or NetMHCIIpan
 
@@ -79,9 +79,9 @@ PANDORA requires at least these information to generate models:
 
 Steps:
 
-A. The database of all templates need to be generated (retrieving all available pMHC PDBs in [IMGT](http://www.imgt.org/3Dstructure-DB/) database). 
+A. The database of all templates need to be generated (retrieving all available pMHC PDBs in [IMGT](http://www.imgt.org/3Dstructure-DB/) database).
    We strongly recommended to save the database once (set argument *save=<your_database_name>*), to skip downloading all templates again for later usage.
-   
+
 B. Creating a Template object based on the given target information
 
 C. Generating *n* number of pMHC models (Default n=20)
@@ -95,7 +95,7 @@ from PANDORA.Database import Database
 
 ## A. Create local Database
 db = Database.Database()
-db.construct_database(save='pandora_Database')     
+db.construct_database(save='pandora_Database')
 
 ## B. Create Target object
 target = PMHC.Target(
@@ -105,10 +105,10 @@ target = PMHC.Target(
 
 ## C. Perform modelling
 case = Pandora.Pandora(target, db)
-case.model()  
+case.model()
 ```
-#### Example 2 : Create multiple loop models in a your given directory 
-There are some options provided that you can input them as arguments to the functions. 
+#### Example 2 : Create multiple loop models in a your given directory
+There are some options provided that you can input them as arguments to the functions.
 
 For instance:
 - Generate more models for your modelling case
@@ -124,7 +124,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. load the pregenerated Database  of all pMHC PDBs as templates
-db = Database.load('pandora_Database')   
+db = Database.load('pandora_Database')
 
 ## B. Create Target object
 target = PMHC.Target(id='myTestCase'
@@ -138,8 +138,8 @@ case.model(n_loop_models=100, output_dir = '/your/directory/')  # Generates 100 
 
 #### Example 3 : Benchmark PANDORA on one modelling case
 If you want to evaluate the framework on a target with a known experimental structure:
-- Provide the PDB ID for the *Target* class 
-- Set *benchmark=True* for the modelling 
+- Provide the PDB ID for the *Target* class
+- Set *benchmark=True* for the modelling
   (calculates L-RMSD to show how far the model is from the near-native structure)
 
 ```python
@@ -148,7 +148,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('pandora_Database')  
+db = Database.load('pandora_Database')
 
 ## B. Create Target object
 target = PMHC.Target('1A1M',
@@ -158,7 +158,7 @@ target = PMHC.Target('1A1M',
 
 ## C. Perform modelling
 case = Pandora.Pandora(target, db)
-case.model(benchmark=True)  
+case.model(benchmark=True)
 ```
 #### Example 4: Model a peptide:MHCI complex with an alpha helix in the peptide
 If you have some domain knowledge of the peptide conformation, whether it forms secondary structures other than loop (Helix/Beta strand), the framework will consider that while modelling the peptide:
@@ -246,25 +246,25 @@ Please note that the modelling results consisting genretaed models by default ar
 ```
 PANDORA_files
   └── data
-     └── outputs                         Default directory to save output 
-        └── <target_name>_<template_id>  Each user's modelling case is given a specific name 
-        
+     └── outputs                         Default directory to save output
+        └── <target_name>_<template_id>  Each user's modelling case is given a specific name
+
            ├── molpdf_DOPE.tsv           Ranking all models by molpdf and DOPE modeller's scoring functions
            ├── *BL*.pdb                  Final models
            ├── modeller.log              Printing log file generated by MODELLER, describing modelling steps, or any issues arose along modelling
-                                                                
+
            ├── *.ali                     Alignment file between template(s) and target used for modelling
            ├── contacts_*.list           Contact restraints
-           
-           ├── MyLoop.py                 MODELLER script to set loop modelling parameters for the peptide               
+
+           ├── MyLoop.py                 MODELLER script to set loop modelling parameters for the peptide
            ├── cmd_modeller_ini.py       MODELLER script to generate an initial model to extract restraints from
            ├── cmd_modeller.py           MODELLER script to set the main modelling parameters
-           
+
            ├── *.ini                     Model generated placing the target atoms at the same coordinate as the template's atoms
            ├── *IL*.pdb                  Initial loop model
-           └── ... 
-     
-           
+           └── ...
+
+
 ```
 
 ## Issues
