@@ -33,7 +33,7 @@ The following installations are required to start PANDORA installation:
 The installation process will take care of installing the following dependencies (see [Installation](#installation)), no need to install them yourself.
 
 - [BioPython](https://anaconda.org/conda-forge/biopython)
-- [muscle](https://anaconda.org/bioconda/muscle)
+<!-- - [muscle](https://anaconda.org/bioconda/muscle) -->
 <!-- - [Modeller](https://anaconda.org/salilab/modeller) 9.23 or later -->
 - [pdb2sql](https://github.com/DeepRank/pdb2sql) (Optional, only for RMSD calculation)
 - [NetMHCpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class I anchors)
@@ -47,6 +47,15 @@ Prior to PANDORA installation, you need to first activate MODELLER's license. Pl
 Replace XXXX with your MODELLER License key and run the command:
 ```
 alias KEY_MODELLER='XXXX'
+```
+
+
+
+#### 2. Install Muscle
+PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) that can be installed via bioconda
+
+```
+conda install -c bioconda muscle
 ```
 
 #### 2. Install PANDORA
