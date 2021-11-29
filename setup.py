@@ -43,6 +43,7 @@ setup(
        'Biopython',
        'pdb_tools',
        'pdb2sql',
+       'dill',
        'matplotlib'
        ],
 
