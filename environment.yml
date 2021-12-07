@@ -1,0 +1,47 @@
+name: PANDORA
+channels:
+  - bioconda
+  - salilab
+  - conda-forge
+  - defaults
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - biopython=1.78=py39hbd71b63_1
+  - blas=1.0=mkl
+  - ca-certificates=2021.4.13=h06a4308_1
+  - certifi=2020.12.5=py39h06a4308_0
+  - hdf5-1106=1.10.6=0
+  - intel-openmp=2021.2.0=h06a4308_610
+  - ld_impl_linux-64=2.33.1=h53a641e_7
+  - libffi=3.3=he6710b0_2
+  - libgcc-ng=9.1.0=hdf63c60_0
+  - libstdcxx-ng=9.1.0=hdf63c60_0
+  - mkl=2021.2.0=h06a4308_296
+  - mkl-service=2.3.0=py39h27cfd23_1
+  - mkl_fft=1.3.0=py39h42c9631_2
+  - mkl_random=1.2.1=py39ha9443f7_2
+  - modeller=10.1=py39h9bf148f_1
+  - muscle=3.8.1551=hc9558a2_5
+  - ncurses=6.2=he6710b0_1
+  - numpy=1.20.1=py39h93e21f0_0
+  - numpy-base=1.20.1=py39h7d8b39e_0
+  - openssl=1.1.1k=h27cfd23_0
+  - pip=21.0.1=py39h06a4308_0
+  - python=3.9.4=hdb3f193_0
+  - python_abi=3.9=1_cp39
+  - readline=8.1=h27cfd23_0
+  - setuptools=52.0.0=py39h06a4308_0
+  - six=1.15.0=pyh9f0ad1d_0
+  - sqlite=3.35.4=hdfb4753_0
+  - tk=8.6.10=hbc83047_0
+  - tzdata=2020f=h52ac0ba_0
+  - wheel=0.36.2=pyhd3eb1b0_0
+  - xz=5.2.5=h7b6447c_0
+  - zlib=1.2.11=h7b6447c_3
+  - pip:
+    - joblib==1.0.1
+    - pandas==1.2.4
+    - pdb2sql==0.5.1
+    - python-dateutil==2.8.1
+    - pytz==2021.1
+prefix: /home/dariom/anaconda3/envs/PANDORA_test
