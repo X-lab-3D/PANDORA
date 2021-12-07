@@ -817,7 +817,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     for line in f:
         if line.startswith(target.id + '.'):   #target.id
             l = line.split()
-            if len(l) > 2:
+            if len(l) == 3: #TODO: make sure the line is reporting the model with tis score. Format: model, molpdf, dope.
                 logf.append(tuple(l))
     f.close()
 
@@ -832,8 +832,13 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         #         il_molpdf = line.split()[-1]
         # f.close()
         # Create a fake molpdf/dope score for the IL model: the best molpdf/dope from the real models - 1
-        fake_molpdf = str(min(float(i[1]) for i in logf) - 1)
-        fake_dope = str(min(float(i[2]) for i in logf) - 1)
+        try:
+            fake_molpdf = str(min(float(i[1]) for i in logf) - 1)
+            fake_dope = str(min(float(i[2]) for i in logf) - 1)
+        except ValueError:
+            fake_molpdf = -10000
+            fake_dope = -10000
+            print('WARNING: ValueError exception raised while assigning fake molpdf and dope to IL model')
         # Append the filename and molpdf to the rest of the data
         logf.append((il_file, fake_molpdf, fake_dope))
 
@@ -855,7 +860,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
                                             molpdf=logf[i][1], dope=logf[i][2])
 
         except:
-            print('Something went wrong when calling Model.Model() for case %s' %target.id)
+            print('WARNING: Error raised while calling Model.Model() for case %s' %target.id)
             
         # if benchmark:
         #     try:
