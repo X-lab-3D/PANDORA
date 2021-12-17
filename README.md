@@ -140,8 +140,8 @@ target = PMHC.Target(id='myTestCase'
     peptide = 'TPYDINQML')
 
 ## C. Perform modelling
-case = Pandora.Pandora(target, db)
-case.model(n_loop_models=100, output_dir = '/your/directory/')  # Generates 100 models
+case = Pandora.Pandora(target, db, output_dir = '/your/directory/')
+case.model(n_loop_models=100)  # Generates 100 models
 ```
 
 #### Example 3 : Benchmark PANDORA on one modelling case
