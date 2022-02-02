@@ -107,7 +107,7 @@ db.construct_database(save='pandora_Database')
 
 ## B. Create Target object
 target = PMHC.Target(
-    allele_ty:pe='HLA-A*0201'
+    allele_type='HLA-A*0201'
     peptide='LLFGYPVYV',
     anchors = [2,9])
 
