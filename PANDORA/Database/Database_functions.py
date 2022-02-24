@@ -232,9 +232,9 @@ def get_chainid_alleles_MHCII(pdbf):
     mhc_b = {}  # MHC II Beta
     for chain in chains:
         try:
-            if chains[chain][1][3] == 'II-ALPHA':
+            if chains[chain][1][3].endswith('II-ALPHA'):
                 mhc_a[chain] = chains[chain]
-            elif chains[chain][1][3] == 'II-BETA':  # or chains[chain][1][3] == 'II-BETA':
+            elif chains[chain][1][3].endswith('II-BETA'):  # or chains[chain][1][3] == 'II-BETA':
                 mhc_b[chain] = chains[chain]
         except:
             pass
