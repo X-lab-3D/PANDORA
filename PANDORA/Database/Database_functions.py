@@ -85,14 +85,10 @@ def download_ids_imgt(ReceptorType, data_dir = PANDORA.PANDORA_data, out_tsv = F
     '''
 
     #out_tsv = 'pMHCI_IDs_alleles_from_IMGT.tsv'
-    params = { 'ReceptorType' : ReceptorType,
-             'type-entry': 'PDB'}
+    params = urllib.parse.urlencode({ 'ReceptorType' : ReceptorType,
+             'type-entry': 'PDB'})
 
-    url = "http://www.imgt.org/3Dstructure-DB/cgi/3Dquery.cgi"
-
-    data = urllib.parse.urlencode(params)
-    data = data.encode('ascii') # data should be bytes
-    req = urllib.request.Request(url, data)
+    url = "http://www.imgt.org/3Dstructure-DB/cgi/3Dquery.cgi?%s" % params
 
     with urllib.request.urlopen(req) as response:
         text = response.read().decode('utf-8')
