@@ -405,12 +405,9 @@ def get_Gdomain_lzone(ref_pdb, output_dir, MHC_class):
 
 def remove_C_like_domain(pdb):
     '''Removes the C-like domain from a MHC struture and keeps only the G domain
-
     Args:
         pdb: (Bio.PDB): Bio.PDB object with chains names M (N for MHCII) and P
-
     Returns: (Bio.PDB): Bio.PDB object without the C-like domain
-
     '''
 
     # If MHCII, remove the C-like domain from the M-chain (res 80 and higher) and the N-chain (res 90 and higher)
@@ -430,10 +427,8 @@ def remove_C_like_domain(pdb):
     if 'N' not in [chain.id for chain in pdb.get_chains()]:
         for chain in pdb.get_chains():
             if chain.id == 'M':
-                for res in chain:
-                    if res.id[1] > 180:
-                        chain.detach_child(res.id)
-
+                need_to_be_removed = [res.id for res in chain if res.id[1] > 180]
+                _ = [chain.detach_child(x) for x in need_to_be_removed]
     return pdb
 
 #ValueError: Invalid column name lzone. Possible names are
