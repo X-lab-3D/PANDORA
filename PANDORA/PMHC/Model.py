@@ -217,25 +217,61 @@ def merge_chains(pdb):
     return pdb
 
 
-def renumber(pdb):
-    ''' Renumbers the pdb. Each chain starts at 1
+def renumber(pdb_ref, pdb_decoy):
+    ''' aligns two pdb's and renumber them accordingly.
 
     Args:
-        pdb: Bio.PDb object
+        pdb_ref:   Bio.PDB object
+        pdb_decoy: Bio.PDB object
+        
 
-    Returns:Bio.PDb object with renumbered residues
+    Returns: Bio.PDB objects with renumbered residues
 
     '''
-    for chain in pdb.get_chains():
-        nr = 1
-        for res in chain:
-            res.id = ('X', nr, res.id[2])
-            nr += 1
-    for chain in pdb.get_chains():
-        for res in chain:
-            res.id = (' ', res.id[1], ' ')
+    ppb=PPBuilder()
+    ref_sequences = [[chain.id, ppb.build_peptides(chain)[0].get_sequence()]
+                      for chain in pdb_ref.get_chains()]
+    ref_sequences.sort()
+    decoy_sequences = [[chain.id, ppb.build_peptides(chain)[0].get_sequence()]
+                      for chain in pdb_decoy.get_chains()]
+    decoy_sequences.sort()
+    
+    assert(len(ref_sequences) == len(decoy_sequences))
+    
+    for ind in range(len(ref_sequences)):
+        pair = pairwise2.align.globalxx(ref_sequences[ind][1], decoy_sequences[ind][1])[0]
+        ref_sequences[ind][1]   = pair.seqA
+        decoy_sequences[ind][1] = pair.seqB
+    
+    def assign(pdb, pdb_sequences):
+        ''' Renumbers the pdb using aligned sequences. 
 
-    return pdb
+        Args:
+            pdb_ref:   Bio.PDB object
+            pdb_decoy: Bio.PDB object
+            
+
+        Returns: Bio.PDB objects with renumbered residues
+
+        '''
+        for chain in pdb.get_chains():
+            for seq in pdb_sequences:
+                if chain.id == seq[0]:
+                    tel = 0
+                    for res in chain:
+                        while seq[1][tel] == '-':
+                            tel += 1    
+                        res.id = ('X', tel+1, res.id[2])
+                        tel += 1
+        for chain in pdb.get_chains():
+            for res in chain:
+                res.id = (' ', res.id[1], ' ')
+        return pdb
+
+    pdb_ref = assign(pdb_ref, ref_sequences)
+    pdb_decoy = assign(pdb_decoy, decoy_sequences)
+
+    return pdb_ref, pdb_decoy
 
 # decoy = PDBParser(QUIET=True).get_structure('MHC', y.model_path)
 #
@@ -290,10 +326,9 @@ def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False, f
 
     # merge chains of the decoy
     decoy = merge_chains(decoy)
-    decoy = renumber(decoy)
     # merge chains of the reference
     ref = merge_chains(ref)
-    ref = renumber(ref)
+    ref, decoy = renumber(ref, decoy)
 
     # Write pdbs
     decoy_path = '%s/%s_decoy.pdb' % (output_dir, target_id)
