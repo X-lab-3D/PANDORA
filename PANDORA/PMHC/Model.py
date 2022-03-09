@@ -1,4 +1,6 @@
 from Bio.PDB import PDBParser
+from Bio.PDB.Polypeptide import PPBuilder
+from Bio import pairwise2
 import os
 from Bio.PDB import PDBIO
 import PANDORA
