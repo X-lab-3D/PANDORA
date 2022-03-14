@@ -30,7 +30,7 @@ class Mock(MagicMock):
 
 MOCK_MODULES = [
     'NumPy',
-    'numpy'
+    'numpy',
     'scipy',
     'matplotlib',
     'matplotlib.pyplot',
@@ -39,7 +39,10 @@ MOCK_MODULES = [
     'Biopython',
     'Bio',
     'Bio.PDB',
-    'Bio.Align']
+    'Bio.PDB.Polypeptide',
+    'Bio.Align',
+    'Bio.Align.Applications',
+    'Bio.SeqUtils']
 
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 #for module_name in MOCK_MODULES:
