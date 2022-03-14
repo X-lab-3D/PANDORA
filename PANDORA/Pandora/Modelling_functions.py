@@ -225,31 +225,31 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     with open(PANDORA.PANDORA_path + '/../netMHCpan-4.1/data/allelenames') as f:
         for line in f:
             all_netMHCpan_alleles.append(line.split(' ')[0])#.replace(':',''))
-
+    
     ## Format alleles
     target_alleles = [i.replace('*','') for i in allele_type]
     ## Make sure only netMHCpan available alleles are used
     target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
-
+    
     if len(target_alleles) == 0:
         print('ERROR: The provided Target allele is not available in NetMHCpan-4.1')
         return None
-
+    
     target_alleles_str = ','.join(target_alleles)
-
+    
     # Setup files
     netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
     infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s.txt' %(
         peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
     outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s_prediction.txt' %(
         peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
-
+    
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
         f.write(peptide)
-
+    
     os.system('%s -p %s -a %s > %s' %(netmhcpan, infile, target_alleles_str, outfile))
-
+    
     # Get the output from the netMHCIIpan prediction
     # {allele: (core, %rank_EL)}
     pred = {}
@@ -266,20 +266,38 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     # Sort each allele result per Rank_EL
     for allele in pred:
         pred[allele] = list(sorted(pred[allele], key=lambda x:x[1]))
-
+    
     if len(pred) == 0:
         print('ERROR: NetMHCpan-4.1 was not able to find any binding core for')
         print('the provided peptide and MHC allele')
         return None
+    
     # For every allele, the binding core is predicted. Take the allele with the highest reliability score
     best_allele = min((pred[i][0][1], i) for i in pred)[1]
-
+    
     # Do a quick alignment of the predicted core and the peptide to find the anchors. (the predicted binding core can
     # contain dashes -. Aligning them makes sure you take the right residue as anchor.
     alignment = pairwise2.align.globalxx(peptide, pred[best_allele][0][0])
-    pept1 = alignment[0][0]
-    pept2 = alignment[0][1]
-
+    
+    #If there are multiple possible solutions, take the one with no gap at the anchor (second) position
+    if len(alignment)>1:
+        flag = False
+        #Search for the options without gap in the second postions
+        for prediction in alignment:
+            if prediction[1][1] != '-' and prediction[0][1] != '-':
+                pept1 = prediction[0]
+                pept2 = prediction[1]
+                flag = True
+                break
+        #If no options are available, take the first one
+        if flag==False:
+             pept1 = alignment[0][0]
+             pept2 = alignment[0][1]
+        
+    else:
+        pept1 = alignment[0][0]
+        pept2 = alignment[0][1]
+    
     # Remove gaps if in the same position
     to_remove = []
     for i, (aa1, aa2) in enumerate(zip(pept1, pept2)):
@@ -293,7 +311,9 @@ def predict_anchors_netMHCpan(peptide, allele_type,
         print('Query peptide aligned to the core:')
         print(pept1)
         print(pept2)
+    
     # Find the anchors by finding the first non dash from the left and from the right
+    # Define chanonical ancors as starting list
     predicted_anchors = [2,len(peptide)]
 
     # Find the first anchor
@@ -311,19 +331,19 @@ def predict_anchors_netMHCpan(peptide, allele_type,
             p1 += 1
         if pept2[i] != '-':
             p2 += 1
-
+    
     # Find the second anchor
     for i in range(len(pept2)):
         if pept2[::-1][i] != '-':
             predicted_anchors[1] = len([j for j in pept1[:len(pept1) -i] if j != '-'])
             #predicted_anchors[1] = len([j for j in pept2[::-1][i] if j != '-'])
             break
-
+    
     if verbose:
         print('\tPredicted the binding core using netMHCpan (4.1):\n')
         print('\tIcore:\t%s\n\t%%Rank EL:\t%s\n' %(pred[best_allele][0][0], pred[best_allele][0][1] ))
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' %predicted_anchors)
-
+    
     if rm_output:
         os.system('rm %s' %infile)
         os.system('rm %s' %outfile)
@@ -800,7 +820,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     for line in f:
         if line.startswith(target.id + '.'):   #target.id
             l = line.split()
-            if len(l) > 2:
+            if len(l) == 3: #TODO: make sure the line is reporting the model with tis score. Format: model, molpdf, dope.
                 logf.append(tuple(l))
     f.close()
 
@@ -815,8 +835,13 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         #         il_molpdf = line.split()[-1]
         # f.close()
         # Create a fake molpdf/dope score for the IL model: the best molpdf/dope from the real models - 1
-        fake_molpdf = str(min(float(i[1]) for i in logf) - 1)
-        fake_dope = str(min(float(i[2]) for i in logf) - 1)
+        try:
+            fake_molpdf = str(min(float(i[1]) for i in logf) - 1)
+            fake_dope = str(min(float(i[2]) for i in logf) - 1)
+        except ValueError:
+            fake_molpdf = -10000
+            fake_dope = -10000
+            print('WARNING: ValueError exception raised while assigning fake molpdf and dope to IL model')
         # Append the filename and molpdf to the rest of the data
         logf.append((il_file, fake_molpdf, fake_dope))
 
@@ -826,7 +851,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     # Write to output file
     f = open(output_dir + '/molpdf_DOPE.tsv', 'w')
     for i in logf:
-        f.write('matched_' + i[0] + '\t' + i[1] + '\t' + i[2] + '\n')
+        f.write(i[0] + '\t' + i[1] + '\t' + i[2] + '\n')
     f.close()
 
 
@@ -838,8 +863,8 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
                                             molpdf=logf[i][1], dope=logf[i][2])
 
         except:
-            print('Something went wrong when calling Model.Model() for case %s' %target.id)
-
+            print('WARNING: Error raised while calling Model.Model() for case %s' %target.id)
+            
         # if benchmark:
         #     try:
         #         m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb',
@@ -924,6 +949,9 @@ def allele_name_adapter(allele, available_alleles):
     Args:
         allele(list) : Allele names
         allele_ID(dict) : Dictionary of structure IDs (values) in the dataset for each allele (keys)
+        
+    Returns:
+        allele(list) : List of adapted (cut) allele names
     '''
     #homolog_allele = '--NONE--'
     for a in range(len(allele)):
