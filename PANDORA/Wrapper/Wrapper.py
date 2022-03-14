@@ -27,52 +27,52 @@ class Wrapper():
         self.db = None
         self.targets = {}
         self.jobs = {}
-        
-        
-    def __get_targets_from_file(self, data_file, delimiter='\t', header=True, 
-                               IDs_col=None, peptides_col=0, allele_col=1, 
+
+
+    def __get_targets_from_file(self, data_file, delimiter='\t', header=True,
+                               IDs_col=None, peptides_col=0, allele_col=1,
                                anchors_col=None, M_chain_col=None,
                                start_row=None, end_row=None):
-        """Extracts peptide sequences, alleles and anchors (if specified) 
+        """
+        Extracts peptide sequences, alleles and anchors (if specified)
             from the target file.
-           Default input should be a .tsv file without any header with 
-           the following structure: peptides_sequence_col \t alleles_name_col
-        
+            Default input should be a .tsv file without any header with
+            the following structure: peptides_sequence_col \t alleles_name_col
 
         Args:
-            data_file (str): Path to the input tsv/csv file containing targets 
+            data_file (str): Path to the input tsv/csv file containing targets
                 information.
-            delimiter (str, optional): data_file delimiter. Do not use 
+            delimiter (str, optional): data_file delimiter. Do not use
                 semicolons (';') as separators. Defaults to '\t'.
-            header (bool, optional): If True, assumes the data_file has a 
+            header (bool, optional): If True, assumes the data_file has a
                 header line and skips it. If your file has no header line,
                 set it as False. Defaults to True.
             IDs_col (int or None, optional): Column of data_file containing
-                the targets IDs. If None, will automatically assign an ID 
+                the targets IDs. If None, will automatically assign an ID
                 according to the row number. Defaults to None.
             peptides_col (int, optional): Column of data_file containing
                 the targets peptides. Defaults to 0.
             allele_col (int, optional): Column of data_file containing
                 the targets alleles. Umbiguous allele cases (where the allele
-                might have multiple names) should be separated by a 
+                might have multiple names) should be separated by a
                 semicolon (';'). Defaults to 1.
             anchors_col (None or int, optional): Column of data_file containing
                 the targets anchors. Anchors should be two numbers separated
                 by a semicolon (';'). Defaults to 2.
             M_chain_col (None or int, optional): Column of data_file containing
                 the targets M chain sequences.
-            start_row (None or int, optional): Starting row of data_file, to use when 
-                splitting the data_file into multiple batches. This allows to 
+            start_row (None or int, optional): Starting row of data_file, to use when
+                splitting the data_file into multiple batches. This allows to
                 specify from which row the samples for this job start.
-            end_row (None or int, optional): Ending row of data_file, to use when 
-                splitting the data_file into multiple batches. This allows to 
+            end_row (None or int, optional): Ending row of data_file, to use when
+                splitting the data_file into multiple batches. This allows to
                 specify at which row the samples for this job end.
 
         Returns:
             None.
 
         """
-            
+
         targets = {}
         with open(data_file, 'r') as infile:
             spamreader = csv.reader(infile, delimiter=delimiter)
@@ -89,17 +89,17 @@ class Wrapper():
                         target_id = row[IDs_col]
                     else:
                         target_id = 'Target_%i' %(i+1)
-                        
+
                     ## Assign peptide sequence
                     peptide_seq = row[peptides_col]
-                    
+
                     ## Assign allele name
                     allele = row[allele_col].split(';')
-                    
+
                     ## Make target entry
                     targets[target_id] = {'peptide_sequence' : peptide_seq,
                                               'allele' : allele}
-                    
+
                     ## Assign optional arguments. Be sure the empty values correspond
                     ## to the default values in PMHC.Target.__init__()
                     ## Assign anchors
@@ -108,42 +108,42 @@ class Wrapper():
                         targets[target_id]['anchors'] = anchors
                     else:
                         targets[target_id]['anchors'] = []
-                    
+
                     ## Assign M chain sequence
                     if M_chain_col:
                         M_chain_seq = row[M_chain_col]
                         targets[target_id]['M_chain_seq'] = M_chain_seq
                     else:
                         targets[target_id]['M_chain_seq'] = ''
-                        
+
         self.targets = targets
 
-    def create_targets(self, data_file, database, MHC_class, delimiter = '\t', 
+    def create_targets(self, data_file, database, MHC_class, delimiter = '\t',
                        header=True, IDs_col=None, peptides_col=0, allele_col=1,
-                       anchors_col=None, M_chain_col=None, benchmark=False, 
-                       verbose=False, start_row=None, end_row=None, 
+                       anchors_col=None, M_chain_col=None, benchmark=False,
+                       verbose=False, start_row=None, end_row=None,
                        use_netmhcpan=False):
         """
-        
+
 
         Args:
-            data_file (str): Path to the input tsv/csv file containing targets 
+            data_file (str): Path to the input tsv/csv file containing targets
                 information.
             database (PANDORA.Database.Database): Database object.
             MHC_class (str): MHC class of the targets, as 'I' or 'II'.
-            delimiter (str, optional): data_file delimiter. Do not use 
+            delimiter (str, optional): data_file delimiter. Do not use
                 semicolons (';') as separators. Defaults to '\t'.
-            header (bool, optional): If True, assumes the data_file has a 
+            header (bool, optional): If True, assumes the data_file has a
                 header line and skips it. If your file has no header line,
                 set it as False. Defaults to True.
             IDs_col (int or None, optional): Column of data_file containing
-                the targets IDs. If None, will automatically assign an ID 
+                the targets IDs. If None, will automatically assign an ID
                 according to the row number. Defaults to None.
             peptides_col (int, optional): Column of data_file containing
                 the targets peptides. Defaults to 0.
             allele_col (int, optional): Column of data_file containing
                 the targets alleles. Umbiguous allele cases (where the allele
-                might have multiple names) should be separated by a 
+                might have multiple names) should be separated by a
                 semicolon (';'). Defaults to 1.
             anchors_col (int, optional): Column of data_file containing
                 the targets anchors. Anchors should be two numbers separated
@@ -152,13 +152,13 @@ class Wrapper():
                 the targets M chain sequences.
             benchmark (bool, optional): Set True only for benchmarking purpose,
                 if target structures are available. Defaults to False.
-            start_row (None or int): Starting row of data_file, to use when 
-                splitting the data_file into multiple batches. This allows to 
+            start_row (None or int): Starting row of data_file, to use when
+                splitting the data_file into multiple batches. This allows to
                 specify from which row the samples for this job start.
-            end_row (None or int): Ending row of data_file, to use when 
-                splitting the data_file into multiple batches. This allows to 
+            end_row (None or int): Ending row of data_file, to use when
+                splitting the data_file into multiple batches. This allows to
                 specify at which row the samples for this job end.
-            use_netmhcpan (bool, optional): If True, uses local installation 
+            use_netmhcpan (bool, optional): If True, uses local installation
                 of netMHCPan to predict anchor positions for each target.
 
         Returns:
@@ -167,12 +167,12 @@ class Wrapper():
         """
         self.data_file = data_file
         self.db = database
-        
+
         ## Extract targets from data_file
-        self.__get_targets_from_file(data_file, delimiter=delimiter, header=header, IDs_col=IDs_col, 
+        self.__get_targets_from_file(data_file, delimiter=delimiter, header=header, IDs_col=IDs_col,
                                      peptides_col=peptides_col, allele_col=allele_col, anchors_col=anchors_col,
                                      M_chain_col=M_chain_col, start_row=start_row, end_row=end_row)
-        
+
         ## Create target objects
         jobs = {}
         for target_id in self.targets:
@@ -189,7 +189,7 @@ class Wrapper():
                 tar = PMHC.Target(target_id, allele_type=self.targets[target_id]['allele'],
                                   peptide=self.targets[target_id]['peptide_sequence'] ,
                                   MHC_class=MHC_class, anchors=self.targets[target_id]['anchors'],
-                                  M_chain_seq=self.targets[target_id]['M_chain_seq'], 
+                                  M_chain_seq=self.targets[target_id]['M_chain_seq'],
                                   use_netmhcpan=use_netmhcpan)
                 #except Exception as err:
                 #    print('Skipping Target %s at Target object generation step for the following reason:' %target_id)
@@ -209,22 +209,22 @@ class Wrapper():
             #    print('An unidentified problem occurred with Target %s. Please check your target info' %target_id)
             #    print(("Exception: {0}".format(err)))
         self.jobs = jobs
-        
-    def run_pandora(self, num_cores=1, n_loop_models=20, n_jobs=None,  
+
+    def run_pandora(self, num_cores=1, n_loop_models=20, n_jobs=None,
                     benchmark=False, output_dir=False, pickle_out=False):
         """Runs Pandora in parallel jobs.
-        
+
 
         Args:
-            num_cores (int, optional): Number of parallel PANDORA jobs. 
+            num_cores (int, optional): Number of parallel PANDORA jobs.
                 Each one will be sent to a different core. Defaults to 1.
-            n_loop_models (int, optional): Number of  loop models. 
+            n_loop_models (int, optional): Number of  loop models.
                 Defaults to 20.
-            n_jobs (int, optional): Number of parallel MODELLER loop jobs. 
+            n_jobs (int, optional): Number of parallel MODELLER loop jobs.
                 Do not increase further than n_loop_models. Defaults to None.
             benchmark (bool, optional): Set True only for benchmarking purpose,
                 if target structures are available. Defaults to False.
-            output_dir (str, optional): Output directory path. 
+            output_dir (str, optional): Output directory path.
                 Defaults to False.
             pickle_out (bool, optional): If True, outputs a pickle file
                 containing every model object. Defaults to False.
@@ -240,5 +240,3 @@ class Wrapper():
             else:
                 self.jobs[job].extend([n_loop_models, n_jobs, benchmark, pickle_out])
         Parallel(n_jobs = num_cores, verbose = 1)(delayed(run_model)(job) for job in list(self.jobs.values()))
-    
-

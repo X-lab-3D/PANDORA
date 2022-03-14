@@ -41,7 +41,8 @@ def fresh_parse_dirs():
 
 
 
-def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_files = True, del_kabat_files = True):
+def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, #: :meta hide-value:
+                                    del_inn_files = True, del_kabat_files = True):
     ''' Downloads the complete structural dataset
 
     Args:
@@ -49,6 +50,7 @@ def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_file
         del_inn_files: (bool) if True (default) deletes all inn files
         del_kabat_files: (bool) if True (default) deletes all kabat files
 
+    :meta hide-value:
     '''
 
     # Changing working directory

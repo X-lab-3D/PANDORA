@@ -26,7 +26,7 @@ class Pandora:
         Args:
             best_n_templates (int, optional): how many template structures are
                 used for modelling. The best n are used. Defaults to 1.
-            benchmark (bool): Perform L-RMSD calculations? only works if the 
+            benchmark (bool): Perform L-RMSD calculations? only works if the
                 target id is an existing pdb id. Defaults to False.
             verbose: (bool): Print information. Defaults to True.
 
@@ -66,7 +66,7 @@ class Pandora:
                 self.keep_IL = Modelling_functions.check_target_template(self.target, self.template)
             # determine peptide alignment scores of the target and the template(s)
             self.pept_ali_scores = []
-            
+
             if type(self.template)==list:
                 for templ in self.template:
                     if self.target.id == 'I':
@@ -95,19 +95,19 @@ class Pandora:
                 print('\tTemplate Allele:  %s' %self.template.allele_type)
                 print('\tTemplate Peptide: %s' %self.template.peptide)
                 print('\tTemplate Anchors: %s\n' %self.template.anchors)
-        
+
         #TODO: remove this line only after implementing issue #32.
         if type(self.template)==list:
             self.template = self.template[0]
 
     def prep_output_dir(self):
         ''' Create an output directory and move the template pdb there
-            Uses self.output_dir (str): Path to output directory. 
+            Uses self.output_dir (str): Path to output directory.
                 Defaults to <PANDORA_location>/PANDORA_files/data/outputs.
 
         Args:
             None
-            
+
 
         '''
 
@@ -122,7 +122,7 @@ class Pandora:
             raise Exception('A problem occurred while creating output directory')
 
         #for templ in self.template:
-        
+
         if os.path.isfile(self.template.pdb_path):
             os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
         else:
@@ -176,14 +176,14 @@ class Pandora:
         os.chdir(self.output_dir)
         # Run Modeller
         os.popen('python %s > modeller_ini.log' %python_script).read()
-        
+
         try:
             # Load initial model into target object
             self.target.initial_model = PDBParser(QUIET=True).get_structure(self.target.id, self.target.id + '.ini')
         except FileExistsError:
             # If the file does not exist, raise an exception to prompt the user to check MODELLER installation
             raise Exception('.ini file could not be modelled. Please check modeller_ini.log. Is your MODELLER correctly installed?')
-        
+
         # Change working directory back
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
         if verbose:
@@ -258,7 +258,7 @@ class Pandora:
 
         '''
 
-        Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file, 
+        Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file,
                                                   self.output_dir, n_loop_models=n_loop_models,
                                                   n_homology_models=n_homology_models, loop_refinement=loop_refinement,
                                                   n_jobs=n_jobs, stdev=stdev, helix=helix, sheet=sheet)
@@ -287,17 +287,46 @@ class Pandora:
     def model(self, output_dir=PANDORA.PANDORA_data + '/outputs', n_loop_models=20, n_homology_models=1,
               best_n_templates=1, n_jobs=None, loop_refinement='slow', pickle_out=False,
               stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, RMSD_atoms=['C', 'CA', 'N', 'O']):
-        ''' Wrapper function that combines all modelling steps.
+        '''
+        Wrapper function that combines all modelling steps.
 
         Args:
-            n_models: (int) number of models modeller generates per run
-            stdev: (float) standard deviation of modelling restraints. Higher = more flexible restraints.
-            seq_based_templ_selection: (bool) Use template selection based on template sequences instead of allele.
-            benchmark: (bool) Perform L-RMSD calculations? only works if the target id is an existing pdb id
-            verbose: (bool) Print information
+            benchmark: (Optional, bool) If True, performs L-RMSD calculations with target strcutre.
+                Only works if the target id is present in the template set.
+                Defaults to False.
+            helix (Optional, False or list): List of integers. Contains starting and ending
+                position of a predicted alpha-helix in the peptide. Defaults to False.
+            loop_refinement (Optional, str): Type of MODELLER loop refinement to apply.
+                Available options are: very_fast,fast,slow,very_slow,slow_large.
+                Defaults to 'slow'.
+            n_loop_models (Optional, int): number of models modeller generates per run.
+                Defaults to 20.
+            n_homology_models (Optional, int): number of initial peptide homology models to generate.
+                Defaults to 1.
+            n_jobs (Optional, int or None): Number of parallel loop model jobs.
+                Setting it higher than n_loop_models gives no computational time advantage.
+                Recommended to change only when producing high number of loop models
+                for one peptide. Defaults to None.
+            output_dir (Optional, str): Path to output directory.
+                Defaults to PANDORA.PANDORA_data + '/outputs'.
+            pickle_out (Optional, bool): If True, saves a pickle file containing the
+                PANDORA.PMHC.Model objects for the generated models in the
+                output directory. Defaults to False.
+            RMSD_atoms (Optional, list): list of atoms to use for final RMSD calculation.
+                Works only if benchmark==True. Defaults to ['C', 'CA', 'N', 'O']
+            stdev (Optional, float): standard deviation of modelling restraints.
+                A higher stdev means more flexible restraints. Defaults to 0.1.
+            sheet (Optional, False or list): List containing: start position of B-sheet 1,
+                start position of B-sheet 2 and the length of the B-sheet in h-bonds.
+                For example: ["O:2:P","N:54:M",2] for a parallel B-sheet; The sheet starts
+                at the Oxigen atom of the 2nd residue of chain P and at the Nitrogen of the 54th residue of
+                chain M and has a length of 2 H-bonds. Or; ["N:6:P", "O:13:P", -3], with -3 denoting an
+                anti-parallel B-sheet with a length of 3 H-bonds.
+            verbose (Optional, bool): If True, print modelling information. Defaults to True.
 
         Returns:
-
+            None
+            
         '''
 
         if verbose:
@@ -403,11 +432,3 @@ class Pandora:
             self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %(n_homology_models*n_loop_models))
         else:
             self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %(n_homology_models*n_loop_models))
-
-
-
-
-
-
-
-
