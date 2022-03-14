@@ -39,7 +39,9 @@ The installation process will take care of installing the following dependencies
 - [NetMHCpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class I anchors)
 - [NetMHCIIpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class II anchors)
 
-## Conda Installation (suggested)
+
+## Installation
+### Conda Installation (suggested)
 
 #### 1. Get a Modeller Key License:
 Prior to PANDORA installation, you need to first activate MODELLER's license. Please request MODELLER license at: https://salilab.org/modeller/registration.html
