@@ -67,6 +67,11 @@ Replace XXXX with your MODELLER License key and run the command:
 alias KEY_MODELLER='XXXX'
 ```
 
+Then Install MODELLER with:
+```
+conda install -y -c salilab modeller
+```
+
 #### 2. Install Muscle
 PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) that can be installed via bioconda
 
