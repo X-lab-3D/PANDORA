@@ -2,6 +2,7 @@
 
 ![Build](https://github.com/X-lab-3D/PANDORA/actions/workflows/main.yml/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/PANDORA/badge.svg?branch=master)](https://coveralls.io/github/X-lab-3D/PANDORA?branch=master)
+[![Anaconda-Server Badge](https://anaconda.org/csb-nijmegen/csb-pandora/badges/version.svg)](https://anaconda.org/csb-nijmegen/csb-pandora)
 
 ### Peptide ANchored mODelling fRAmework for peptide-MHC complexes
 
@@ -23,6 +24,8 @@
 PANDORA is anchor restrained modelling pipeline for generating peptide-MHC structures.
 
 It contains multiple functions to pre-process data and it's able to exploit different crucial domain knowledge provided by the user to guide the modelling.
+
+PANDORA documentation can be found at: https://csb-pandora.readthedocs.io/en/latest/
 
 
 ## Dependencies

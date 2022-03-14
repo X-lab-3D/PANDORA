@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Mar 25 17:46:39 2021
 
-@author: Dario Marzella
-"""
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 from PANDORA.Wrapper.run_model import run_model
@@ -28,10 +24,10 @@ class Wrapper():
         self.targets = {}
         self.jobs = {}
 
-        
-    def __get_targets_from_file(self, data_file, delimiter='\t', header=True, 
-                               IDs_col=None, peptides_col=0, 
-                               allele_col=1, anchors_col=None, 
+
+    def __get_targets_from_file(self, data_file, delimiter='\t', header=True,
+                               IDs_col=None, peptides_col=0,
+                               allele_col=1, anchors_col=None,
                                M_chain_col=None, N_chain_col=None,
                                start_row=None, end_row=None):
         """
@@ -64,8 +60,8 @@ class Wrapper():
                 the targets M chain sequences.
             N_chain_col (None or int, optional): Column of data_file containing
                 the targets N chain sequences (only for MHCII).
-            start_row (None or int, optional): Starting row of data_file, to use when 
-                splitting the data_file into multiple batches. This allows to 
+            start_row (None or int, optional): Starting row of data_file, to use when
+                splitting the data_file into multiple batches. This allows to
                 specify from which row the samples for this job start.
             end_row (None or int, optional): Ending row of data_file, to use when
                 splitting the data_file into multiple batches. This allows to
@@ -118,20 +114,20 @@ class Wrapper():
                         targets[target_id]['M_chain_seq'] = M_chain_seq
                     else:
                         targets[target_id]['M_chain_seq'] = ''
-                    
+
                     ## Assign N chain sequence
                     if N_chain_col:
                         N_chain_seq = row[N_chain_col]
                         targets[target_id]['N_chain_seq'] = N_chain_seq
                     else:
                         targets[target_id]['N_chain_seq'] = ''
-                        
+
         self.targets = targets
 
     def create_targets(self, data_file, database, MHC_class, delimiter = '\t',
                        header=True, IDs_col=None, peptides_col=0, allele_col=1,
-                       anchors_col=None, M_chain_col=None, N_chain_col=None, 
-                       benchmark=False, verbose=False, start_row=None, 
+                       anchors_col=None, M_chain_col=None, N_chain_col=None,
+                       benchmark=False, verbose=False, start_row=None,
                        end_row=None, use_netmhcpan=False):
         """
 
@@ -181,13 +177,13 @@ class Wrapper():
         self.db = database
 
         ## Extract targets from data_file
-        self.__get_targets_from_file(data_file, delimiter=delimiter, 
-                                     header=header, IDs_col=IDs_col, 
-                                     peptides_col=peptides_col, allele_col=allele_col, 
-                                     anchors_col=anchors_col, M_chain_col=M_chain_col, 
-                                     N_chain_col=N_chain_col, start_row=start_row, 
+        self.__get_targets_from_file(data_file, delimiter=delimiter,
+                                     header=header, IDs_col=IDs_col,
+                                     peptides_col=peptides_col, allele_col=allele_col,
+                                     anchors_col=anchors_col, M_chain_col=M_chain_col,
+                                     N_chain_col=N_chain_col, start_row=start_row,
                                      end_row=end_row)
-        
+
         ## Create target objects
         jobs = {}
         for target_id in self.targets:
@@ -206,7 +202,7 @@ class Wrapper():
                 tar = PMHC.Target(target_id, allele_type=self.targets[target_id]['allele'],
                                   peptide=self.targets[target_id]['peptide_sequence'] ,
                                   MHC_class=MHC_class, anchors=self.targets[target_id]['anchors'],
-                                  M_chain_seq=self.targets[target_id]['M_chain_seq'], 
+                                  M_chain_seq=self.targets[target_id]['M_chain_seq'],
                                   N_chain_seq=self.targets[target_id]['N_chain_seq'],
                                   use_netmhcpan=use_netmhcpan)
                 #except Exception as err:
