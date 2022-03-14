@@ -1,0 +1,41 @@
+{% set name = "csb-pandora" %}
+{% set version = "1.0" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  git_rev:
+  git_url: git@github.com:X-lab-3D/PANDORA.git
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv "
+
+requirements:
+  build:
+    - python
+    - setuptools
+
+  host:
+    - python
+
+  run:
+    - biopython
+    - modeller
+    - muscle
+    - numpy
+    - numpy-base
+    - pip
+    - python
+    - setuptools
+    - joblib
+    - pandas
+    - python-dateutil
+
+about:
+  home: https://github.com/X-lab-3D/PANDORA/blob/master/README.md
+  license: Apache License 2.0
+  summary: "PANDORA is anchor restrained modelling pipeline for generating peptide-MHC structures."
+  doc_ulr: Work In Progress

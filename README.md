@@ -39,9 +39,9 @@ The installation process will take care of installing the following dependencies
 - [NetMHCpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class I anchors)
 - [NetMHCIIpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class II anchors)
 
-## Installation
+## Conda Installation (suggested)
 
-#### 1. Install Modeller:
+#### 1. Get a Modeller Key License:
 Prior to PANDORA installation, you need to first activate MODELLER's license. Please request MODELLER license at: https://salilab.org/modeller/registration.html
 
 Replace XXXX with your MODELLER License key and run the command:
@@ -50,10 +50,21 @@ Replace XXXX with your MODELLER License key and run the command:
 alias KEY_MODELLER='XXXX'
 ```
 
-Then run:
+#### 2. Install PANDORA
 
+Install with conda:
 ```
-conda install -c salilab modeller
+conda install -c csb-nijmegen csb-pandora -c salilab -c bioconda
+```
+
+## GitHub / Pypi installation
+
+#### 1. Install Modeller:
+Prior to PANDORA installation, you need to first activate MODELLER's license. Please request MODELLER license at: https://salilab.org/modeller/registration.html
+
+Replace XXXX with your MODELLER License key and run the command:
+```
+alias KEY_MODELLER='XXXX'
 ```
 
 #### 2. Install Muscle
@@ -76,7 +87,8 @@ pip install -e .
 
 ```
 
-#### 4. Generate / download template Database
+
+## Generate / download template Database
 
 PANDORA needs a PDB template database to work (retrieved from  [IMGT](http://www.imgt.org/3Dstructure-DB/) database). You can download it from https://github.com/X-lab-3D/PANDORA_database (pMHC I only, generated on 23/03/2021) and follow the [instructions](https://github.com/X-lab-3D/PANDORA_database/blob/main/README.md). Please be sure you re-path your database as explained in the instructions.
 
@@ -95,10 +107,10 @@ db.construct_database(save='path/to/pandora_Database.pkl')
 
 Note: generating a database can take more than one hour and a half, so we advice to run it as background process or submit it as cluster job.
 
-#### 5. (Optional) Install NetMHCpan and/or NetMHCIIpan
+## (Optional) Install NetMHCpan and/or NetMHCIIpan
 
 PANDORA lets the user if he wants to predict peptide's anchor residues instead of using conventional predefined anchor residues.
-In that case you need to install NetMHCpan (for peptide:MHC class I) and/or NetMHCIIpan (for peptide:MHC class II).
+In that case you need to download [NetMHCpan](https://services.healthtech.dtu.dk/cgi-bin/sw_request) (for peptide:MHC class I) and/or [NetMHCIIpan](https://services.healthtech.dtu.dk/cgi-bin/sw_request) (for peptide:MHC class II).
 To install, you can simply run:
 ```
 python netMHCpan_install.py
