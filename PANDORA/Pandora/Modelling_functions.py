@@ -848,7 +848,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     # Write to output file
     f = open(output_dir + '/molpdf_DOPE.tsv', 'w')
     for i in logf:
-        f.write('matched_' + i[0] + '\t' + i[1] + '\t' + i[2] + '\n')
+        f.write(i[0] + '\t' + i[1] + '\t' + i[2] + '\n')
     f.close()
 
 
