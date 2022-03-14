@@ -1,6 +1,6 @@
 # PANDORA
 
-![Build](https://github.com/X-lab-3D/PANDORA/workflows/Build/badge.svg)
+![Build](https://github.com/X-lab-3D/PANDORA/workflows/CI/main.yml)
 
 ### Peptide ANchored mODelling fRAmework for peptide-MHC complexes
 
