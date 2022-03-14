@@ -35,6 +35,7 @@ MOCK_MODULES = [
     'matplotlib',
     'matplotlib.pyplot',
     'matplotlib.ticker',
+    'joblib',
     'modeller',
     'Biopython',
     'Bio',
