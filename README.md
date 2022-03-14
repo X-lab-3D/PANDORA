@@ -1,7 +1,7 @@
 # PANDORA
 
 ![Build](https://github.com/X-lab-3D/PANDORA/actions/workflows/main.yml/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/PANDORA/badge.svg?branch=issue102)](https://coveralls.io/github/X-lab-3D/PANDORA?branch=issue102)
+[![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/PANDORA/badge.svg?branch=master)](https://coveralls.io/github/X-lab-3D/PANDORA?branch=master)
 
 ### Peptide ANchored mODelling fRAmework for peptide-MHC complexes
 

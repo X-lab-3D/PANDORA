@@ -41,16 +41,16 @@ def fresh_parse_dirs():
 
 
 
-def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, #: :meta hide-value:
+def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data,
                                     del_inn_files = True, del_kabat_files = True):
-    ''' Downloads the complete structural dataset
+    ''' download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_files = True, del_kabat_files = True)
+    Downloads the complete structural dataset
 
     Args:
         data_dir: (string) path of data directory
         del_inn_files: (bool) if True (default) deletes all inn files
         del_kabat_files: (bool) if True (default) deletes all kabat files
 
-    :meta hide-value:
     '''
 
     # Changing working directory
@@ -76,7 +76,8 @@ def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, #: :meta hid
 
 
 def download_ids_imgt(ReceptorType, data_dir = PANDORA.PANDORA_data, out_tsv = False):
-    ''' Querys IMGT with the ReceptorType for PDBs.
+    ''' download_ids_imgt(ReceptorType, data_dir = PANDORA.PANDORA_data, out_tsv = False)
+    Queries IMGT with the ReceptorType for PDBs.
 
     Args:
         ReceptorType: (string) Receptor query for IMGT: 'MH1' or 'MH2'
@@ -1307,7 +1308,8 @@ def parse_pMHCI_pdb(pdb_id,
                      indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                      outdir = PANDORA.PANDORA_data + '/PDBs/pMHCI',
                      bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI'):
-    ''' Clean all MHCI pdb files that have been downloaded from IMGT
+    ''' parse_pMHCI_pdb(pdb_id, indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles', outdir=PANDORA.PANDORA_data + '/PDBs/pMHCI',bad_dir=PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI')
+    Clean all MHCI pdb files that have been downloaded from IMGT
 
     Args:
         pdb_id: (string) id of pdb file
@@ -1443,7 +1445,8 @@ def parse_pMHCII_pdb(pdb_id,
                       indir=PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                       outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII',
                       bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII'):
-    ''' Clean all MHCII pdb files that have been downloaded from IMGT
+    ''' parse_pMHCII_pdb(pdb_id, indir=PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles', outdir=PANDORA.PANDORA_data + '/PDBs/pMHCII', bad_dir=PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII')
+    Clean all MHCII pdb files that have been downloaded from IMGT
 
     Args:
         pdb_id: (string) id of pdb file
@@ -1584,7 +1587,7 @@ def parse_pMHCII_pdb(pdb_id,
 
 def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/', HLA_out = 'Human_MHC_data.fasta',
                              nonHLA_out = 'NonHuman_MHC_data.fasta'):
-    """
+    """generate_mhcseq_database(data_dir=PANDORA.PANDORA_data+ '/csv_pkl_files/', HLA_out='Human_MHC_data.fasta', nonHLA_out='NonHuman_MHC_data.fasta')
     Downloads and parse HLA and other MHC sequences to compile reference fastas
 
     Args:

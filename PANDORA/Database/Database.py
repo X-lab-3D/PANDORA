@@ -5,7 +5,7 @@ from PANDORA.Database import Database_functions
 import os
 
 class Database:
-    
+
     def __init__(self):
         self.MHCI_data = {}
         self.MHCII_data = {}
@@ -14,7 +14,8 @@ class Database:
         self.__IDs_list_MHCII = []
 
     def download_data(self, data_dir = PANDORA.PANDORA_data, download = True):
-        """ Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
+        """download_data(self, data_dir = PANDORA.PANDORA_data, download = True)
+        Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
 
         if download:
             print('Downloading structures ...')
@@ -45,7 +46,8 @@ class Database:
     def construct_database(self, save, data_dir = PANDORA.PANDORA_data,
                            MHCI=True, MHCII=True, download=True,
                            update_ref_sequences=True):
-        ''' Construct the database. Download, clean and add all structures
+        '''construct_database(self, save, data_dir = PANDORA.PANDORA_data, MHCI=True, MHCII=True, download=True, update_ref_sequences=True)
+        Construct the database. Download, clean and add all structures
 
         Args:
             save (str/bool): Filename of database, can be False if you don't want to save the database

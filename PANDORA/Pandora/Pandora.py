@@ -11,6 +11,8 @@ from datetime import datetime
 class Pandora:
 
     def __init__(self, target, database=None, template=None, output_dir=PANDORA.PANDORA_data + '/outputs'):
+        '''__init__(self, target, database=None, template=None, output_dir=PANDORA.PANDORA_data + '/outputs')
+        '''
         self.target = target
         self.template = template
         self.database = database
@@ -287,7 +289,7 @@ class Pandora:
     def model(self, output_dir=PANDORA.PANDORA_data + '/outputs', n_loop_models=20, n_homology_models=1,
               best_n_templates=1, n_jobs=None, loop_refinement='slow', pickle_out=False,
               stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, RMSD_atoms=['C', 'CA', 'N', 'O']):
-        '''
+        '''model(self, output_dir=PANDORA.PANDORA_data + '/outputs', n_loop_models=20, n_homology_models=1, best_n_templates=1, n_jobs=None, loop_refinement='slow', pickle_out=False,stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, RMSD_atoms=['C', 'CA', 'N', 'O'])
         Wrapper function that combines all modelling steps.
 
         Args:
@@ -326,7 +328,7 @@ class Pandora:
 
         Returns:
             None
-            
+
         '''
 
         if verbose:
