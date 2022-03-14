@@ -1,5 +1,5 @@
 from Bio.PDB import PDBParser
-from Bio.PDB.Polypeptide import PPBuilder
+from Bio.PDB.Polypeptide import three_to_one
 from Bio import pairwise2
 import os
 from Bio.PDB import PDBIO
@@ -230,11 +230,10 @@ def renumber(pdb_ref, pdb_decoy):
     Returns: Bio.PDB objects with renumbered residues
 
     '''
-    ppb=PPBuilder()
-    ref_sequences = [[chain.id, ppb.build_peptides(chain)[0].get_sequence()]
+    ref_sequences = [[chain.id, ('').join([three_to_one(res.resname) for res in chain])]
                       for chain in pdb_ref.get_chains()]
     ref_sequences.sort()
-    decoy_sequences = [[chain.id, ppb.build_peptides(chain)[0].get_sequence()]
+    decoy_sequences = [[chain.id, ('').join([three_to_one(res.resname) for res in chain])]
                       for chain in pdb_decoy.get_chains()]
     decoy_sequences.sort()
     
@@ -244,6 +243,9 @@ def renumber(pdb_ref, pdb_decoy):
         pair = pairwise2.align.globalxx(ref_sequences[ind][1], decoy_sequences[ind][1])[0]
         ref_sequences[ind][1]   = pair.seqA
         decoy_sequences[ind][1] = pair.seqB
+        
+    ref_sequences = [[seq[0],[i+1 for i,res in enumerate(seq[1]) if res != '-']] for seq in ref_sequences]
+    decoy_sequences = [[seq[0],[i+1 for i,res in enumerate(seq[1]) if res != '-']] for seq in decoy_sequences]
     
     def assign(pdb, pdb_sequences):
         ''' Renumbers the pdb using aligned sequences. 
@@ -256,15 +258,13 @@ def renumber(pdb_ref, pdb_decoy):
         Returns: Bio.PDB objects with renumbered residues
 
         '''
+        
+        
         for chain in pdb.get_chains():
             for seq in pdb_sequences:
                 if chain.id == seq[0]:
-                    tel = 0
-                    for res in chain:
-                        while seq[1][tel] == '-':
-                            tel += 1    
-                        res.id = ('X', tel+1, res.id[2])
-                        tel += 1
+                    for ind, res in enumerate(chain):
+                        res.id = ('X', seq[1][ind], res.id[2])
         for chain in pdb.get_chains():
             for res in chain:
                 res.id = (' ', res.id[1], ' ')
