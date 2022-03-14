@@ -1,5 +1,8 @@
 # PANDORA
 
+![Build](https://github.com/X-lab-3D/PANDORA/actions/workflows/main.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/PANDORA/badge.svg?branch=master)](https://coveralls.io/github/X-lab-3D/PANDORA?branch=master)
+
 ### Peptide ANchored mODelling fRAmework for peptide-MHC complexes
 
 ![PANDORA](https://github.com/DarioMarzella/PANDORA/blob/master/images/flowchart_pMHCI.png?raw=true)
@@ -188,6 +191,7 @@ case.model(n_loop_models=100)  # Generates 100 models
 ```
 
 #### Example 3 : Benchmark PANDORA on one modelling case
+
 Evaluate the framework on a target with a known experimental structure:
 - Provide the PDB ID for the *Target* class
 - Set *benchmark=True* for the modelling
@@ -212,6 +216,7 @@ case = Pandora.Pandora(target, db)
 case.model(benchmark=True)
 ```
 #### Example 4: Model a peptide:MHCI complex with an alpha helix in the peptide
+
 Input domain secondary structure prediction information (Helix/Beta strand):
 
 ```python
@@ -234,6 +239,7 @@ case = Pandora.Pandora(target, db)
 case.model(helix=target.helix)
 ```
 #### Example 5: Benchmark PANDORA on multiple cases (running in parallel on multiple cores)
+
 PANDORA can model large batches of peptides in parallel. You need to provide the following peptide information in a *.tsv* or *.csv* file:
 
 - *Peptide sequence,  MHC Allele name*
@@ -259,6 +265,7 @@ wrap.create_targets('datafile.tsv', db)
 wrap.run_pandora(num_cores=128)
 ```
 #### Example 6: Generating a peptide:MHC class II complex given the peptide sequence
+
 To model a peptide:MHC class II complex, you only need to specify that in *PMHC.Target()* function: as *MHC_class='II'* (By default it is set to model MHC class I).
 
 ```python
