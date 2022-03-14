@@ -24,6 +24,8 @@ PANDORA is anchor restrained modelling pipeline for generating peptide-MHC struc
 
 It contains multiple functions to pre-process data and it's able to exploit different crucial domain knowledge provided by the user to guide the modelling.
 
+PANDORA documentation can be found at: https://csb-pandora.readthedocs.io/en/latest/
+
 
 ## Dependencies
 PANDORA requires MODELLER, python and some python libraries to be installed.
