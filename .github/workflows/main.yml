@@ -37,14 +37,14 @@ jobs:
           mv coverage.xml .coverage
 
 
-    - name: Covert Coverage Results
-      run: |
-        pip install coveragepy-lcov
-        coveragepy-lcov --data_file_path .coverage --output_file_path .coverage.lcov
-        mv .coverage.lcov .coverage
-
-      - name: Coveralls
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Covert Coverage Results
         run: |
-          coveralls --service=github
+          pip install coveragepy-lcov
+          coveragepy-lcov --data_file_path .coverage --output_file_path .coverage.lcov
+          mv .coverage.lcov .coverage
+
+        - name: Coveralls
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            coveralls --service=github
