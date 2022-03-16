@@ -8,12 +8,11 @@ on:
   push:
     branches:
       - master
-      - PANDORA_remaster
       - cleanup_install
+      - coveralls
   pull_request:
     branches:
       - master
-      - PANDORA_remaster
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -61,3 +60,9 @@ jobs:
 
       - name: Test with pytest
         run: pytest test/
+
+      - name: Coveralls
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        coveralls --service=github
