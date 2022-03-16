@@ -33,7 +33,8 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pytest test/ --cov=pandora --cov-report xml:../.coverage
+          pytest test/ --cov=pandora --cov-report xml:coverage.xml
+          mv coverage.xml .coverage
 
       - name: Coveralls
         env:
