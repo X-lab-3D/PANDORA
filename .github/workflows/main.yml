@@ -34,7 +34,7 @@ jobs:
       - name: Test with pytest
         run: |
           cd test/
-          pytest --cov=pandora --cov-report xml:coverage.xml
+          pytest --cov=pandora > coverage.xml
           mv coverage.xml .coverage ..
           cd ../
 
