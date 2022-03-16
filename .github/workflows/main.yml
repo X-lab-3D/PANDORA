@@ -43,26 +43,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install .[test]
 
-      # /opt/hostedtoolcache/Python/3.8.8/x64/lib/python3.8/site-packages
-#      - name: Run a multi-line script
-#        run: |
-#          echo test,
-#          pip show modeller
-#
-#          cd /opt/hostedtoolcache/Python/3.8.8/x64
-#          ls -la
-#          echo 1
-#          cd /opt/hostedtoolcache/Python/3.8.8/x64/bin
-#          ls -la
-#          echo 2
-#          cd /opt/hostedtoolcache/Python/3.8.8/x64/lib
-#          ls -la
-
       - name: Test with pytest
         run: pytest test/
 
       - name: Coveralls
-      env:
+        env:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        coveralls --service=github
+        run: |
+          coveralls --service=github
