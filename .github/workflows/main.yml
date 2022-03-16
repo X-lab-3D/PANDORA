@@ -3,19 +3,7 @@
 name: CI
 
 # Controls when the action will run.
-on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches:
-      - master
-      - cleanup_install
-      - coveralls
-  pull_request:
-    branches:
-      - master
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -44,7 +32,11 @@ jobs:
           pip install .[test]
 
       - name: Test with pytest
-        run: pytest test/
+        run: |
+          cd test/
+          pytest --cov=pandora --cov-report xml:coverage.xml
+          mv coverage.xml .coverage ..
+          cd ../
 
       - name: Coveralls
         env:
