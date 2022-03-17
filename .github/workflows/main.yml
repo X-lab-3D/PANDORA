@@ -36,7 +36,7 @@ jobs:
           pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
 
       - name: Coveralls
-        with:
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage.xml
         run: |
