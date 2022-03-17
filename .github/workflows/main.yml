@@ -29,11 +29,11 @@ jobs:
           conda install -c bioconda muscle
           conda install -c salilab modeller
           python -m pip install --upgrade pip
-          pip install .[test]
+          pip install -e .[test]
 
       - name: Test with pytest
         run: |
-          pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml --cov=test
+          pytest test/ --cov=PANDORA --cov-report xml:coverage.xml
 
       - name: Covert Coverage Results
         run: |
