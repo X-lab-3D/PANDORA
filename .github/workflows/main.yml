@@ -36,7 +36,6 @@ jobs:
           pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
           mv coverage.xml .coverage
 
-
       - name: Covert Coverage Results
         run: |
           pip install coveragepy-lcov
