@@ -33,7 +33,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pytest test/ --cov=PANDORA --cov-report xml:coverage.xml
+          pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
 
       - name: Covert Coverage Results
         run: |
