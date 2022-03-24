@@ -44,7 +44,8 @@ setup(
        'pdb_tools',
        'pdb2sql',
        'matplotlib',
-       'dill'
+       'dill',
+       'joblib'
        ],
 
     extras_require={

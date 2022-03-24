@@ -36,6 +36,7 @@ jobs:
         run: python test/install_git_test.py
       - name: Install package
         run: |
+          pip install joblib
           conda install -c bioconda muscle
           conda install -c salilab modeller
           python -m pip install --upgrade pip
