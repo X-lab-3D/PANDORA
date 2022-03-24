@@ -463,7 +463,8 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
         # Adapt the target allele name if necessary
         #target_alleles = [allele_name_adapter(allele, available_alleles) for allele in target.allele_type]
         target_alleles = allele_name_adapter(target.allele_type, available_alleles)
-        target_alleles = list(set(target_alleles))
+        #target_alleles = list(set(target_alleles))
+        target_alleles = list(set([x for x in target_alleles if len(x) == len(max(target_alleles, key=len))]))
 
         # Find template structures with matching alleles
         putative_templates = {}
