@@ -19,7 +19,7 @@ setup(
     description='Model peptide-MHC I complexes using anchor distance restrains in MODELLER',
     long_description=readme + '\n\n',
     long_description_content_type='text/markdown',
-    author='Farzaneh Meimandi Parizi, Dario Marzella, Li Xue',
+    author='Dario Marzella, Farzaneh Parizi, Li Xue',
     url='https://github.com/X-lab-3D/PANDORA/tree/master',
     project_urls={
         'Source Code': 'https://github.com/X-lab-3D/PANDORA/tree/master',
