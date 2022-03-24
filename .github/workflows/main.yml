@@ -35,6 +35,8 @@ jobs:
       - name: Set up directories
         run: python test/install_git_test.py
       - name: Install package
+        env:
+        KEY_MODELLER: ${{ secrets.MODELLER_KEY }}
         run: |
           pip install joblib
           conda install -c bioconda muscle
