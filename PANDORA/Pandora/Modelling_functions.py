@@ -921,6 +921,9 @@ def allele_name_adapter(allele, available_alleles):
     Args:
         allele(list) : Allele names
         allele_ID(dict) : Dictionary of structure IDs (values) in the dataset for each allele (keys)
+        
+    Returns:
+        allele(list) : List of adapted (cut) allele names
     '''
     #homolog_allele = '--NONE--'
     for a in range(len(allele)):
