@@ -1578,6 +1578,32 @@ def parse_pMHCII_pdb(pdb_id,
 
         except:  # If something goes wrong, append the ID to the bad_ids list
             os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
+
+def get_sequence_for_fasta(template, MHC_class, chain):
+    alpha_chains = ['HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G',
+                    'HLA-DQA', 'HLA-DRA', 'HLA-DPA', 
+                    'H2-EA', 'MH2-AA']
+    beta_chains = ['HLA-DQB', 'HLA-DRB', 'HLA-DPB', 
+                   'H2-EB', 'MH2-AB', 'H2-AB']
+    
+    if chain == 'M':
+        alleles = [x for x in template.allele_type if any(y in x for y in alpha_chains)]
+        header = template.id+'_alpha' +'; '+ (',').join(alleles)
+        seq = template.M_chain_seq
+        if MHC_class =='I':
+            seq = seq[:180]
+        elif MHC_class =='II':
+            seq = seq[:84]
+            
+    elif chain == 'N':
+        alleles = [x for x in template.allele_type if any(y in x for y in beta_chains)]
+        header = template.id+'_beta' +'; '+ (',').join(alleles)
+        seq = template.N_chain_seq
+        
+        seq = seq[:94]
+
+    return header, seq
+    
      
 def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/', HLA_out = 'Human_MHC_data.fasta',
                              nonHLA_out = 'NonHuman_MHC_data.fasta'):
