@@ -1,5 +1,6 @@
 from Bio.Align import substitution_matrices
 import os
+import subprocess
 import PANDORA
 import pickle
 from PANDORA.PMHC import Model
@@ -416,7 +417,8 @@ def score_peptide_alignment_MHCII(target, template, substitution_matrix='PAM30')
     return aligned.score
 
 
-def find_template(target, database, best_n_templates = 1, benchmark=False):
+def find_template(target, database, best_n_templates = 1, benchmark=False, 
+                  blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/MHC_blast_db/MHC_blast_db'):
     ''' Selects the template structure that is best suited as template for homology modelling of the target
 
     Args:
@@ -484,9 +486,41 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
 
         ## For MHC II
     if target.MHC_class == 'II':
-
-        # Find template structures with matching alleles
+        
         putative_templates = {}
+        # Sequence based template selection
+        try:
+            command = (' ').join(['blastp','-db',blastdb, 
+                                                     '-query',
+                                                     '<(echo %s)' %target.M_chain_seq,
+                                                     '-outfmt','6'])
+            proc = subprocess.Popen(command,  executable='/bin/bash',
+                                         shell=True, stdout=subprocess.PIPE)
+            M_chain_result = proc.stdout.read()
+            M_chain_result = M_chain_result.decode()
+        except subprocess.CalledProcessError as e:
+            error = e.output
+            
+        try:
+            command = (' ').join(['blastp','-db',blastdb, 
+                                                     '-query',
+                                                     '<(echo %s)' %target.N_chain_seq,
+                                                     '-outfmt','6'])
+            proc = subprocess.Popen(command, executable='/bin/bash',
+                                         shell=True, stdout=subprocess.PIPE)
+            N_chain_result = proc.stdout.read()
+            N_chain_result = N_chain_result.decode()
+        except subprocess.CalledProcessError as e:
+            error = e.output
+
+        M_chain_result = M_chain_result.split('\n')
+        M_chain_result = [x.replace(';','').split('\t') for x in M_chain_result]
+        
+        N_chain_result = N_chain_result.split('\n')
+        N_chain_result = [x.replace(';','').split('\t') for x in N_chain_result]
+        
+        # Allele name based template selection
+        # Find template structures with matching alleles
         for ID in database.MHCII_data:
             if benchmark:
                 if ID != target.id:
