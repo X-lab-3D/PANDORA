@@ -489,6 +489,7 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
         
         putative_templates = {}
         # Sequence based template selection
+        #Blast M chain sequence
         try:
             command = (' ').join(['blastp','-db',blastdb, 
                                                      '-query',
@@ -500,7 +501,8 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
             M_chain_result = M_chain_result.decode()
         except subprocess.CalledProcessError as e:
             error = e.output
-            
+        
+        #Blast M chain sequence
         try:
             command = (' ').join(['blastp','-db',blastdb, 
                                                      '-query',
@@ -518,6 +520,24 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
         
         N_chain_result = N_chain_result.split('\n')
         N_chain_result = [x.replace(';','').split('\t') for x in N_chain_result]
+        
+        for result in M_chain_result:
+            ID = result[0]
+            score = float(result[4])
+            putative_templates[ID] = {'M_score': score}
+        
+        for result in N_chain_result:
+            ID = result[0]
+            score = float(result[4])
+            try:
+                putative_templates[ID]['N_score']= score
+                #Get average score
+                avg = (score+putative_templates[ID]['M_score'])/2
+                putative_templates[ID]['Avg_score']= avg
+            except KeyError:
+                putative_templates[ID] = {'N_score': score}
+            
+        putative_templates = sorted(putative_templates, key=lambda elem: elem['Avg_score'])
         
         # Allele name based template selection
         # Find template structures with matching alleles
@@ -564,58 +584,58 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
 
             # return database.MHCII_data[template_id], check_target_template(target, database.MHCII_data[template_id])
 
-    # # Sequence based template search if the sequences of the target are provided
-    # elif target.M_chain_seq != '' and seq_based_templ_selection:
-    #
-    #     if target.MHC_class == 'I':
-    #
-    #         # define target sequences
-    #         tar_seq = database.MHCI_data[target.id].M_chain_seq
-    #         tar_pept = database.MHCI_data[target.id].peptide
-    #         # keep track of alignment scores
-    #         scores = {}
-    #         # Perform a pairwise alignment of the target and all templates for the MHC M chain and peptide
-    #         for i in database.MHCI_data:
-    #             aligner = Align.PairwiseAligner()
-    #             aligner.substitution_matrix = substitution_matrices.load("BLOSUM80")  # PAM30 for pept??
-    #
-    #             M_score = aligner.align(tar_seq, database.MHCI_data[i].M_chain_seq).score
-    #             P_score = aligner.align(tar_pept, database.MHCI_data[i].peptide).score
-    #
-    #             scores[i] = (M_score, P_score)
-    #         # Remove the target structure from this dict, you cannot select the target as template
-    #         scores.pop(target.id, None)
-    #         # take the 10 best scoring templates
-    #         best_MHCs = sorted(scores, key=scores.get, reverse=True)[:10]
-    #         # take the template with the best scoring peptide
-    #         best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
-    #
-    #         return database.MHCI_data[best_template], check_target_template(target, database.MHCI_data[best_template])
-    #
-    #     if target.MHC_class == 'II':
-    #         # define target sequences
-    #         tar_seq = database.MHCII_data[target.id].M_chain_seq + database.MHCII_data[target.id].N_chain_seq
-    #         tar_pept = database.MHCII_data[target.id].peptide
-    #         # keep track of alignment scores
-    #         scores = {}
-    #
-    #         for i in database.MHCII_data:
-    #             aligner = Align.PairwiseAligner()
-    #             aligner.substitution_matrix = substitution_matrices.load("BLOSUM62")  # or PAM30 ??
-    #
-    #             temp_seq = database.MHCII_data[i].M_chain_seq + database.MHCII_data[i].N_chain_seq
-    #             MN_score = aligner.align(tar_seq, temp_seq).score
-    #             P_score = aligner.align(tar_pept, database.MHCII_data[i].peptide).score
-    #
-    #             scores[i] = (MN_score, P_score)
-    #         # Remove the target structure from this dict, you cannot select the target as template
-    #         scores.pop(target.id, None)
-    #         # take the 10 best scoring templates
-    #         best_MHCs = sorted(scores, key=scores.get, reverse=True)[:10]
-    #         # take the template with the best scoring peptide
-    #         best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
-    #
-    #         return database.MHCII_data[best_template], check_target_template(target, database.MHCI_data[best_template])
+    # Sequence based template search if the sequences of the target are provided
+    elif target.M_chain_seq != '' and seq_based_templ_selection:
+    
+        if target.MHC_class == 'I':
+    
+            # define target sequences
+            tar_seq = database.MHCI_data[target.id].M_chain_seq
+            tar_pept = database.MHCI_data[target.id].peptide
+            # keep track of alignment scores
+            scores = {}
+            # Perform a pairwise alignment of the target and all templates for the MHC M chain and peptide
+            for i in database.MHCI_data:
+                aligner = Align.PairwiseAligner()
+                aligner.substitution_matrix = substitution_matrices.load("BLOSUM80")  # PAM30 for pept??
+    
+                M_score = aligner.align(tar_seq, database.MHCI_data[i].M_chain_seq).score
+                P_score = aligner.align(tar_pept, database.MHCI_data[i].peptide).score
+    
+                scores[i] = (M_score, P_score)
+            # Remove the target structure from this dict, you cannot select the target as template
+            scores.pop(target.id, None)
+            # take the 10 best scoring templates
+            best_MHCs = sorted(scores, key=scores.get, reverse=True)[:10]
+            # take the template with the best scoring peptide
+            best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
+    
+            return database.MHCI_data[best_template], check_target_template(target, database.MHCI_data[best_template])
+    
+        if target.MHC_class == 'II':
+            # define target sequences
+            tar_seq = database.MHCII_data[target.id].M_chain_seq + database.MHCII_data[target.id].N_chain_seq
+            tar_pept = database.MHCII_data[target.id].peptide
+            # keep track of alignment scores
+            scores = {}
+    
+            for i in database.MHCII_data:
+                aligner = Align.PairwiseAligner()
+                aligner.substitution_matrix = substitution_matrices.load("BLOSUM62")  # or PAM30 ??
+    
+                temp_seq = database.MHCII_data[i].M_chain_seq + database.MHCII_data[i].N_chain_seq
+                MN_score = aligner.align(tar_seq, temp_seq).score
+                P_score = aligner.align(tar_pept, database.MHCII_data[i].peptide).score
+    
+                scores[i] = (MN_score, P_score)
+            # Remove the target structure from this dict, you cannot select the target as template
+            #scores.pop(target.id, None)
+            # take the 10 best scoring templates
+            best_MHCs = sorted(scores, key=scores.get, reverse=True)[:10]
+            # take the template with the best scoring peptide
+            best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
+    
+            return database.MHCII_data[best_template], check_target_template(target, database.MHCI_data[best_template])
 
 
 def write_ini_script(target, template, alignment_file, output_dir):
