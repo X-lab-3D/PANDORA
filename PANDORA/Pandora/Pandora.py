@@ -36,7 +36,7 @@ class Pandora:
             print('\tTarget MHC Class: %s' % self.target.MHC_class)
             print('\tTarget Allele:  %s' % self.target.allele_type)
             print('\tTarget Peptide: %s' % self.target.peptide)
-            print('\tTarget Anchors: %s,%s\n' % (self.target.anchors[0],self.target.anchors[1]))
+            print('\tTarget Anchors: %s\n' % (',').join(self.target.anchors))
 
         if self.template is None: # Only find the best template if the user didn't specify one
             # if verbose and self.target.M_chain_seq != '' and seq_based_templ_selection:
