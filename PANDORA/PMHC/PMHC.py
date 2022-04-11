@@ -86,8 +86,14 @@ class Template(PMHC):
         if anchors == []:
             self.calc_anchors()
 
-    def parse_pdb(self):
-        '''Loads pdb from path, updates self.pdb field and self.chain_seq/self.peptide if they were empty'''
+    def parse_pdb(self, custom_map={"MSE":"M"}):
+        '''Loads pdb from path, updates self.pdb field and self.chain_seq/self.peptide if they were empty
+        
+        Args:
+            custom_map (dict): custom map of 3-letter to 1-letter residues translation,
+                                used by Bio.SeqUtiles.seq1 to decide how to assign 
+                                non-canonical residues. Defaults to {"MSE":"M"}.
+                '''
 
         if self.pdb_path and not self.pdb: #if there is a path to a pdb provided and there is not already a self.pdb...
             parser = PDBParser(QUIET=True)  # Create a parser object, used to read pdb files
@@ -96,7 +102,8 @@ class Template(PMHC):
 
         # If the chains or peptide are not given by the user, fetch them from the pdb
         # Get the chain sequences
-        chain_seqs = [seq1(''.join([res.resname for res in chain])) for chain in self.pdb.get_chains()]
+        chain_seqs = [seq1(''.join([res.resname for res in chain]), 
+                           custom_map=custom_map) for chain in self.pdb.get_chains()]
         # Update chain and peptide fields if emtpy
         if self.MHC_class == 'I':
             if self.M_chain_seq == '':
