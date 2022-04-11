@@ -433,32 +433,76 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
     ## For MHC I
     if target.MHC_class == 'I':
 
-        # Define available alleles in database
-        available_alleles = []
-        for ID in database.MHCI_data:
-            if benchmark and ID == target.id:
-                pass
-            else:
-                available_alleles.extend(database.MHCI_data[ID].allele_type)
-        available_alleles = list(set(available_alleles))
-
-        # Adapt the target allele name if necessary
-        #target_alleles = [allele_name_adapter(allele, available_alleles) for allele in target.allele_type]
-        target_alleles = allele_name_adapter(target.allele_type, available_alleles)
-        target_alleles = list(set(target_alleles))
-
-        # Find template structures with matching alleles
-        putative_templates = {}
-        for ID in database.MHCI_data:
-            if benchmark and ID == target.id:
-                pass
-            else:
-                for tar_allele in target_alleles:
-                    if any(tar_allele in put_temp_allele for put_temp_allele in database.MHCI_data[ID].allele_type):
-                        # update dict with ID:all matching alleles
-                        #TODO: is this list of matching allele obsolete?
-                        putative_templates[ID] = list(
-                            set(target.allele_type) & set(database.MHCI_data[ID].allele_type))
+        if target.M_chain_seq != '': 
+            #Sequence based template selection
+            putative_templates = {}
+            # Sequence based template selection
+            #Keep only G-domain
+            M_chain = target.M_chain_seq[:180]
+            #Blast M chain sequence
+            try:
+                command = (' ').join(['blastp','-db',blastdb, 
+                                                         '-query',
+                                                         '<(echo %s)' %M_chain,
+                                                         '-outfmt','6'])
+                proc = subprocess.Popen(command,  executable='/bin/bash',
+                                             shell=True, stdout=subprocess.PIPE)
+                M_chain_result = proc.stdout.read()
+                M_chain_result = M_chain_result.decode()
+            except subprocess.CalledProcessError as e:
+                print('An error occurred while blasting M chain seq: %s' %e.output)
+                
+    
+            M_chain_result = M_chain_result.split('\n')
+            M_chain_result = [x.replace(';','').split('\t') for x in M_chain_result]
+            M_chain_result = [x for x in M_chain_result if x != ['']]
+            
+            #FIll in putative_templates M identity score
+            for result in M_chain_result:
+                ID = result[1][:4]
+                score = float(result[2])
+                putative_templates[ID] = {'M_score': score}
+                    
+            #Remove target from putative_templates if benchmark run
+            if benchmark:
+                del putative_templates[target.id]
+            
+            #Sort for average score
+            putative_templates = sorted(putative_templates.items(), 
+                                        key=lambda x: x[1]['M_score'], reverse=True)
+            putative_templates = {x[0] : x[1] for x in putative_templates}
+            
+            #Keep only max score templates
+            max_score = list(putative_templates.values())[0]['M_score']
+            putative_templates = {x : putative_templates[x] for x in putative_templates 
+                                  if putative_templates[x]['M_score'] == max_score}
+        else:
+            # Define available alleles in database
+            available_alleles = []
+            for ID in database.MHCI_data:
+                if benchmark and ID == target.id:
+                    pass
+                else:
+                    available_alleles.extend(database.MHCI_data[ID].allele_type)
+            available_alleles = list(set(available_alleles))
+    
+            # Adapt the target allele name if necessary
+            #target_alleles = [allele_name_adapter(allele, available_alleles) for allele in target.allele_type]
+            target_alleles = allele_name_adapter(target.allele_type, available_alleles)
+            target_alleles = list(set(target_alleles))
+    
+            # Find template structures with matching alleles
+            putative_templates = {}
+            for ID in database.MHCI_data:
+                if benchmark and ID == target.id:
+                    pass
+                else:
+                    for tar_allele in target_alleles:
+                        if any(tar_allele in put_temp_allele for put_temp_allele in database.MHCI_data[ID].allele_type):
+                            # update dict with ID:all matching alleles
+                            #TODO: is this list of matching allele obsolete?
+                            putative_templates[ID] = list(
+                                set(target.allele_type) & set(database.MHCI_data[ID].allele_type))
 
         # If the target template already occured in the database, remove it from the dict of putative templates
         #putative_templates.pop(target.id)
@@ -504,7 +548,12 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
                 M_chain_result = proc.stdout.read()
                 M_chain_result = M_chain_result.decode()
             except subprocess.CalledProcessError as e:
-                error = e.output
+                print('An error occurred while blasting M chain seq: %s' %e.output)
+                
+    
+            M_chain_result = M_chain_result.split('\n')
+            M_chain_result = [x.replace(';','').split('\t') for x in M_chain_result]
+            M_chain_result = [x for x in M_chain_result if x != ['']]
             
             #Keep only G-domain
             N_chain = target.N_chain_seq[:90]
@@ -519,21 +568,19 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
                 N_chain_result = proc.stdout.read()
                 N_chain_result = N_chain_result.decode()
             except subprocess.CalledProcessError as e:
-                error = e.output
-    
-            M_chain_result = M_chain_result.split('\n')
-            M_chain_result = [x.replace(';','').split('\t') for x in M_chain_result]
-            M_chain_result = [x for x in M_chain_result if x != ['']]
+                print('An error occurred while blasting N chain seq: %s' %e.output)
             
             N_chain_result = N_chain_result.split('\n')
             N_chain_result = [x.replace(';','').split('\t') for x in N_chain_result]
             N_chain_result = [x for x in N_chain_result if x != ['']]
             
+            #FIll in putative_templates M identity score
             for result in M_chain_result:
                 ID = result[1][:4]
                 score = float(result[2])
                 putative_templates[ID] = {'M_score': score}
             
+            #FIll in putative_templates N  and average identity score
             for result in N_chain_result:
                 ID = result[1][:4]
                 score = float(result[2])
@@ -550,12 +597,9 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
                 del putative_templates[target.id]
             
             #Sort for average score
-            try:
-                putative_templates = sorted(putative_templates.items(), 
-                                            key=lambda x: x[1]['Avg_score'], reverse=True)
-                putative_templates = {x[0] : x[1] for x in putative_templates}
-            except:
-                return M_chain_result, N_chain_result, putative_templates
+            putative_templates = sorted(putative_templates.items(), 
+                                        key=lambda x: x[1]['Avg_score'], reverse=True)
+            putative_templates = {x[0] : x[1] for x in putative_templates}
             #Keep only max score templates
             max_score = list(putative_templates.values())[0]['Avg_score']
             putative_templates = {x : putative_templates[x] for x in putative_templates 
@@ -593,10 +637,8 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
 
         if len(pos_list) == 0:
             raise Exception('Pandora could not find any putative template! Please try to define your own template or contact us for help')
-        # Take the putative template with the max scoring peptide
-        # template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]        # Return the Template object of the selected template that will be used for homology modelling
-
-
+        
+        # Sort templates per peptide score
         template_id = [i[-1] for i in sorted(pos_list, key=lambda elem: elem[0], reverse=True)][:best_n_templates]
         scores = sorted(pos_list, key=lambda elem: elem[0], reverse=True)[:best_n_templates]
 
@@ -604,9 +646,6 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
         keep_IL = any(check_target_template(target, tmpl) for tmpl in templates)
 
         return templates, scores, keep_IL
-
-            # return database.MHCII_data[template_id], check_target_template(target, database.MHCII_data[template_id])
-
 
 def write_ini_script(target, template, alignment_file, output_dir):
     ''' Writes the MyLoop.py and cmd_modeller_ini.py files. This function takes two template python scripts and fills
