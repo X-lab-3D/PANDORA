@@ -1,4 +1,5 @@
 import os
+import subprocess
 import urllib.request
 import urllib.parse
 from copy import deepcopy
@@ -10,7 +11,6 @@ import gzip
 import shutil
 import PANDORA
 from PANDORA.Contacts import Contacts
-from Bio import SeqIO
 from PANDORA.PMHC import PMHC
 from Bio.PDB import NeighborSearch
 from Bio.SeqUtils import seq1
@@ -1605,7 +1605,8 @@ def get_sequence_for_fasta(template, MHC_class, chain):
     return header, seq
     
      
-def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/', HLA_out = 'Human_MHC_data.fasta',
+def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/', 
+                             HLA_out = 'Human_MHC_data.fasta',
                              nonHLA_out = 'NonHuman_MHC_data.fasta'):
     """
     Downloads and parse HLA and other MHC sequences to compile reference fastas 
@@ -1625,21 +1626,21 @@ def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/',
     
 
     # Changing working directory
-    start_dir = os.getcwd()
-    os.chdir(data_dir)
+    #start_dir = os.getcwd()
+    #os.chdir(data_dir)
     
     # Download and parse sequences
     # Human sequences
-    ref_MHCI_sequences = generate_hla_database()
+    ref_MHCI_sequences = generate_hla_database(data_dir)
     # Non-human sequences
-    ref_MHCI_sequences.update(generate_nonhla_database())
+    ref_MHCI_sequences.update(generate_nonhla_database(data_dir))
     
     # Change back working directory
-    os.chdir(start_dir)
+    #os.chdir(start_dir)
     return ref_MHCI_sequences
     
     
-def generate_hla_database(HLA_out = 'Human_MHC_data.fasta'):
+def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
     """
     Downloads and parse HLA sequences
 
@@ -1660,7 +1661,12 @@ def generate_hla_database(HLA_out = 'Human_MHC_data.fasta'):
         pass
     
     # Download Human data
-    os.system('wget https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta')
+    #os.system('wget https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta')
+    url = 'https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta'
+    command = (' ').join(['wget', url, '-P', data_dir])
+    proc = subprocess.Popen(command,  executable='/bin/bash',
+                                 shell=True, stdout=subprocess.PIPE)
+    print(proc.stdout.read())
     
     HLAs = {}
     to_write = {}
@@ -1683,6 +1689,10 @@ def generate_hla_database(HLA_out = 'Human_MHC_data.fasta'):
                     HLAs[allele_significant].append(seq_record)
                 except KeyError:
                     HLAs[allele_significant] = [seq_record]
+                    
+        elif allele_fullname.split('*')[0][:2] in ['DP', 'DQ', 'DR']:
+            if allele_fullname.endswith('N') or allele_fullname.endswith('Q'):
+                pass
     
     #Sort HLA sequences by length. Keep the longest
     for allele in HLAs:
@@ -1715,7 +1725,7 @@ def generate_hla_database(HLA_out = 'Human_MHC_data.fasta'):
 
     return to_write
 
-def generate_nonhla_database(nonHLA_out = 'NonHuman_MHC_data.fasta'):
+def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
     """
     Downloads and parse non human MHC sequences
 
@@ -1736,7 +1746,12 @@ def generate_nonhla_database(nonHLA_out = 'NonHuman_MHC_data.fasta'):
         pass
     
     # Download other animlas data
-    os.system('wget https://raw.githubusercontent.com/ANHIG/IPDMHC/Latest/MHC_prot.fasta')
+    #os.system('wget https://raw.githubusercontent.com/ANHIG/IPDMHC/Latest/MHC_prot.fasta')
+    url = 'https://raw.githubusercontent.com/ANHIG/IPDMHC/Latest/MHC_prot.fasta'
+    command = (' ').join(['wget', url, '-P', data_dir])
+    proc = subprocess.Popen(command,  executable='/bin/bash',
+                                 shell=True, stdout=subprocess.PIPE)
+    print(proc.stdout.read())
     
     MHCs = {}
     to_write = {}

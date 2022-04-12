@@ -36,13 +36,13 @@ class Pandora:
             print('\tTarget MHC Class: %s' % self.target.MHC_class)
             print('\tTarget Allele:  %s' % self.target.allele_type)
             print('\tTarget Peptide: %s' % self.target.peptide)
-            print('\tTarget Anchors: %s\n' % (',').join(self.target.anchors))
+            print('\tTarget Anchors: %s\n' % (',').join([str(x) for x in self.target.anchors]))
 
         if self.template is None: # Only find the best template if the user didn't specify one
             # if verbose and self.target.M_chain_seq != '' and seq_based_templ_selection:
             #     print('\tUsing sequence based template selection')
             if verbose:
-                print('\tUsing allele type based template selection')
+                print('\tLooking for a template...')
             # Find the best template. If the target already exists in the database,
             # also consider the initial loop model as a model
             self.template, self.pept_ali_scores, self.keep_IL = Modelling_functions.find_template(self.target,

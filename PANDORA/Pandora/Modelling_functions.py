@@ -433,7 +433,7 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
     ## For MHC I
     if target.MHC_class == 'I':
 
-        if target.M_chain_seq != '': 
+        if target.M_chain_seq != '':
             #Sequence based template selection
             putative_templates = {}
             # Sequence based template selection
@@ -595,6 +595,9 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
             #Remove target from putative_templates if benchmark run
             if benchmark:
                 del putative_templates[target.id]
+            
+            putative_templates = {x : putative_templates[x] for x in putative_templates 
+                                  if 'Avg_score' in list(putative_templates[x].keys())}
             
             #Sort for average score
             putative_templates = sorted(putative_templates.items(), 

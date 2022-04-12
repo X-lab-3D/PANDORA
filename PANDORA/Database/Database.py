@@ -83,6 +83,9 @@ class Database:
                         self.MHCII_data[id] = templ
                 except:
                     print('something went wrong parsing %s' %id)
+        
+        #Construct blast database for blast-based sequence-based template selection
+        self.construct_blast_db()
 
         if save:
             self.save(save)
@@ -159,9 +162,7 @@ class Database:
                 
             
 
-    def construct_blast_db(self, outpath=PANDORA.PANDORA_data+ '/csv_pkl_files/MHC_blast_db', db_name='MHC_blast_db',
-                           MHCI=True, MHC_db='MHC_blast_db', MHCII=True, 
-                           MHCIIA_db='MHCIIA_DB', MHCIIB_db='MHCIIB_DB'):
+    def construct_blast_db(self, outpath=PANDORA.PANDORA_data+ '/csv_pkl_files/MHC_blast_db', db_name='MHC_blast_db'):
         """
         Construc blast database for seq based template selection
 
@@ -186,15 +187,6 @@ class Database:
         subprocess.check_call((' ').join(['makeblastdb','-dbtype','prot',
                                           '-in', out_fasta,'-out', 
                                           outpath+'/'+db_name]), shell=True)
-        #if MHCI:
-        #    write_db_into_fasta(MHC_class='I', 
-        #                                           outfile=MHCI_db + '.fasta')
-        
-        #if MHCII:
-        #    write_db_into_fasta(MHC_class='IIA', 
-        #                                           outfile=MHCIIA_db + '.fasta')
-        #    write_db_into_fasta(MHC_class='IIB', 
-        #                                           outfile=MHCIIB_db + '.fasta')
         
         
         

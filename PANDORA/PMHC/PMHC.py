@@ -86,6 +86,9 @@ class Template(PMHC):
         if anchors == []:
             self.calc_anchors()
 
+        #Remove self.pdb as it's not useful anymore and takes a lot of memory
+        self.pdb = None
+
     def parse_pdb(self, custom_map={"MSE":"M"}):
         '''Loads pdb from path, updates self.pdb field and self.chain_seq/self.peptide if they were empty
         
