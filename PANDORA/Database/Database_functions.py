@@ -90,7 +90,7 @@ def download_ids_imgt(ReceptorType, data_dir = PANDORA.PANDORA_data, out_tsv = F
 
     url = "http://www.imgt.org/3Dstructure-DB/cgi/3Dquery.cgi?%s" % params
 
-    with urllib.request.urlopen(req) as response:
+    with urllib.request.urlopen(url) as response:
         text = response.read().decode('utf-8')
         text = text.splitlines()
 
