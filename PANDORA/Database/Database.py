@@ -167,13 +167,8 @@ class Database:
         Construc blast database for seq based template selection
 
         Args:
-            data_dir (str, optional): Data dir folder. Defaults to PANDORA.PANDORA_data+ '/csv_pkl_files/'.
-            MHCI (bool, optional): If True, builds MHCI db. Defaults to True.
-            MHCI_db (str, optional): Name of the MHCI db folder and fasta file. Defaults to 'MHCI_DB'.
-            MHCII (bool, optional): DESCRIPTION. Defaults to True.
-            MHCIIA_db (str, optional): Name of the MHCII alpha db folder and fasta file. Defaults to 'MHCIIA_DB'.
-            MHCIIB_db (str, optional): Name of the MHCII beta db folder and fasta file. Defaults to 'MHCIIB_DB'.
-
+            outpath (str, optional): Data dir folder. Defaults to PANDORA.PANDORA_data+ '/csv_pkl_files/'.
+            db_name (str, optional): Name of the db folder and fasta file. Defaults to 'MHC_blast_db'.
         Returns:
             None.
 

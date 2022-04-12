@@ -1576,14 +1576,14 @@ def parse_pMHCII_pdb(pdb_id,
             os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
 
 def get_sequence_for_fasta(template, MHC_class, chain):
-    alpha_chains = ['HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G',
-                    'HLA-DQA', 'HLA-DRA', 'HLA-DPA', 
-                    'H2-EA', 'MH2-AA']
-    beta_chains = ['HLA-DQB', 'HLA-DRB', 'HLA-DPB', 
-                   'H2-EB', 'MH2-AB', 'H2-AB']
+    # alpha_chains = ['HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G',
+    #                 'HLA-DQA', 'HLA-DRA', 'HLA-DPA', 
+    #                 'H2-EA', 'MH2-AA']
+    # beta_chains = ['HLA-DQB', 'HLA-DRB', 'HLA-DPB', 
+    #                'H2-EB', 'MH2-AB', 'H2-AB']
     
     if chain == 'M':
-        alleles = [x for x in template.allele_type if any(y in x for y in alpha_chains)]
+        alleles = [x for x in template.allele_type if any(y in x for y in PANDORA.alpha_genes)]
         header = template.id+'_alpha' +'; '+ (',').join(alleles)
         seq = template.M_chain_seq
         if MHC_class =='I':
@@ -1592,7 +1592,7 @@ def get_sequence_for_fasta(template, MHC_class, chain):
             seq = seq[:84]
             
     elif chain == 'N':
-        alleles = [x for x in template.allele_type if any(y in x for y in beta_chains)]
+        alleles = [x for x in template.allele_type if any(y in x for y in PANDORA.beta_genes)]
         header = template.id+'_beta' +'; '+ (',').join(alleles)
         seq = template.N_chain_seq
         

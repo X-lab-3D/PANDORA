@@ -1,4 +1,4 @@
-
+from Bio import SeqIO
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 import PANDORA
@@ -212,7 +212,7 @@ class Target(PMHC):
         if MHC_class == 'I' and M_chain_seq =='':
             print('No MHC sequence was provided. Trying to retrieve it from reference sequences...')
             try:
-                self.retrieve_MHCI_refseq()
+                self.retrieve_MHCI_refseq(chain='M')
             except:
                 print('Something went wrong while retrieving the reference sequence.')
                 print('Please provide a M_chain_seq for your target.')
@@ -229,7 +229,23 @@ class Target(PMHC):
                 raise Exception('Failed in retriving reference sequence.')
         elif MHC_class == 'II' and M_chain_seq =='' and N_chain_seq =='':
             print('No MHC sequence was provided. Trying to retrieve it from reference sequences...')
-            raise Exception('Reference MHC II sequences have not been implemented yet. Please provide both M and N chain sequence.')
+            try:
+                self.retrieve_MHCI_refseq(chain='M')
+                self.retrieve_MHCI_refseq(chain='N')
+            except:
+                print('Something went wrong while retrieving the reference sequence.')
+                print('Please provide a M_chain_seq for your target.')
+                print('###################')
+                print('You can find all the reference MHC sequences used in PANDORA')
+                print(' and use them for your target in <MyDatabase>.ref_MHCI_sequences')
+                print('Where <MyDatabase> is the name of your PANDORA Database object.')
+                print('###################')
+                print('You can also find reference MHC sequences for Humans at:')
+                print('https://www.ebi.ac.uk/ipd/imgt/hla/')
+                print('And for other animals here:')
+                print('https://www.ebi.ac.uk/ipd/mhc/')
+                print('###################')
+            #raise Exception('Reference MHC II sequences have not been implemented yet. Please provide both M and N chain sequence.')
         
         # If anchors are not provided, predict them from the peptide length
         if MHC_class =='I' and anchors == []:
@@ -319,7 +335,7 @@ class Target(PMHC):
         else:
             raise Exception('Provide an initial model (.ini PDB) and anchor positions to the Target object first')
 
-    def retrieve_MHCI_refseq(self, input_file = None):
+    def retrieve_MHCI_refseq(self, input_file = None, chain='M'):
         """
         Retrieves MHC I reference sequence from fasta file.
 
@@ -331,7 +347,6 @@ class Target(PMHC):
 
         """
         # Import necessary package
-        from Bio import SeqIO
         
         # Define correct fasta file
         if input_file == None:
@@ -343,12 +358,20 @@ class Target(PMHC):
         # Parse Fasta file
         fasta_sequences = SeqIO.parse(input_file,'fasta')
         
+        if chain == 'M':
+            alleles = [x for x in self.allele_type if any(y in x for y in PANDORA.alpha_genes)]
+        elif chain == 'N':
+            alleles = [x for x in self.allele_type if any(y in x for y in PANDORA.beta_genes)]
         # Return the right sequences
         seq_flag = False
         for seq in fasta_sequences:
-            if seq.id == self.allele_type[0]:
-                self.M_chain_seq = str(seq.seq)
-                seq_flag = True
+            if any(seq.id == allele for allele in alleles):
+                if chain == 'M':
+                    self.M_chain_seq = str(seq.seq)
+                    seq_flag = True
+                elif chain == 'N':
+                    self.N_chain_seq = str(seq.seq)
+                    seq_flag = True
                 break
             else:
                 pass

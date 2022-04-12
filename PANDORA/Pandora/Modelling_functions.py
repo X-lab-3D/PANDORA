@@ -450,12 +450,11 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
 
     '''
 
+    putative_templates = {}
     ## For MHC I
     if target.MHC_class == 'I':
 
         if target.M_chain_seq != '':
-            #Sequence based template selection
-            putative_templates = {}
             # Sequence based template selection
             #Keep only G-domain
             M_chain = target.M_chain_seq[:180]
@@ -511,8 +510,7 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
             target_alleles = allele_name_adapter(target.allele_type, available_alleles)
             target_alleles = list(set(target_alleles))
     
-            # Find template structures with matching alleles
-            putative_templates = {}
+            # Find template structures with matching allele
             for ID in database.MHCI_data:
                 if benchmark and ID == target.id:
                     pass
@@ -553,7 +551,7 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
         
         if target.M_chain_seq != '' and target.N_chain_seq != '': 
             #Sequence based template selection
-            putative_templates = {}
+            
             # Sequence based template selection
             #Keep only G-domain
             M_chain = target.M_chain_seq[:82]
