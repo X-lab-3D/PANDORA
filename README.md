@@ -205,7 +205,7 @@ from PANDORA.Wrapper.Wrapper import Wrapper
 db = Database.load('pandora_Database')
 
 ## B. Create the wrapper object
-wrap =  Wrapper()
+wrap =  Wrapper.Wrapper()
 
 ## C. Create all Target Objects based on peptides in the .tsv file
 wrap.create_targets('datafile.tsv', db)

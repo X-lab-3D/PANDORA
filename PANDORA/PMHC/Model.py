@@ -3,18 +3,6 @@ import os
 from Bio.PDB import PDBIO
 import PANDORA
 import traceback
-#import sys
-#import numpy as np
-# from copy import deepcopy
-
-
-
-# target = y.target
-# model_path = y.model_path
-# output_dir = PANDORA.PANDORA_data
-# pdb = deepcopy(y.pdb)
-# reference_pdb = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/PDBs/pMHCII/1HXY.pdb'
-
 
 
 class Model:
