@@ -1652,7 +1652,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
     ###
     # Rename pre-existing raw file
     try:
-        os.system('mv hla_prot.fasta OLD_hla_prot.fasta')
+        os.system('mv %shla_prot.fasta %sOLD_hla_prot.fasta' %(data_dir, data_dir))
     except:
         pass
     
@@ -1666,29 +1666,29 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
     
     HLAs = {}
     to_write = {}
-    
     #Parse the fasta files
-    for seq_record in SeqIO.parse('hla_prot.fasta', "fasta"):
+    for seq_record in SeqIO.parse(data_dir + 'hla_prot.fasta', "fasta"):
         allele_fullname = seq_record.description.split(' ')[1]
-        allele_significant = allele_fullname[:8]
+        #allele_significant = allele_fullname[:8]
         #If the allele name ends with ':', trim it away
-        if allele_significant[-1] == ':':
-            allele_significant = allele_significant[:-1]
+        allele_significant = ':'.join(allele_fullname.split(':')[:3])
+        #if allele_significant[-1] == ':':
+        #    allele_significant = allele_significant[:-1]
         #If the gene name is A, B, C, E, F, G
-        if allele_fullname.split('*')[0] in ['A', 'B', 'C', 'E', 'F', 'G']:
-            if allele_fullname.endswith('N') or allele_fullname.endswith('Q'):
-                pass
-            elif int(seq_record.description.split(' ')[2]) < 350 or int(seq_record.description.split(' ')[2]) > 380:
-                pass
-            else:
-                try:
-                    HLAs[allele_significant].append(seq_record)
-                except KeyError:
-                    HLAs[allele_significant] = [seq_record]
-                    
-        elif allele_fullname.split('*')[0][:2] in ['DP', 'DQ', 'DR']:
-            if allele_fullname.endswith('N') or allele_fullname.endswith('Q'):
-                pass
+        if allele_fullname.endswith('N') or allele_fullname.endswith('Q'):
+            pass
+        #Take only sequences which legth is consistent with MHCI or MHCII chains
+        elif ((allele_fullname.split('*')[0][:2] in ['A', 'B', 'C',
+                                                 'E', 'F', 'G'] and
+              350 < int(seq_record.description.split(' ')[2]) < 380) or
+              (allele_fullname.split('*')[0][:2] in ['DP', 'DQ', 'DR'] and
+               170 < int(seq_record.description.split(' ')[2]) < 220)):
+            try:
+                HLAs[allele_significant].append(seq_record)
+            except KeyError:
+                HLAs[allele_significant] = [seq_record]
+        else:
+            pass
     
     #Sort HLA sequences by length. Keep the longest
     for allele in HLAs:
@@ -1703,7 +1703,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
             to_write['HLA-'+allele] = str(putatives[0].seq)
     
     #Write output fasta file
-    with open(HLA_out, 'w') as outfile:
+    with open(data_dir + HLA_out, 'w') as outfile:
         for allele in to_write:
             outfile.write('>'+allele+'\n')
             for i in range(len(to_write[allele])):
@@ -1715,7 +1715,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
     
     # Remove pre-existing raw file
     try:
-        os.system('rm OLD_hla_prot.fasta')
+        os.system('rm %s/OLD_hla_prot.fasta' %data_dir)
     except:
         pass
 
