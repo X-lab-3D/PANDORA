@@ -6,10 +6,12 @@ import pickle
 from PANDORA.PMHC import Model
 # from Bio import Align
 from Bio import pairwise2
-from PANDORA.Pandora import Align
-import statistics
+#from PANDORA.Pandora import Align
+#import statistics
 from Bio.Align import PairwiseAligner
 from datetime import datetime
+from copy import deepcopy
+import re
 
 
 def check_target_template(target, template):
@@ -438,7 +440,7 @@ def score_peptide_alignment_MHCII(target, template, substitution_matrix='PAM30')
 
 
 def find_template(target, database, best_n_templates = 1, benchmark=False, 
-                  blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/MHC_blast_db/MHC_blast_db'):
+                  blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/templates_blast_db/templates_blast_db'):
     ''' Selects the template structure that is best suited as template for homology modelling of the target
 
     Args:
@@ -459,27 +461,31 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
             #Keep only G-domain
             M_chain = target.M_chain_seq[:180]
             #Blast M chain sequence
-            try:
-                command = (' ').join(['blastp','-db',blastdb, 
-                                                         '-query',
-                                                         '<(echo %s)' %M_chain,
-                                                         '-outfmt','6'])
-                proc = subprocess.Popen(command,  executable='/bin/bash',
-                                             shell=True, stdout=subprocess.PIPE)
-                M_chain_result = proc.stdout.read()
-                M_chain_result = M_chain_result.decode()
-            except subprocess.CalledProcessError as e:
-                print('An error occurred while blasting M chain seq: %s' %e.output)
+            # try:
+            #     command = (' ').join(['blastp','-db',blastdb, 
+            #                                              '-query',
+            #                                              '<(echo %s)' %M_chain,
+            #                                              '-outfmt','6'])
+            #     proc = subprocess.Popen(command,  executable='/bin/bash',
+            #                                  shell=True, stdout=subprocess.PIPE)
+            #     M_chain_result = proc.stdout.read()
+            #     M_chain_result = M_chain_result.decode()
+            # except subprocess.CalledProcessError as e:
+            #     print('An error occurred while blasting M chain seq: %s' %e.output)
                 
     
-            M_chain_result = M_chain_result.split('\n')
-            M_chain_result = [x.replace(';','').split('\t') for x in M_chain_result]
-            M_chain_result = [x for x in M_chain_result if x != ['']]
+            # M_chain_result = M_chain_result.split('\n')
+            # M_chain_result = [x.replace(';','').split('\t') for x in M_chain_result]
+            # M_chain_result = [x for x in M_chain_result if x != ['']]
             
-            #FIll in putative_templates M identity score
+            # #FIll in putative_templates M identity score
+            # for result in M_chain_result:
+            #     ID = result[1][:4]
+            #     score = float(result[2])
+            M_chain_result = blast_mhc_seq(M_chain, chain='M', blastdb=blastdb)
             for result in M_chain_result:
-                ID = result[1][:4]
-                score = float(result[2])
+                ID = result[0][:4]
+                score = result[1]
                 putative_templates[ID] = {'M_score': score}
                     
             #Remove target from putative_templates if benchmark run
@@ -556,52 +562,54 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
             #Keep only G-domain
             M_chain = target.M_chain_seq[:82]
             #Blast M chain sequence
-            try:
-                command = (' ').join(['blastp','-db',blastdb, 
-                                                         '-query',
-                                                         '<(echo %s)' %M_chain,
-                                                         '-outfmt','6'])
-                proc = subprocess.Popen(command,  executable='/bin/bash',
-                                             shell=True, stdout=subprocess.PIPE)
-                M_chain_result = proc.stdout.read()
-                M_chain_result = M_chain_result.decode()
-            except subprocess.CalledProcessError as e:
-                print('An error occurred while blasting M chain seq: %s' %e.output)
+            # try:
+            #     command = (' ').join(['blastp','-db',blastdb, 
+            #                                              '-query',
+            #                                              '<(echo %s)' %M_chain,
+            #                                              '-outfmt','6'])
+            #     proc = subprocess.Popen(command,  executable='/bin/bash',
+            #                                  shell=True, stdout=subprocess.PIPE)
+            #     M_chain_result = proc.stdout.read()
+            #     M_chain_result = M_chain_result.decode()
+            # except subprocess.CalledProcessError as e:
+            #     print('An error occurred while blasting M chain seq: %s' %e.output)
                 
     
-            M_chain_result = M_chain_result.split('\n')
-            M_chain_result = [x.replace(';','').split('\t') for x in M_chain_result]
-            M_chain_result = [x for x in M_chain_result if x != ['']]
+            # M_chain_result = M_chain_result.split('\n')
+            # M_chain_result = [x.replace(';','').split('\t') for x in M_chain_result]
+            # M_chain_result = [x for x in M_chain_result if x != ['']]
+            M_chain_result = blast_mhc_seq(M_chain, chain='M', blastdb=blastdb)
             
             #Keep only G-domain
             N_chain = target.N_chain_seq[:90]
             #Blast N chain sequence
-            try:
-                command = (' ').join(['blastp','-db',blastdb, 
-                                                         '-query',
-                                                         '<(echo %s)' %N_chain,
-                                                         '-outfmt','6'])
-                proc = subprocess.Popen(command, executable='/bin/bash',
-                                             shell=True, stdout=subprocess.PIPE)
-                N_chain_result = proc.stdout.read()
-                N_chain_result = N_chain_result.decode()
-            except subprocess.CalledProcessError as e:
-                print('An error occurred while blasting N chain seq: %s' %e.output)
+            # try:
+            #     command = (' ').join(['blastp','-db',blastdb, 
+            #                                              '-query',
+            #                                              '<(echo %s)' %N_chain,
+            #                                              '-outfmt','6'])
+            #     proc = subprocess.Popen(command, executable='/bin/bash',
+            #                                  shell=True, stdout=subprocess.PIPE)
+            #     N_chain_result = proc.stdout.read()
+            #     N_chain_result = N_chain_result.decode()
+            # except subprocess.CalledProcessError as e:
+            #     print('An error occurred while blasting N chain seq: %s' %e.output)
             
-            N_chain_result = N_chain_result.split('\n')
-            N_chain_result = [x.replace(';','').split('\t') for x in N_chain_result]
-            N_chain_result = [x for x in N_chain_result if x != ['']]
+            # N_chain_result = N_chain_result.split('\n')
+            # N_chain_result = [x.replace(';','').split('\t') for x in N_chain_result]
+            # N_chain_result = [x for x in N_chain_result if x != ['']]
+            N_chain_result = blast_mhc_seq(N_chain, chain='N', blastdb=blastdb)
             
             #FIll in putative_templates M identity score
             for result in M_chain_result:
-                ID = result[1][:4]
-                score = float(result[2])
+                ID = result[0][:4]
+                score = result[1]
                 putative_templates[ID] = {'M_score': score}
             
             #FIll in putative_templates N  and average identity score
             for result in N_chain_result:
-                ID = result[1][:4]
-                score = float(result[2])
+                ID = result[0][:4]
+                score = result[1]
                 try:
                     putative_templates[ID]['N_score']= score
                     #Get average score
@@ -628,15 +636,25 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
             
         else:
             # BETA: Allele name based template selection
+            
+            available_alleles = []
+            for ID in database.MHCI_data:
+                if benchmark and ID == target.id:
+                    pass
+                else:
+                    available_alleles.extend(database.MHCI_data[ID].allele_type)
+            available_alleles = list(set(available_alleles))
             # Find template structures with matching alleles
+            target_alleles = MHCII_allele_name_adapter(target.allele_type, available_alleles)
+            target_alleles = list(set(target_alleles))
             for ID in database.MHCII_data:
                 if benchmark:
                     if ID != target.id:
-                        if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
+                        if any(x in database.MHCII_data[ID].allele_type for x in target_alleles):
                             putative_templates[ID] = list(
                                 set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
                 else:
-                    if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
+                    if any(x in database.MHCII_data[ID].allele_type for x in target_alleles):
                         putative_templates[ID] = list(
                             set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
 
@@ -951,6 +969,36 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
 
     return results
 
+def blast_mhc_seq(seq, chain='M', blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/MHC_blast_db/MHC_blast_db'):
+    try:
+        command = (' ').join(['blastp','-db',blastdb, 
+                                                 '-query',
+                                                 '<(echo %s)' %seq,
+                                                 '-outfmt','6'])
+        proc = subprocess.Popen(command,  executable='/bin/bash',
+                                     shell=True, stdout=subprocess.PIPE)
+        blast_result = proc.stdout.read()
+        blast_result = blast_result.decode()
+    except subprocess.CalledProcessError as e:
+        print('An error occurred while blasting %s chain seq: %s' %(chain, e.output))
+        
+
+    blast_result = blast_result.split('\n')
+    blast_result = [x.replace(';',' ').split('\t') for x in blast_result]
+    blast_result = [x for x in blast_result if x != ['']]
+    
+    #FIll in putative_templates M identity score
+    results = []
+    for result in blast_result:
+        ID = result[1]
+        score = float(result[2])
+        results.append((ID, score))
+    results = sorted(results, key=lambda x: x[1], reverse=True)
+    
+    return results
+        
+    
+
 def align_peptides(seq1, anch1_seq1, anch2_seq1, seq2, anch1_seq2, anch2_seq2):
     '''
     Align two MHC-I peptides making overlap the anchors.
@@ -1003,7 +1051,7 @@ def align_peptides(seq1, anch1_seq1, anch2_seq1, seq2, anch1_seq2, anch2_seq2):
     ali_seq2 = ('').join(list2)
     return ali_seq1, ali_seq2
 
-def allele_name_adapter(allele, available_alleles):
+def allele_name_adapter(alleles, available_alleles):
     '''
     Cuts the given allele name to make it consistent with the alleles in allele_ID.
 
@@ -1015,87 +1063,112 @@ def allele_name_adapter(allele, available_alleles):
         allele(list) : List of adapted (cut) allele names
     '''
     #homolog_allele = '--NONE--'
-    for a in range(len(allele)):
-        if allele[a].startswith('HLA'):      # Human
-            if any(allele[a] in key for key in list(available_alleles)):
+    for a in range(len(alleles)):
+        if alleles[a].startswith('HLA'):      # Human
+            if any(alleles[a] in key for key in list(available_alleles)):
                 pass
-            elif any(allele[a][:8] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:8]
-            elif any(allele[a][:6] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:6]
+            elif any(alleles[a][:8] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:8]
+            elif any(alleles[a][:6] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:6]
             else:
-                allele[a] = allele[a][:4]
-        elif allele[a].startswith('H2'):    # Mouse
+                alleles[a] = alleles[a][:4]
+        elif alleles[a].startswith('H2'):    # Mouse
             #homolog_allele = 'RT1'
-            if any(allele[a] in key for key in list(available_alleles)):
+            if any(alleles[a] in key for key in list(available_alleles)):
                 pass
-            elif any(allele[a][:4] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:4]
+            elif any(alleles[a][:4] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:4]
             else:
-                allele[a] = allele[a][:3]
-        elif allele[a].startswith('RT1'):          # Rat
+                alleles[a] = alleles[a][:3]
+        elif alleles[a].startswith('RT1'):          # Rat
             #homolog_allele = 'H2'
-            if any(allele[a] in key for key in list(available_alleles)):
+            if any(alleles[a] in key for key in list(available_alleles)):
                 pass
-            elif any(allele[a][:5] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:5]
+            elif any(alleles[a][:5] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:5]
             else:
-                allele[a] = allele[a][:4]
-        elif allele[a].startswith('BoLA'):        # Bovine
-            if any(allele[a] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:4]
+        elif alleles[a].startswith('BoLA'):        # Bovine
+            if any(alleles[a] in key for key in list(available_alleles)):
                 pass
-            elif any(allele[a][:10] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:10]
-            elif any(allele[a][:7] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:7]
+            elif any(alleles[a][:10] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:10]
+            elif any(alleles[a][:7] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:7]
             else:
-                allele[a] = allele[a][:5]
-        elif allele[a].startswith('SLA'):        # Suine
-            if any(allele[a] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:5]
+        elif alleles[a].startswith('SLA'):        # Suine
+            if any(alleles[a] in key for key in list(available_alleles)):
                 pass
-            elif any(allele[a][:9] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:9]
-            elif any(allele[a][:6] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:6]
+            elif any(alleles[a][:9] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:9]
+            elif any(alleles[a][:6] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:6]
             else:
-                allele[a] = allele[a][:4]
-        elif allele[a].startswith('MH1-B'):        # Chicken
-            if any(allele[a] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:4]
+        elif alleles[a].startswith('MH1-B'):        # Chicken
+            if any(alleles[a] in key for key in list(available_alleles)):
                 pass
-            elif any(allele[a][:8] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:8]
+            elif any(alleles[a][:8] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:8]
             else:
-                allele[a] = allele[a][:6]
-        elif allele[a].startswith('MH1-N'):        # Chicken
-            if any(allele[a] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:6]
+        elif alleles[a].startswith('MH1-N'):        # Chicken
+            if any(alleles[a] in key for key in list(available_alleles)):
                 pass
-            elif any(allele[a][:9] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:9]
+            elif any(alleles[a][:9] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:9]
             else:
-                allele[a] = allele[a][:6]
-        elif allele[a].startswith('BF2'):        # Chicken
-            if any(allele[a] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:6]
+        elif alleles[a].startswith('BF2'):        # Chicken
+            if any(alleles[a] in key for key in list(available_alleles)):
                 pass
-            elif any(allele[a][:6] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:6]
+            elif any(alleles[a][:6] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:6]
             else:
-                allele[a] = allele[a][:4]
-        elif allele[a].startswith('Mamu'):       # Monkey
-            if any(allele[a] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:4]
+        elif alleles[a].startswith('Mamu'):       # Monkey
+            if any(alleles[a] in key for key in list(available_alleles)):
                 pass
-            elif any(allele[a][:13] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:13]
-            elif any(allele[a][:9] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:9]
+            elif any(alleles[a][:13] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:13]
+            elif any(alleles[a][:9] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:9]
             else:
-                allele[a] = allele[a][:5]
-        elif allele[a].startswith('Eqca'):        # Horse
-            if any(allele[a] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:5]
+        elif alleles[a].startswith('Eqca'):        # Horse
+            if any(alleles[a] in key for key in list(available_alleles)):
                 pass
-            elif any(allele[a][:10] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:10]
-            elif any(allele[a][:7] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:7]
+            elif any(alleles[a][:10] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:10]
+            elif any(alleles[a][:7] in key for key in list(available_alleles)):
+                alleles[a] = alleles[a][:7]
             else:
-                allele[a] = allele[a][:5]
-    return(allele)#, homolog_allele)
+                alleles[a] = alleles[a][:5]
+    return(alleles)#, homolog_allele)
+
+def MHCII_allele_name_adapter(ori_alleles, available_alleles):
+    alleles = deepcopy(ori_alleles)
+    for a in range(len(alleles)):
+        if alleles[a].startswith('HLA'):      # Human
+            prefix = alleles[a].split('-')[0]
+            gene = re.split('-|\*', alleles[a])[1][:2]
+            chain = re.split('-|\*', alleles[a])[1][2]
+            subgene = re.split('-|\*', alleles[a])[1][3:]
+            group = re.split(':|\*', alleles[a])[1]
+            subgroup = re.split(':|\*', alleles[a])[2]
+            
+            if any(alleles[a] in key for key in list(available_alleles)):
+                pass
+            elif any(prefix+'-'+gene+chain+subgene+'*'+group in key for key in list(available_alleles)):
+                alleles[a] = prefix+'-'+gene+chain+subgene+'*'+group
+            elif any(prefix+'-'+gene+chain+subgene in key for key in list(available_alleles)):
+                alleles[a] = prefix+'-'+gene+chain+subgene
+            else:
+                alleles[a] = prefix+'-'+gene+chain
+        
+        else:                               #Other spieces might be implemented later
+            pass
+    return(alleles)
+    
