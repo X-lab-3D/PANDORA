@@ -598,10 +598,6 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
                     #Get average score
                 except KeyError:
                     putative_templates[ID] = {'N_score': score}
-                    
-            #Remove target from putative_templates if benchmark run
-            if benchmark:
-                del putative_templates[target.id]
                 
         else: 
             no_seq_chains.append('N_score')
@@ -636,6 +632,11 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
                             putative_templates[ID][C] = 100.0
                         except KeyError:
                             putative_templates[ID]= {C : 100.0}
+    
+    #Remove target from putative_templates if benchmark run
+    if benchmark:
+        if target.id in putative_templates.keys():
+            del putative_templates[target.id]
                                 
     if target.MHC_class == 'II':
         for ID in putative_templates:
@@ -648,10 +649,6 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
         if benchmark:
             putative_templates = {k:v for k,v in putative_templates.items() if len(database.MHCII_data[k].anchors) == 4}
         
-        #Remove target from putative_templates if benchmark run
-        if benchmark:
-            if target.id in putative_templates.keys():
-                del putative_templates[target.id]
 
     # For both chains
     #Sort for average score
