@@ -380,7 +380,9 @@ class Target(PMHC):
             available_alleles = [seq for seq in ref_sequences]
             #print('input', input_file)
             #print('DQA1: ', [x for x in available_alleles if 'HLA-DQA1*05' in x])
-            corrected_alleles = Modelling_functions.MHCII_allele_name_adapter(alleles,available_alleles)
+            corrected_alleles = Modelling_functions.allele_name_adapter(self.MHC_class, 
+                                                                        alleles,
+                                                                        available_alleles)
             #print('CORRECTED ALLELES: ', corrected_alleles)
             for seq in ref_sequences:
                 if any(allele  in seq for allele in corrected_alleles):

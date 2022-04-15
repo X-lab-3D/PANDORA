@@ -69,19 +69,11 @@ class Pandora:
             
             if type(self.template)==list:
                 for templ in self.template:
-                    if self.target.id == 'I':
-                        score = Modelling_functions.score_peptide_alignment_MHCI(self.target, templ, 'PAM30')
-                        self.pept_ali_scores.append((score, templ.peptide, templ.id))
-                    elif self.target.id == 'II':
-                        score = Modelling_functions.score_peptide_alignment_MHCII(self.target, templ, 'PAM30')
-                        self.pept_ali_scores.append((score, templ.peptide, templ.id))
+                    score = Modelling_functions.score_peptide_alignment(self.target, templ, 'PAM30')
+                    self.pept_ali_scores.append((score, templ.peptide, templ.id))
             else:
-                if self.target.id == 'I':
-                    score = Modelling_functions.score_peptide_alignment_MHCI(self.target, self.template, 'PAM30')
-                    self.pept_ali_scores.append((score, self.template.peptide, self.template.id))
-                elif self.target.id == 'II':
-                    score = Modelling_functions.score_peptide_alignment_MHCII(self.target, self.template, 'PAM30')
-                    self.pept_ali_scores.append((score, self.template.peptide, self.template.id))
+                score = Modelling_functions.score_peptide_alignment(self.target, self.template, 'PAM30')
+                self.pept_ali_scores.append((score, self.template.peptide, self.template.id))
             self.pept_ali_scores = self.pept_ali_scores[:best_n_templates]
 
 
