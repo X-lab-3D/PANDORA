@@ -215,49 +215,7 @@ class Target(PMHC):
         if MHC_class == 'II' and N_chain_seq != '' and allele_type == []:
              pass #retrieve allele_type from blast db
             
-        if self.allele_type:
-            # Check allele name
-            self.check_allele_name()
-        
-        # If the user does not provide sequence info, retrieve them from the reference sequences.
-        # WARNING: currently available only for MHC I
-        if MHC_class == 'I' and M_chain_seq =='':
-            print('No MHC sequence was provided. Trying to retrieve it from reference sequences...')
-            try:
-                self.retrieve_MHC_refseq(chain='M')
-            except:
-                print('Something went wrong while retrieving the reference sequence.')
-                print('Please provide a M_chain_seq for your target.')
-                print('###################')
-                print('You can find all the reference MHC sequences used in PANDORA')
-                print(' and use them for your target in <MyDatabase>.ref_MHCI_sequences')
-                print('Where <MyDatabase> is the name of your PANDORA Database object.')
-                print('###################')
-                print('You can also find reference MHC sequences for Humans at:')
-                print('https://www.ebi.ac.uk/ipd/imgt/hla/')
-                print('And for other animals here:')
-                print('https://www.ebi.ac.uk/ipd/mhc/')
-                print('###################')
-                raise Exception('Failed in retriving reference sequence.')
-        elif MHC_class == 'II' and M_chain_seq =='' and N_chain_seq =='':
-            print('No MHC sequence was provided. Trying to retrieve it from reference sequences...')
-            try:
-                self.retrieve_MHC_refseq(chain='M')
-                self.retrieve_MHC_refseq(chain='N')
-            except:
-                print('Something went wrong while retrieving the reference sequence.')
-                print('Please provide a M_chain_seq for your target.')
-                print('###################')
-                print('You can find all the reference MHC sequences used in PANDORA')
-                print(' and use them for your target in <MyDatabase>.ref_MHCI_sequences')
-                print('Where <MyDatabase> is the name of your PANDORA Database object.')
-                print('###################')
-                print('You can also find reference MHC sequences for Humans at:')
-                print('https://www.ebi.ac.uk/ipd/imgt/hla/')
-                print('And for other animals here:')
-                print('https://www.ebi.ac.uk/ipd/mhc/')
-                print('###################')
-            #raise Exception('Reference MHC II sequences have not been implemented yet. Please provide both M and N chain sequence.')
+        self.fill_allele_seq_info()
         
         # If anchors are not provided, predict them from the peptide length
         if MHC_class =='I' and anchors == []:
@@ -420,10 +378,10 @@ class Target(PMHC):
         if seq_flag == False:
             #fasta_sequences = SeqIO.parse(input_file,'fasta')
             available_alleles = [seq for seq in ref_sequences]
-            print('input', input_file)
-            print('DQA1: ', [x for x in available_alleles if 'HLA-DQA1*05' in x])
+            #print('input', input_file)
+            #print('DQA1: ', [x for x in available_alleles if 'HLA-DQA1*05' in x])
             corrected_alleles = Modelling_functions.MHCII_allele_name_adapter(alleles,available_alleles)
-            print('CORRECTED ALLELES: ', corrected_alleles)
+            #print('CORRECTED ALLELES: ', corrected_alleles)
             for seq in ref_sequences:
                 if any(allele  in seq for allele in corrected_alleles):
                     if chain == 'M':
@@ -438,10 +396,96 @@ class Target(PMHC):
             
         
         if seq_flag == True:
-            print('MHC sequence correctly retrieved')
+            print('Chain %s MHC sequence correctly retrieved' %chain)
         else:
             print('WARNING: No MHC seq could be retrieved with the given MHC allele name')
             print('Your MHC allele might be missing from the IPDMHC/IMGTHLA database.')
             print("The model will be generated using the best template's MHC sequence.")
             print("To be sure you use the right sequence, please double check your MHC allele name")
             print("or provide the MHC sequence as target.M_chain_seq (and target.N_chain_seq for MHCII beta chain)")
+            
+    def fill_allele_seq_info(self):
+        
+        if self.allele_type:
+            # Check allele name
+            self.check_allele_name()
+            
+        
+        #Check if there are allele name for each MHC chain
+        M_allele_flag = False
+        N_allele_flag = False
+        if any(x in y for x in PANDORA.alpha_genes for y in self.allele_type):
+            M_allele_flag = True
+        if self.MHC_class == 'II':
+            if any(x in y for x in PANDORA.beta_genes for y in self.allele_type):
+                N_allele_flag = True
+          
+        #Check if there are allele name for each MHC chain
+        if self.M_chain_seq =='' and M_allele_flag:
+            print('No MHC alpha chain sequence was provided. Trying to retrieve it from reference sequences...')
+            try:
+                self.retrieve_MHC_refseq(chain='M')
+            except:
+                print('WARNING: Something went wrong while retrieving the reference sequence.')
+                print('Please provide a M_chain_seq for your target.')
+                print('###################')
+                print('You can find all the reference MHC sequences used in PANDORA')
+                print(' and use them for your target in <MyDatabase>.ref_MHCI(II)_sequences')
+                print('Where <MyDatabase> is the name of your PANDORA Database object.')
+                print('###################')
+                print('You can also find reference MHC sequences for Humans at:')
+                print('https://www.ebi.ac.uk/ipd/imgt/hla/')
+                print('And for other animals here:')
+                print('https://www.ebi.ac.uk/ipd/mhc/')
+                print('###################')
+                print('PANDORA will try to model case %s by using the best template M chain sequence' %self.id)
+        if self.M_chain_seq =='' and not M_allele_flag:
+                print('WARNING: Missing M chain (Alpha chain) sequence and allele name.')
+                print('PANDORA will try to model case %s by using the best template M chain sequence' %self.id)
+                print('We strongly advice to provide either allele name or chain sequence for chain M')
+
+        if self.M_chain_seq !='' and not M_allele_flag:
+            print('No MHC alpha chain allele was provided. Trying to retrieve it from reference sequences...')
+            #Blast against reference database
+            blast_results = Modelling_functions.blast_mhc_seq(self.M_chain_seq, 
+                                                              chain='M', 
+                                                              blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db')
+            #Take only the allele names with the highest id score
+            top_id = blast_results[0][1]
+            self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
+                
+            
+        if self.MHC_class == 'II' and self.N_chain_seq =='' and N_allele_flag:
+            print('No MHC sequence was provided. Trying to retrieve it from reference sequences...')
+            try:
+                self.retrieve_MHC_refseq(chain='N')
+            except:
+                print('Something went wrong while retrieving the reference sequence.')
+                print('Please provide a N_chain_seq for your target.')
+                print('###################')
+                print('You can find all the reference MHC sequences used in PANDORA')
+                print(' and use them for your target in <MyDatabase>.ref_MHCI(II)_sequences')
+                print('Where <MyDatabase> is the name of your PANDORA Database object.')
+                print('###################')
+                print('You can also find reference MHC sequences for Humans at:')
+                print('https://www.ebi.ac.uk/ipd/imgt/hla/')
+                print('And for other animals here:')
+                print('https://www.ebi.ac.uk/ipd/mhc/')
+                print('###################')
+                print('PANDORA will try to model case %s by using the best template N chain sequence' %self.id)
+        elif self.MHC_class == 'II' and self.N_chain_seq =='' and not N_allele_flag:
+                print('WARNING: Missing N chain (Beta chain) sequence and allele name.')
+                print('PANDORA will try to model case %s by using the best template N chain sequence' %self.id)
+                print('We strongly advice to provide either allele name or chain sequence for chain N')
+            
+        if self.MHC_class == 'II' and self.N_chain_seq !='' and not N_allele_flag:
+            print('No MHC alpha chain allele was provided. Trying to retrieve it from reference sequences...')
+            #Blast against reference database
+            blast_results = Modelling_functions.blast_mhc_seq(self.N_chain_seq, 
+                                                              chain='N', 
+                                                              blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db')
+            #Take only the allele names with the highest id score
+            top_id = blast_results[0][1]
+            self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
+            
+            

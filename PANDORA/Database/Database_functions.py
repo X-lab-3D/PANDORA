@@ -892,7 +892,7 @@ def check_hetatoms_in_binding_groove(pdb, MHC_chains):
     '''
 
     letters = ["ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE", "LYS", "LEU", "MET", "ASN", "PRO", "GLN", "ARG",
-               "SER", "THR", "VAL", "TRP", "TYR", 'HOH']
+               "SER", "THR", "VAL", "TRP", "TYR", 'HOH', "MSE"]
 
     # Based on the number of MHC_chains, the structure is MHCI or II.
     # Define the chain names and the center MHC residue from which distances are calculated.
@@ -1299,7 +1299,8 @@ def check_clip_peptide(pdb_file):
 def parse_pMHCI_pdb(pdb_id,
                      indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                      outdir = PANDORA.PANDORA_data + '/PDBs/pMHCI',
-                     bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI'):
+                     bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI',
+                     custom_map={"MSE":"M"}):
     ''' Clean all MHCI pdb files that have been downloaded from IMGT
 
     Args:
@@ -1307,6 +1308,7 @@ def parse_pMHCI_pdb(pdb_id,
         indir: (string) path of the input dir (where the .gz files are)
         outdir: (string) path of the output dir (where the unzipped .pdb files go)
         bad_dir: (string) path of the output dir (where the unsuitable .pdb files go)
+        custom_map (dict): custom map for 3-to-1 letter aa name translation.
 
     Returns: Template object
 
@@ -1405,7 +1407,7 @@ def parse_pMHCI_pdb(pdb_id,
             try:  # get the chain sequences from the pdb file
                 # seqs = seqs_from_pdb(pdb_file, MHC_chains)
                 #seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
-                seqs = {chain.id : seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()}
+                seqs = {chain.id : seq1(''.join([res.resname for res in chain]), custom_map=custom_map) for chain in pdb.get_chains()}
             except:
                 log(pdb_id, 'Failed, Could not fetch chain sequences from pdb file', logfile)
                 raise Exception
@@ -1435,7 +1437,8 @@ def parse_pMHCI_pdb(pdb_id,
 def parse_pMHCII_pdb(pdb_id,
                       indir=PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                       outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII',
-                      bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII'):
+                      bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII', 
+                      custom_map={"MSE":"M"}):
     ''' Clean all MHCII pdb files that have been downloaded from IMGT
 
     Args:
@@ -1443,6 +1446,7 @@ def parse_pMHCII_pdb(pdb_id,
         indir: (string) path of the input dir (where the .gz files are)
         outdir: (string) path of the output dir (where the unzipped .pdb files go)
         bad_dir: (string) path of the output dir (where the unsuitable .pdb files go)
+        custom_map (dict): custom map for 3-to-1 letter aa name translation.
 
     Returns: Template object
 
@@ -1549,7 +1553,7 @@ def parse_pMHCII_pdb(pdb_id,
                 raise Exception
 
             try:  # get the chain sequences from the pdb file
-                seqs = {chain.id : seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()}
+                seqs = {chain.id : seq1(''.join([res.resname for res in chain]), custom_map=custom_map) for chain in pdb.get_chains()}
             except:
                 log(pdb_id, 'Failed, Could not fetch chain sequences from pdb file', logfile)
                 raise Exception

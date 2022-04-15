@@ -461,27 +461,6 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
             #Keep only G-domain
             M_chain = target.M_chain_seq[:180]
             #Blast M chain sequence
-            # try:
-            #     command = (' ').join(['blastp','-db',blastdb, 
-            #                                              '-query',
-            #                                              '<(echo %s)' %M_chain,
-            #                                              '-outfmt','6'])
-            #     proc = subprocess.Popen(command,  executable='/bin/bash',
-            #                                  shell=True, stdout=subprocess.PIPE)
-            #     M_chain_result = proc.stdout.read()
-            #     M_chain_result = M_chain_result.decode()
-            # except subprocess.CalledProcessError as e:
-            #     print('An error occurred while blasting M chain seq: %s' %e.output)
-                
-    
-            # M_chain_result = M_chain_result.split('\n')
-            # M_chain_result = [x.replace(';','').split('\t') for x in M_chain_result]
-            # M_chain_result = [x for x in M_chain_result if x != ['']]
-            
-            # #FIll in putative_templates M identity score
-            # for result in M_chain_result:
-            #     ID = result[1][:4]
-            #     score = float(result[2])
             M_chain_result = blast_mhc_seq(M_chain, chain='M', blastdb=blastdb)
             for result in M_chain_result:
                 ID = result[0][:4]
@@ -555,56 +534,31 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
         ## For MHC II
     if target.MHC_class == 'II':
         
-        if target.M_chain_seq != '' and target.N_chain_seq != '': 
+        no_seq_chains = []
+        if target.M_chain_seq != '':
             #Sequence based template selection
             
             # Sequence based template selection
             #Keep only G-domain
             M_chain = target.M_chain_seq[:82]
             #Blast M chain sequence
-            # try:
-            #     command = (' ').join(['blastp','-db',blastdb, 
-            #                                              '-query',
-            #                                              '<(echo %s)' %M_chain,
-            #                                              '-outfmt','6'])
-            #     proc = subprocess.Popen(command,  executable='/bin/bash',
-            #                                  shell=True, stdout=subprocess.PIPE)
-            #     M_chain_result = proc.stdout.read()
-            #     M_chain_result = M_chain_result.decode()
-            # except subprocess.CalledProcessError as e:
-            #     print('An error occurred while blasting M chain seq: %s' %e.output)
-                
-    
-            # M_chain_result = M_chain_result.split('\n')
-            # M_chain_result = [x.replace(';','').split('\t') for x in M_chain_result]
-            # M_chain_result = [x for x in M_chain_result if x != ['']]
             M_chain_result = blast_mhc_seq(M_chain, chain='M', blastdb=blastdb)
-            
-            #Keep only G-domain
-            N_chain = target.N_chain_seq[:90]
-            #Blast N chain sequence
-            # try:
-            #     command = (' ').join(['blastp','-db',blastdb, 
-            #                                              '-query',
-            #                                              '<(echo %s)' %N_chain,
-            #                                              '-outfmt','6'])
-            #     proc = subprocess.Popen(command, executable='/bin/bash',
-            #                                  shell=True, stdout=subprocess.PIPE)
-            #     N_chain_result = proc.stdout.read()
-            #     N_chain_result = N_chain_result.decode()
-            # except subprocess.CalledProcessError as e:
-            #     print('An error occurred while blasting N chain seq: %s' %e.output)
-            
-            # N_chain_result = N_chain_result.split('\n')
-            # N_chain_result = [x.replace(';','').split('\t') for x in N_chain_result]
-            # N_chain_result = [x for x in N_chain_result if x != ['']]
-            N_chain_result = blast_mhc_seq(N_chain, chain='N', blastdb=blastdb)
             
             #FIll in putative_templates M identity score
             for result in M_chain_result:
                 ID = result[0][:4]
                 score = result[1]
                 putative_templates[ID] = {'M_score': score}
+        
+        else:
+            no_seq_chains.append('M_score')
+            
+            
+        if target.N_chain_seq != '':
+            #Keep only G-domain
+            N_chain = target.N_chain_seq[:90]
+            #Blast N chain sequence
+            N_chain_result = blast_mhc_seq(N_chain, chain='N', blastdb=blastdb)
             
             #FIll in putative_templates N  and average identity score
             for result in N_chain_result:
@@ -613,50 +567,68 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
                 try:
                     putative_templates[ID]['N_score']= score
                     #Get average score
-                    avg = (score+putative_templates[ID]['M_score'])/2
-                    putative_templates[ID]['Avg_score']= avg
+                    #avg = (score+putative_templates[ID]['M_score'])/2
+                    #putative_templates[ID]['Avg_score']= avg
                 except KeyError:
                     putative_templates[ID] = {'N_score': score}
                     
             #Remove target from putative_templates if benchmark run
             if benchmark:
                 del putative_templates[target.id]
+                
+        else: 
+            no_seq_chains.append('N_score')
             
-            putative_templates = {x : putative_templates[x] for x in putative_templates 
-                                  if 'Avg_score' in list(putative_templates[x].keys())}
-            
-            #Sort for average score
-            putative_templates = sorted(putative_templates.items(), 
-                                        key=lambda x: x[1]['Avg_score'], reverse=True)
-            putative_templates = {x[0] : x[1] for x in putative_templates}
-            #Keep only max score templates
-            max_score = list(putative_templates.values())[0]['Avg_score']
-            putative_templates = {x : putative_templates[x] for x in putative_templates 
-                                  if putative_templates[x]['Avg_score'] == max_score}
-            
-        else:
+        #For every chain withous a seq, fill in the relative score to 100
+        #For each template with at least one matching allele
+        if no_seq_chains !=[]:
+            for C in no_seq_chains:
+                # Fill in available alleles list
+                available_alleles = []
+                for ID in database.MHCII_data:
+                    if benchmark and ID == target.id:
+                        pass
+                    else:
+                        available_alleles.extend(database.MHCII_data[ID].allele_type)
+                available_alleles = list(set(available_alleles))
+                
+                # Find template structures with matching alleles
+                target_alleles = MHCII_allele_name_adapter(target.allele_type, available_alleles)
+                target_alleles = list(set(target_alleles))
+                for ID in database.MHCII_data:
+                    if benchmark:
+                        if ID != target.id:
+                            if any(y in x for x in database.MHCII_data[ID].allele_type for y in target_alleles):
+                                print('TARGET ALLELES: ', target_alleles)
+                                print('TEMPLATE: ', database.MHCII_data[ID].allele_type)
+                                try:
+                                    putative_templates[ID][C] = 100.0
+                                except KeyError:
+                                    putative_templates[ID] = {C : 100.0}
+                    else:
+                        if any(y in x for x in database.MHCII_data[ID].allele_type for y in target_alleles):
+                            try:
+                                putative_templates[ID][C] = 100.0
+                            except KeyError:
+                                putative_templates[ID]= {C : 100.0}
+                                
+        #if any(target.M_chain_seq == '' and target.N_chain_seq == ''):
             # BETA: Allele name based template selection
+        for ID in putative_templates:
+            if len(putative_templates[ID].keys()) == 2:
+                putative_templates[ID]['Avg_score'] = (putative_templates[ID]['M_score'] + putative_templates[ID]['N_score']) /2
             
-            available_alleles = []
-            for ID in database.MHCI_data:
-                if benchmark and ID == target.id:
-                    pass
-                else:
-                    available_alleles.extend(database.MHCI_data[ID].allele_type)
-            available_alleles = list(set(available_alleles))
-            # Find template structures with matching alleles
-            target_alleles = MHCII_allele_name_adapter(target.allele_type, available_alleles)
-            target_alleles = list(set(target_alleles))
-            for ID in database.MHCII_data:
-                if benchmark:
-                    if ID != target.id:
-                        if any(x in database.MHCII_data[ID].allele_type for x in target_alleles):
-                            putative_templates[ID] = list(
-                                set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
-                else:
-                    if any(x in database.MHCII_data[ID].allele_type for x in target_alleles):
-                        putative_templates[ID] = list(
-                            set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
+        putative_templates = {x : putative_templates[x] for x in putative_templates 
+                              if 'Avg_score' in list(putative_templates[x].keys())}
+        
+        #Sort for average score
+        putative_templates = sorted(putative_templates.items(), 
+                                    key=lambda x: x[1]['Avg_score'], reverse=True)
+        putative_templates = {x[0] : x[1] for x in putative_templates}
+        #Keep only max score templates
+        max_score = list(putative_templates.values())[0]['Avg_score']
+        putative_templates = {x : putative_templates[x] for x in putative_templates 
+                              if putative_templates[x]['Avg_score'] == max_score}
 
         # Make sure there is no template with only 3 anchors for benchmarking.
         if benchmark:
@@ -969,7 +941,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
 
     return results
 
-def blast_mhc_seq(seq, chain='M', blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/MHC_blast_db/MHC_blast_db'):
+def blast_mhc_seq(seq, chain='M', blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db'):
     try:
         command = (' ').join(['blastp','-db',blastdb, 
                                                  '-query',
@@ -1146,7 +1118,7 @@ def allele_name_adapter(alleles, available_alleles):
                 alleles[a] = alleles[a][:7]
             else:
                 alleles[a] = alleles[a][:5]
-    return(alleles)#, homolog_allele)
+    return alleles #, homolog_allele)
 
 def MHCII_allele_name_adapter(ori_alleles, available_alleles):
     alleles = deepcopy(ori_alleles)
@@ -1162,13 +1134,15 @@ def MHCII_allele_name_adapter(ori_alleles, available_alleles):
             if any(alleles[a] in key for key in list(available_alleles)):
                 pass
             elif any(prefix+'-'+gene+chain+subgene+'*'+group in key for key in list(available_alleles)):
+                print('WARNING: The provided allele subgroup has not been found. PANDORA will treat this case as %s' %(prefix+'-'+gene+chain+subgene+'*'+group))
                 alleles[a] = prefix+'-'+gene+chain+subgene+'*'+group
             elif any(prefix+'-'+gene+chain+subgene in key for key in list(available_alleles)):
                 alleles[a] = prefix+'-'+gene+chain+subgene
+                print('WARNING: The provided allele group has not been found. PANDORA will treat this case as %s' %(prefix+'-'+gene+chain+subgene))
             else:
                 alleles[a] = prefix+'-'+gene+chain
         
         else:                               #Other spieces might be implemented later
             pass
-    return(alleles)
+    return alleles
     
