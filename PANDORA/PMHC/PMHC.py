@@ -12,7 +12,8 @@ import re
 
 class PMHC(ABC):
 
-    def __init__(self, id, peptide = '', allele_type = [], MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [],
+    def __init__(self, id, peptide = '', allele_type = [], MHC_class = 'I', 
+                 M_chain_seq = '', N_chain_seq = '', anchors = [],
                  helix=False, sheet=False):
         ''' pMHC class. Acts as a parent class to Template and Target
 
@@ -180,8 +181,10 @@ class Template(PMHC):
 
 class Target(PMHC):
 
-    def __init__(self, id, peptide, allele_type=[], MHC_class = 'I', M_chain_seq = '', N_chain_seq = '', anchors = [],
-                 helix=False, sheet=False, templates = False, use_netmhcpan = False):
+    def __init__(self, id, peptide, allele_type=[], MHC_class = 'I', 
+                 M_chain_seq = '', N_chain_seq = '', anchors = [],
+                 helix=False, sheet=False, templates = False, 
+                 use_netmhcpan = False):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
         Args:

@@ -197,9 +197,8 @@ PANDORA can modell more than one peptide, in parallel. You need to provide the f
 The Wrapper class is implemented to run PANDORA in parallel on multiple cores.
 
 ```python
-from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
-from PANDORA.Wrapper.Wrapper import Wrapper
+from PANDORA.Wrapper import Wrapper
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
 db = Database.load('pandora_Database')
