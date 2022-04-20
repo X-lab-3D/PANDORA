@@ -15,6 +15,7 @@ class Pandora:
         self.template = template
         self.database = database
         self.output_dir = output_dir
+        self.keep_IL = False
 
         if database is None and template is None:
             raise Exception('Provide a Database object so Pandora can find the best suitable template structure for '
@@ -57,6 +58,8 @@ class Pandora:
             if verbose:
                 if type(self.template)==list:
                     print('\tUser defined template structure (%s): %s' %(len(self.template), [i.id for i in self.template]))
+                elif type(self.template)==str:
+                    print('\tUser defined template structure: %s' %self.template)
                 else:
                     print('\tUser defined template structure: %s' %self.template.id)
             # Check if the target structure and template structure are the same.
@@ -110,6 +113,8 @@ class Pandora:
 
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir)
+                if not os.path.exists(self.output_dir):
+                    raise Exception('A problem occurred while creating output directory')
         except:
             raise Exception('A problem occurred while creating output directory')
 
@@ -299,11 +304,12 @@ class Pandora:
         os.path.dirname(PANDORA.PANDORA_path)
 
         # Find the best template structure given the Target
-        try:
-            self.find_template(best_n_templates=best_n_templates, benchmark=benchmark, verbose=verbose)
-        except:
-            self.__log(self.target.id, 'None', 'Could not find a template')
-            raise Exception('Could not find a template')
+        if self.template==None:
+            try:
+                self.find_template(best_n_templates=best_n_templates, benchmark=benchmark, verbose=verbose)
+            except:
+                self.__log(self.target.id, 'None', 'Could not find a template')
+                raise Exception('Could not find a template')
 
         print('###############')
         print('TEMPLATE: ', self.template.id)

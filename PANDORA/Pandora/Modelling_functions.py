@@ -181,7 +181,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
         pred = {}
         with open(outfile) as f:
             for line in f:
-                if peptide in line:
+                if peptide in line and not line.startswith('#'):
                     ln = [i for i in line[:-1].split(' ') if i != '']
                     pred[ln[1]] = (int(ln[3]), ln[4], float(ln[5]))
 
@@ -570,7 +570,14 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
         #Keep only G-domain
         M_chain = target.M_chain_seq[:class_variables[0]]
         #Blast M chain sequence
-        M_chain_result = blast_mhc_seq(M_chain, chain='M', blastdb=blastdb)
+        try:
+            M_chain_result = blast_mhc_seq(M_chain, chain='M', blastdb=blastdb)
+        except Exception as e:
+            print(e)
+            print('WARNING: something went wrong with blast-based template selection.')
+            print('Is blastp properly installed?')
+            #If blast didn't work properly, consider this sequence missing
+            no_seq_chains.append('M_score')
         
         #FIll in putative_templates M identity score
         for result in M_chain_result:
@@ -587,7 +594,14 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
             #Keep only G-domain
             N_chain = target.N_chain_seq[:90]
             #Blast N chain sequence
-            N_chain_result = blast_mhc_seq(N_chain, chain='N', blastdb=blastdb)
+            try:
+                N_chain_result = blast_mhc_seq(N_chain, chain='N', blastdb=blastdb)
+            except Exception as e:
+                print(e)
+                print('WARNING: something went wrong with blast-based template selection.')
+                print('Is blastp properly installed?')
+                #If blast didn't work properly, consider this sequence missing
+                no_seq_chains.append('N_score')
             
             #FIll in putative_templates N  and average identity score
             for result in N_chain_result:
@@ -601,7 +615,7 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
                 
         else: 
             no_seq_chains.append('N_score')
-        
+    
     #For every chain withous a seq, fill in the relative score to 100
     #For each template with at least one matching allele
     if no_seq_chains !=[]:
@@ -632,6 +646,10 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
                             putative_templates[ID][C] = 100.0
                         except KeyError:
                             putative_templates[ID]= {C : 100.0}
+    
+    #Keep only templates present in the template db.
+    #This prevents errors caused by different blast and pandora db.
+    putative_templates = {k:v for k,v in putative_templates.items() if k in getattr(database, class_variables[1]).keys()}
     
     #Remove target from putative_templates if benchmark run
     if benchmark:
@@ -972,7 +990,7 @@ def blast_mhc_seq(seq, chain='M', blastdb=PANDORA.PANDORA_data + '/csv_pkl_files
         blast_result = proc.stdout.read()
         blast_result = blast_result.decode()
     except subprocess.CalledProcessError as e:
-        print('An error occurred while blasting %s chain seq: %s' %(chain, e.output))
+        raise Exception('An error occurred while blasting %s chain seq: %s' %(chain, e.output))
         
 
     blast_result = blast_result.split('\n')

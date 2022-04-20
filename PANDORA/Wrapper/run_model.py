@@ -24,23 +24,24 @@ def run_model(args):
 
     """
     # Check if the output directory is provided
-    if len(args) == 6:
-        output_dir = False
-        start=0
-    elif len(args) == 7:
-        output_dir = args[0]
-        start=1
+    # if len(args) == 6:
+    #     output_dir = False
+    #     start=0
+    # elif len(args) == 7:
+    #     output_dir = args[0]
+    #     start=1
     
-    target = args[start]
-    template = args[start+1]
-    n_loop_models = args[start+2]
-    n_jobs=args[start+3]
-    benchmark = args[start+4]
-    pickle_out = args[start+5]
+    target = args[0]
+    template = args[1]
+    output_dir = args[2]
+    n_loop_models = args[3]
+    n_jobs=args[4]
+    benchmark = args[5]
+    pickle_out = args[6]
     
        
     # Create Pandora Object
-    if output_dir:
+    if output_dir != '':
         mod = Pandora.Pandora(target, template=template, 
                               output_dir=output_dir)
     else:

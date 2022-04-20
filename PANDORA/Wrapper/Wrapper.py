@@ -200,8 +200,8 @@ class Wrapper():
                                      header=header, IDs_col=IDs_col, 
                                      peptides_col=peptides_col, allele_col=allele_col, 
                                      anchors_col=anchors_col, M_chain_col=M_chain_col, 
-                                     N_chain_col=N_chain_col, start_row=start_row, 
-                                     end_row=end_row)
+                                     N_chain_col=N_chain_col,outdir_col=outdir_col,
+                                     start_row=start_row,end_row=end_row)
         
         ## Create target objects
         jobs = {}
@@ -270,10 +270,11 @@ class Wrapper():
         """
 
         for job in self.jobs:
-            if len(job) == 3:
+            if self.jobs[job][-1] != '':
                 self.jobs[job].extend([n_loop_models, n_jobs, benchmark, pickle_out])
-            elif len(job) == 2 and collective_output_dir:
-                self.jobs[job].extend([collective_output_dir, n_loop_models, n_jobs, benchmark, pickle_out])
+            elif self.jobs[job][-1] == '' and collective_output_dir:
+                self.jobs[job][-1] = collective_output_dir
+                self.jobs[job].extend([n_loop_models, n_jobs, benchmark, pickle_out])
             else:
                 self.jobs[job].extend([n_loop_models, n_jobs, benchmark, pickle_out])
         Parallel(n_jobs = num_cores, verbose = 1)(delayed(run_model)(job) for job in list(self.jobs.values()))
