@@ -11,7 +11,7 @@ class Align:
 
     def __init__(self, target, template, 
                  output_dir=PANDORA.PANDORA_data + '/outputs', remove_terms=True):
-        ''' Performs a alignment of the target and template(s). Will spit out a filename that will be used for modeller.
+        ''' Performs a alignment of the target and template(s). Returns a filename that will be used for modeller.
 
         Args:
             target: (Target object) The target object that will be aligned to 

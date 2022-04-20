@@ -80,6 +80,8 @@ class Template(PMHC):
 
         if type(self.allele_type) == str:
             self.allele_type = [self.allele_type]
+        
+        self.check_allele_name()
 
         if not pdb_path and not pdb:
             raise Exception('Provide a PDB structure to the Template object first')
@@ -176,6 +178,34 @@ class Template(PMHC):
         else:
             raise Exception('Provide an initial model (.ini PDB) and anchor positions to the Target object first')
 
+    def check_allele_name(self):
+        """
+        Checks the spell of the allele name and tried to correct it.
+        Prints out warning if the allele name does not seem correct.
+        """
+        #if self.MHC_class == 'I':
+        for i, allele in enumerate(self.allele_type):
+            regexp = re.search(r'([A-Z]{1}[a-z]{3}|[A-Z]{3})[-][A-Z0-9]{0,4}[*][0-9]{2,3}[:][0-9]{2,3}',allele)
+            if regexp is not None:
+                #if the allele name is valid
+                pass
+            else:
+                regexp = re.search(r'([A-Z]{1}[a-z]{3}|[A-Z]{3})[-][A-Z0-9]{0,4}[*][0-9]{4,6}',allele)
+                if regexp is not None:
+                    print('WARNING: Allele name missing ":"')
+                    print(regexp.group(0))
+                    print('PANDORA will try to correct the allele name.')
+                    if len(allele.split('*')[-1]) <=5:
+                        new_allele = allele[:-2] + ':' + allele[-2:]
+                    else:
+                        new_allele = allele[:-3] + ':' + allele[-3:]
+                    
+                    print('New attempted allele name: ' + new_allele)
+                    print('Is this allele name correct?')
+                    self.allele_type[i] = new_allele
+                else:
+                    print('WARNING: Allele name syntax not recognized for allele', allele)
+                    print('The allele will not be changed')
 
 
 
@@ -208,10 +238,10 @@ class Target(PMHC):
         self.anchor_contacts = False
 
         # If the user does provide sequence info, make sure both the M and N chain are provided
-        if MHC_class == 'II' and M_chain_seq != '' and N_chain_seq == '':
-            raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
-        if MHC_class == 'II' and N_chain_seq != '' and M_chain_seq == '':
-            raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
+        # if MHC_class == 'II' and M_chain_seq != '' and N_chain_seq == '':
+        #     raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
+        # if MHC_class == 'II' and N_chain_seq != '' and M_chain_seq == '':
+        #     raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
             
         if M_chain_seq != '' and allele_type == []:
             pass #retrieve allele_type from blast db
