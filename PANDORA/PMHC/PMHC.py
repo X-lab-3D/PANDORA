@@ -482,13 +482,16 @@ class Target(PMHC):
         if self.M_chain_seq !='' and not M_allele_flag:
             print('No MHC alpha chain allele was provided. Trying to retrieve it from reference sequences...')
             #Blast against reference database
-            blast_results = Modelling_functions.blast_mhc_seq(self.M_chain_seq, 
-                                                              chain='M', 
-                                                              blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db')
-            #Take only the allele names with the highest id score
-            top_id = blast_results[0][1]
-            self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
-                
+            try:
+                blast_results = Modelling_functions.blast_mhc_seq(self.M_chain_seq, 
+                                                                  chain='M', 
+                                                                  blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db')
+                #Take only the allele names with the highest id score
+                top_id = blast_results[0][1]
+                self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
+            except:
+                print('WARNING: something went wrong when trying to retrieve chain M allele')
+                print('with blast. Is blastp properly installed as working as "/bin/bash blastp"?')
             
         if self.MHC_class == 'II' and self.N_chain_seq =='' and N_allele_flag:
             print('No MHC sequence was provided. Trying to retrieve it from reference sequences...')
@@ -516,11 +519,15 @@ class Target(PMHC):
         if self.MHC_class == 'II' and self.N_chain_seq !='' and not N_allele_flag:
             print('No MHC alpha chain allele was provided. Trying to retrieve it from reference sequences...')
             #Blast against reference database
-            blast_results = Modelling_functions.blast_mhc_seq(self.N_chain_seq, 
-                                                              chain='N', 
-                                                              blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db')
-            #Take only the allele names with the highest id score
-            top_id = blast_results[0][1]
-            self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
+            try:
+                blast_results = Modelling_functions.blast_mhc_seq(self.N_chain_seq, 
+                                                                  chain='N', 
+                                                                  blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db')
+                #Take only the allele names with the highest id score
+                top_id = blast_results[0][1]
+                self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
+            except:
+                print('WARNING: something went wrong when trying to retrieve chain M allele')
+                print('with blast. Is blastp properly installed as working as "/bin/bash blastp"?')
             
             
