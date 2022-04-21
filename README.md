@@ -254,13 +254,13 @@ The Wrapper class will take care of generating PANDORA target objects and parall
 ```python
 from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
-from PANDORA.Wrapper import Wrapper
+from PANDORA.Wrapper.Wrapper import Wrapper
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
 db = Database.load('path/to/pandora_Database.pkl')
 
 ## B. Create the wrapper object
-wrap =  Wrapper()
+wrap =  Wrapper.Wrapper()
 
 ## C. Create all Target Objects based on peptides in the .tsv file
 wrap.create_targets('datafile.tsv', db)

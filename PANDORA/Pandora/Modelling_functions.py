@@ -1,5 +1,6 @@
 from Bio.Align import substitution_matrices
 import os
+import subprocess
 import PANDORA
 import pickle
 from PANDORA.PMHC import Model
@@ -436,13 +437,14 @@ def score_peptide_alignment_MHCII(target, template, substitution_matrix='PAM30')
     return aligned.score
 
 
-def find_template(target, database, best_n_templates = 1, benchmark=False):
+def find_template(target, database, best_n_templates = 1, benchmark=False, 
+                  blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/MHC_blast_db/MHC_blast_db'):
     ''' Selects the template structure that is best suited as template for homology modelling of the target
 
     Args:
-        target: Target object
-        database: Database object
-        seq_based_templ_selection: (bool) Use template selection based on template sequences instead of allele.
+        target (PMHC.Target): Target object
+        database (Database.Database): Database object
+        blastdb (str): Path to blast database to use for sequence-based template selection.
 
     Returns: Template object
 
@@ -451,32 +453,76 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
     ## For MHC I
     if target.MHC_class == 'I':
 
-        # Define available alleles in database
-        available_alleles = []
-        for ID in database.MHCI_data:
-            if benchmark and ID == target.id:
-                pass
-            else:
-                available_alleles.extend(database.MHCI_data[ID].allele_type)
-        available_alleles = list(set(available_alleles))
-
-        # Adapt the target allele name if necessary
-        #target_alleles = [allele_name_adapter(allele, available_alleles) for allele in target.allele_type]
-        target_alleles = allele_name_adapter(target.allele_type, available_alleles)
-        target_alleles = list(set(target_alleles))
-
-        # Find template structures with matching alleles
-        putative_templates = {}
-        for ID in database.MHCI_data:
-            if benchmark and ID == target.id:
-                pass
-            else:
-                for tar_allele in target_alleles:
-                    if any(tar_allele in put_temp_allele for put_temp_allele in database.MHCI_data[ID].allele_type):
-                        # update dict with ID:all matching alleles
-                        #TODO: is this list of matching allele obsolete?
-                        putative_templates[ID] = list(
-                            set(target.allele_type) & set(database.MHCI_data[ID].allele_type))
+        if target.M_chain_seq != '':
+            #Sequence based template selection
+            putative_templates = {}
+            # Sequence based template selection
+            #Keep only G-domain
+            M_chain = target.M_chain_seq[:180]
+            #Blast M chain sequence
+            try:
+                command = (' ').join(['blastp','-db',blastdb, 
+                                                         '-query',
+                                                         '<(echo %s)' %M_chain,
+                                                         '-outfmt','6'])
+                proc = subprocess.Popen(command,  executable='/bin/bash',
+                                             shell=True, stdout=subprocess.PIPE)
+                M_chain_result = proc.stdout.read()
+                M_chain_result = M_chain_result.decode()
+            except subprocess.CalledProcessError as e:
+                print('An error occurred while blasting M chain seq: %s' %e.output)
+                
+    
+            M_chain_result = M_chain_result.split('\n')
+            M_chain_result = [x.replace(';','').split('\t') for x in M_chain_result]
+            M_chain_result = [x for x in M_chain_result if x != ['']]
+            
+            #FIll in putative_templates M identity score
+            for result in M_chain_result:
+                ID = result[1][:4]
+                score = float(result[2])
+                putative_templates[ID] = {'M_score': score}
+                    
+            #Remove target from putative_templates if benchmark run
+            if benchmark:
+                del putative_templates[target.id]
+            
+            #Sort for average score
+            putative_templates = sorted(putative_templates.items(), 
+                                        key=lambda x: x[1]['M_score'], reverse=True)
+            putative_templates = {x[0] : x[1] for x in putative_templates}
+            
+            #Keep only max score templates
+            max_score = list(putative_templates.values())[0]['M_score']
+            putative_templates = {x : putative_templates[x] for x in putative_templates 
+                                  if putative_templates[x]['M_score'] == max_score}
+        else:
+            # Define available alleles in database
+            available_alleles = []
+            for ID in database.MHCI_data:
+                if benchmark and ID == target.id:
+                    pass
+                else:
+                    available_alleles.extend(database.MHCI_data[ID].allele_type)
+            available_alleles = list(set(available_alleles))
+    
+            # Adapt the target allele name if necessary
+            #target_alleles = [allele_name_adapter(allele, available_alleles) for allele in target.allele_type]
+            target_alleles = allele_name_adapter(target.allele_type, available_alleles)
+            target_alleles = list(set(target_alleles))
+    
+            # Find template structures with matching alleles
+            putative_templates = {}
+            for ID in database.MHCI_data:
+                if benchmark and ID == target.id:
+                    pass
+                else:
+                    for tar_allele in target_alleles:
+                        if any(tar_allele in put_temp_allele for put_temp_allele in database.MHCI_data[ID].allele_type):
+                            # update dict with ID:all matching alleles
+                            #TODO: is this list of matching allele obsolete?
+                            putative_templates[ID] = list(
+                                set(target.allele_type) & set(database.MHCI_data[ID].allele_type))
 
         # If the target template already occured in the database, remove it from the dict of putative templates
         #putative_templates.pop(target.id)
@@ -504,19 +550,97 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
 
         ## For MHC II
     if target.MHC_class == 'II':
-
-        # Find template structures with matching alleles
-        putative_templates = {}
-        for ID in database.MHCII_data:
+        
+        if target.M_chain_seq != '' and target.N_chain_seq != '': 
+            #Sequence based template selection
+            putative_templates = {}
+            # Sequence based template selection
+            #Keep only G-domain
+            M_chain = target.M_chain_seq[:82]
+            #Blast M chain sequence
+            try:
+                command = (' ').join(['blastp','-db',blastdb, 
+                                                         '-query',
+                                                         '<(echo %s)' %M_chain,
+                                                         '-outfmt','6'])
+                proc = subprocess.Popen(command,  executable='/bin/bash',
+                                             shell=True, stdout=subprocess.PIPE)
+                M_chain_result = proc.stdout.read()
+                M_chain_result = M_chain_result.decode()
+            except subprocess.CalledProcessError as e:
+                print('An error occurred while blasting M chain seq: %s' %e.output)
+                
+    
+            M_chain_result = M_chain_result.split('\n')
+            M_chain_result = [x.replace(';','').split('\t') for x in M_chain_result]
+            M_chain_result = [x for x in M_chain_result if x != ['']]
+            
+            #Keep only G-domain
+            N_chain = target.N_chain_seq[:90]
+            #Blast N chain sequence
+            try:
+                command = (' ').join(['blastp','-db',blastdb, 
+                                                         '-query',
+                                                         '<(echo %s)' %N_chain,
+                                                         '-outfmt','6'])
+                proc = subprocess.Popen(command, executable='/bin/bash',
+                                             shell=True, stdout=subprocess.PIPE)
+                N_chain_result = proc.stdout.read()
+                N_chain_result = N_chain_result.decode()
+            except subprocess.CalledProcessError as e:
+                print('An error occurred while blasting N chain seq: %s' %e.output)
+            
+            N_chain_result = N_chain_result.split('\n')
+            N_chain_result = [x.replace(';','').split('\t') for x in N_chain_result]
+            N_chain_result = [x for x in N_chain_result if x != ['']]
+            
+            #FIll in putative_templates M identity score
+            for result in M_chain_result:
+                ID = result[1][:4]
+                score = float(result[2])
+                putative_templates[ID] = {'M_score': score}
+            
+            #FIll in putative_templates N  and average identity score
+            for result in N_chain_result:
+                ID = result[1][:4]
+                score = float(result[2])
+                try:
+                    putative_templates[ID]['N_score']= score
+                    #Get average score
+                    avg = (score+putative_templates[ID]['M_score'])/2
+                    putative_templates[ID]['Avg_score']= avg
+                except KeyError:
+                    putative_templates[ID] = {'N_score': score}
+                    
+            #Remove target from putative_templates if benchmark run
             if benchmark:
-                if ID != target.id:
+                del putative_templates[target.id]
+            
+            putative_templates = {x : putative_templates[x] for x in putative_templates 
+                                  if 'Avg_score' in list(putative_templates[x].keys())}
+            
+            #Sort for average score
+            putative_templates = sorted(putative_templates.items(), 
+                                        key=lambda x: x[1]['Avg_score'], reverse=True)
+            putative_templates = {x[0] : x[1] for x in putative_templates}
+            #Keep only max score templates
+            max_score = list(putative_templates.values())[0]['Avg_score']
+            putative_templates = {x : putative_templates[x] for x in putative_templates 
+                                  if putative_templates[x]['Avg_score'] == max_score}
+            
+        else:
+            # BETA: Allele name based template selection
+            # Find template structures with matching alleles
+            for ID in database.MHCII_data:
+                if benchmark:
+                    if ID != target.id:
+                        if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
+                            putative_templates[ID] = list(
+                                set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
+                else:
                     if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
                         putative_templates[ID] = list(
                             set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
-            else:
-                if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
-                    putative_templates[ID] = list(
-                        set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
 
         # Make sure there is no template with only 3 anchors for benchmarking.
         if benchmark:
@@ -536,10 +660,8 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
 
         if len(pos_list) == 0:
             raise Exception('Pandora could not find any putative template! Please try to define your own template or contact us for help')
-        # Take the putative template with the max scoring peptide
-        # template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]        # Return the Template object of the selected template that will be used for homology modelling
-
-
+        
+        # Sort templates per peptide score
         template_id = [i[-1] for i in sorted(pos_list, key=lambda elem: elem[0], reverse=True)][:best_n_templates]
         scores = sorted(pos_list, key=lambda elem: elem[0], reverse=True)[:best_n_templates]
 
@@ -547,62 +669,6 @@ def find_template(target, database, best_n_templates = 1, benchmark=False):
         keep_IL = any(check_target_template(target, tmpl) for tmpl in templates)
 
         return templates, scores, keep_IL
-
-            # return database.MHCII_data[template_id], check_target_template(target, database.MHCII_data[template_id])
-
-    # # Sequence based template search if the sequences of the target are provided
-    # elif target.M_chain_seq != '' and seq_based_templ_selection:
-    #
-    #     if target.MHC_class == 'I':
-    #
-    #         # define target sequences
-    #         tar_seq = database.MHCI_data[target.id].M_chain_seq
-    #         tar_pept = database.MHCI_data[target.id].peptide
-    #         # keep track of alignment scores
-    #         scores = {}
-    #         # Perform a pairwise alignment of the target and all templates for the MHC M chain and peptide
-    #         for i in database.MHCI_data:
-    #             aligner = Align.PairwiseAligner()
-    #             aligner.substitution_matrix = substitution_matrices.load("BLOSUM80")  # PAM30 for pept??
-    #
-    #             M_score = aligner.align(tar_seq, database.MHCI_data[i].M_chain_seq).score
-    #             P_score = aligner.align(tar_pept, database.MHCI_data[i].peptide).score
-    #
-    #             scores[i] = (M_score, P_score)
-    #         # Remove the target structure from this dict, you cannot select the target as template
-    #         scores.pop(target.id, None)
-    #         # take the 10 best scoring templates
-    #         best_MHCs = sorted(scores, key=scores.get, reverse=True)[:10]
-    #         # take the template with the best scoring peptide
-    #         best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
-    #
-    #         return database.MHCI_data[best_template], check_target_template(target, database.MHCI_data[best_template])
-    #
-    #     if target.MHC_class == 'II':
-    #         # define target sequences
-    #         tar_seq = database.MHCII_data[target.id].M_chain_seq + database.MHCII_data[target.id].N_chain_seq
-    #         tar_pept = database.MHCII_data[target.id].peptide
-    #         # keep track of alignment scores
-    #         scores = {}
-    #
-    #         for i in database.MHCII_data:
-    #             aligner = Align.PairwiseAligner()
-    #             aligner.substitution_matrix = substitution_matrices.load("BLOSUM62")  # or PAM30 ??
-    #
-    #             temp_seq = database.MHCII_data[i].M_chain_seq + database.MHCII_data[i].N_chain_seq
-    #             MN_score = aligner.align(tar_seq, temp_seq).score
-    #             P_score = aligner.align(tar_pept, database.MHCII_data[i].peptide).score
-    #
-    #             scores[i] = (MN_score, P_score)
-    #         # Remove the target structure from this dict, you cannot select the target as template
-    #         scores.pop(target.id, None)
-    #         # take the 10 best scoring templates
-    #         best_MHCs = sorted(scores, key=scores.get, reverse=True)[:10]
-    #         # take the template with the best scoring peptide
-    #         best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
-    #
-    #         return database.MHCII_data[best_template], check_target_template(target, database.MHCI_data[best_template])
-
 
 def write_ini_script(target, template, alignment_file, output_dir):
     ''' Writes the MyLoop.py and cmd_modeller_ini.py files. This function takes two template python scripts and fills
