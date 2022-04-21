@@ -3,6 +3,7 @@ import pickle
 from PANDORA.PMHC import PMHC
 from PANDORA.Database import Database_functions
 import os
+import subprocess
 
 class Database:
     #todo Integrate Anchor calculation with Rafaellas code to do all the anchor calcs while initiating the db
@@ -82,13 +83,24 @@ class Database:
                         self.MHCII_data[id] = templ
                 except:
                     print('something went wrong parsing %s' %id)
-
-        if save:
-            self.save(save)
+    
+        databases_data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/'
+        #Construct blast database for blast-based sequence-based template selection
+        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ '/csv_pkl_files/templates_blast_db',
+        #                         db_name='templates_blast_db')
         
         #Download and parse HLA and MHC sequences reference data
         if update_ref_sequences:
             self.update_ref_sequences()
+        
+        #Construct blast database for retriving mhc allele
+        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ '/csv_pkl_files/refseq_blast_db',
+        #                         db_name='refseq_blast_db')
+
+        self.construct_both_blast_db(databases_data_dir)            
+
+        if save:
+            self.save(save)
         
         print('Database correctly generated')
 
@@ -117,6 +129,108 @@ class Database:
         # Add to MHCII data
         if MHC_class == 'II':
             self.MHCII_data[id] = PMHC.Template(id, allele_type, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
+            
+            
+    def write_db_into_fasta(self, outfile):
+        """
+        Writes structure db into a fasta file (to be later used to build a blast database)
+    
+        Args:
+            MHC_class (str): I or II.
+            outfile (str): output file path.
+    
+        Returns:
+            None.
+    
+        """
+        
+        sequences = []
+        for template in self.MHCI_data.values():
+            header, seq = Database_functions.get_sequence_for_fasta(
+                                        template, MHC_class='I', chain='M')
+            sequences.append((header, seq))
+            
+        for template in self.MHCII_data.values():
+            header, seq = Database_functions.get_sequence_for_fasta(
+                                        template, MHC_class='II', chain='M')
+            sequences.append((header, seq))
+            
+            header, seq = Database_functions.get_sequence_for_fasta(
+                                        template, MHC_class='II', chain='N')
+            sequences.append((header, seq))
+        
+        self.all_sequences = sequences
+        
+        with open(outfile, 'w') as outfasta:
+            for sequence in sequences:
+                header = sequence[0]
+                seq = sequence[1]
+                outfasta.write('> %s\n' %header)
+                outfasta.write('\n'.join(seq[j:j+60] for j in range(0, len(seq), 60)) + '\n')
+                
+            
+
+    def construct_blast_db(self, infile, outpath, db_name):
+        """
+        Construc blast database for seq based template selection
+
+        Args:
+            outpath (str, optional): Data dir folder. Defaults to PANDORA.PANDORA_data+ '/csv_pkl_files/'.
+            db_name (str, optional): Name of the db folder and fasta file. Defaults to 'MHC_blast_db'.
+        Returns:
+            None.
+
+        """
+        # if not os.path.isdir(outpath):
+        #     subprocess.check_call('mkdir %s' %outpath, shell=True)
+        
+        # out_fasta = outpath+'/'+db_name+'.fasta'
+        # self.write_db_into_fasta(outfile=out_fasta)
+        
+        subprocess.check_call((' ').join(['makeblastdb','-dbtype','prot',
+                                          '-in', infile,'-out', 
+                                          outpath+'/'+db_name]), shell=True)
+        
+    def construct_both_blast_db(self, data_dir=PANDORA.PANDORA_data+ '/csv_pkl_files/'):
+        
+        #Define db name and path
+        db_name='templates_blast_db'
+        outpath=data_dir+ db_name
+        out_fasta = outpath+'/'+db_name+'.fasta'
+        
+        #Create db directory
+        if not os.path.isdir(outpath):
+            subprocess.check_call('mkdir %s' %outpath, shell=True)
+        
+        #Create .fasta for the db
+        self.write_db_into_fasta(outfile=out_fasta)
+        
+        #Construct blast database for blast-based sequence-based template selection
+        self.construct_blast_db(infile = out_fasta,
+                                outpath=outpath,
+                                db_name=db_name)
+        
+        #Define db name and path
+        db_name='refseq_blast_db'
+        outpath=data_dir+ db_name
+        out_fasta = outpath+'/'+db_name+'.fasta'
+        
+        #Create db directory
+        if not os.path.isdir(outpath):
+            subprocess.check_call('mkdir %s' %outpath, shell=True)
+        
+        #Create .fasta for the db
+        command='cat %sHuman_MHC_data.fasta %sNonHuman_MHC_data.fasta > %s' %(data_dir, 
+                                                                              data_dir, 
+                                                                              out_fasta)
+        subprocess.check_call(command, shell=True)
+        
+        #Construct blast database for retriving mhc allele
+        self.construct_blast_db(infile=out_fasta,
+                                outpath=outpath,
+                                db_name=db_name)
+        
+        
 
     def remove_structure(self, id =''):
         ''' Removes a structure (by id) from the database

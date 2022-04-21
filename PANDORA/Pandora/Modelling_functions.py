@@ -1,14 +1,17 @@
 from Bio.Align import substitution_matrices
 import os
+import subprocess
 import PANDORA
 import pickle
 from PANDORA.PMHC import Model
 # from Bio import Align
 from Bio import pairwise2
-from PANDORA.Pandora import Align
-import statistics
+#from PANDORA.Pandora import Align
+#import statistics
 from Bio.Align import PairwiseAligner
 from datetime import datetime
+from copy import deepcopy
+import re
 
 
 def check_target_template(target, template):
@@ -178,7 +181,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
         pred = {}
         with open(outfile) as f:
             for line in f:
-                if peptide in line:
+                if peptide in line and not line.startswith('#'):
                     ln = [i for i in line[:-1].split(' ') if i != '']
                     pred[ln[1]] = (int(ln[3]), ln[4], float(ln[5]))
 
@@ -225,31 +228,31 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     with open(PANDORA.PANDORA_path + '/../netMHCpan-4.1/data/allelenames') as f:
         for line in f:
             all_netMHCpan_alleles.append(line.split(' ')[0])#.replace(':',''))
-
+    
     ## Format alleles
     target_alleles = [i.replace('*','') for i in allele_type]
     ## Make sure only netMHCpan available alleles are used
     target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
-
+    
     if len(target_alleles) == 0:
         print('ERROR: The provided Target allele is not available in NetMHCpan-4.1')
         return None
-
+    
     target_alleles_str = ','.join(target_alleles)
-
+    
     # Setup files
     netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
     infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s.txt' %(
         peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
     outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s_prediction.txt' %(
         peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
-
+    
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
         f.write(peptide)
-
+    
     os.system('%s -p %s -a %s > %s' %(netmhcpan, infile, target_alleles_str, outfile))
-
+    
     # Get the output from the netMHCIIpan prediction
     # {allele: (core, %rank_EL)}
     pred = {}
@@ -266,19 +269,37 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     # Sort each allele result per Rank_EL
     for allele in pred:
         pred[allele] = list(sorted(pred[allele], key=lambda x:x[1]))
-
+    
     if len(pred) == 0:
         print('ERROR: NetMHCpan-4.1 was not able to find any binding core for')
         print('the provided peptide and MHC allele')
         return None
+    
     # For every allele, the binding core is predicted. Take the allele with the highest reliability score
     best_allele = min((pred[i][0][1], i) for i in pred)[1]
-
+    
     # Do a quick alignment of the predicted core and the peptide to find the anchors. (the predicted binding core can
     # contain dashes -. Aligning them makes sure you take the right residue as anchor.
     alignment = pairwise2.align.globalxx(peptide, pred[best_allele][0][0])
-    pept1 = alignment[0][0]
-    pept2 = alignment[0][1]
+    
+    #If there are multiple possible solutions, take the one with no gap at the anchor (second) position
+    if len(alignment)>1:
+        flag = False
+        #Search for the options without gap in the second postions
+        for prediction in alignment:
+            if prediction[1][1] != '-' and prediction[0][1] != '-':
+                pept1 = prediction[0]
+                pept2 = prediction[1]
+                flag = True
+                break
+        #If no options are available, take the first one
+        if flag==False:
+             pept1 = alignment[0][0]
+             pept2 = alignment[0][1]
+        
+    else:
+        pept1 = alignment[0][0]
+        pept2 = alignment[0][1]
     
     # Remove gaps if in the same position
     to_remove = []
@@ -293,7 +314,9 @@ def predict_anchors_netMHCpan(peptide, allele_type,
         print('Query peptide aligned to the core:')
         print(pept1)
         print(pept2)
+    
     # Find the anchors by finding the first non dash from the left and from the right
+    # Define chanonical ancors as starting list
     predicted_anchors = [2,len(peptide)]
     
     # Find the first anchor
@@ -311,19 +334,19 @@ def predict_anchors_netMHCpan(peptide, allele_type,
             p1 += 1
         if pept2[i] != '-':
             p2 += 1
-
+    
     # Find the second anchor
     for i in range(len(pept2)):
         if pept2[::-1][i] != '-':
             predicted_anchors[1] = len([j for j in pept1[:len(pept1) -i] if j != '-'])
             #predicted_anchors[1] = len([j for j in pept2[::-1][i] if j != '-'])
             break
-
+    
     if verbose:
         print('\tPredicted the binding core using netMHCpan (4.1):\n')
         print('\tIcore:\t%s\n\t%%Rank EL:\t%s\n' %(pred[best_allele][0][0], pred[best_allele][0][1] ))
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' %predicted_anchors)
-
+    
     if rm_output:
         os.system('rm %s' %infile)
         os.system('rm %s' %outfile)
@@ -331,7 +354,7 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     return predicted_anchors
 
 
-def score_peptide_alignment_MHCI(target, template, substitution_matrix='PAM30'):
+def score_peptide_alignment(target, template, substitution_matrix='PAM30'):
     ''' Calculate the alignment score of the target and template peptide
 
     Args:
@@ -342,247 +365,220 @@ def score_peptide_alignment_MHCI(target, template, substitution_matrix='PAM30'):
     Returns: (flt): alignment score
 
     '''
-    # Dario don't worry, I didn't change the code, I just moved it to a function, so peptide similarity can be
-    # calculated for user defined templates as well.
-    substitution_matrix = substitution_matrices.load(substitution_matrix)
-    score = 0
-    try:
-        pept_anchs = target.anchors
-    except:
-        pept_anchs = [1, len(target.peptide) - 1]
-
-    temp_pept = template.peptide
-    temp_anchs = template.anchors
-    aligned_pept, aligned_temp_pept = align_peptides(target.peptide,
-                                                     pept_anchs[0], pept_anchs[1],
-                                                     temp_pept,
-                                                     temp_anchs[0], temp_anchs[1])
-
-    aligned_pept = aligned_pept.replace('-', '*')
-    aligned_temp_pept = aligned_temp_pept.replace('-', '*')
-    # min_len = min([len(target.peptide), len(temp_pept)])
-    # score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty #Is now handled by normal PAM30
-    for i, (aa, bb) in enumerate(zip(aligned_pept, aligned_temp_pept)):
+    if target.MHC_class == 'I':
+        substitution_matrix = substitution_matrices.load(substitution_matrix)
+        score = 0
         try:
-            # gain = MatrixInfo.pam30[aa, bb]
-            gain = substitution_matrix[aa, bb]
-            score += gain
-        except KeyError:
+            pept_anchs = target.anchors
+        except:
+            pept_anchs = [1, len(target.peptide) - 1]
+    
+        temp_pept = template.peptide
+        temp_anchs = template.anchors
+        aligned_pept, aligned_temp_pept = align_peptides(target.peptide,
+                                                         pept_anchs[0], pept_anchs[1],
+                                                         temp_pept,
+                                                         temp_anchs[0], temp_anchs[1])
+    
+        aligned_pept = aligned_pept.replace('-', '*')
+        aligned_temp_pept = aligned_temp_pept.replace('-', '*')
+        # min_len = min([len(target.peptide), len(temp_pept)])
+        # score -= ((abs(len(target.peptide) - len(temp_pept)) ** 2.4))  # !!!  ## Gap Penalty #Is now handled by normal PAM30
+        for i, (aa, bb) in enumerate(zip(aligned_pept, aligned_temp_pept)):
             try:
-                # gain = MatrixInfo.pam30[bb, aa]
-                gain = substitution_matrix[bb, aa]
+                # gain = MatrixInfo.pam30[aa, bb]
+                gain = substitution_matrix[aa, bb]
                 score += gain
             except KeyError:
-                score = -50
-                pass
-
-    return score
-
-
-def score_peptide_alignment_MHCII(target, template, substitution_matrix='PAM30'):
-    ''' Calculate the alignment score of the target and template peptide using pairwise alignment
-
-    Args:
-        target: (Target): Target object
-        template: (Template): Template object
-        substitution_matrix: (str): name of subtitution matrix, default is PAM30 (BLOSUM80 etc)
-
-    Returns: (flt): alignment score
-
-    '''
-
-    # define the peptide and p1 anchor position
-    temp_pept = template.peptide
-    temp_p1 = template.anchors[0]
-    tar_pept = target.peptide
-    tar_p1 = target.anchors[0]
-
-    # align based on first anchor position, fill in the ends with '-' to make them equal length
-    temp_pept = '*' * (tar_p1 - temp_p1) + temp_pept
-    tar_pept = '*' * (temp_p1 - tar_p1) + tar_pept
-    temp_pept = temp_pept + '*' * (len(tar_pept) - len(temp_pept))
-    tar_pept = tar_pept + '*' * (len(temp_pept) - len(tar_pept))
-
-    # Perform a pairwise alignment. Make sure no gaps are introduced.
-    aligner = PairwiseAligner()
-    aligner.substitution_matrix = substitution_matrices.load(substitution_matrix)
-    aligner.gap_score = -1000
-    aligner.end_open_gap_score = -1000000
-    aligner.internal_open_gap_score = -10000
-
-    # Align the sequences
-    aligned = aligner.align(tar_pept, temp_pept)
-
-    return aligned.score
+                try:
+                    # gain = MatrixInfo.pam30[bb, aa]
+                    gain = substitution_matrix[bb, aa]
+                    score += gain
+                except KeyError:
+                    score = -50
+                    pass
+    
+        return score
+    
+    elif target.MHC_class == 'II':
+        # define the peptide and p1 anchor position
+        temp_pept = template.peptide
+        temp_p1 = template.anchors[0]
+        tar_pept = target.peptide
+        tar_p1 = target.anchors[0]
+    
+        # align based on first anchor position, fill in the ends with '-' to make them equal length
+        temp_pept = '*' * (tar_p1 - temp_p1) + temp_pept
+        tar_pept = '*' * (temp_p1 - tar_p1) + tar_pept
+        temp_pept = temp_pept + '*' * (len(tar_pept) - len(temp_pept))
+        tar_pept = tar_pept + '*' * (len(temp_pept) - len(tar_pept))
+    
+        # Perform a pairwise alignment. Make sure no gaps are introduced.
+        aligner = PairwiseAligner()
+        aligner.substitution_matrix = substitution_matrices.load(substitution_matrix)
+        aligner.gap_score = -1000
+        aligner.end_open_gap_score = -1000000
+        aligner.internal_open_gap_score = -10000
+    
+        # Align the sequences
+        aligned = aligner.align(tar_pept, temp_pept)
+    
+        return aligned.score
 
 
-def find_template(target, database, best_n_templates = 1, benchmark=False):
+def find_template(target, database, best_n_templates = 1, benchmark=False, 
+                  blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/templates_blast_db/templates_blast_db'):
     ''' Selects the template structure that is best suited as template for homology modelling of the target
 
     Args:
-        target: Target object
-        database: Database object
-        seq_based_templ_selection: (bool) Use template selection based on template sequences instead of allele.
+        target (PMHC.Target): Target object
+        database (Database.Database): Database object
+        blastdb (str): Path to blast database to use for sequence-based template selection.
 
     Returns: Template object
 
     '''
 
-    ## For MHC I
+    putative_templates = {}
+    
     if target.MHC_class == 'I':
-
-        # Define available alleles in database
-        available_alleles = []
-        for ID in database.MHCI_data:
-            if benchmark and ID == target.id:
-                pass
-            else:
-                available_alleles.extend(database.MHCI_data[ID].allele_type)
-        available_alleles = list(set(available_alleles))
-
-        # Adapt the target allele name if necessary
-        #target_alleles = [allele_name_adapter(allele, available_alleles) for allele in target.allele_type]
-        target_alleles = allele_name_adapter(target.allele_type, available_alleles)
-        target_alleles = list(set(target_alleles))
-
-        # Find template structures with matching alleles
-        putative_templates = {}
-        for ID in database.MHCI_data:
-            if benchmark and ID == target.id:
-                pass
-            else:
-                for tar_allele in target_alleles:
-                    if any(tar_allele in put_temp_allele for put_temp_allele in database.MHCI_data[ID].allele_type):
-                        # update dict with ID:all matching alleles
-                        #TODO: is this list of matching allele obsolete?
-                        putative_templates[ID] = list(
-                            set(target.allele_type) & set(database.MHCI_data[ID].allele_type))
-
-        # If the target template already occured in the database, remove it from the dict of putative templates
-        #putative_templates.pop(target.id)
-
-        # Find the putative template with the best matching peptide
-        pos_list = []
-        for ID in putative_templates:
-            score = score_peptide_alignment_MHCI(target, database.MHCI_data[ID], substitution_matrix='PAM30')
-            pos_list.append((score, database.MHCI_data[ID].peptide, ID))
-
-        if len(pos_list) == 0:
-            raise Exception('Pandora could not find any putative template! Please try to define your own template or contact us for help')
-        # Take the putative template with the max scoring peptide
-        # template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]
-        # Return the Template object of the selected template that will be used for homology modelling
-
-        template_id = [i[-1] for i in sorted(pos_list, key=lambda elem: elem[0], reverse=True)][:best_n_templates]
-        scores = sorted(pos_list, key=lambda elem: elem[0], reverse=True)[:best_n_templates]
-
-        templates = [database.MHCI_data[tmpl] for tmpl in template_id]
-        keep_IL = any(check_target_template(target, tmpl) for tmpl in templates)
-
-        return templates, scores, keep_IL
-
-
-        ## For MHC II
+        class_variables = [180, 'MHCI_data', 'M_score']
+    elif target.MHC_class == 'II':
+        class_variables = [82, 'MHCII_data', 'Avg_score']
+        
+    no_seq_chains = []
+    if target.M_chain_seq != '':
+        #Sequence based template selection
+        
+        # Sequence based template selection
+        #Keep only G-domain
+        M_chain = target.M_chain_seq[:class_variables[0]]
+        #Blast M chain sequence
+        try:
+            M_chain_result = blast_mhc_seq(M_chain, chain='M', blastdb=blastdb)
+        except Exception as e:
+            print(e)
+            print('WARNING: something went wrong with blast-based template selection.')
+            print('Is blastp properly installed?')
+            #If blast didn't work properly, consider this sequence missing
+            no_seq_chains.append('M_score')
+        
+        #FIll in putative_templates M identity score
+        for result in M_chain_result:
+            ID = result[0][:4]
+            score = result[1]
+            putative_templates[ID] = {'M_score': score}
+    
+    else:
+        no_seq_chains.append('M_score')
+        
+    
     if target.MHC_class == 'II':
-
-        # Find template structures with matching alleles
-        putative_templates = {}
-        for ID in database.MHCII_data:
-            if benchmark:
-                if ID != target.id:
-                    if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
-                        putative_templates[ID] = list(
-                            set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
-            else:
-                if any(x in database.MHCII_data[ID].allele_type for x in target.allele_type):
-                    putative_templates[ID] = list(
-                        set(target.allele_type) & set(database.MHCII_data[ID].allele_type))
-
-        # Make sure there is no template with only 3 anchors for benchmarking.
+        if target.N_chain_seq != '':
+            #Keep only G-domain
+            N_chain = target.N_chain_seq[:90]
+            #Blast N chain sequence
+            try:
+                N_chain_result = blast_mhc_seq(N_chain, chain='N', blastdb=blastdb)
+            except Exception as e:
+                print(e)
+                print('WARNING: something went wrong with blast-based template selection.')
+                print('Is blastp properly installed?')
+                #If blast didn't work properly, consider this sequence missing
+                no_seq_chains.append('N_score')
+            
+            #FIll in putative_templates N  and average identity score
+            for result in N_chain_result:
+                ID = result[0][:4]
+                score = result[1]
+                try:
+                    putative_templates[ID]['N_score']= score
+                    #Get average score
+                except KeyError:
+                    putative_templates[ID] = {'N_score': score}
+                
+        else: 
+            no_seq_chains.append('N_score')
+    
+    #For every chain withous a seq, fill in the relative score to 100
+    #For each template with at least one matching allele
+    if no_seq_chains !=[]:
+        for C in no_seq_chains:
+            # Fill in available alleles list
+            available_alleles = []
+            for ID in getattr(database, class_variables[1]):
+                if benchmark and ID == target.id:
+                    pass
+                else:
+                    available_alleles.extend(getattr(database, class_variables[1])[ID].allele_type)
+            available_alleles = list(set(available_alleles))
+            
+            # Find template structures with matching alleles
+            target_alleles = allele_name_adapter(target.MHC_class, target.allele_type, available_alleles)
+            target_alleles = list(set(target_alleles))
+            for ID in getattr(database, class_variables[1]):
+                if benchmark:
+                    if ID != target.id:
+                        if any(y in x for x in getattr(database, class_variables[1])[ID].allele_type for y in target_alleles):
+                            try:
+                                putative_templates[ID][C] = 100.0
+                            except KeyError:
+                                putative_templates[ID] = {C : 100.0}
+                else:
+                    if any(y in x for x in getattr(database, class_variables[1])[ID].allele_type for y in target_alleles):
+                        try:
+                            putative_templates[ID][C] = 100.0
+                        except KeyError:
+                            putative_templates[ID]= {C : 100.0}
+    
+    #Keep only templates present in the template db.
+    #This prevents errors caused by different blast and pandora db.
+    putative_templates = {k:v for k,v in putative_templates.items() if k in getattr(database, class_variables[1]).keys()}
+    
+    #Remove target from putative_templates if benchmark run
+    if benchmark:
+        if target.id in putative_templates.keys():
+            del putative_templates[target.id]
+                                
+    if target.MHC_class == 'II':
+        for ID in putative_templates:
+            if len(putative_templates[ID].keys()) == 2:
+                putative_templates[ID]['Avg_score'] = (putative_templates[ID]['M_score'] + putative_templates[ID]['N_score']) /2
+        
+        putative_templates = {x : putative_templates[x] for x in putative_templates 
+                              if 'Avg_score' in list(putative_templates[x].keys())}
+         # Make sure there is no template with only 3 anchors for benchmarking.
         if benchmark:
             putative_templates = {k:v for k,v in putative_templates.items() if len(database.MHCII_data[k].anchors) == 4}
+        
 
+    # For both chains
+    #Sort for average score
+    putative_templates = sorted(putative_templates.items(), 
+                                key=lambda x: x[1][class_variables[2]], reverse=True)
+    putative_templates = {x[0] : x[1] for x in putative_templates}
+    #Keep only max score templates
+    max_score = list(putative_templates.values())[0][class_variables[2]]
+    putative_templates = {x : putative_templates[x] for x in putative_templates 
+                          if putative_templates[x][class_variables[2]] == max_score}
 
-        # Find the peptide with the highest alignment score. If there are multiple, take the first one with same
-        # same anchor positions
-        # template_id = find_best_template_peptide(target=target,
-        #                                          templates=[database.MHCII_data[i] for i in putative_templates])
+    # Find the putative template with the best matching peptide
+    pos_list = []
+    for ID in putative_templates:
+        score = score_peptide_alignment(target, getattr(database, class_variables[1])[ID], substitution_matrix='PAM30')
+        pos_list.append((score, getattr(database, class_variables[1])[ID].peptide, ID))
 
-        # Find the putative template with the best matching peptide
-        pos_list = []
-        for ID in putative_templates:
-            score = score_peptide_alignment_MHCII(target, database.MHCII_data[ID], substitution_matrix='PAM30')
-            pos_list.append((score, database.MHCII_data[ID].peptide, ID))
+    if len(pos_list) == 0:
+        raise Exception('Pandora could not find any putative template! Please try to define your own template or contact us for help')
+    
+    # Sort templates per peptide score
+    template_id = [i[-1] for i in sorted(pos_list, key=lambda elem: elem[0], reverse=True)][:best_n_templates]
+    scores = sorted(pos_list, key=lambda elem: elem[0], reverse=True)[:best_n_templates]
 
-        if len(pos_list) == 0:
-            raise Exception('Pandora could not find any putative template! Please try to define your own template or contact us for help')
-        # Take the putative template with the max scoring peptide
-        # template_id = pos_list[[i[0] for i in pos_list].index(max([i[0] for i in pos_list]))][2]        # Return the Template object of the selected template that will be used for homology modelling
+    templates = [getattr(database, class_variables[1])[tmpl] for tmpl in template_id]
+    keep_IL = any(check_target_template(target, tmpl) for tmpl in templates)
 
-
-        template_id = [i[-1] for i in sorted(pos_list, key=lambda elem: elem[0], reverse=True)][:best_n_templates]
-        scores = sorted(pos_list, key=lambda elem: elem[0], reverse=True)[:best_n_templates]
-
-        templates = [database.MHCII_data[tmpl] for tmpl in template_id]
-        keep_IL = any(check_target_template(target, tmpl) for tmpl in templates)
-
-        return templates, scores, keep_IL
-
-            # return database.MHCII_data[template_id], check_target_template(target, database.MHCII_data[template_id])
-
-    # # Sequence based template search if the sequences of the target are provided
-    # elif target.M_chain_seq != '' and seq_based_templ_selection:
-    #
-    #     if target.MHC_class == 'I':
-    #
-    #         # define target sequences
-    #         tar_seq = database.MHCI_data[target.id].M_chain_seq
-    #         tar_pept = database.MHCI_data[target.id].peptide
-    #         # keep track of alignment scores
-    #         scores = {}
-    #         # Perform a pairwise alignment of the target and all templates for the MHC M chain and peptide
-    #         for i in database.MHCI_data:
-    #             aligner = Align.PairwiseAligner()
-    #             aligner.substitution_matrix = substitution_matrices.load("BLOSUM80")  # PAM30 for pept??
-    #
-    #             M_score = aligner.align(tar_seq, database.MHCI_data[i].M_chain_seq).score
-    #             P_score = aligner.align(tar_pept, database.MHCI_data[i].peptide).score
-    #
-    #             scores[i] = (M_score, P_score)
-    #         # Remove the target structure from this dict, you cannot select the target as template
-    #         scores.pop(target.id, None)
-    #         # take the 10 best scoring templates
-    #         best_MHCs = sorted(scores, key=scores.get, reverse=True)[:10]
-    #         # take the template with the best scoring peptide
-    #         best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
-    #
-    #         return database.MHCI_data[best_template], check_target_template(target, database.MHCI_data[best_template])
-    #
-    #     if target.MHC_class == 'II':
-    #         # define target sequences
-    #         tar_seq = database.MHCII_data[target.id].M_chain_seq + database.MHCII_data[target.id].N_chain_seq
-    #         tar_pept = database.MHCII_data[target.id].peptide
-    #         # keep track of alignment scores
-    #         scores = {}
-    #
-    #         for i in database.MHCII_data:
-    #             aligner = Align.PairwiseAligner()
-    #             aligner.substitution_matrix = substitution_matrices.load("BLOSUM62")  # or PAM30 ??
-    #
-    #             temp_seq = database.MHCII_data[i].M_chain_seq + database.MHCII_data[i].N_chain_seq
-    #             MN_score = aligner.align(tar_seq, temp_seq).score
-    #             P_score = aligner.align(tar_pept, database.MHCII_data[i].peptide).score
-    #
-    #             scores[i] = (MN_score, P_score)
-    #         # Remove the target structure from this dict, you cannot select the target as template
-    #         scores.pop(target.id, None)
-    #         # take the 10 best scoring templates
-    #         best_MHCs = sorted(scores, key=scores.get, reverse=True)[:10]
-    #         # take the template with the best scoring peptide
-    #         best_template = max((v[1], k) for k, v in scores.items() if k in best_MHCs)[1]
-    #
-    #         return database.MHCII_data[best_template], check_target_template(target, database.MHCI_data[best_template])
-
+    return templates, scores, keep_IL
 
 def write_ini_script(target, template, alignment_file, output_dir):
     ''' Writes the MyLoop.py and cmd_modeller_ini.py files. This function takes two template python scripts and fills
@@ -797,7 +793,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     for line in f:
         if line.startswith(target.id + '.'):   #target.id
             l = line.split()
-            if len(l) > 2:
+            if len(l) == 3: #TODO: make sure the line is reporting the model with tis score. Format: model, molpdf, dope.
                 logf.append(tuple(l))
     f.close()
 
@@ -806,14 +802,14 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     if keep_IL:
         # Also take the Initial Loop model. Take the molpdf from the pdb header.
         il_file = [i for i in os.listdir(output_dir) if i.startswith(target.id + '.IL')][0]
-        # il = open(output_dir + '/' + il_file)
-        # for line in il:
-        #     if 'MODELLER OBJECTIVE FUNCTION' in line:
-        #         il_molpdf = line.split()[-1]
-        # f.close()
         # Create a fake molpdf/dope score for the IL model: the best molpdf/dope from the real models - 1
-        fake_molpdf = str(min(float(i[1]) for i in logf) - 1)
-        fake_dope = str(min(float(i[2]) for i in logf) - 1)
+        try:
+            fake_molpdf = str(min(float(i[1]) for i in logf) - 1)
+            fake_dope = str(min(float(i[2]) for i in logf) - 1)
+        except ValueError:
+            fake_molpdf = -10000
+            fake_dope = -10000
+            print('WARNING: ValueError exception raised while assigning fake molpdf and dope to IL model')
         # Append the filename and molpdf to the rest of the data
         logf.append((il_file, fake_molpdf, fake_dope))
 
@@ -823,7 +819,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     # Write to output file
     f = open(output_dir + '/molpdf_DOPE.tsv', 'w')
     for i in logf:
-        f.write('matched_' + i[0] + '\t' + i[1] + '\t' + i[2] + '\n')
+        f.write(i[0] + '\t' + i[1] + '\t' + i[2] + '\n')
     f.close()
 
 
@@ -835,24 +831,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
                                             molpdf=logf[i][1], dope=logf[i][2])
 
         except:
-            print('Something went wrong when calling Model.Model() for case %s' %target.id)
-            
-        # if benchmark:
-        #     try:
-        #         m.calc_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb',
-        #                      atoms = RMSD_atoms)
-        #         # print('l-RMSD for %s: %f' %(target.id, m.lrmsd))
-        #     except:
-        #         print('Something went wrong when calculating l-RMSD for case %s' %target.id)
-        #         pass
-        #     if target.MHC_class == 'II': #only calculate the core L-rmsd for MHCII cases
-        #         try:
-        #             m.calc_Core_LRMSD(PANDORA.PANDORA_data + '/PDBs/pMHC' + target.MHC_class + '/' + target.id + '.pdb',
-        #                      atoms = RMSD_atoms)
-        #             # print('Core l-RMSD for %s: %f' %(target.id, m.core_lrmsd))
-        #         except:
-        #             print('Something went wrong when calculating core l-RMSD for case %s' %target.id)
-        #             pass
+            print('WARNING: Error raised while calling Model.Model() for case %s' %target.id)
         results.append(m)
 
 
@@ -861,6 +840,36 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
         pickle.dump(results, open("%s/results_%s.pkl" %(output_dir, os.path.basename(os.path.normpath(output_dir))), "wb"))
 
     return results
+
+def blast_mhc_seq(seq, chain='M', blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db'):
+    try:
+        command = (' ').join(['blastp','-db',blastdb, 
+                                                 '-query',
+                                                 '<(echo %s)' %seq,
+                                                 '-outfmt','6'])
+        proc = subprocess.Popen(command,  executable='/bin/bash',
+                                     shell=True, stdout=subprocess.PIPE)
+        blast_result = proc.stdout.read()
+        blast_result = blast_result.decode()
+    except subprocess.CalledProcessError as e:
+        raise Exception('An error occurred while blasting %s chain seq: %s' %(chain, e.output))
+        
+
+    blast_result = blast_result.split('\n')
+    blast_result = [x.replace(';',' ').split('\t') for x in blast_result]
+    blast_result = [x for x in blast_result if x != ['']]
+    
+    #FIll in putative_templates M identity score
+    results = []
+    for result in blast_result:
+        ID = result[1]
+        score = float(result[2])
+        results.append((ID, score))
+    results = sorted(results, key=lambda x: x[1], reverse=True)
+    
+    return results
+        
+    
 
 def align_peptides(seq1, anch1_seq1, anch2_seq1, seq2, anch1_seq2, anch2_seq2):
     '''
@@ -914,96 +923,126 @@ def align_peptides(seq1, anch1_seq1, anch2_seq1, seq2, anch1_seq2, anch2_seq2):
     ali_seq2 = ('').join(list2)
     return ali_seq1, ali_seq2
 
-def allele_name_adapter(allele, available_alleles):
+def allele_name_adapter(MHC_class, ori_alleles, available_alleles):
     '''
     Cuts the given allele name to make it consistent with the alleles in allele_ID.
 
     Args:
         allele(list) : Allele names
         allele_ID(dict) : Dictionary of structure IDs (values) in the dataset for each allele (keys)
+        
+    Returns:
+        allele(list) : List of adapted (cut) allele names
     '''
     #homolog_allele = '--NONE--'
-    for a in range(len(allele)):
-        if allele[a].startswith('HLA'):      # Human
-            if any(allele[a] in key for key in list(available_alleles)):
+    alleles = deepcopy(ori_alleles)
+    if MHC_class =='I':
+        for a in range(len(alleles)):
+            if alleles[a].startswith('HLA'):      # Human
+                if any(alleles[a] in key for key in list(available_alleles)):
+                    pass
+                elif any(alleles[a][:8] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:8]
+                elif any(alleles[a][:6] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:6]
+                else:
+                    alleles[a] = alleles[a][:4]
+            elif alleles[a].startswith('H2'):    # Mouse
+                #homolog_allele = 'RT1'
+                if any(alleles[a] in key for key in list(available_alleles)):
+                    pass
+                elif any(alleles[a][:4] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:4]
+                else:
+                    alleles[a] = alleles[a][:3]
+            elif alleles[a].startswith('RT1'):          # Rat
+                #homolog_allele = 'H2'
+                if any(alleles[a] in key for key in list(available_alleles)):
+                    pass
+                elif any(alleles[a][:5] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:5]
+                else:
+                    alleles[a] = alleles[a][:4]
+            elif alleles[a].startswith('BoLA'):        # Bovine
+                if any(alleles[a] in key for key in list(available_alleles)):
+                    pass
+                elif any(alleles[a][:10] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:10]
+                elif any(alleles[a][:7] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:7]
+                else:
+                    alleles[a] = alleles[a][:5]
+            elif alleles[a].startswith('SLA'):        # Suine
+                if any(alleles[a] in key for key in list(available_alleles)):
+                    pass
+                elif any(alleles[a][:9] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:9]
+                elif any(alleles[a][:6] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:6]
+                else:
+                    alleles[a] = alleles[a][:4]
+            elif alleles[a].startswith('MH1-B'):        # Chicken
+                if any(alleles[a] in key for key in list(available_alleles)):
+                    pass
+                elif any(alleles[a][:8] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:8]
+                else:
+                    alleles[a] = alleles[a][:6]
+            elif alleles[a].startswith('MH1-N'):        # Chicken
+                if any(alleles[a] in key for key in list(available_alleles)):
+                    pass
+                elif any(alleles[a][:9] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:9]
+                else:
+                    alleles[a] = alleles[a][:6]
+            elif alleles[a].startswith('BF2'):        # Chicken
+                if any(alleles[a] in key for key in list(available_alleles)):
+                    pass
+                elif any(alleles[a][:6] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:6]
+                else:
+                    alleles[a] = alleles[a][:4]
+            elif alleles[a].startswith('Mamu'):       # Monkey
+                if any(alleles[a] in key for key in list(available_alleles)):
+                    pass
+                elif any(alleles[a][:13] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:13]
+                elif any(alleles[a][:9] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:9]
+                else:
+                    alleles[a] = alleles[a][:5]
+            elif alleles[a].startswith('Eqca'):        # Horse
+                if any(alleles[a] in key for key in list(available_alleles)):
+                    pass
+                elif any(alleles[a][:10] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:10]
+                elif any(alleles[a][:7] in key for key in list(available_alleles)):
+                    alleles[a] = alleles[a][:7]
+                else:
+                    alleles[a] = alleles[a][:5]
+                    
+    elif MHC_class =='I':
+        for a in range(len(alleles)):
+            if alleles[a].startswith('HLA'):      # Human
+                prefix = alleles[a].split('-')[0]
+                gene = re.split('-|\*', alleles[a])[1][:2]
+                chain = re.split('-|\*', alleles[a])[1][2]
+                subgene = re.split('-|\*', alleles[a])[1][3:]
+                group = re.split(':|\*', alleles[a])[1]
+                subgroup = re.split(':|\*', alleles[a])[2]
+                
+                if any(alleles[a] in key for key in list(available_alleles)):
+                    pass
+                elif any(prefix+'-'+gene+chain+subgene+'*'+group in key for key in list(available_alleles)):
+                    print('WARNING: The provided allele subgroup has not been found. PANDORA will treat this case as %s' %(prefix+'-'+gene+chain+subgene+'*'+group))
+                    alleles[a] = prefix+'-'+gene+chain+subgene+'*'+group
+                elif any(prefix+'-'+gene+chain+subgene in key for key in list(available_alleles)):
+                    alleles[a] = prefix+'-'+gene+chain+subgene
+                    print('WARNING: The provided allele group has not been found. PANDORA will treat this case as %s' %(prefix+'-'+gene+chain+subgene))
+                else:
+                    alleles[a] = prefix+'-'+gene+chain
+            
+            else:                               #Other spieces might be implemented later
                 pass
-            elif any(allele[a][:8] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:8]
-            elif any(allele[a][:6] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:6]
-            else:
-                allele[a] = allele[a][:4]
-        elif allele[a].startswith('H2'):    # Mouse
-            #homolog_allele = 'RT1'
-            if any(allele[a] in key for key in list(available_alleles)):
-                pass
-            elif any(allele[a][:4] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:4]
-            else:
-                allele[a] = allele[a][:3]
-        elif allele[a].startswith('RT1'):          # Rat
-            #homolog_allele = 'H2'
-            if any(allele[a] in key for key in list(available_alleles)):
-                pass
-            elif any(allele[a][:5] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:5]
-            else:
-                allele[a] = allele[a][:4]
-        elif allele[a].startswith('BoLA'):        # Bovine
-            if any(allele[a] in key for key in list(available_alleles)):
-                pass
-            elif any(allele[a][:10] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:10]
-            elif any(allele[a][:7] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:7]
-            else:
-                allele[a] = allele[a][:5]
-        elif allele[a].startswith('SLA'):        # Suine
-            if any(allele[a] in key for key in list(available_alleles)):
-                pass
-            elif any(allele[a][:9] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:9]
-            elif any(allele[a][:6] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:6]
-            else:
-                allele[a] = allele[a][:4]
-        elif allele[a].startswith('MH1-B'):        # Chicken
-            if any(allele[a] in key for key in list(available_alleles)):
-                pass
-            elif any(allele[a][:8] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:8]
-            else:
-                allele[a] = allele[a][:6]
-        elif allele[a].startswith('MH1-N'):        # Chicken
-            if any(allele[a] in key for key in list(available_alleles)):
-                pass
-            elif any(allele[a][:9] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:9]
-            else:
-                allele[a] = allele[a][:6]
-        elif allele[a].startswith('BF2'):        # Chicken
-            if any(allele[a] in key for key in list(available_alleles)):
-                pass
-            elif any(allele[a][:6] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:6]
-            else:
-                allele[a] = allele[a][:4]
-        elif allele[a].startswith('Mamu'):       # Monkey
-            if any(allele[a] in key for key in list(available_alleles)):
-                pass
-            elif any(allele[a][:13] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:13]
-            elif any(allele[a][:9] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:9]
-            else:
-                allele[a] = allele[a][:5]
-        elif allele[a].startswith('Eqca'):        # Horse
-            if any(allele[a] in key for key in list(available_alleles)):
-                pass
-            elif any(allele[a][:10] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:10]
-            elif any(allele[a][:7] in key for key in list(available_alleles)):
-                allele[a] = allele[a][:7]
-            else:
-                allele[a] = allele[a][:5]
-    return(allele)#, homolog_allele)
+    return alleles #, homolog_allele)
+    

@@ -11,7 +11,7 @@ class Align:
 
     def __init__(self, target, template, 
                  output_dir=PANDORA.PANDORA_data + '/outputs', remove_terms=True):
-        ''' Performs a alignment of the target and template(s). Will spit out a filename that will be used for modeller.
+        ''' Performs a alignment of the target and template(s). Returns a filename that will be used for modeller.
 
         Args:
             target: (Target object) The target object that will be aligned to 
@@ -45,15 +45,24 @@ class Align:
         self.__tem_p = [i.peptide for i in self.__template]
 
         # Define target m, n and p seqs. If there are no m and n chains supplied, just take the seqs from the template
-        # Only if the target is MHC class II, the n chains are defined.
         if self.__target.M_chain_seq == '':
+            print('WARNING: No M chain sequence could be retrieved for target %s' %self.__target.id)
+            print('PANDORA will use the M chain sequence from the best template.')
+            print('To avoid this, please provide an M chain sequence to your target.')
             self.__tar_m = self.__tem_m[0]
-            if self.__MHC_class == 'II' and self.__target.N_chain_seq == '':
-                self.__tar_n = self.__tem_n[0]
         else:
             self.__tar_m = self.__target.M_chain_seq
-            if self.__MHC_class == 'II':
-                self.__tar_n = self.__target.N_chain_seq
+        
+        # N chains (only for MHCII)
+        if self.__MHC_class == 'II' and self.__target.N_chain_seq == '':
+            print('WARNING: No M chain sequence could be retrieved for target %s' %self.__target.id)
+            print('PANDORA will use the M chain sequence from the best template.')
+            print('To avoid this, please provide an M chain sequence to your target.')
+            self.__tar_n = self.__tem_n[0]
+        elif self.__MHC_class == 'II' and self.__target.N_chain_seq != '':
+            self.__tar_n = self.__target.N_chain_seq
+            
+        # P chain
         self.__tar_p = self.__target.peptide
 
         # Perform alignment
