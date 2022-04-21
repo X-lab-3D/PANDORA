@@ -1,4 +1,6 @@
 from Bio.PDB import PDBParser
+from Bio.PDB.Polypeptide import three_to_one
+from Bio import pairwise2
 import os
 from Bio.PDB import PDBIO
 import PANDORA
@@ -8,7 +10,8 @@ import traceback
 class Model:
 
     def __init__(self, target, model_path='', output_dir = PANDORA.PANDORA_data, pdb=False, molpdf=0, dope=0):
-        ''' Initiate model object
+        '''__init__(self, target, model_path='', output_dir = PANDORA.PANDORA_data, pdb=False, molpdf=0, dope=0)
+         Initiate model object
 
         Args:
             target: Target object
@@ -73,14 +76,14 @@ class Model:
         # Get decoy structure to superpose
         #decoy_db = pdb2sql(decoy_path)
         #decoy_lzone = np.asarray(decoy_db.get('x,y,z', resSeq=M_lzone))
-        
+
         # Get ref structure to superpose
         #ref_db = pdb2sql(ref_path)
         #ref_lzone = np.asarray(ref_db.get('x,y,z', resSeq=M_lzone))
-        
+
         # Align the G domains
         #superpose.superpose_selection()
-        
+
         try:
             # Calculate l-rmsd between decoy and reference with pdb2sql
             sim = StructureSimilarity(decoy_path, ref_path)
@@ -126,7 +129,7 @@ class Model:
         #lzone = get_Gdomain_lzone('%s/%s_ref.pdb' %(self.output_dir, self.target.id), self.output_dir, self.target.MHC_class)
         # Get decoy structure to superpose
         #decoy_db = psb2sql()
-        
+
         # Calculate l-rmsd between decoy and reference with pdb2sql
         sim = StructureSimilarity(decoy_path, ref_path)
         self.core_lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name=atoms)
@@ -205,25 +208,61 @@ def merge_chains(pdb):
     return pdb
 
 
-def renumber(pdb):
-    ''' Renumbers the pdb. Each chain starts at 1
+def renumber(pdb_ref, pdb_decoy):
+    ''' aligns two pdb's and renumber them accordingly.
 
     Args:
-        pdb: Bio.PDb object
+        pdb_ref:   Bio.PDB object
+        pdb_decoy: Bio.PDB object
+        
 
-    Returns:Bio.PDb object with renumbered residues
+    Returns: Bio.PDB objects with renumbered residues
 
     '''
-    for chain in pdb.get_chains():
-        nr = 1
-        for res in chain:
-            res.id = ('X', nr, res.id[2])
-            nr += 1
-    for chain in pdb.get_chains():
-        for res in chain:
-            res.id = (' ', res.id[1], ' ')
+    ref_sequences = [[chain.id, ('').join([three_to_one(res.resname) for res in chain])]
+                      for chain in pdb_ref.get_chains()]
+    ref_sequences.sort()
+    decoy_sequences = [[chain.id, ('').join([three_to_one(res.resname) for res in chain])]
+                      for chain in pdb_decoy.get_chains()]
+    decoy_sequences.sort()
+    
+    assert(len(ref_sequences) == len(decoy_sequences))
+    
+    for ind in range(len(ref_sequences)):
+        pair = pairwise2.align.globalxx(ref_sequences[ind][1], decoy_sequences[ind][1])[0]
+        ref_sequences[ind][1]   = pair.seqA
+        decoy_sequences[ind][1] = pair.seqB
+        
+    ref_sequences = [[seq[0],[i+1 for i,res in enumerate(seq[1]) if res != '-']] for seq in ref_sequences]
+    decoy_sequences = [[seq[0],[i+1 for i,res in enumerate(seq[1]) if res != '-']] for seq in decoy_sequences]
+    
+    def assign(pdb, pdb_sequences):
+        ''' Renumbers the pdb using aligned sequences. 
 
-    return pdb
+        Args:
+            pdb_ref:   Bio.PDB object
+            pdb_decoy: Bio.PDB object
+            
+
+        Returns: Bio.PDB objects with renumbered residues
+
+        '''
+        
+        
+        for chain in pdb.get_chains():
+            for seq in pdb_sequences:
+                if chain.id == seq[0]:
+                    for ind, res in enumerate(chain):
+                        res.id = ('X', seq[1][ind], res.id[2])
+        for chain in pdb.get_chains():
+            for res in chain:
+                res.id = (' ', res.id[1], ' ')
+        return pdb
+
+    pdb_ref = assign(pdb_ref, ref_sequences)
+    pdb_decoy = assign(pdb_decoy, decoy_sequences)
+
+    return pdb_ref, pdb_decoy
 
 # decoy = PDBParser(QUIET=True).get_structure('MHC', y.model_path)
 #
@@ -278,10 +317,9 @@ def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False, f
 
     # merge chains of the decoy
     decoy = merge_chains(decoy)
-    decoy = renumber(decoy)
     # merge chains of the reference
     ref = merge_chains(ref)
-    ref = renumber(ref)
+    ref, decoy = renumber(ref, decoy)
 
     # Write pdbs
     decoy_path = '%s/%s_decoy.pdb' % (output_dir, target_id)
@@ -306,11 +344,11 @@ def get_Gdomain_lzone(ref_pdb, output_dir, MHC_class):
 
     Raises:
         Exception: In case there are unexpected chain names it raises an exception
-        
+
     Returns:
         outfile (str): Path to the output file
     """
-    
+
     ref_name = ref_pdb.split('/')[-1].split('.')[0]
     outfile = '%s/%s.lzone' %(output_dir, ref_name)
     if MHC_class == 'I':
@@ -332,7 +370,7 @@ def get_Gdomain_lzone(ref_pdb, output_dir, MHC_class):
                 else:
                     raise Exception('Unrecognized chain ID, different from M or P. Please check your file')
             #output.write('fit\n')
-    
+
     elif MHC_class == 'II':
         #Chain M from 4 to 72; Chain N from 10 to 80
         with open(outfile, 'w') as output:
@@ -356,12 +394,9 @@ def get_Gdomain_lzone(ref_pdb, output_dir, MHC_class):
 
 def remove_C_like_domain(pdb):
     '''Removes the C-like domain from a MHC struture and keeps only the G domain
-
     Args:
         pdb: (Bio.PDB): Bio.PDB object with chains names M (N for MHCII) and P
-
     Returns: (Bio.PDB): Bio.PDB object without the C-like domain
-
     '''
 
     # If MHCII, remove the C-like domain from the M-chain (res 80 and higher) and the N-chain (res 90 and higher)
@@ -381,13 +416,10 @@ def remove_C_like_domain(pdb):
     if 'N' not in [chain.id for chain in pdb.get_chains()]:
         for chain in pdb.get_chains():
             if chain.id == 'M':
-                for res in chain:
-                    if res.id[1] > 180:
-                        chain.detach_child(res.id)
-
+                need_to_be_removed = [res.id for res in chain if res.id[1] > 180]
+                _ = [chain.detach_child(x) for x in need_to_be_removed]
     return pdb
 
 #ValueError: Invalid column name lzone. Possible names are
 #['rowID', 'serial', 'name', 'altLoc', 'resName', 'chainID', 'resSeq',
-# 'iCode', 'x', 'y', 'z', 'occ', 'temp', 'element', 'model']  
-
+# 'iCode', 'x', 'y', 'z', 'occ', 'temp', 'element', 'model']

@@ -3,22 +3,9 @@
 name: CI
 
 # Controls when the action will run.
-on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches:
-      - master
-      - PANDORA_remaster
-      - cleanup_install
-  pull_request:
-    branches:
-      - master
-      - PANDORA_remaster
+on: [push, pull_request, workflow_dispatch]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# A workflow  run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
   build:
@@ -42,22 +29,15 @@ jobs:
           conda install -c bioconda muscle
           conda install -c salilab modeller
           python -m pip install --upgrade pip
-          pip install .[test]
-
-      # /opt/hostedtoolcache/Python/3.8.8/x64/lib/python3.8/site-packages
-#      - name: Run a multi-line script
-#        run: |
-#          echo test,
-#          pip show modeller
-#
-#          cd /opt/hostedtoolcache/Python/3.8.8/x64
-#          ls -la
-#          echo 1
-#          cd /opt/hostedtoolcache/Python/3.8.8/x64/bin
-#          ls -la
-#          echo 2
-#          cd /opt/hostedtoolcache/Python/3.8.8/x64/lib
-#          ls -la
+          pip install -e .[test]
 
       - name: Test with pytest
-        run: pytest test/
+        run: |
+          pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
+
+      - name: Coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coverage.xml
+        run: |
+          coveralls --service=github

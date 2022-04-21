@@ -61,7 +61,7 @@ def check_presence(target, database, seq_based_templ_selection = False):
         seq_based_templ_selection: bool, select the template based on the chain sequences.
 
     Returns: bool/Template object. If the target is already in the db, return the Template, otherwise return False
-    
+
     '''
     putative_templates = []
     target_in_db = False
@@ -211,9 +211,9 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     return predicted_anchors
 
 
-def predict_anchors_netMHCpan(peptide, allele_type, 
+def predict_anchors_netMHCpan(peptide, allele_type,
                               verbose=True, rm_output=True):
-    '''Uses netMHCIIpan to predict the binding core of a peptide and infer the 
+    '''Uses netMHCIIpan to predict the binding core of a peptide and infer the
     anchor positions from that.
 
     Args:
@@ -265,7 +265,7 @@ def predict_anchors_netMHCpan(peptide, allele_type,
                     pred[ln[1]].append((ln[3], float(ln[12])))
                 except KeyError:
                     pred[ln[1]] = [(ln[3], float(ln[12]))]
-                    
+
     # Sort each allele result per Rank_EL
     for allele in pred:
         pred[allele] = list(sorted(pred[allele], key=lambda x:x[1]))
@@ -309,7 +309,7 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     for x in reversed(to_remove):
        pept1 = pept1[0:x:]+pept1[x+1::]
        pept2 = pept2[0:x:]+pept2[x+1::]
-    
+
     if verbose:
         print('Query peptide aligned to the core:')
         print(pept1)
@@ -318,7 +318,7 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     # Find the anchors by finding the first non dash from the left and from the right
     # Define chanonical ancors as starting list
     predicted_anchors = [2,len(peptide)]
-    
+
     # Find the first anchor
     p1 = 0
     p2 = 0
@@ -350,7 +350,7 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     if rm_output:
         os.system('rm %s' %infile)
         os.system('rm %s' %outfile)
-    
+
     return predicted_anchors
 
 
@@ -623,7 +623,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
                     else:
                         anch_term = anch[-1]
                     #Write first and last anchors, to keep only the flanking regions flexible
-                    myloopscript.write(line % (1, anch_1, anch_term, len(target.peptide))) 
+                    myloopscript.write(line % (1, anch_1, anch_term, len(target.peptide)))
                     #for i in range(len(anch)-1): # Write all the inbetween acnhors if they are there
                     #    myloopscript.write(line % (anch[i] + 2, anch[i+1]))
                     #myloopscript.write(line % (anch[-1] + 2, len(target.peptide))) # Write the last anchor
@@ -662,24 +662,27 @@ def write_ini_script(target, template, alignment_file, output_dir):
 def write_modeller_script(target, template, alignment_file, output_dir, n_homology_models=1, n_loop_models = 20,
                           loop_refinement='slow', n_jobs=None, stdev=0.1, helix = False, sheet = False):
     ''' Write script that refines the loops of the peptide
+    
     Args:
-        target: Target object
-        template: Template object
-        alignment_file: (str): path to alignment file
-        output_dir: (str): path to output directory
-        n_homology_models: (int): number of homology models that are generated per run.
-        n_loop_models:  (int): number of loop models modeller generates per homology model
-        n_jobs: (int): number of parallel jobs. Is recommended to use as many jobs as the number of models: less will
-                        result in a slower run, more will not add any benefit but might occupy cores unnecessarily.
-        loop_refinement: (str): Level of loop refinement: very_fast,fast,slow,very_slow,slow_large. default = slow
-        stdev: (flt): standard deviation of modelling restraints. Higher = more flexible restraints.
-        helix: (lst): List of the alpha helix start and end-positions as integers. I.e. [3,8] for a helix between
-                        peptide residue 3 and 8.
-        sheet: (lst): List containing: start position of B-sheet 1, start position of B-sheet 2 and the length of the
-                        B-sheet in h-bonds. For example: ["O:2:P","N:54:M",2] for a parallel B-sheet; The sheet starts
-                        at the Oxigen atom of the 2nd residue of chain P and at the Nitrogen of the 54th residue of
-                        chain M and has a length of 2 H-bonds. Or; ["N:6:P", "O:13:P", -3], with -3 denoting an
-                        anti-parallel B-sheet with a length of 3 H-bonds.
+        target (PANDORA.PMHC.PMHC.Target): Target object
+        template (PANDORA.PMHC.PMHC.Template): Template object
+        alignment_file (str): path to alignment file
+        output_dir (str): path to output directory
+        n_homology_models (int): number of homology models that are generated per run.
+        n_loop_models (int): number of loop models modeller generates per homology model
+        n_jobs (int): number of parallel jobs. Is recommended to use at most as many jobs as the number of models:
+            ore will not add any benefit but might occupy cores unnecessarily.
+        loop_refinement (str): Level of loop refinement: very_fast,fast,slow,very_slow,slow_large.
+            Defaults to slow
+        stdev (float): standard deviation of modelling restraints. Higher = more flexible restraints.
+        helix (list): List of the alpha helix start and end-positions as integers. I.e. [3,8] for a helix between
+            peptide residue 3 and 8.
+        sheet (list): List containing: start position of B-sheet 1, start position of B-sheet 2 and the length of the
+            B-sheet in h-bonds. For example: ["O:2:P","N:54:M",2] for a parallel B-sheet; The sheet starts
+            at the Oxigen atom of the 2nd residue of chain P and at the Nitrogen of the 54th residue of
+            chain M and has a length of 2 H-bonds. Or; ["N:6:P", "O:13:P", -3], with -3 denoting an
+            anti-parallel B-sheet with a length of 3 H-bonds.
+
     '''
 
     anch = target.anchors
@@ -716,7 +719,7 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
                     else:
                         anch_term = anch[-1]
                     #Write first and last anchors, to keep only the flanking regions flexible
-                    myloopscript.write(line % (1, anch_1, anch_term, len(target.peptide))) 
+                    myloopscript.write(line % (1, anch_1, anch_term, len(target.peptide)))
                     #for i in range(len(anch)-1): # Write all the inbetween acnhors if they are there
                     #    myloopscript.write(line % (anch[i] + 2, anch[i+1]))
                     #myloopscript.write(line % (anch[-1] + 2, len(target.peptide))) # Write the last anchor
@@ -815,7 +818,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
 
     # Sort output by molpdf
     logf.sort(key=lambda tup:float(tup[1]))
-    
+
     # Write to output file
     f = open(output_dir + '/molpdf_DOPE.tsv', 'w')
     for i in logf:
