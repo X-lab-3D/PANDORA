@@ -3,6 +3,7 @@ import subprocess
 import urllib.request
 import urllib.parse
 from copy import deepcopy
+import numpy
 from Bio.PDB import PDBParser
 from Bio.PDB import PDBIO
 from Bio.PDB import parse_pdb_header
@@ -40,8 +41,10 @@ def fresh_parse_dirs():
 
 
 
-def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_files = True, del_kabat_files = True):
-    ''' Downloads the complete structural dataset
+def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data,
+                                    del_inn_files = True, del_kabat_files = True):
+    ''' download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_files = True, del_kabat_files = True)
+    Downloads the complete structural dataset
 
     Args:
         data_dir: (string) path of data directory
@@ -73,7 +76,8 @@ def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data, del_inn_file
 
 
 def download_ids_imgt(ReceptorType, data_dir = PANDORA.PANDORA_data, out_tsv = False):
-    ''' Querys IMGT with the ReceptorType for PDBs.
+    ''' download_ids_imgt(ReceptorType, data_dir = PANDORA.PANDORA_data, out_tsv = False)
+    Queries IMGT with the ReceptorType for PDBs.
 
     Args:
         ReceptorType: (string) Receptor query for IMGT: 'MH1' or 'MH2'
@@ -361,7 +365,7 @@ def change_modified_res(pdb_file, change_SEP = True, change_F2F = True, change_C
         for line in infile:
             l = [x for x in line.split(' ') if x != '']
             if line.startswith('ATOM') or line.startswith('HETATM'):
-                
+
                 # Change SEO into SER
                 if ('SEP' in l[3] or 'SEP' in l[2]) and l[2] not in ['P', 'O1P', 'O2P', 'O3P', 'HA', 'HB2','HB3']:
                     if change_SEP:
@@ -374,7 +378,7 @@ def change_modified_res(pdb_file, change_SEP = True, change_F2F = True, change_C
                         pass
                     else:
                         f.write(line)
-                        
+
                 # Change CIR into ARG
                 elif ('CIR' in l[3] or 'CIR' in l[2]) and l[2] not in ['F1', 'F2']:
                     if change_CIR:
@@ -396,7 +400,7 @@ def change_modified_res(pdb_file, change_SEP = True, change_F2F = True, change_C
                         pass
                     else:
                         f.write(line)
-                        
+
                 # Change F2F into PHE
                 elif ('F2F' in l[3] or 'F2F' in l[2]) and l[2] not in ['F1', 'F2']:
                     if change_F2F:
@@ -409,7 +413,7 @@ def change_modified_res(pdb_file, change_SEP = True, change_F2F = True, change_C
                         pass
                     else:
                         f.write(line)
-                        
+
                 # Change CSO into CYS
                 elif ('CSO' in l[3] or 'CSO' in l[2]) and l[2] not in ['OD']:
                     if change_CSO:
@@ -422,7 +426,7 @@ def change_modified_res(pdb_file, change_SEP = True, change_F2F = True, change_C
                         pass
                     else:
                         f.write(line)
-                
+
                 # Keep all the other lines unchanged
                 else:
                     f.write(line)
@@ -709,7 +713,7 @@ def find_chains_MHCI(pdb, pept_chain, all_MHC_chains):
 
     Args:
         pdb (Bio.PDB.PDBParser): Bio.PDB object of a peptide-MHCI structure
-        pept_chain (str): chain ID of the peptide 
+        pept_chain (str): chain ID of the peptide
         all_MHC_chains (list): list of all MHC alpha chains in the pdb file
 
     Returns: list of chains
@@ -1300,7 +1304,8 @@ def parse_pMHCI_pdb(pdb_id,
                      indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                      outdir = PANDORA.PANDORA_data + '/PDBs/pMHCI',
                      bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI'):
-    ''' Clean all MHCI pdb files that have been downloaded from IMGT
+    ''' parse_pMHCI_pdb(pdb_id, indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles', outdir=PANDORA.PANDORA_data + '/PDBs/pMHCI',bad_dir=PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI')
+    Clean all MHCI pdb files that have been downloaded from IMGT
 
     Args:
         pdb_id: (string) id of pdb file
@@ -1436,7 +1441,8 @@ def parse_pMHCII_pdb(pdb_id,
                       indir=PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                       outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII',
                       bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII'):
-    ''' Clean all MHCII pdb files that have been downloaded from IMGT
+    ''' parse_pMHCII_pdb(pdb_id, indir=PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles', outdir=PANDORA.PANDORA_data + '/PDBs/pMHCII', bad_dir=PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII')
+    Clean all MHCII pdb files that have been downloaded from IMGT
 
     Args:
         pdb_id: (string) id of pdb file
@@ -1604,8 +1610,8 @@ def get_sequence_for_fasta(template, MHC_class, chain):
 def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/', 
                              HLA_out = 'Human_MHC_data.fasta',
                              nonHLA_out = 'NonHuman_MHC_data.fasta'):
-    """
-    Downloads and parse HLA and other MHC sequences to compile reference fastas 
+    """generate_mhcseq_database(data_dir=PANDORA.PANDORA_data+ '/csv_pkl_files/', HLA_out='Human_MHC_data.fasta', nonHLA_out='NonHuman_MHC_data.fasta')
+    Downloads and parse HLA and other MHC sequences to compile reference fastas
 
     Args:
         data_dir (str, optional): Data directory. Defaults to PANDORA.PANDORA_data/csv_pkl_files/.
@@ -1616,10 +1622,10 @@ def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/',
         None.
 
     """
-    
+
     #HLAs: https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta
     #MHCs: https://raw.githubusercontent.com/ANHIG/IPDMHC/Latest/MHC_prot.fasta
-    
+
 
     # Changing working directory
     #start_dir = os.getcwd()
@@ -1634,8 +1640,8 @@ def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/',
     # Change back working directory
     #os.chdir(start_dir)
     return ref_MHCI_sequences
-    
-    
+  
+  
 def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
     """
     Downloads and parse HLA sequences
@@ -1655,7 +1661,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
         os.system('mv hla_prot.fasta OLD_hla_prot.fasta')
     except:
         pass
-    
+
     # Download Human data
     #os.system('wget https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta')
     url = 'https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta'
@@ -1666,7 +1672,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
     
     HLAs = {}
     to_write = {}
-    
+
     #Parse the fasta files
     for seq_record in SeqIO.parse('hla_prot.fasta', "fasta"):
         allele_fullname = seq_record.description.split(' ')[1]
@@ -1684,8 +1690,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
                 try:
                     HLAs[allele_significant].append(seq_record)
                 except KeyError:
-                    HLAs[allele_significant] = [seq_record]
-                    
+                    HLAs[allele_significant] = [seq_record]        
         elif allele_fullname.split('*')[0][:2] in ['DP', 'DQ', 'DR']:
             if allele_fullname.endswith('N') or allele_fullname.endswith('Q'):
                 pass
@@ -1701,7 +1706,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
             #print(putatives, allele)
             #No further filtering criteria are used and the first sequence is taken as reference.
             to_write['HLA-'+allele] = str(putatives[0].seq)
-    
+
     #Write output fasta file
     with open(HLA_out, 'w') as outfile:
         for allele in to_write:
@@ -1712,7 +1717,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
                     outfile.write('\n')
                 elif i == len(to_write[allele])-1:
                     outfile.write('\n')
-    
+
     # Remove pre-existing raw file
     try:
         os.system('rm OLD_hla_prot.fasta')
@@ -1740,7 +1745,7 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
         os.system('mv MHC_prot.fasta OLD_MHC_prot.fasta')
     except:
         pass
-    
+
     # Download other animlas data
     #os.system('wget https://raw.githubusercontent.com/ANHIG/IPDMHC/Latest/MHC_prot.fasta')
     url = 'https://raw.githubusercontent.com/ANHIG/IPDMHC/Latest/MHC_prot.fasta'
@@ -1773,7 +1778,7 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
                     MHCs[allele_fullname].append(seq_record)
                 except KeyError:
                     MHCs[allele_fullname] = [seq_record]
-    
+
     #Sort MHC sequences by length. Keep the longest
     for allele in MHCs:
         #If there is only one sequence for the allele
@@ -1785,8 +1790,8 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
             #print(putatives, allele)
             #No further filtering criteria are used and the first sequence is taken as reference.
             to_write[allele] = str(putatives[0].seq)
-    
-    #Write output fasta file    
+
+    #Write output fasta file
     with open(nonHLA_out, 'w') as outfile:
         for allele in to_write:
             outfile.write('>'+allele+'\n')
@@ -1797,11 +1802,11 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
                 elif i == len(to_write[allele])-1:
                     outfile.write('\n')
             #outfile.write(to_write[allele]+'\n')
-                
+
     # Remove pre-existing raw file
     try:
         os.system('rm OLD_MHC_prot.fasta')
     except:
         pass
-    
+
     return to_write
