@@ -20,10 +20,10 @@ setup(
     long_description=readme + '\n\n',
     long_description_content_type='text/markdown',
     author='Farzaneh Meimandi Parizi, Dario Marzella, Li Xue',
-    url='https://github.com/DarioMarzella/pMHC_Modelling/tree/master',
+    url='https://github.com/X-lab-3D/PANDORA/tree/master',
     project_urls={
-        'Source Code': 'https://github.com/DarioMarzella/pMHC_Modelling/tree/master',
-        'Issue tracker': 'https://github.com/DarioMarzella/pMHC_Modelling/issues'
+        'Source Code': 'https://github.com/X-lab-3D/PANDORA/tree/master',
+        'Issue tracker': 'https://github.com/X-lab-3D/PANDORA/issues'
     },
     packages=find_packages(),
     include_package_data=True,
@@ -43,13 +43,13 @@ setup(
        'Biopython',
        'pdb_tools',
        'pdb2sql',
-       'dill',
-       'matplotlib'
+       'matplotlib',
+       'dill'
        ],
 
     extras_require={
         'doc': ['recommonmark', 'sphinx', 'sphinx_rtd_theme'],
-        'test': ['pytest', 'pytest-runner',
+        'test': ['pytest', 'pytest-runner', 'pytest-cov',
                  'coverage', 'coveralls', 'pycodestyle']
     }
 )
