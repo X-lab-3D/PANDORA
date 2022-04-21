@@ -13,8 +13,8 @@ from PANDORA.PMHC import Model
 def test_PMHC_target():
     # Create target object
     target = PMHC.Target('1A1O',
-                         ['HLA-B*5301', 'HLA-B*5301'],
-                         'KPIVQYDNF',
+                         allele_type=['HLA-B*5301', 'HLA-B*5301'],
+                         peptide='KPIVQYDNF',
                          M_chain_seq = 'GSHSMRYFYTAMSRPGRGEPRFIAVGYVDDTQFVRFDSDAASPRTEPRPPWIEQEGPEYWDRNTQIFKTNTQTYRE'
                                        'NLRIALRYYNQSEAGSHIIQRMYGCDLGPDGRLLRGHDQSAYDGKDYIALNEDLSSWTAADTAAQITQRKWEAARV'
                                        'AEQLRAYLEGLCVEWLRRYLENGKETLQRADPPKTHVTHHPVSDHEATLRCWALGFYPAEITLTWQRDGEDQTQDT'
@@ -22,9 +22,12 @@ def test_PMHC_target():
                          anchors = [2, 9])
     # test if the inital model is empty, MHC class, the peptide chain, the allele and anchors
     pass_test = False
-    if target.initial_model == False and target.MHC_class == 'I' and target.peptide == 'KPIVQYDNF':
-        if target.peptide == 'KPIVQYDNF' and target.anchors == [2, 9] :
-            pass_test = True
+    if (target.initial_model == False and 
+        target.MHC_class == 'I' and 
+        target.peptide == 'KPIVQYDNF' and
+        target.anchors == [2, 9]):
+        
+        pass_test = True
 
     assert pass_test
 
@@ -32,13 +35,15 @@ def test_PMHC_target():
 def test_PMHC_template():
     # Create template object
     template = PMHC.Template('1A1O',
-                         ['HLA-B*5301', 'HLA-B*5301'],
+                         allele_type=['HLA-B*5301', 'HLA-B*5301'],
                          pdb_path=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
     # check calculated anchors, M_chain, peptide, allele and pdb chains
     pass_test = False
-    if template.anchors == [2,9] and template.M_chain_seq != '' and template.peptide == 'KPIVQYDNF':
-        if template.allele_type == ['HLA-B*5301', 'HLA-B*5301']:
-            if [i.id for i in template.pdb.get_chains()] == ['M', 'P']:
+    if (template.anchors == [2,9] and 
+        template.M_chain_seq != '' and 
+        template.peptide == 'KPIVQYDNF' and
+        template.allele_type == ['HLA-B*53:01', 'HLA-B*53:01'] and
+        [i.id for i in template.pdb.get_chains()] == ['M', 'P']):
                 pass_test = True
 
     assert pass_test
