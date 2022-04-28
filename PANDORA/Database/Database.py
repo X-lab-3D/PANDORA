@@ -25,21 +25,21 @@ class Database:
         self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', data_dir = data_dir, out_tsv='all_MHII_IDs.tsv')
 
 
-    def __clean_MHCI_file(self, pdb_id, data_dir, remove_biopython_objects):
+    def __clean_MHCI_file(self, pdb_id, data_dir, remove_biopython_object):
         """ Clean all MHCI structures"""
         return Database_functions.parse_pMHCI_pdb(pdb_id,
                                                    indir = data_dir + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                                                    outdir = data_dir + '/PDBs/pMHCI',
                                                    bad_dir = data_dir + '/PDBs/Bad/pMHCI',
-                                                   remove_biopython_object=remove_biopython_objects)
+                                                   remove_biopython_object=remove_biopython_object)
 
-    def __clean_MHCII_file(self, pdb_id, data_dir, remove_biopython_objects):
+    def __clean_MHCII_file(self, pdb_id, data_dir, remove_biopython_object):
         """ Clean all MHCII structures. Returns a list of bad PDBs"""
         return Database_functions.parse_pMHCII_pdb(pdb_id,
                                                    indir = data_dir + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                                                    outdir = data_dir + '/PDBs/pMHCII',
                                                    bad_dir = data_dir + '/PDBs/Bad/pMHCII',
-                                                   remove_biopython_object=remove_biopython_objects)
+                                                   remove_biopython_object=remove_biopython_object)
 
     def update_ref_sequences(self):
         """Downloads and parse HLA and other MHC sequences to compile reference fastas.
@@ -76,11 +76,12 @@ class Database:
             for id in self.__IDs_list_MHCI:
                 try:
                     templ = self.__clean_MHCI_file(pdb_id = id, data_dir=data_dir,
-                                                   remove_biopython_objects=remove_biopython_objects)
+                                                   remove_biopython_object=remove_biopython_objects)
                     if templ != None:
                         self.MHCI_data[id] = templ
-                except:
-                    pass
+                except Exception as e:
+                    print('something went wrong parsing %s:' %id)
+                    print(e)
 
         # Construct the MHCII database
         if MHCII:
@@ -88,11 +89,12 @@ class Database:
             for id in self.__IDs_list_MHCII:
                 try:
                     templ = self.__clean_MHCII_file(pdb_id = id, data_dir=data_dir,
-                                                    remove_biopython_objects=remove_biopython_objects)
+                                                    remove_biopython_object=remove_biopython_objects)
                     if templ != None:
                         self.MHCII_data[id] = templ
-                except:
+                except Exception as e:
                     print('something went wrong parsing %s' %id)
+                    print(e)
 
         databases_data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/'
         #Construct blast database for blast-based sequence-based template selection
@@ -152,7 +154,6 @@ class Database:
         Writes structure db into a fasta file (to be later used to build a blast database)
 
         Args:
-            MHC_class (str): I or II.
             outfile (str): output file path.
 
         Returns:
