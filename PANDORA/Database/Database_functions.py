@@ -1310,7 +1310,8 @@ def parse_pMHCI_pdb(pdb_id,
                      indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                      outdir = PANDORA.PANDORA_data + '/PDBs/pMHCI',
                      bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI',
-                     custom_map={"MSE":"M"}):
+                     custom_map={"MSE":"M"},
+                     remove_biopython_object=True):
     ''' Clean one MHCI pdb file downloaded from IMGT
 
     Args:
@@ -1435,8 +1436,10 @@ def parse_pMHCI_pdb(pdb_id,
         resolution = get_resolution(pdb_file)
 
         # Create MHC_structure object
-        templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'], peptide=seqs['P'],
-                              pdb=pdb, pdb_path=pdb_file, resolution=resolution, sheet=sheet, helix=helix)
+        templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'],
+                              peptide=seqs['P'], pdb=pdb, pdb_path=pdb_file, 
+                              resolution=resolution, sheet=sheet, helix=helix,
+                              remove_biopython_object=remove_biopython_object)
 
         # clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
         # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
@@ -1456,7 +1459,8 @@ def parse_pMHCII_pdb(pdb_id,
                       indir=PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                       outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII',
                       bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII',
-                      custom_map={"MSE":"M"}):
+                      custom_map={"MSE":"M"},
+                      remove_biopython_object=True):
     ''' Clean one MHCII pdb file downloaded from IMGT
 
     Args:
@@ -1584,9 +1588,12 @@ def parse_pMHCII_pdb(pdb_id,
             resolution = get_resolution(pdb_file)
 
             # Create MHC_structure object
-            templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele, M_chain_seq=seqs['M'], N_chain_seq=seqs['N'],
-                                  peptide=seqs['P'], MHC_class='II', pdb=pdb, pdb_path=pdb_file, resolution=resolution,
-                                  helix=helix, sheet=sheet)
+            templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele, 
+                                  M_chain_seq=seqs['M'], N_chain_seq=seqs['N'],
+                                  peptide=seqs['P'], MHC_class='II', pdb=pdb, 
+                                  pdb_path=pdb_file, resolution=resolution,
+                                  helix=helix, sheet=sheet,
+                                  remove_biopython_object=remove_biopython_object)
 
             # clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.

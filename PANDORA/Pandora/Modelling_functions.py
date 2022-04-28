@@ -456,18 +456,17 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
         #Blast M chain sequence
         try:
             M_chain_result = blast_mhc_seq(M_chain, chain='M', blastdb=blastdb)
+            #FIll in putative_templates M identity score
+            for result in M_chain_result:
+                ID = result[0][:4]
+                score = result[1]
+                putative_templates[ID] = {'M_score': score}
         except Exception as e:
             print(e)
             print('WARNING: something went wrong with blast-based template selection.')
             print('Is blastp properly installed?')
             #If blast didn't work properly, consider this sequence missing
             no_seq_chains.append('M_score')
-        
-        #FIll in putative_templates M identity score
-        for result in M_chain_result:
-            ID = result[0][:4]
-            score = result[1]
-            putative_templates[ID] = {'M_score': score}
     
     else:
         no_seq_chains.append('M_score')
@@ -480,6 +479,17 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
             #Blast N chain sequence
             try:
                 N_chain_result = blast_mhc_seq(N_chain, chain='N', blastdb=blastdb)
+            
+                #FIll in putative_templates N  and average identity score
+                for result in N_chain_result:
+                    ID = result[0][:4]
+                    score = result[1]
+                    try:
+                        putative_templates[ID]['N_score']= score
+                        #Get average score
+                    except KeyError:
+                        putative_templates[ID] = {'N_score': score}
+                        
             except Exception as e:
                 print(e)
                 print('WARNING: something went wrong with blast-based template selection.')
@@ -487,15 +497,6 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
                 #If blast didn't work properly, consider this sequence missing
                 no_seq_chains.append('N_score')
             
-            #FIll in putative_templates N  and average identity score
-            for result in N_chain_result:
-                ID = result[0][:4]
-                score = result[1]
-                try:
-                    putative_templates[ID]['N_score']= score
-                    #Get average score
-                except KeyError:
-                    putative_templates[ID] = {'N_score': score}
                 
         else: 
             no_seq_chains.append('N_score')
@@ -856,7 +857,9 @@ def blast_mhc_seq(seq, chain='M', blastdb=PANDORA.PANDORA_data + '/csv_pkl_files
         blast_result = blast_result.decode()
     except subprocess.CalledProcessError as e:
         raise Exception('An error occurred while blasting %s chain seq: %s' %(chain, e.output))
-        
+    
+    if not blast_result:
+        raise Exception('An error occurred while blasting %s chain seq: blast output empty' %(chain))
 
     blast_result = blast_result.split('\n')
     blast_result = [x.replace(';',' ').split('\t') for x in blast_result]

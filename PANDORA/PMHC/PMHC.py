@@ -54,7 +54,10 @@ class PMHC(ABC):
 
 class Template(PMHC):
 
-    def __init__(self, id, peptide='',  allele_type=[], MHC_class='I', M_chain_seq='', N_chain_seq='', anchors=[], helix=False, sheet=False, pdb_path=False, pdb=False, resolution=None):
+    def __init__(self, id, peptide='',  allele_type=[], MHC_class='I', 
+                 M_chain_seq='', N_chain_seq='', anchors=[], 
+                 helix=False, sheet=False, pdb_path=False, pdb=False, 
+                 resolution=None, remove_biopython_object=False):
         ''' Template structure class. This class holds all information of a template structure that is used for
             homology modelling. This class needs a id, allele and the path to a pdb file to work. (sequence info of
             the chains and peptide can be fetched from the pdb)
@@ -72,7 +75,10 @@ class Template(PMHC):
             pdb: (Bio.PDB) Biopython PBD object
             resolution: (float) Structure resolution in Angstrom
         '''
-        super().__init__(id, peptide, allele_type, MHC_class, M_chain_seq, N_chain_seq, anchors, helix, sheet)
+        super().__init__(id, peptide=peptide, allele_type=allele_type, 
+                         MHC_class=MHC_class, M_chain_seq=M_chain_seq, 
+                         N_chain_seq=N_chain_seq, anchors=anchors, 
+                         helix=helix, sheet=sheet)
         self.pdb_path = pdb_path
         self.pdb = pdb
         self.contacts = False
@@ -93,7 +99,8 @@ class Template(PMHC):
             self.calc_anchors()
 
         #Remove self.pdb as it's not useful anymore and takes a lot of memory
-        self.pdb = None
+        if remove_biopython_object:
+            self.pdb = None
 
     def parse_pdb(self, custom_map={"MSE":"M"}):
         '''Loads pdb from path, updates self.pdb field and self.chain_seq/self.peptide if they were empty
@@ -482,13 +489,16 @@ class Target(PMHC):
         if self.M_chain_seq !='' and not M_allele_flag:
             print('No MHC alpha chain allele was provided. Trying to retrieve it from reference sequences...')
             #Blast against reference database
-            blast_results = Modelling_functions.blast_mhc_seq(self.M_chain_seq, 
-                                                              chain='M', 
-                                                              blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db')
-            #Take only the allele names with the highest id score
-            top_id = blast_results[0][1]
-            self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
-                
+            try:
+                blast_results = Modelling_functions.blast_mhc_seq(self.M_chain_seq, 
+                                                                  chain='M', 
+                                                                  blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db')
+                #Take only the allele names with the highest id score
+                top_id = blast_results[0][1]
+                self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
+            except:
+                print('WARNING: something went wrong when trying to retrieve chain M allele')
+                print('with blast. Is blastp properly installed as working as "/bin/bash blastp"?')
             
         if self.MHC_class == 'II' and self.N_chain_seq =='' and N_allele_flag:
             print('No MHC sequence was provided. Trying to retrieve it from reference sequences...')
@@ -516,11 +526,15 @@ class Target(PMHC):
         if self.MHC_class == 'II' and self.N_chain_seq !='' and not N_allele_flag:
             print('No MHC alpha chain allele was provided. Trying to retrieve it from reference sequences...')
             #Blast against reference database
-            blast_results = Modelling_functions.blast_mhc_seq(self.N_chain_seq, 
-                                                              chain='N', 
-                                                              blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db')
-            #Take only the allele names with the highest id score
-            top_id = blast_results[0][1]
-            self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
+            try:
+                blast_results = Modelling_functions.blast_mhc_seq(self.N_chain_seq, 
+                                                                  chain='N', 
+                                                                  blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db')
+                #Take only the allele names with the highest id score
+                top_id = blast_results[0][1]
+                self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
+            except:
+                print('WARNING: something went wrong when trying to retrieve chain M allele')
+                print('with blast. Is blastp properly installed as working as "/bin/bash blastp"?')
             
             
