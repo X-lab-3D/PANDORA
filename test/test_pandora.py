@@ -103,7 +103,8 @@ def test_clean_MHCI_structure():
     x = Database_functions.parse_pMHCI_pdb('1A1O',
                        indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                        outdir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI',
-                       bad_dir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/Bad')
+                       bad_dir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/Bad',
+                       remove_biopython_object=False)
 
     assert x.peptide == 'KPIVQYDNF' and [i.id for i in x.pdb.get_chains()] == ['M', 'P']
 
@@ -112,7 +113,8 @@ def test_clean_MHCII_structure():
     x = Database_functions.parse_pMHCII_pdb('2NNA',
                        indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                        outdir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCII',
-                       bad_dir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCII/Bad')
+                       bad_dir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCII/Bad',
+                       remove_biopython_object=False)
 
 
     assert x.peptide == 'SGEGSFQPSQENP' and [i.id for i in x.pdb.get_chains()] == ['M', 'N', 'P']
