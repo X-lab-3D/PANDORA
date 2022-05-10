@@ -19,6 +19,7 @@
 - [Output](#output)
 - [License](./LICENSE)
 - [Issues](#issues)
+- [Publication](#publication)
 
 ## Overview
 
@@ -334,3 +335,10 @@ PANDORA_files
 ## Issues
 
 If you have questions or find a bug, please report the issue in the [Github issue channel](https://github.com/X-lab-3D/PANDORA/issues).
+
+## Publication
+If you use PANDORA, please cite the following paper in your work:
+
+Marzella DF, Parizi FM, Tilborg Dv, Renaud N, Sybrandi D, Buzatu R, Rademaker DT, ‘t Hoen PAC and Xue LC (2022) PANDORA: A Fast, Anchor-Restrained Modelling Protocol for Peptide: MHC Complexes. Front. Immunol. 13:878762. doi: 10.3389/fimmu.2022.878762
+
+https://www.frontiersin.org/articles/10.3389/fimmu.2022.878762/full
