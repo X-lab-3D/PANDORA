@@ -132,6 +132,9 @@ python netMHCpan_install.py
 
 ## Tutorial
 
+Are you planning to run multiple pMHC models with similar settings?
+Then hop directly to example #5 and try our Wrapper module!
+
 #### Example 1 : Generating a peptide:MHC complex given the peptide sequence
 PANDORA requires at least these information to generate models:
 - Peptide sequence
