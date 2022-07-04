@@ -61,7 +61,7 @@ class PMHC(ABC):
 class Template(PMHC):
 
     def __init__(self, id, peptide='',  allele_type=[], MHC_class='I',
-                 M_chain_seq='', N_chain_seq='', anchors=[],
+                 M_chain_seq='', N_chain_seq='', anchors=[], G_domain_span=False,
                  helix=False, sheet=False, pdb_path=False, pdb=False,
                  resolution=None, remove_biopython_object=False):
         ''' Template structure class. This class holds all information of a template structure that is used for
@@ -77,6 +77,7 @@ class Template(PMHC):
             N_chain_seq: (string) N chain sequence for the Beta chain
             anchors: (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
                         during the modelling. MHC class I typically has 2 anchors, while MHC class II typically has 4.
+            G_domain_span (list): span of the G domain(s) over the sequence. The format should be [(1, 90),(1, 86)]
             pdb_path: (string) path to pdb file
             pdb: (Bio.PDB) Biopython PBD object
             resolution: (float) Structure resolution in Angstrom
@@ -89,6 +90,12 @@ class Template(PMHC):
         self.pdb = pdb
         self.contacts = False
         self.resolution = resolution
+
+        if not G_domain_span:
+            if self.MHC_class == 'I':
+                G_domain_span=[(1,182)]
+            elif self.MHC_class=='II':
+                G_domain_span=[(1,81),(1,90)]
 
         if type(self.allele_type) == str:
             self.allele_type = [self.allele_type]

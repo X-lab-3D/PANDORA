@@ -10,72 +10,107 @@ import subprocess
 
 class Align:
 
-    def __init__(self, target, template,
+    def __init__(self, target, template, clip=False,
                  output_dir=PANDORA.PANDORA_data + '/outputs', remove_terms=True):
         ''' Performs a alignment of the target and template(s). Returns a filename that will be used for modeller.
 
         Args:
             target: (Target object) The target object that will be aligned to
                 the template structures
-            template: (Template object) can be either a single Target object
-                or a list of Target objects
+            template: (list): list with a single Template object
+            clip (bool or list): if True, clips away the C-like domain, levaing only
+                the G-domain according to IMGT. If a listcontaining the G domain(s) 
+                span is provided, will use it to cut the sequence. The list should have 
+                this format: [(1,182)] for MHCI and [(1,91),(1,86)] for MHCII.
             output_dir: (string) output directory
             remove_terms (bool): if True, removes N-terminal and C-terminal
                 regions not present in the template sequence
         '''
 
         # Assign target and template. If the template is not given as a list, put in in a list.
-        self.__target = target
-        if isinstance(template, list):
-            self.__template = template
+        self.target = target
+        if type(template) == list:
+            self.template = template
         else:
-            self.__template = [template]
-        self.__output_dir = output_dir # + '/%s_%s' %('_'.join([i.id for i in self.__template]), self.__target.id)
+            self.template = [template]
+        self.output_dir = output_dir # + '/%s_%s' %('_'.join([i.id for i in self.template]), self.target.id)
 
         # Find out if the target is MHC class I or II
-        self.__MHC_class = target.MHC_class
+        self.MHC_class = target.MHC_class
 
         # Store the target and template ids for later use
-        self.__tar_id = target.id
-        self.__tem_id = [i.id for i in self.__template]
+        self.tar_id = target.id
+        self.tem_id = [i.id for i in self.template]
 
         # Define template m, n and p seqs
-        self.__tem_m = [i.M_chain_seq for i in self.__template]
-        if self.__MHC_class == 'II':
-            self.__tem_n = [i.N_chain_seq for i in self.__template]
-        self.__tem_p = [i.peptide for i in self.__template]
+        self.tem_m = self.template[0].M_chain_seq
+        if self.MHC_class == 'II':
+            self.tem_n = self.template[0].N_chain_seq
+        self.tem_p = self.template[0].peptide 
+        
+        # if clip, cut away the C-like domain(s)
+        if clip == False:
+            pass
+        
+        elif clip == True:
+            #try:
+            self.tem_m, self.tem_m_c = self.clip(self.tem_m, self.template[0].G_domain_span[0])
+            if self.MHC_class == 'II':
+                self.tem_n, self.tem_n_c = self.clip(self.tem_n, self.template[0].G_domain_span[1])
+            #except:
+            #    print('WARNING: an error occurred while clipping the template sequence.')
+                
+        elif type(clip) == list:
+            #try:
+            self.tem_m, self.tem_m_c = self.clip(self.tem_m, clip[0])
+            if self.MHC_class == 'II':
+                self.tem_n, self.tem_n_c = self.clip(self.tem_n, clip[1])
+            #except:
+            #    print('WARNING: an error occurred while clipping the template sequence.')
 
         # Define target m, n and p seqs. If there are no m and n chains supplied, just take the seqs from the template
-        if self.__target.M_chain_seq == '':
-            print('WARNING: No M chain sequence could be retrieved for target %s' %self.__target.id)
+        if self.target.M_chain_seq == '':
+            print('WARNING: No M chain sequence could be retrieved for target %s' %self.target.id)
             print('PANDORA will use the M chain sequence from the best template.')
             print('To avoid this, please provide an M chain sequence to your target.')
-            self.__tar_m = self.__tem_m[0]
+            self.tar_m = self.tem_m
         else:
-            self.__tar_m = self.__target.M_chain_seq
+            self.tar_m = self.target.M_chain_seq
 
         # N chains (only for MHCII)
-        if self.__MHC_class == 'II' and self.__target.N_chain_seq == '':
-            print('WARNING: No M chain sequence could be retrieved for target %s' %self.__target.id)
+        if self.MHC_class == 'II' and self.target.N_chain_seq == '':
+            print('WARNING: No M chain sequence could be retrieved for target %s' %self.target.id)
             print('PANDORA will use the M chain sequence from the best template.')
             print('To avoid this, please provide an M chain sequence to your target.')
-            self.__tar_n = self.__tem_n[0]
-        elif self.__MHC_class == 'II' and self.__target.N_chain_seq != '':
-            self.__tar_n = self.__target.N_chain_seq
+            self.tar_n = self.tem_n
+        elif self.MHC_class == 'II' and self.target.N_chain_seq != '':
+            self.tar_n = self.target.N_chain_seq
 
         # P chain
-        self.__tar_p = self.__target.peptide
+        self.tar_p = self.target.peptide
 
         # Perform alignment
-        self.aligned_seqs_and_pept = self.__align_chains()
+        self.aligned_seqs_and_pept = self.align_chains()
         # Cut extra N-terminal and C-terminal
-        if remove_terms==True:
-            self.__remove_terms()
+        if clip==True or remove_terms==True:
+            self.remove_terms()
+        if clip:
+            self.aligned_seqs_and_pept['%s M' %self.template[0].id] += self.tem_m_c
+            self.aligned_seqs_and_pept['%s M' %self.target.id] += ('').join(
+                ['-' for i in range(len(self.tem_m_c))])
+            if self.MHC_class == 'II':
+                self.aligned_seqs_and_pept['%s N' %self.template[0].id] += self.tem_n_c
+                self.aligned_seqs_and_pept['%s N' %self.target.id] += ('').join(
+                ['-' for i in range(len(self.tem_n_c))])
         #Write alignment file for MODELLER
-        self.alignment_file = self.__write_ali_file()
+        self.alignment_file = self.write_ali_file()
 
+    def clip(self, seq, span):
+        seq_1 = seq[span[0]-1:span[1]]
+        seq_2 = seq[span[1]:]
+        return seq_1, seq_2
 
-    def __align_chains(self):
+    def align_chains(self):
         ''' Alignes the chains of MHCI/MHCII structues given a target and (multiple) templates.
 
         Returns: (dict) all aligned chains per structure id {id M: NNNNNNNNNNNN, id N: NNNNNNNNNNNN, id P: NNNNNN}
@@ -84,60 +119,60 @@ class Align:
 
         # Align M and N chain for MHC II. Because the target chains need to be aligned to the respective chain of
         # the template, M and N are done seperately and later added together
-        if self.__MHC_class == 'II':
+        if self.MHC_class == 'II':
 
             # Align the M chain
             # First write a fasta file containing all chains
-            with open('%s/%s_M.fasta' % (self.__output_dir,self.__tar_id),"w") as f:
-                for i in range(len(self.__tem_id)):
-                    f.write('>'+self.__tem_id[i] + ' M\n' + self.__tem_m[i] +'\n')
-                f.write('>' + self.__tar_id + ' M\n' + self.__tar_m)
+            with open('%s/%s_M.fasta' % (self.output_dir,self.tar_id),"w") as f:
+                for i in range(len(self.tem_id)):
+                    f.write('>'+self.tem_id[i] + ' M\n' + self.tem_m +'\n')
+                f.write('>' + self.tar_id + ' M\n' + self.tar_m)
             # Perform MSA with muscle
-            in_file_muscle = '%s/%s_M.fasta' % (self.__output_dir, self.__tar_id)
-            out_file_muscle = '%s/%_M.afa' % (self.__output_dir, self.__tar_id)
-            p = subprocess.check_call("muscle -in %s -output %s" % (in_file_muscle,out_file_muscle),shell=True)
+            in_file_muscle = '%s/%s_M.fasta' % (self.output_dir, self.tar_id)
+            out_file_muscle = '%s/%s_M.afa' % (self.output_dir, self.tar_id)
+            p = subprocess.check_call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
 
             # Align the N chain
             # First write a fasta file containing all chains
-            with open('%s/%s_N.fasta' % (self.__output_dir,self.__tar_id),"w") as f:
-                for i in range(len(self.__tem_id)):
-                    f.write('>'+self.__tem_id[i] + ' N\n' + self.__tem_n[i] +'\n')
-                f.write('>' + self.__tar_id + ' N\n' + self.__tar_n)
+            with open('%s/%s_N.fasta' % (self.output_dir,self.tar_id),"w") as f:
+                for i in range(len(self.tem_id)):
+                    f.write('>'+self.tem_id[i] + ' N\n' + self.tem_n +'\n')
+                f.write('>' + self.tar_id + ' N\n' + self.tar_n)
             # Perform MSA with muscle
-            in_file_muscle = '%s/%s_N.fasta' % (self.__output_dir, self.__tar_id)
-            out_file_muscle = '%s/%_N.afa' % (self.__output_dir, self.__tar_id)
-            p = subprocess.check_call("muscle -in %s -output %s" % (in_file_muscle,out_file_muscle),shell=True)
+            in_file_muscle = '%s/%s_N.fasta' % (self.output_dir, self.tar_id)
+            out_file_muscle = '%s/%s_N.afa' % (self.output_dir, self.tar_id)
+            p = subprocess.check_call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
 
             # Merge M and N chain into one file
             os.system('cat %s/%s_M.afa %s/%s_N.afa > %s/alignment.afa' % (
-            self.__output_dir.replace(' ', '\\ '), self.__tar_id, self.__output_dir.replace(' ', '\\ '), self.__tar_id,
-            self.__output_dir.replace(' ', '\\ ')))
+            self.output_dir.replace(' ', '\\ '), self.tar_id, self.output_dir.replace(' ', '\\ '), self.tar_id,
+            self.output_dir.replace(' ', '\\ ')))
 
 
-        if self.__MHC_class == 'I':
+        if self.MHC_class == 'I':
             # Align the M chain
             # First write a fasta file containing all chains
-            with open('%s/%s_M.fasta' % (self.__output_dir,self.__tar_id),"w") as f:
-                for i in range(len(self.__tem_id)):
-                    f.write('>'+self.__tem_id[i] + ' M\n' + self.__tem_m[i] +'\n')
-                f.write('>' + self.__tar_id + ' M\n' + self.__tar_m)
+            with open('%s/%s_M.fasta' % (self.output_dir,self.tar_id),"w") as f:
+                for i in range(len(self.tem_id)):
+                    f.write('>'+self.tem_id[i] + ' M\n' + self.tem_m +'\n')
+                f.write('>' + self.tar_id + ' M\n' + self.tar_m)
             # Perform MSA with muscle
-            in_file_muscle = '%s/%s_M.fasta' % (self.__output_dir, self.__tar_id)
-            out_file_muscle = '%s/alignment.afa' % (self.__output_dir)
-            p = subprocess.call("muscle -in %s -output %s" % (in_file_muscle,out_file_muscle),shell=True)
+            in_file_muscle = '%s/%s_M.fasta' % (self.output_dir, self.tar_id)
+            out_file_muscle = '%s/alignment.afa' % (self.output_dir)
+            p = subprocess.call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
 
         # Load aligned seqs into dict
-        seqs = {v.description: str(v.seq) for (v) in SeqIO.parse('%s/alignment.afa' % (self.__output_dir), "fasta")}
+        seqs = {v.description: str(v.seq) for (v) in SeqIO.parse('%s/alignment.afa' % (self.output_dir), "fasta")}
 
         # Align peptides
         # aligned_pepts = {'1D9K P': 'GNSHRGAIEWEGIESG', '1IAK P': '-STDYGILQINSRW--'}
-        aligned_pepts = self.__align_peptides()
+        aligned_pepts = self.align_peptides()
 
         # Remove all intermediate files
-        os.system('rm %s/*.fasta %s/*.afa' % (self.__output_dir.replace(' ', '\\ '), self.__output_dir.replace(' ', '\\ ')))
+        os.system('rm %s/*.fasta %s/*.afa' % (self.output_dir.replace(' ', '\\ '), self.output_dir.replace(' ', '\\ ')))
         return {**seqs, **aligned_pepts}
 
-    def __align_peptides(self):
+    def align_peptides(self):
         ''' Align MHCI peptides based on their anchors. This function adds padding to the left and the right of
             the anchors and uses muscle to align the core. For MHCII, the peptides are aligned on the 2nd and 3rd anchor
             position. These two anchor positions are present in all MHCII structures (1 and 4 are missing sometimes).
@@ -149,11 +184,11 @@ class Align:
         '''
 
         # Make a dict containing {id, (peptide_sequence, [anchors])}
-        id_pept_anch = {self.__tar_id: (self.__tar_p, self.__target.anchors)}
-        for i in self.__template:
+        id_pept_anch = {self.tar_id: (self.tar_p, self.target.anchors)}
+        for i in self.template:
             id_pept_anch[i.id] = (i.peptide, i.anchors)
 
-        if self.__MHC_class == 'I':
+        if self.MHC_class == 'I':
 
             # Find the peptide with the longest 1st anchor.
             longest_1st_anch = max((v[1][0], k) for k, v in id_pept_anch.items())[0]
@@ -169,30 +204,30 @@ class Align:
             if len(set([len(v) for k,v in cores.items()])) != 1:
 
                 # Write Fasta file
-                with open('%s/pept_cores.fasta' % (self.__output_dir), "w") as f:
+                with open('%s/pept_cores.fasta' % (self.output_dir), "w") as f:
                     for k, v in cores.items():
                         f.write('>' + k + '\n' + v + '\n')
 
                 # Run Muscle
-                in_file_muscle = '%s/pept_cores.fasta' % (self.__output_dir)
-                out_file_muscle = '%s/pept_cores.afa' % (self.__output_dir)
-                p = subprocess.call("muscle -in %s -output %s" % (in_file_muscle,out_file_muscle),shell=True)
+                in_file_muscle = '%s/pept_cores.fasta' % (self.output_dir)
+                out_file_muscle = '%s/pept_cores.afa' % (self.output_dir)
+                p = subprocess.call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
 
                 # Load aligned seqs into dict
                 aligned_cores = {v.description: str(v.seq) for (v) in
-                                 SeqIO.parse('%s/pept_cores.afa' % (self.__output_dir), "fasta")}
+                                 SeqIO.parse('%s/pept_cores.afa' % (self.output_dir), "fasta")}
 
                 # Remove intermediate files
                 # os.system(
                 #     'rm %s/*.fasta %s/*.afa' % (
-                #     self.__output_dir.replace(' ', '\\ '), self.__output_dir.replace(' ', '\\ ')))
+                #     self.output_dir.replace(' ', '\\ '), self.output_dir.replace(' ', '\\ ')))
 
                 # Add aligned cores in between anchors
                 for k, v in id_pept_anch.items():
                     id_pept_anch[k] = (v[0][:v[1][0]] + aligned_cores[k] + v[0][(v[1][1]) - 1:], v[1])
 
 
-        if self.__MHC_class == 'II':
+        if self.MHC_class == 'II':
 
             # Find the peptide with the longest 2nd anchor.
             longest_2nd_anch = max((v[1][1], k) for k, v in id_pept_anch.items())[0]
@@ -220,47 +255,53 @@ class Align:
         return {k + ' P': v[0] for k, v in id_pept_anch.items()}
 
 
-    def __remove_terms(self):
+    def remove_terms(self):
         '''Removes N-terminal and C-terminal regions not present in the template'''
-        if self.__MHC_class == 'I':
+        if self.MHC_class == 'I':
             chains = ['M']
-        elif self.__MHC_class == 'II':
+        elif self.MHC_class == 'II':
             chains = ['M', 'N']
 
-        for chain in chains:
-            templ_seq = self.aligned_seqs_and_pept['%s %s' %(self.__template[0].id, chain)]
-
+        
+        def cut_excess(ref_seq, ref_id, decoy_id, chain):
+            
             #N terminal excess
             N_term_excess = 0
-            if templ_seq.startswith('-'):
+            if ref_seq.startswith('-'):
                 for aa in templ_seq:
                     if aa == '-':
                         N_term_excess += 1
                     else:
                         break
-
+    
                 #Cut N-terminal excess regions
-                self.aligned_seqs_and_pept['%s %s' %(self.__template[0].id, chain)] = self.aligned_seqs_and_pept['%s %s' %(self.__template[0].id, chain)][N_term_excess:]
-                self.aligned_seqs_and_pept['%s %s' %(self.__target.id, chain)] = self.aligned_seqs_and_pept['%s %s' %(self.__target.id, chain)][N_term_excess:]
-
-
-
+                self.aligned_seqs_and_pept['%s %s' %(ref_id, chain)] = self.aligned_seqs_and_pept['%s %s' %(ref_id, chain)][N_term_excess:]
+                self.aligned_seqs_and_pept['%s %s' %(decoy_id, chain)] = self.aligned_seqs_and_pept['%s %s' %(decoy_id, chain)][N_term_excess:]
+    
+    
             #C terminal excess
             C_term_excess = 0
-            if templ_seq.endswith('-'):
+            if ref_seq.endswith('-'):
                 for aa in templ_seq[::-1]:
                     if aa == '-':
                         C_term_excess += 1
                     else:
                         break
-
+    
                 #Cut C-terminal excess regions
-                self.aligned_seqs_and_pept['%s %s' %(self.__template[0].id, chain)] = self.aligned_seqs_and_pept['%s %s' %(self.__template[0].id, chain)][:-C_term_excess]
-                self.aligned_seqs_and_pept['%s %s' %(self.__target.id, chain)] = self.aligned_seqs_and_pept['%s %s' %(self.__target.id, chain)][:-C_term_excess]
+                self.aligned_seqs_and_pept['%s %s' %(ref_id, chain)] = self.aligned_seqs_and_pept['%s %s' %(ref_id, chain)][:-C_term_excess]
+                self.aligned_seqs_and_pept['%s %s' %(decoy_id, chain)] = self.aligned_seqs_and_pept['%s %s' %(decoy_id, chain)][:-C_term_excess]
             print('Chain %s, excess N %i, C %i' %(chain, N_term_excess, C_term_excess))
+        
+        for chain in chains:
+            templ_id = self.template[0].id
+            target_id = self.target.id
+            templ_seq = self.aligned_seqs_and_pept['%s %s' %(templ_id, chain)]
+            target_seq = self.aligned_seqs_and_pept['%s %s' %(target_id, chain)]
+            cut_excess(ref_seq=templ_seq, ref_id=templ_id, decoy_id=target_id, chain=chain)
+            cut_excess(ref_seq=target_seq, ref_id=target_id, decoy_id=templ_id, chain=chain)
 
-
-    def __write_ali_file(self):
+    def write_ali_file(self):
         ''' Writes the alignement file from self.aligned_seqs_and_pept '''
 
         seqs = self.aligned_seqs_and_pept
@@ -272,23 +313,23 @@ class Align:
             head = '>P1;'+id
 
             # The comment line that contains the path to the file, start chain and peptide length for modeller.
-            if id in self.__tem_id:
+            if id in self.tem_id:
                 comment = 'structure:%s:1:M:%s:P::::' % (
-                    os.path.basename(self.__template[self.__tem_id.index(id)].pdb_path), len(seqs[id + ' P']))
-                    # self.__template[self.__tem_id.index(id)].pdb_path.replace(' ', '\\ '), len(seqs[id + ' P']))
+                    os.path.basename(self.template[self.tem_id.index(id)].pdb_path), len(seqs[id + ' P']))
+                    # self.template[self.tem_id.index(id)].pdb_path.replace(' ', '\\ '), len(seqs[id + ' P']))
             else:
                 comment = 'sequence:::::::::'
 
             # The sequences
-            if self.__MHC_class == 'II':
+            if self.MHC_class == 'II':
                 seq = '%s/%s/%s*' %(seqs[id+' M'], seqs[id+' N'], seqs[id+' P'])
-            if self.__MHC_class == 'I':
+            if self.MHC_class == 'I':
                 seq = '%s/%s*' % (seqs[id + ' M'], seqs[id + ' P'])
 
             aligned_seqs[id] = (head, comment, seq)
 
         # Write actual .ali file
-        alignment_file = '%s/%s.ali' %(self.__output_dir, self.__target.id)
+        alignment_file = '%s/%s.ali' %(self.output_dir, self.target.id)
         with open(alignment_file, 'w') as f:
             for k,v in aligned_seqs.items():
                 f.write(v[0]+'\n'+v[1]+'\n'+v[2]+'\n\n')
@@ -298,7 +339,7 @@ class Align:
 
 class Align2:
 
-    def __init__(self, target, template, output_dir=PANDORA.PANDORA_data + '/outputs'):
+    def init(self, target, template, output_dir=PANDORA.PANDORA_data + '/outputs'):
         ''' Performs a alignment of the target and template(s). Will spit out a filename that will be used for modeller.
 
         Args:
@@ -356,8 +397,8 @@ class Align2:
                 f.write('>' + tar_id + ' M\n' + tar_m)
             # Perform MSA with muscle
             in_file_muscle = '%s/%s_M.fasta' % (opd, tar_id)
-            out_file_muscle = '%s/%_M.afa' % (opd, tar_id)
-            p = subprocess.check_call("muscle -in %s -output %s" % (in_file_muscle,out_file_muscle),shell=True)
+            out_file_muscle = '%s/%s_M.afa' % (opd, tar_id)
+            p = subprocess.check_call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
 
             # Align the N chain
             # First write a fasta file containing all chains
@@ -367,8 +408,8 @@ class Align2:
                 f.write('>' + tar_id + ' N\n' + tar_n)
             # Perform MSA with muscle
             in_file_muscle = '%s/%s_N.fasta' % (opd, tar_id)
-            out_file_muscle = '%s/%_N.afa' % (opd, tar_id)
-            p = subprocess.check_call("muscle -in %s -output %s" % (in_file_muscle,out_file_muscle),shell=True)
+            out_file_muscle = '%s/%s_N.afa' % (opd, tar_id)
+            p = subprocess.check_call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
 
 
             # Merge M and N chain into one file
@@ -384,8 +425,8 @@ class Align2:
                 f.write('>' + tar_id + ' M\n' + tar_m)
             # Perform MSA with muscle
             in_file_muscle = '%s/%s_M.fasta' % (opd, tar_id)
-            out_file_muscle = '%s/%_M.afa' % (opd, tar_id)
-            p = subprocess.check_call("muscle -in %s -output %s" % (in_file_muscle,out_file_muscle),shell=True)
+            out_file_muscle = '%s/%s_M.afa' % (opd, tar_id)
+            p = subprocess.check_call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
 
         # Load aligned seqs into dict
         seqs = {v.description: str(v.seq) for (v) in SeqIO.parse('%s/alignment.afa' % (opd), "fasta")}
@@ -400,7 +441,7 @@ class Align2:
         os.system('rm %s/*.fasta %s/*.afa' % (opd, opd))
 
         # Using the aligned sequences, write the alignment file.
-        self.alignment_file = self.__write_ali_file()
+        self.alignment_file = self.write_ali_file()
 
 
     def align_peptides(self, subt_matrix='PAM30'):
@@ -507,9 +548,9 @@ class Align2:
 
         # Add padding left and right to make sure all peptides are the same length
         if MHC_class == 'I':
-            scores = self.__add_padding(scores, first_aligned_anch_idx=0)
+            scores = self.add_padding(scores, first_aligned_anch_idx=0)
         if MHC_class == "II":
-            scores = self.__add_padding(scores, first_aligned_anch_idx=1)
+            scores = self.add_padding(scores, first_aligned_anch_idx=1)
 
         # Dict that is later used in align_templates()
         self.aligned_pepts = {k + ' P': v[1] for k, v in scores.items()}
@@ -520,7 +561,7 @@ class Align2:
         self.pept_alignment_scores = {k:(v[0],v[1], v[2]) for k,v in scores.items()}
 
 
-    def __add_padding(self, scores, first_aligned_anch_idx=1):
+    def add_padding(self, scores, first_aligned_anch_idx=1):
         ''' Internal function for align_peptides() to add --padding-- left and right of peptides. Adds -- according to
             anchors positions
 
@@ -546,7 +587,7 @@ class Align2:
 
         return scores
 
-    def __write_ali_file(self):
+    def write_ali_file(self):
         ''' Writes the alignement file from self.aligned_seqs_and_pept '''
 
         seqs = self.aligned_seqs
@@ -562,7 +603,7 @@ class Align2:
             if id in tem_id:
                 comment = 'structure:%s:1:M:%s:P::::' % (
                     os.path.basename(self.templates[tem_id.index(id)].pdb_path), len(seqs[id + ' P']))
-                    # self.__template[self.__tem_id.index(id)].pdb_path.replace(' ', '\\ '), len(seqs[id + ' P']))
+                    # self.template[self.tem_id.index(id)].pdb_path.replace(' ', '\\ '), len(seqs[id + ' P']))
             else:
                 comment = 'sequence:::::::::'
 
