@@ -28,7 +28,7 @@ def run_model(args):
 
     target = args['target']
     template = args['template']
-    output_dir = args['output_dir']
+    #output_dir = args['outdir']
     n_loop_models = args['n_loop_models']
     n_jobs = args['n_jobs']
     benchmark = args['benchmark']

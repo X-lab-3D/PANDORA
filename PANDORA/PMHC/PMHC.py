@@ -93,9 +93,9 @@ class Template(PMHC):
 
         if not G_domain_span:
             if self.MHC_class == 'I':
-                G_domain_span=[(1,182)]
+                self.G_domain_span=[(1,182)]
             elif self.MHC_class=='II':
-                G_domain_span=[(1,81),(1,90)]
+                self.G_domain_span=[(1,81),(1,90)]
 
         if type(self.allele_type) == str:
             self.allele_type = [self.allele_type]
