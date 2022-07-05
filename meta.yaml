@@ -23,7 +23,7 @@ requirements:
   run:
     - biopython
     - modeller
-    - muscle
+    - muscle=3.8.1551
     - numpy
     - numpy-base
     - pip
