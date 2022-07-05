@@ -154,7 +154,7 @@ class Pandora:
         '''
         self.alignment = Align.Align(self.target, self.template, 
                                      output_dir=self.output_dir, 
-                                     clip=self.clip_C_domain)
+                                     clip_C_domain=self.clip_C_domain)
 
         # self.alignment = Align.Align2(target = self.target, template=self.template, output_dir=self.output_dir)
         # self.alignment.align_templates()

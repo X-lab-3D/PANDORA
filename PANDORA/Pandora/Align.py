@@ -10,7 +10,7 @@ import subprocess
 
 class Align:
 
-    def __init__(self, target, template, clip=False,
+    def __init__(self, target, template, clip_C_domain=False,
                  output_dir=PANDORA.PANDORA_data + '/outputs', remove_terms=True):
         ''' Performs a alignment of the target and template(s). Returns a filename that will be used for modeller.
 
@@ -27,6 +27,7 @@ class Align:
                 regions not present in the template sequence
         '''
 
+        self.clip_C_domain = clip_C_domain
         # Assign target and template. If the template is not given as a list, put in in a list.
         self.target = target
         if type(template) == list:
@@ -49,10 +50,10 @@ class Align:
         self.tem_p = self.template[0].peptide 
         
         # if clip, cut away the C-like domain(s)
-        if clip == False:
+        if self.clip_C_domain == False:
             pass
         
-        elif clip == True:
+        elif self.clip_C_domain == True:
             #try:
             self.tem_m, self.tem_m_c = self.clip(self.tem_m, self.template[0].G_domain_span[0])
             if self.MHC_class == 'II':
@@ -60,11 +61,11 @@ class Align:
             #except:
             #    print('WARNING: an error occurred while clipping the template sequence.')
                 
-        elif type(clip) == list:
+        elif type(self.clip_C_domain) == list:
             #try:
-            self.tem_m, self.tem_m_c = self.clip(self.tem_m, clip[0])
+            self.tem_m, self.tem_m_c = self.clip(self.tem_m, self.clip_C_domain[0])
             if self.MHC_class == 'II':
-                self.tem_n, self.tem_n_c = self.clip(self.tem_n, clip[1])
+                self.tem_n, self.tem_n_c = self.clip(self.tem_n, self.clip_C_domain[1])
             #except:
             #    print('WARNING: an error occurred while clipping the template sequence.')
 
@@ -92,9 +93,9 @@ class Align:
         # Perform alignment
         self.aligned_seqs_and_pept = self.align_chains()
         # Cut extra N-terminal and C-terminal
-        if clip==True or remove_terms==True:
+        if self.clip_C_domain==True or remove_terms==True:
             self.remove_terms()
-        if clip:
+        if self.clip_C_domain:
             self.aligned_seqs_and_pept['%s M' %self.template[0].id] += self.tem_m_c
             self.aligned_seqs_and_pept['%s M' %self.target.id] += ('').join(
                 ['-' for i in range(len(self.tem_m_c))])
@@ -130,7 +131,7 @@ class Align:
             # Perform MSA with muscle
             in_file_muscle = '%s/%s_M.fasta' % (self.output_dir, self.tar_id)
             out_file_muscle = '%s/%s_M.afa' % (self.output_dir, self.tar_id)
-            p = subprocess.check_call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
+            p = subprocess.check_call("muscle -in %s -out %s -quiet" % (in_file_muscle,out_file_muscle),shell=True)
 
             # Align the N chain
             # First write a fasta file containing all chains
@@ -141,7 +142,7 @@ class Align:
             # Perform MSA with muscle
             in_file_muscle = '%s/%s_N.fasta' % (self.output_dir, self.tar_id)
             out_file_muscle = '%s/%s_N.afa' % (self.output_dir, self.tar_id)
-            p = subprocess.check_call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
+            p = subprocess.check_call("muscle -in %s -out %s -quiet" % (in_file_muscle,out_file_muscle),shell=True)
 
             # Merge M and N chain into one file
             os.system('cat %s/%s_M.afa %s/%s_N.afa > %s/alignment.afa' % (
@@ -159,7 +160,7 @@ class Align:
             # Perform MSA with muscle
             in_file_muscle = '%s/%s_M.fasta' % (self.output_dir, self.tar_id)
             out_file_muscle = '%s/alignment.afa' % (self.output_dir)
-            p = subprocess.call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
+            p = subprocess.call("muscle -in %s -out %s -quiet" % (in_file_muscle,out_file_muscle),shell=True)
 
         # Load aligned seqs into dict
         seqs = {v.description: str(v.seq) for (v) in SeqIO.parse('%s/alignment.afa' % (self.output_dir), "fasta")}
@@ -211,7 +212,7 @@ class Align:
                 # Run Muscle
                 in_file_muscle = '%s/pept_cores.fasta' % (self.output_dir)
                 out_file_muscle = '%s/pept_cores.afa' % (self.output_dir)
-                p = subprocess.call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
+                p = subprocess.call("muscle -in %s -out %s -quiet" % (in_file_muscle,out_file_muscle),shell=True)
 
                 # Load aligned seqs into dict
                 aligned_cores = {v.description: str(v.seq) for (v) in
@@ -268,7 +269,7 @@ class Align:
             #N terminal excess
             N_term_excess = 0
             if ref_seq.startswith('-'):
-                for aa in templ_seq:
+                for aa in ref_seq:
                     if aa == '-':
                         N_term_excess += 1
                     else:
@@ -297,9 +298,9 @@ class Align:
             templ_id = self.template[0].id
             target_id = self.target.id
             templ_seq = self.aligned_seqs_and_pept['%s %s' %(templ_id, chain)]
-            target_seq = self.aligned_seqs_and_pept['%s %s' %(target_id, chain)]
+            #target_seq = self.aligned_seqs_and_pept['%s %s' %(target_id, chain)]
             cut_excess(ref_seq=templ_seq, ref_id=templ_id, decoy_id=target_id, chain=chain)
-            cut_excess(ref_seq=target_seq, ref_id=target_id, decoy_id=templ_id, chain=chain)
+            #cut_excess(ref_seq=target_seq, ref_id=target_id, decoy_id=templ_id, chain=chain)
 
     def write_ali_file(self):
         ''' Writes the alignement file from self.aligned_seqs_and_pept '''
@@ -398,7 +399,7 @@ class Align2:
             # Perform MSA with muscle
             in_file_muscle = '%s/%s_M.fasta' % (opd, tar_id)
             out_file_muscle = '%s/%s_M.afa' % (opd, tar_id)
-            p = subprocess.check_call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
+            p = subprocess.check_call("muscle -in %s -out %s -quiet" % (in_file_muscle,out_file_muscle),shell=True)
 
             # Align the N chain
             # First write a fasta file containing all chains
@@ -409,7 +410,7 @@ class Align2:
             # Perform MSA with muscle
             in_file_muscle = '%s/%s_N.fasta' % (opd, tar_id)
             out_file_muscle = '%s/%s_N.afa' % (opd, tar_id)
-            p = subprocess.check_call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
+            p = subprocess.check_call("muscle -in %s -out %s -quiet" % (in_file_muscle,out_file_muscle),shell=True)
 
 
             # Merge M and N chain into one file
@@ -426,7 +427,7 @@ class Align2:
             # Perform MSA with muscle
             in_file_muscle = '%s/%s_M.fasta' % (opd, tar_id)
             out_file_muscle = '%s/%s_M.afa' % (opd, tar_id)
-            p = subprocess.check_call("muscle -in %s -out %s" % (in_file_muscle,out_file_muscle),shell=True)
+            p = subprocess.check_call("muscle -in %s -out %s -quiet" % (in_file_muscle,out_file_muscle),shell=True)
 
         # Load aligned seqs into dict
         seqs = {v.description: str(v.seq) for (v) in SeqIO.parse('%s/alignment.afa' % (opd), "fasta")}
