@@ -10,8 +10,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.PMHC import Model
 from PANDORA.Wrapper import Wrapper
 
-current_dir = os.path.dirname(os.path.realpath(__file__))
-working_dir = os.path.join(current_dir , "..")
+working_dir = os.path.dirname(os.path.realpath(__file__))
 
 def test_PMHC_target():
     # Create target object
@@ -39,7 +38,7 @@ def test_PMHC_template():
     # Create template object
     template = PMHC.Template('1A1O',
                          allele_type=['HLA-B*5301', 'HLA-B*5301'],
-                         pdb_path=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
+                         pdb_path=working_dir + '/test_data/PDBs/pMHCI/1A1O.pdb')
     # check calculated anchors, M_chain, peptide, allele and pdb chains
     pass_test = False
     if (template.anchors == [2,9] and 
@@ -65,7 +64,7 @@ def test_fail_PMHC():
 
 def test_contacts():
     # Calculate atom contacts
-    c = Contacts.Contacts(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
+    c = Contacts.Contacts(working_dir + '/test_data/PDBs/pMHCI/1A1O.pdb')
     # check length of output, chains of the pdb and the pdb path
     pass_test = False
     if len(c.chain_contacts[0]) == 9 and [i.id for i in c.PDB.get_chains()] == ['M', 'P'] and c.pdb_path != '':
@@ -79,7 +78,7 @@ def test_align():
     # initiate target and template object
     template = PMHC.Template('1A1O',
                          allele_type=['HLA-B*5301', 'HLA-B*5301'],
-                         pdb_path=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb',
+                         pdb_path=working_dir + '/test_data/PDBs/pMHCI/1A1O.pdb',
                              anchors = [2, 9])
     target = PMHC.Target('2X4R',
                          allele_type=['test'],
@@ -90,23 +89,23 @@ def test_align():
                                        'ELVETRPAGDGTFQKWAAVVVPSGQEQRYTCHVQHEGLPKPLTLRWE',
                          anchors = [2, 9])
     # align target and template
-    a = Align.Align(target, template, output_dir=PANDORA.PANDORA_path + '/../test/')
+    a = Align.Align(target, template, output_dir=working_dir + '/')
     # check keys of aligned output and output .ali file path
     pass_test = False
     if a.aligned_seqs_and_pept['1A1O P'] == 'KPIVQYDNF' and '2X4R M' in a.aligned_seqs_and_pept:
         if os.path.basename(a.alignment_file) == '2X4R.ali':
             pass_test = True
     # Remove output dir
-    os.system('rm -r %s1A1O_2X4R' %(PANDORA.PANDORA_path + '/../test/'))
+    os.system('rm -r %s1A1O_2X4R' %(working_dir + '/'))
 
     assert pass_test
 
 
 def test_clean_MHCI_structure():
     x = Database_functions.parse_pMHCI_pdb('1A1O',
-                       indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
-                       outdir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI',
-                       bad_dir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/Bad',
+                       indir=working_dir + '/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
+                       outdir=working_dir + '/test_data/PDBs/pMHCI',
+                       bad_dir=working_dir + '/test_data/PDBs/pMHCI/Bad',
                        remove_biopython_object=False)
 
     assert x.peptide == 'KPIVQYDNF' and [i.id for i in x.pdb.get_chains()] == ['M', 'P']
@@ -114,9 +113,9 @@ def test_clean_MHCI_structure():
 
 def test_clean_MHCII_structure():
     x = Database_functions.parse_pMHCII_pdb('2NNA',
-                       indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
-                       outdir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCII',
-                       bad_dir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCII/Bad',
+                       indir=working_dir + '/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
+                       outdir=working_dir + '/test_data/PDBs/pMHCII',
+                       bad_dir=working_dir + '/test_data/PDBs/pMHCII/Bad',
                        remove_biopython_object=False)
 
 
@@ -125,7 +124,7 @@ def test_clean_MHCII_structure():
 
 @pytest.mark.skip
 def test_construct_database():
-    test_data = PANDORA.PANDORA_path + '/../test/test_data/'
+    test_data = working_dir + '/test_data/'
     bad1, bad2 = test_data + 'PDBs/Bad/pMHCI/6C6A.pdb', test_data + 'PDBs/Bad/pMHCII/1K8I.pdb'
     log1, log2 = test_data + 'PDBs/Bad/log_MHCI.csv', test_data + 'PDBs/Bad/log_MHCII.csv'
 
@@ -147,7 +146,7 @@ def test_construct_database():
 
 
 def test_load_db():
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
+    db = Database.load(working_dir + '/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # test if items in the database are correct
     pass_test = False
     if '1A1O' in db.MHCI_data and '4Z7U' in db.MHCII_data:
@@ -158,7 +157,7 @@ def test_load_db():
 
 
 def test_template_select_MHCI():
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
+    db = Database.load(working_dir + '/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
     target = PMHC.Target('1A1O',
                          allele_type=db.MHCI_data['1A1O'].allele_type,
@@ -175,7 +174,7 @@ def test_template_select_MHCI():
 
 def test_template_select_MHCII():
     # Load database
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
+    db = Database.load(working_dir + '/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
     target = PMHC.Target('2NNA',
                          allele_type=db.MHCII_data['2NNA'].allele_type,
@@ -192,24 +191,23 @@ def test_template_select_MHCII():
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
 
 def test_database_repath():
-    raise Exception('%s   %s' %(current_dir, working_dir)  + str(os.listdir(current_dir)))
     # Load database
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
+    db = Database.load(working_dir + '/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Repath database
-    db.repath(PANDORA.PANDORA_path + '/../test/test_data/PDBs', save=PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
+    db.repath(working_dir + '/test_data/PDBs', save=working_dir + '/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
     
     MHCI_flag = False
-    if db.MHCI_data['1A1O'].pdb_path == PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb':
+    if db.MHCI_data['1A1O'].pdb_path == working_dir + '/test_data/PDBs/pMHCI/1A1O.pdb':
         MHCI_flag = True
     MHCI_flag = False
-    if db.MHCII_data['2NNA'].pdb_path == PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCII/2NNA.pdb':
+    if db.MHCII_data['2NNA'].pdb_path == working_dir + '/test_data/PDBs/pMHCII/2NNA.pdb':
         MHCII_flag = True
     assert  MHCI_flag and MHCII_flag
     
 @pytest.mark.skip
 def test_pandora_MHCI_modelling():
     # Load database
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
+    db = Database.load(working_dir + '/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
     # Create target object
     target = PMHC.Target('1A1O',
                          allele_type=db.MHCI_data['1A1O'].allele_type,
@@ -234,11 +232,11 @@ def test_pandora_MHCI_modelling():
 
 def test_wrapper_MHCI():
     # Load database
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
+    db = Database.load(working_dir + '/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
     # Create Wrapper object
     wrap = Wrapper.Wrapper()
     # Define data_file
-    data_file =  PANDORA.PANDORA_path + '/../test/test_data/test_MHCI_wrapper_data.tsv'
+    data_file =  working_dir + '/test_data/test_MHCI_wrapper_data.tsv'
     # Create targets
     wrap.create_targets(data_file, db, MHC_class='I', header=False, 
                         delimiter='\t', IDs_col=0, peptides_col=1, 
@@ -287,7 +285,7 @@ def test_wrapper_MHCI():
 @pytest.mark.skip
 def test_pandora_MHCII_modelling():
     # Load database
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
+    db = Database.load(working_dir + '/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
     # Create target object
     target = PMHC.Target('2NNA',
                          allele_type=db.MHCII_data['2NNA'].allele_type,
@@ -312,7 +310,7 @@ def test_pandora_MHCII_modelling():
 
 def test_rmsd():
     # Load database
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
+    db = Database.load(working_dir + '/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
     target = PMHC.Target('1A1O',
                          allele_type=db.MHCI_data['1A1O'].allele_type,
@@ -321,11 +319,11 @@ def test_rmsd():
                          anchors=db.MHCI_data['1A1O'].anchors)
 
     # Initiate Model object
-    m = Model.Model(target, model_path=PANDORA.PANDORA_path + '/../test/test_data/1A1O.BL00010001.pdb',
-                    output_dir=PANDORA.PANDORA_path + '/../test')
+    m = Model.Model(target, model_path=working_dir + '/test_data/1A1O.BL00010001.pdb',
+                    output_dir=working_dir + '')
     # Calculate L-RMSD and Core L-RMSD
-    m.calc_LRMSD(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
-    m.calc_Core_LRMSD(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
+    m.calc_LRMSD(working_dir + '/test_data/PDBs/pMHCI/1A1O.pdb')
+    m.calc_Core_LRMSD(working_dir + '/test_data/PDBs/pMHCI/1A1O.pdb')
     # Check if the rmsds are between 0.5 and 2 (I gave some slack for the cases that modeller gets lucky.
     pass_test = m.lrmsd > 1 and m.lrmsd < 1.5 and m.core_lrmsd > 1 and m.core_lrmsd < 1.5
 
