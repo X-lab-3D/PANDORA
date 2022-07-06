@@ -167,7 +167,7 @@ def test_template_select_MHCI():
 
     # Perform modelling
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test',
-                         logfile=PANDORA.PANDORA_path + '/../test/test_datalogfile.txt')
+                         logfile=working_dir + '/test_data/logfile.txt')
     mod.find_template(benchmark=True)
 
     assert mod.template.id == '2X4R' and mod.template.peptide == 'NLVPMVATV'
@@ -187,7 +187,7 @@ def test_template_select_MHCII():
 
     # Perform modelling
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test',
-                            logfile=PANDORA.PANDORA_path + '/../test/test_datalogfile.txt')
+                            logfile=working_dir + '/test_data/logfile.txt')
     mod.find_template(benchmark=True)
 
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
@@ -221,7 +221,7 @@ def test_pandora_MHCI_modelling():
 
     # Perform modelling
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/',
-                            logfile=PANDORA.PANDORA_path + '/../test/test_datalogfile.txt')
+                            logfile=working_dir + '/test_data/logfile.txt')
     mod.model(n_loop_models=1, stdev=0.1, benchmark=True, loop_refinement='very_fast')
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
@@ -302,7 +302,7 @@ def test_pandora_MHCII_modelling():
 
     # Perform modelling
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/',
-                            logfile=PANDORA.PANDORA_path + '/../test/test_datalogfile.txt')
+                            logfile=working_dir + '/test_data/logfile.txt')
     mod.model(n_models=1, stdev=0.2, benchmark=True, loop_refinement='very_fast')
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
