@@ -471,7 +471,6 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
     else:
         no_seq_chains.append('M_score')
         
-    
     if target.MHC_class == 'II':
         if target.N_chain_seq != '':
             #Keep only G-domain
