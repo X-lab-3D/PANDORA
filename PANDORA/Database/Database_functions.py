@@ -1440,6 +1440,11 @@ def parse_pMHCI_pdb(pdb_id,
                               peptide=seqs['P'], pdb=pdb, pdb_path=pdb_file, 
                               resolution=resolution, sheet=sheet, helix=helix,
                               remove_biopython_object=remove_biopython_object)
+        
+        #Check if the anchor calculation went ok
+        if templ.anchors[1] - templ.anchors[0] < 6:
+            log(pdb_id, 'Failed, the anchors seem to be too close to each other. This might depend on GitHub issue #146', logfile)
+            raise Exception
 
         # clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
         # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.

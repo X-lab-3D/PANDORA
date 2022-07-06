@@ -1,5 +1,6 @@
 from Bio.PDB import PDBParser
 from Bio.PDB.Polypeptide import three_to_one
+from Bio.SeqUtils import seq1
 from Bio import pairwise2
 import os
 from Bio.PDB import PDBIO
@@ -208,7 +209,7 @@ def merge_chains(pdb):
     return pdb
 
 
-def renumber(pdb_ref, pdb_decoy):
+def renumber(pdb_ref, pdb_decoy, custom_map={"MSE":"M"}):
     ''' aligns two pdb's and renumber them accordingly.
 
     Args:
@@ -219,11 +220,14 @@ def renumber(pdb_ref, pdb_decoy):
     Returns: Bio.PDB objects with renumbered residues
 
     '''
-    ref_sequences = [[chain.id, ('').join([three_to_one(res.resname) for res in chain])]
-                      for chain in pdb_ref.get_chains()]
+    ref_sequences = [[chain.id, seq1(''.join([res.resname for res in chain]), custom_map=custom_map)] for chain in pdb_ref.get_chains()]
+                    #[[chain.id, ('').join([seq1(res.resname) for res in chain])]
+                    #  for chain in pdb_ref.get_chains()]
     ref_sequences.sort()
-    decoy_sequences = [[chain.id, ('').join([three_to_one(res.resname) for res in chain])]
-                      for chain in pdb_decoy.get_chains()]
+    decoy_sequences = [[chain.id, seq1(''.join([res.resname for res in chain]), custom_map=custom_map)] for chain in pdb_decoy.get_chains()]
+                        #[[chain.id, ('').join([seq1(res.resname) for res in chain])]
+                      #for chain in pdb_decoy.get_chains()]
+                        
     decoy_sequences.sort()
     
     assert(len(ref_sequences) == len(decoy_sequences))

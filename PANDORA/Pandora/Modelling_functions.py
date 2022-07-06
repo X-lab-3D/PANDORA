@@ -442,9 +442,9 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
     putative_templates = {}
     
     if target.MHC_class == 'I':
-        class_variables = [180, 'MHCI_data', 'M_score']
+        class_variables = [PANDORA.MHCI_G_domain[0][1], 'MHCI_data', 'M_score']
     elif target.MHC_class == 'II':
-        class_variables = [82, 'MHCII_data', 'Avg_score']
+        class_variables = [PANDORA.MHCII_G_domain[0][1], 'MHCII_data', 'Avg_score']
         
     no_seq_chains = []
     if target.M_chain_seq != '':
@@ -475,7 +475,7 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
     if target.MHC_class == 'II':
         if target.N_chain_seq != '':
             #Keep only G-domain
-            N_chain = target.N_chain_seq[:90]
+            N_chain = target.N_chain_seq[:PANDORA.MHCII_G_domain[1][1]]
             #Blast N chain sequence
             try:
                 N_chain_result = blast_mhc_seq(N_chain, chain='N', blastdb=blastdb)
