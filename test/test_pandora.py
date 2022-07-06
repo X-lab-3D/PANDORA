@@ -192,7 +192,7 @@ def test_template_select_MHCII():
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
 
 def test_database_repath():
-    raise Exception('%s   %s' %(current_dir, working_dir))
+    raise Exception('%s   %s' + str(os.listdir(current_dir)) %(current_dir, working_dir))
     # Load database
     db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Repath database
