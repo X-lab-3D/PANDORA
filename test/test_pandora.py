@@ -10,6 +10,9 @@ from PANDORA.Pandora import Pandora
 from PANDORA.PMHC import Model
 from PANDORA.Wrapper import Wrapper
 
+current_dir = os.path.dirname(os.path.realpath(__file__)))
+working_dir = os.path.join(current_dir , "..")
+
 def test_PMHC_target():
     # Create target object
     target = PMHC.Target('1A1O',
@@ -188,8 +191,8 @@ def test_template_select_MHCII():
 
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
 
-@pytest.mark.skip
 def test_database_repath():
+    raise Exception('%s   %s' %(current_dir, working_dir))
     # Load database
     db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Repath database
