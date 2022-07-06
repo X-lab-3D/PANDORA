@@ -10,14 +10,17 @@ from datetime import datetime
 
 class Pandora:
 
-    def __init__(self, target, database=None, template=None, output_dir=PANDORA.PANDORA_data + '/outputs'):
-        '''__init__(self, target, database=None, template=None, output_dir=PANDORA.PANDORA_data + '/outputs')
+    def __init__(self, target, database=None, template=None, output_dir=PANDORA.PANDORA_data + '/outputs',
+                logfile = PANDORA.PANDORA_data + '/outputs/Pandora_log.txt'):
+        '''__init__(self, target, database=None, template=None, output_dir=PANDORA.PANDORA_data + '/outputs',
+                    logfile = PANDORA.PANDORA_data + '/outputs/Pandora_log.txt')
         '''
         self.target = target
         self.template = template
         self.database = database
         self.output_dir = output_dir
         self.keep_IL = False
+        self.logfile = logfile
 
         if database is None and template is None:
             raise Exception('Provide a Database object so Pandora can find the best suitable template structure for '
@@ -339,7 +342,7 @@ class Pandora:
             try:
                 self.find_template(best_n_templates=best_n_templates, benchmark=benchmark, verbose=verbose)
             except:
-                self.__log(self.target.id, 'None', 'Could not find a template')
+                self.__log(self.target.id, 'None', 'Could not find a template', logfile=self.logfile)
                 raise Exception('Could not find a template')
 
         print('###############')
@@ -348,7 +351,7 @@ class Pandora:
         try:
             self.prep_output_dir()
         except:
-            self.__log(self.target.id, self.template.id, 'Failed creating output directory')
+            self.__log(self.target.id, self.template.id, 'Failed creating output directory', logfile=self.logfile)
             raise Exception('Failed creating output directory')
 
 
@@ -357,28 +360,28 @@ class Pandora:
         try:
             self.align(verbose=verbose)
         except:
-            self.__log(self.target.id, self.template.id, 'Failed aligning target and template')
+            self.__log(self.target.id, self.template.id, 'Failed aligning target and template', logfile=self.logfile)
             raise Exception('Failed aligning target and template')
 
         # Prepare the scripts that run modeller
         try:
             self.write_ini_script()
         except:
-            self.__log(self.target.id, self.template.id, 'Failed writing .ini script')
+            self.__log(self.target.id, self.template.id, 'Failed writing .ini script', logfile=self.logfile)
             raise Exception('Failed writing .ini script')
 
         # Run modeller to create the initial model
         try:
             self.create_initial_model(verbose=verbose)
         except Exception:
-            self.__log(self.target.id, self.template.id, 'Failed creating initial model with modeller')
+            self.__log(self.target.id, self.template.id, 'Failed creating initial model with modeller', logfile=self.logfile)
             raise Exception('Failed creating initial model with modeller')
 
         # Calculate anchor restraints
         try:
             self.anchor_contacts(verbose=verbose)
         except:
-            self.__log(self.target.id, self.template.id, 'Failed calculating anchor restraints')
+            self.__log(self.target.id, self.template.id, 'Failed calculating anchor restraints', logfile=self.logfile)
             raise Exception('Failed calculating anchor restraints')
 
         # prepare the scripts that run modeller
@@ -387,7 +390,7 @@ class Pandora:
                                        loop_refinement=loop_refinement, n_jobs=n_jobs,
                                        stdev=stdev, helix=helix, sheet=sheet)
         except:
-            self.__log(self.target.id, self.template.id, 'Failed preparing the modeller script')
+            self.__log(self.target.id, self.template.id, 'Failed preparing the modeller script', logfile=self.logfile)
             raise Exception('Failed preparing the modeller script')
 
         # Do the homology modelling
@@ -395,7 +398,7 @@ class Pandora:
             self.run_modeller(benchmark=benchmark, verbose=verbose, keep_IL=self.keep_IL,
                               RMSD_atoms=RMSD_atoms, pickle_out=pickle_out)
         except:
-            self.__log(self.target.id, self.template.id, 'Failed running modeller')
+            self.__log(self.target.id, self.template.id, 'Failed running modeller', logfile=self.logfile)
             raise Exception('Failed running modeller')
 
 
@@ -419,7 +422,7 @@ class Pandora:
 
 
         #     except:
-        #         self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD')
+        #         self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD', logfile=self.logfile)
         #         raise Exception('Could not calculate L-RMSD')
 
         # elif verbose and not benchmark:
@@ -429,6 +432,6 @@ class Pandora:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4)))
 
         if type(self.template)==list:
-            self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %(n_homology_models*n_loop_models))
+            self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %(n_homology_models*n_loop_models), logfile=self.logfile)
         else:
-            self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %(n_homology_models*n_loop_models))
+            self.__log(self.target.id, self.template.id, 'Successfully modelled %s models' %(n_homology_models*n_loop_models), logfile=self.logfile)

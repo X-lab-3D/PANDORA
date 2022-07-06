@@ -166,7 +166,8 @@ def test_template_select_MHCI():
                          anchors=db.MHCI_data['1A1O'].anchors)
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
+    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test',
+                         logfile=PANDORA.PANDORA_path + '/../test/test_datalogfile.txt')
     mod.find_template(benchmark=True)
 
     assert mod.template.id == '2X4R' and mod.template.peptide == 'NLVPMVATV'
@@ -185,7 +186,8 @@ def test_template_select_MHCII():
                          anchors=db.MHCII_data['2NNA'].anchors)
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
+    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test',
+                            logfile=PANDORA.PANDORA_path + '/../test/test_datalogfile.txt')
     mod.find_template(benchmark=True)
 
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
@@ -203,7 +205,7 @@ def test_database_repath():
     MHCII_flag = False
     if db.MHCII_data['2NNA'].pdb_path == PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCII/2NNA.pdb':
         MHCII_flag = True
-        
+
     assert  MHCI_flag and MHCII_flag
     
 @pytest.mark.skip
@@ -218,7 +220,8 @@ def test_pandora_MHCI_modelling():
                          anchors=db.MHCI_data['1A1O'].anchors)
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/')
+    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/',
+                            logfile=PANDORA.PANDORA_path + '/../test/test_datalogfile.txt')
     mod.model(n_loop_models=1, stdev=0.1, benchmark=True, loop_refinement='very_fast')
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
@@ -298,7 +301,8 @@ def test_pandora_MHCII_modelling():
                          anchors=db.MHCII_data['2NNA'].anchors)
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/')
+    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/',
+                            logfile=PANDORA.PANDORA_path + '/../test/test_datalogfile.txt')
     mod.model(n_models=1, stdev=0.2, benchmark=True, loop_refinement='very_fast')
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
