@@ -30,7 +30,7 @@ jobs:
           pip install joblib
           conda install -c bioconda muscle
           conda install -c salilab modeller
-          #conda install -c bioconda blast
+          conda install -c bioconda blast
           python -m pip install --upgrade pip
           pip install -e .[test]
 

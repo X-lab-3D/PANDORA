@@ -208,7 +208,7 @@ def test_database_repath():
 
     assert  MHCI_flag and MHCII_flag
     
-@pytest.mark.skip
+
 def test_pandora_MHCI_modelling():
     # Load database
     db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
@@ -234,7 +234,7 @@ def test_pandora_MHCI_modelling():
 
     assert pass_test
 
-
+@pytest.mark.skip
 def test_wrapper_MHCI():
     # Load database
     db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
