@@ -181,7 +181,7 @@ def test_template_select_MHCII():
 
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
 
-
+@pytest.mark.skip
 def test_database_repath():
     # Load database
     db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -267,7 +267,7 @@ def test_wrapper_MHCI():
     output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/'
     # Run the modellings
     wrap.run_pandora(num_cores=1, n_loop_models=1, 
-                     benchmark=False, output_dir=output_dir)
+                     benchmark=False, collective_output_dir=output_dir)
     
     #Add check model exist flag
     #Add check molpdf flag
