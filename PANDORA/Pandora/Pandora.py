@@ -17,6 +17,7 @@ class Pandora:
         self.template = template
         self.database = database
         self.output_dir = output_dir
+        self.keep_IL = False
 
         if database is None and template is None:
             raise Exception('Provide a Database object so Pandora can find the best suitable template structure for '
@@ -38,13 +39,13 @@ class Pandora:
             print('\tTarget MHC Class: %s' % self.target.MHC_class)
             print('\tTarget Allele:  %s' % self.target.allele_type)
             print('\tTarget Peptide: %s' % self.target.peptide)
-            print('\tTarget Anchors: %s,%s\n' % (self.target.anchors[0],self.target.anchors[1]))
+            print('\tTarget Anchors: %s\n' % (',').join([str(x) for x in self.target.anchors]))
 
         if self.template is None: # Only find the best template if the user didn't specify one
             # if verbose and self.target.M_chain_seq != '' and seq_based_templ_selection:
             #     print('\tUsing sequence based template selection')
             if verbose:
-                print('\tUsing allele type based template selection')
+                print('\tLooking for a template...')
             # Find the best template. If the target already exists in the database,
             # also consider the initial loop model as a model
             self.template, self.pept_ali_scores, self.keep_IL = Modelling_functions.find_template(self.target,
@@ -59,6 +60,8 @@ class Pandora:
             if verbose:
                 if type(self.template)==list:
                     print('\tUser defined template structure (%s): %s' %(len(self.template), [i.id for i in self.template]))
+                elif type(self.template)==str:
+                    print('\tUser defined template structure: %s' %self.template)
                 else:
                     print('\tUser defined template structure: %s' %self.template.id)
             # Check if the target structure and template structure are the same.
@@ -71,19 +74,11 @@ class Pandora:
 
             if type(self.template)==list:
                 for templ in self.template:
-                    if self.target.id == 'I':
-                        score = Modelling_functions.score_peptide_alignment_MHCI(self.target, templ, 'PAM30')
-                        self.pept_ali_scores.append((score, templ.peptide, templ.id))
-                    elif self.target.id == 'II':
-                        score = Modelling_functions.score_peptide_alignment_MHCII(self.target, templ, 'PAM30')
-                        self.pept_ali_scores.append((score, templ.peptide, templ.id))
+                    score = Modelling_functions.score_peptide_alignment(self.target, templ, 'PAM30')
+                    self.pept_ali_scores.append((score, templ.peptide, templ.id))
             else:
-                if self.target.id == 'I':
-                    score = Modelling_functions.score_peptide_alignment_MHCI(self.target, self.template, 'PAM30')
-                    self.pept_ali_scores.append((score, self.template.peptide, self.template.id))
-                elif self.target.id == 'II':
-                    score = Modelling_functions.score_peptide_alignment_MHCII(self.target, self.template, 'PAM30')
-                    self.pept_ali_scores.append((score, self.template.peptide, self.template.id))
+                score = Modelling_functions.score_peptide_alignment(self.target, self.template, 'PAM30')
+                self.pept_ali_scores.append((score, self.template.peptide, self.template.id))
             self.pept_ali_scores = self.pept_ali_scores[:best_n_templates]
 
 
@@ -120,6 +115,8 @@ class Pandora:
 
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir)
+                if not os.path.exists(self.output_dir):
+                    raise Exception('A problem occurred while creating output directory')
         except:
             raise Exception('A problem occurred while creating output directory')
 
@@ -338,11 +335,12 @@ class Pandora:
         os.path.dirname(PANDORA.PANDORA_path)
 
         # Find the best template structure given the Target
-        try:
-            self.find_template(best_n_templates=best_n_templates, benchmark=benchmark, verbose=verbose)
-        except:
-            self.__log(self.target.id, 'None', 'Could not find a template')
-            raise Exception('Could not find a template')
+        if self.template==None:
+            try:
+                self.find_template(best_n_templates=best_n_templates, benchmark=benchmark, verbose=verbose)
+            except:
+                self.__log(self.target.id, 'None', 'Could not find a template')
+                raise Exception('Could not find a template')
 
         print('###############')
         print('TEMPLATE: ', self.template.id)

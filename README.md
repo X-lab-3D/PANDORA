@@ -1,7 +1,7 @@
 # PANDORA
 
 ![Build](https://github.com/X-lab-3D/PANDORA/actions/workflows/main.yml/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/PANDORA/badge.svg?branch=master)](https://coveralls.io/github/X-lab-3D/PANDORA?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/PANDORA/badge.svg?branch=master&kill_cache=1)](https://coveralls.io/github/X-lab-3D/PANDORA?branch=master)
 [![Anaconda-Server Badge](https://anaconda.org/csb-nijmegen/csb-pandora/badges/version.svg)](https://anaconda.org/csb-nijmegen/csb-pandora)
 [![Documentation Status](https://readthedocs.org/projects/csb-pandora/badge/?version=latest)](http://csb-pandora.readthedocs.io/?badge=latest)
 
@@ -252,7 +252,6 @@ Note: you can also add various information to your file, including anchors for e
 The Wrapper class will take care of generating PANDORA target objects and parallelize the modelling on the given number of cores:
 
 ```python
-from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 from PANDORA.Wrapper import Wrapper
 
@@ -260,7 +259,7 @@ from PANDORA.Wrapper import Wrapper
 db = Database.load('path/to/pandora_Database.pkl')
 
 ## B. Create the wrapper object
-wrap =  Wrapper()
+wrap =  Wrapper.Wrapper()
 
 ## C. Create all Target Objects based on peptides in the .tsv file
 wrap.create_targets('datafile.tsv', db)

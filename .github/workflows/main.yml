@@ -3,17 +3,7 @@
 name: CI
 
 # Controls when the action will run.
-on:
-  # Triggers the workflow on push or pull request events but only for the master branch
-  push:
-    branches:
-      - '*'
-      - '!__*'
-  pull_request:
-    branches:
-      - '*'
-      - '!__*'
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 
 # A workflow  run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -40,11 +30,14 @@ jobs:
           pip install joblib
           conda install -c bioconda muscle
           conda install -c salilab modeller
+          #conda install -c bioconda blast
           python -m pip install --upgrade pip
           pip install -e .[test]
+
       - name: Test with pytest
         run: |
           pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
+
       - name: Coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
