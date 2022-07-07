@@ -1771,7 +1771,7 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
     ###
     # Rename pre-existing raw file
     try:
-        os.system('mv MHC_prot.fasta OLD_MHC_prot.fasta')
+        os.system('mv %sMHC_prot.fasta %sOLD_MHC_prot.fasta' %%(data_dir, data_dir))
     except:
         pass
 
