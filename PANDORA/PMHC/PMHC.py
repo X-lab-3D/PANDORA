@@ -12,7 +12,7 @@ import re
 
 class PMHC(ABC):
 
-    def __init__(self, id, peptide = '', allele_type = [], MHC_class = 'I', 
+    def __init__(self, id, peptide = '', allele_type = [], MHC_class = 'I',
                  M_chain_seq = '', N_chain_seq = '', anchors = [],
                  helix=False, sheet=False):
         ''' pMHC class. Acts as a parent class to Template and Target
@@ -33,10 +33,16 @@ class PMHC(ABC):
         self.peptide = peptide
         self.M_chain_seq = M_chain_seq
         self.N_chain_seq = N_chain_seq
-        self.allele_type = allele_type
         self.anchors = anchors
         self.helix = helix
         self.sheet = sheet
+
+        if type(allele_type) == list:
+            self.allele_type = allele_type
+        elif type(allele_type) == str:
+            self.allele_type = [allele_type]
+        else:
+            raise Exception('The provided allele_type should be a string or a list of strings')
 
 
         @abstractmethod
@@ -54,9 +60,9 @@ class PMHC(ABC):
 
 class Template(PMHC):
 
-    def __init__(self, id, peptide='',  allele_type=[], MHC_class='I', 
-                 M_chain_seq='', N_chain_seq='', anchors=[], 
-                 helix=False, sheet=False, pdb_path=False, pdb=False, 
+    def __init__(self, id, peptide='',  allele_type=[], MHC_class='I',
+                 M_chain_seq='', N_chain_seq='', anchors=[], G_domain_span=False,
+                 helix=False, sheet=False, pdb_path=False, pdb=False,
                  resolution=None, remove_biopython_object=False):
         ''' Template structure class. This class holds all information of a template structure that is used for
             homology modelling. This class needs a id, allele and the path to a pdb file to work. (sequence info of
@@ -71,22 +77,29 @@ class Template(PMHC):
             N_chain_seq: (string) N chain sequence for the Beta chain
             anchors: (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
                         during the modelling. MHC class I typically has 2 anchors, while MHC class II typically has 4.
+            G_domain_span (list): span of the G domain(s) over the sequence. The format should be [(1, 90),(1, 86)]
             pdb_path: (string) path to pdb file
             pdb: (Bio.PDB) Biopython PBD object
             resolution: (float) Structure resolution in Angstrom
         '''
-        super().__init__(id, peptide=peptide, allele_type=allele_type, 
-                         MHC_class=MHC_class, M_chain_seq=M_chain_seq, 
-                         N_chain_seq=N_chain_seq, anchors=anchors, 
+        super().__init__(id, peptide=peptide, allele_type=allele_type,
+                         MHC_class=MHC_class, M_chain_seq=M_chain_seq,
+                         N_chain_seq=N_chain_seq, anchors=anchors,
                          helix=helix, sheet=sheet)
         self.pdb_path = pdb_path
         self.pdb = pdb
         self.contacts = False
         self.resolution = resolution
 
+        if not G_domain_span:
+            if self.MHC_class == 'I':
+                self.G_domain_span=PANDORA.MHCI_G_domain
+            elif self.MHC_class=='II':
+                self.G_domain_span=PANDORA.MHCII_G_domain
+
         if type(self.allele_type) == str:
             self.allele_type = [self.allele_type]
-        
+
         self.check_allele_name()
 
         if not pdb_path and not pdb:
@@ -104,10 +117,10 @@ class Template(PMHC):
 
     def parse_pdb(self, custom_map={"MSE":"M"}):
         '''Loads pdb from path, updates self.pdb field and self.chain_seq/self.peptide if they were empty
-        
+
         Args:
             custom_map (dict): custom map of 3-letter to 1-letter residues translation,
-                                used by Bio.SeqUtiles.seq1 to decide how to assign 
+                                used by Bio.SeqUtiles.seq1 to decide how to assign
                                 non-canonical residues. Defaults to {"MSE":"M"}.
                 '''
 
@@ -118,7 +131,7 @@ class Template(PMHC):
 
         # If the chains or peptide are not given by the user, fetch them from the pdb
         # Get the chain sequences
-        chain_seqs = [seq1(''.join([res.resname for res in chain]), 
+        chain_seqs = [seq1(''.join([res.resname for res in chain]),
                            custom_map=custom_map) for chain in self.pdb.get_chains()]
         # Update chain and peptide fields if emtpy
         if self.MHC_class == 'I':
@@ -206,7 +219,7 @@ class Template(PMHC):
                         new_allele = allele[:-2] + ':' + allele[-2:]
                     else:
                         new_allele = allele[:-3] + ':' + allele[-3:]
-                    
+
                     print('New attempted allele name: ' + new_allele)
                     print('Is this allele name correct?')
                     self.allele_type[i] = new_allele
@@ -218,9 +231,9 @@ class Template(PMHC):
 
 class Target(PMHC):
 
-    def __init__(self, id, peptide, allele_type=[], MHC_class = 'I', 
+    def __init__(self, id, peptide, allele_type=[], MHC_class = 'I',
                  M_chain_seq = '', N_chain_seq = '', anchors = [],
-                 helix=False, sheet=False, templates = False, 
+                 helix=False, sheet=False, templates = False,
                  use_netmhcpan = False):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
@@ -249,14 +262,14 @@ class Target(PMHC):
         #     raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
         # if MHC_class == 'II' and N_chain_seq != '' and M_chain_seq == '':
         #     raise Exception('Provide both the M and N chain sequences for MHC class II targets or none at all')
-            
+
         if M_chain_seq != '' and allele_type == []:
             pass #retrieve allele_type from blast db
         if MHC_class == 'II' and N_chain_seq != '' and allele_type == []:
              pass #retrieve allele_type from blast db
-            
+
         self.fill_allele_seq_info()
-        
+
         # If anchors are not provided, predict them from the peptide length
         if MHC_class =='I' and anchors == []:
             #Use Canonical anchors
@@ -270,14 +283,14 @@ class Target(PMHC):
             #Use NetMHCpan to predict the anchors
             else:
                 print('WARNING: no anchor positions provided. Pandora will predict them using NetMHCpan')
-    
+
                 netMHCpan_dir = [i for i in os.listdir(PANDORA.PANDORA_path + '/../') if
                                  i.startswith('netMHCpan') and os.path.isdir(PANDORA.PANDORA_path + '/../'+i)]
                 if os.path.isfile(PANDORA.PANDORA_path + '/../' + netMHCpan_dir[0] + '/netMHCpan'):
                     # predict the anchors
                     self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type)
                     print('Predicted anchors: %s' %self.anchors)
-    
+
                 else:
                     print("Need netMHCIIpan to predict anchor positions. Please download and install netMHCpan.\n\n"
                       "The user needs to manually download the netMHCIIpan software, since it requires agreement to an academic license agreement.\n"
@@ -344,7 +357,7 @@ class Target(PMHC):
             self.anchor_contacts = Contacts.Contacts(self.initial_model, anchors=self.anchors).anchor_contacts
         else:
             raise Exception('Provide an initial model (.ini PDB) and anchor positions to the Target object first')
-            
+
     def check_allele_name(self):
         """
         Checks the spell of the allele name and tried to correct it.
@@ -366,13 +379,13 @@ class Target(PMHC):
                         new_allele = allele[:-2] + ':' + allele[-2:]
                     else:
                         new_allele = allele[:-3] + ':' + allele[-3:]
-                    
+
                     print('New attempted allele name: ' + new_allele)
                     print('Is this your allele?')
                     self.allele_type[i] = new_allele
                 else:
                     print('WARNING: Allele name syntax not recognized')
-            
+
     def retrieve_MHC_refseq(self, input_file = None, chain='M'):
         """
         Retrieves MHC reference sequence from fasta file.
@@ -384,18 +397,18 @@ class Target(PMHC):
             None.
 
         """
-        
+
         # Define correct fasta file
         if input_file == None:
             if self.allele_type[0].startswith('HLA'):
                 input_file = PANDORA.PANDORA_data+ '/csv_pkl_files/Human_MHC_data.fasta'
             else:
                 input_file = PANDORA.PANDORA_data+ '/csv_pkl_files/NonHuman_MHC_data.fasta'
-        
+
         # Parse Fasta file
         fasta_sequences = SeqIO.parse(input_file,'fasta')
         ref_sequences = {seq.id : str(seq.seq) for seq in fasta_sequences}
-        
+
         if chain == 'M':
             alleles = [x for x in self.allele_type if any(y in x for y in PANDORA.alpha_genes)]
         elif chain == 'N':
@@ -414,13 +427,13 @@ class Target(PMHC):
                 break
             else:
                 pass
-        
+
         if seq_flag == False:
             #fasta_sequences = SeqIO.parse(input_file,'fasta')
             available_alleles = [seq for seq in ref_sequences]
             #print('input', input_file)
             #print('DQA1: ', [x for x in available_alleles if 'HLA-DQA1*05' in x])
-            corrected_alleles = Modelling_functions.allele_name_adapter(self.MHC_class, 
+            corrected_alleles = Modelling_functions.allele_name_adapter(self.MHC_class,
                                                                         alleles,
                                                                         available_alleles)
             #print('CORRECTED ALLELES: ', corrected_alleles)
@@ -435,8 +448,8 @@ class Target(PMHC):
                     break
                 else:
                     pass
-            
-        
+
+
         if seq_flag == True:
             print('Chain %s MHC sequence correctly retrieved' %chain)
         else:
@@ -445,14 +458,14 @@ class Target(PMHC):
             print("The model will be generated using the best template's MHC sequence.")
             print("To be sure you use the right sequence, please double check your MHC allele name")
             print("or provide the MHC sequence as target.M_chain_seq (and target.N_chain_seq for MHCII beta chain)")
-            
+
     def fill_allele_seq_info(self):
-        
+
         if self.allele_type:
             # Check allele name
             self.check_allele_name()
-            
-        
+
+
         #Check if there are allele name for each MHC chain
         M_allele_flag = False
         N_allele_flag = False
@@ -461,7 +474,7 @@ class Target(PMHC):
         if self.MHC_class == 'II':
             if any(x in y for x in PANDORA.beta_genes for y in self.allele_type):
                 N_allele_flag = True
-          
+
         #Check if there are allele name for each MHC chain
         if self.M_chain_seq =='' and M_allele_flag:
             print('No MHC alpha chain sequence was provided. Trying to retrieve it from reference sequences...')
@@ -490,8 +503,8 @@ class Target(PMHC):
             print('No MHC alpha chain allele was provided. Trying to retrieve it from reference sequences...')
             #Blast against reference database
             try:
-                blast_results = Modelling_functions.blast_mhc_seq(self.M_chain_seq, 
-                                                                  chain='M', 
+                blast_results = Modelling_functions.blast_mhc_seq(self.M_chain_seq,
+                                                                  chain='M',
                                                                   blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db')
                 #Take only the allele names with the highest id score
                 top_id = blast_results[0][1]
@@ -499,7 +512,7 @@ class Target(PMHC):
             except:
                 print('WARNING: something went wrong when trying to retrieve chain M allele')
                 print('with blast. Is blastp properly installed as working as "/bin/bash blastp"?')
-            
+
         if self.MHC_class == 'II' and self.N_chain_seq =='' and N_allele_flag:
             print('No MHC sequence was provided. Trying to retrieve it from reference sequences...')
             try:
@@ -522,13 +535,13 @@ class Target(PMHC):
                 print('WARNING: Missing N chain (Beta chain) sequence and allele name.')
                 print('PANDORA will try to model case %s by using the best template N chain sequence' %self.id)
                 print('We strongly advice to provide either allele name or chain sequence for chain N')
-            
+
         if self.MHC_class == 'II' and self.N_chain_seq !='' and not N_allele_flag:
             print('No MHC alpha chain allele was provided. Trying to retrieve it from reference sequences...')
             #Blast against reference database
             try:
-                blast_results = Modelling_functions.blast_mhc_seq(self.N_chain_seq, 
-                                                                  chain='N', 
+                blast_results = Modelling_functions.blast_mhc_seq(self.N_chain_seq,
+                                                                  chain='N',
                                                                   blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db')
                 #Take only the allele names with the highest id score
                 top_id = blast_results[0][1]
@@ -536,5 +549,3 @@ class Target(PMHC):
             except:
                 print('WARNING: something went wrong when trying to retrieve chain M allele')
                 print('with blast. Is blastp properly installed as working as "/bin/bash blastp"?')
-            
-            

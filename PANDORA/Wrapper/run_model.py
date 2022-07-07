@@ -26,21 +26,25 @@ def run_model(args):
     #     output_dir = args[0]
     #     start=1
 
-    target = args[0]
-    template = args[1]
-    output_dir = args[2]
-    n_loop_models = args[3]
-    n_jobs=args[4]
-    benchmark = args[5]
-    pickle_out = args[6]
+    target = args['target']
+    template = args['template']
+    #output_dir = args['outdir']
+    n_loop_models = args['n_loop_models']
+    n_jobs = args['n_jobs']
+    benchmark = args['benchmark']
+    pickle_out = args['pickle_out']
 
 
     # Create Pandora Object
-    if output_dir != '':
-        mod = Pandora.Pandora(target, template=template,
-                              output_dir=output_dir)
+    if args['outdir'] != '':
+        output_dir = args['outdir']
+    elif args['outdir'] == '' and args['collective_output_dir']:
+        output_dir = args['collective_output_dir']
     else:
-        mod = Pandora.Pandora(target, template = template)
+        output_dir = False
+
+    mod = Pandora.Pandora(target, template=template,
+                          output_dir=output_dir)
 
     # Run the modelling
     mod.model(n_loop_models=n_loop_models, n_jobs=n_jobs,

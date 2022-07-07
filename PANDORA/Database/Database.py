@@ -163,17 +163,29 @@ class Database:
 
         sequences = []
         for template in self.MHCI_data.values():
+            #Get Header and sequence
             header, seq = Database_functions.get_sequence_for_fasta(
                                         template, MHC_class='I', chain='M')
+            #Keep only the G-domain
+            seq = seq[PANDORA.MHCI_G_domain[0][0]:PANDORA.MHCI_G_domain[0][1]]
+            #Append to the list
             sequences.append((header, seq))
 
         for template in self.MHCII_data.values():
+            #Get Header and sequence
             header, seq = Database_functions.get_sequence_for_fasta(
                                         template, MHC_class='II', chain='M')
+            #Keep only the G-domain
+            seq = seq[PANDORA.MHCII_G_domain[0][0]:PANDORA.MHCII_G_domain[0][1]]
+            #Append to the list
             sequences.append((header, seq))
 
+            #Get Header and sequence
             header, seq = Database_functions.get_sequence_for_fasta(
                                         template, MHC_class='II', chain='N')
+            #Keep only the G-domain
+            seq = seq[PANDORA.MHCII_G_domain[1][0]:PANDORA.MHCII_G_domain[1][1]]
+            #Append to the list
             sequences.append((header, seq))
 
         self.all_sequences = sequences
