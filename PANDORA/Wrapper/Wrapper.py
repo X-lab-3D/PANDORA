@@ -107,7 +107,7 @@ class Wrapper():
                     ## to the default values in PMHC.Target.__init__()
                     ## Assign anchors
                     if anchors_col:
-                        anchors = tuple([int(x) for x in row[anchors_col].split(';')])
+                        anchors = list([int(x) for x in row[anchors_col].split(';')])
                         targets[target_id]['anchors'] = anchors
                     else:
                         targets[target_id]['anchors'] = []
