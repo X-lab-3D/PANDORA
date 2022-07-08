@@ -1437,10 +1437,10 @@ def parse_pMHCI_pdb(pdb_id,
 
         # Create MHC_structure object
         templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'],
-                              peptide=seqs['P'], pdb=pdb, pdb_path=pdb_file, 
+                              peptide=seqs['P'], pdb=pdb, pdb_path=pdb_file,
                               resolution=resolution, sheet=sheet, helix=helix,
                               remove_biopython_object=remove_biopython_object)
-        
+
         #Check if the anchor calculation went ok
         if templ.anchors[1] - templ.anchors[0] < 6:
             log(pdb_id, 'Failed, the anchors seem to be too close to each other. This might depend on GitHub issue #146', logfile)
@@ -1593,9 +1593,9 @@ def parse_pMHCII_pdb(pdb_id,
             resolution = get_resolution(pdb_file)
 
             # Create MHC_structure object
-            templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele, 
+            templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele,
                                   M_chain_seq=seqs['M'], N_chain_seq=seqs['N'],
-                                  peptide=seqs['P'], MHC_class='II', pdb=pdb, 
+                                  peptide=seqs['P'], MHC_class='II', pdb=pdb,
                                   pdb_path=pdb_file, resolution=resolution,
                                   helix=helix, sheet=sheet,
                                   remove_biopython_object=remove_biopython_object)
@@ -1821,7 +1821,7 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
             to_write[allele] = str(putatives[0].seq)
 
     #Write output fasta file
-    with open(nonHLA_out, 'w') as outfile:
+    with open(data_dir + nonHLA_out, 'w') as outfile:
         for allele in to_write:
             outfile.write('>'+allele+'\n')
             for i in range(len(to_write[allele])):
