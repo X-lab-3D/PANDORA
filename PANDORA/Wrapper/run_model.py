@@ -33,6 +33,7 @@ def run_model(args):
     n_jobs = args['n_jobs']
     benchmark = args['benchmark']
     pickle_out = args['pickle_out']
+    clip_C_domain = args['clip_C_domain']
 
 
     # Create Pandora Object
@@ -48,4 +49,5 @@ def run_model(args):
 
     # Run the modelling
     mod.model(n_loop_models=n_loop_models, n_jobs=n_jobs,
-              stdev=0.1, benchmark=benchmark, pickle_out=pickle_out)
+              stdev=0.1, benchmark=benchmark, pickle_out=pickle_out,
+              clip_C_domain=clip_C_domain)
