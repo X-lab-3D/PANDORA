@@ -417,7 +417,7 @@ class Target(PMHC):
         seq_flag = False
         #for seq in fasta_sequences:
         for seq in ref_sequences:
-            if any(seq == allele for allele in alleles):
+            if any(allele in seq for allele in alleles):
                 if chain == 'M':
                     self.M_chain_seq = ref_sequences[seq]
                     seq_flag = True
