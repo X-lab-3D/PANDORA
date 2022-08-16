@@ -96,7 +96,7 @@ def test_align():
 
 def test_clean_MHCI_structure():
     x = Database_functions.parse_pMHCI_pdb('1A1O',
-                       indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/Bad/IMGT/IMGT3DFlatFiles',
+                       indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                        outdir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI',
                        bad_dir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/Bad')
 
@@ -105,7 +105,7 @@ def test_clean_MHCI_structure():
 
 def test_clean_MHCII_structure():
     x = Database_functions.parse_pMHCII_pdb('2NNA',
-                       indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/Bad/IMGT/IMGT3DFlatFiles',
+                       indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                        outdir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCII',
                        bad_dir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCII/Bad')
 
