@@ -15,7 +15,7 @@ import traceback
 # model_path = y.model_path
 # output_dir = PANDORA.PANDORA_data
 # pdb = deepcopy(y.pdb)
-# reference_pdb = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/PDBs/pMHCII/1HXY.pdb'
+# reference_pdb = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/default/PDBs/pMHCII/1HXY.pdb'
 
 
 

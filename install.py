@@ -1,12 +1,12 @@
 import os
 
 dirs = [
-        './PANDORA_files', './PANDORA_files/data', './PANDORA_files/data/csv_pkl_files',
-        './PANDORA_files/data/csv_pkl_files/mhcseqs', './PANDORA_files/data/PDBs',
-        './PANDORA_files/data/PDBs/pMHCI', './PANDORA_files/data/PDBs/pMHCII',
-        './PANDORA_files/data/PDBs/Bad', './PANDORA_files/data/PDBs/Bad/pMHCI',
-        './PANDORA_files/data/PDBs/Bad/pMHCII', './PANDORA_files/data/PDBs/IMGT_retrieved',
-         './PANDORA_files/data/outputs',
+        './PANDORA_files', './PANDORA_files/default', './PANDORA_files/default/csv_pkl_files',
+        './PANDORA_files/default/csv_pkl_files/mhcseqs', './PANDORA_files/default/PDBs',
+        './PANDORA_files/default/PDBs/pMHCI', './PANDORA_files/default/PDBs/pMHCII',
+        './PANDORA_files/default/PDBs/Bad', './PANDORA_files/default/PDBs/Bad/pMHCI',
+        './PANDORA_files/default/PDBs/Bad/pMHCII', './PANDORA_files/default/PDBs/IMGT_retrieved',
+         './PANDORA_files/default/outputs',
         './test/test_data/PDBs/Bad','./test/test_data/PDBs/Bad/pMHCI',
         './test/test_data/PDBs/Bad/pMHCII', './test/test_data/csv_pkl_files'
         ]
