@@ -86,7 +86,7 @@ conda install -y -c salilab modeller
 PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) that can be installed via bioconda
 
 ```
-conda install -c bioconda muscle
+conda install -c bioconda muscle=3.8
 ```
 
 #### 3. Install PANDORA
