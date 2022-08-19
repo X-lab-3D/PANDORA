@@ -96,9 +96,9 @@ class Database:
                     print('something went wrong parsing %s' %id)
                     print(e)
 
-        databases_data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/'
+        databases_data_dir = PANDORA.PANDORA_data
         #Construct blast database for blast-based sequence-based template selection
-        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ '/csv_pkl_files/templates_blast_db',
+        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ 'templates_blast_db',
         #                         db_name='templates_blast_db')
 
         #Download and parse HLA and MHC sequences reference data
@@ -106,7 +106,7 @@ class Database:
             self.update_ref_sequences()
 
         #Construct blast database for retriving mhc allele
-        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ '/csv_pkl_files/refseq_blast_db',
+        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ 'refseq_blast_db',
         #                         db_name='refseq_blast_db')
 
         self.construct_both_blast_db(databases_data_dir)
@@ -204,7 +204,7 @@ class Database:
         Construc blast database for seq based template selection
 
         Args:
-            outpath (str, optional): Data dir folder. Defaults to PANDORA.PANDORA_data+ '/csv_pkl_files/'.
+            outpath (str, optional): Data dir folder. Defaults to PANDORA.PANDORA_data.
             db_name (str, optional): Name of the db folder and fasta file. Defaults to 'MHC_blast_db'.
         Returns:
             None.
@@ -220,7 +220,7 @@ class Database:
                                           '-in', infile,'-out',
                                           outpath+'/'+db_name]), shell=True)
 
-    def construct_both_blast_db(self, data_dir=PANDORA.PANDORA_data+ '/csv_pkl_files/'):
+    def construct_both_blast_db(self, data_dir=PANDORA.PANDORA_data):
 
         #Define db name and path
         db_name='templates_blast_db'

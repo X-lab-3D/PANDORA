@@ -1,14 +1,14 @@
 import os
 
 dirs = [
-        './Databases', './Databases/default', './Databases/default/csv_pkl_files',
-        './Databases/default/csv_pkl_files/mhcseqs', './Databases/default/PDBs',
+        './Databases', './Databases/default',
+        './Databases/default/mhcseqs', './Databases/default/PDBs',
         './Databases/default/PDBs/pMHCI', './Databases/default/PDBs/pMHCII',
         './Databases/default/PDBs/Bad', './Databases/default/PDBs/Bad/pMHCI',
         './Databases/default/PDBs/Bad/pMHCII', './Databases/default/PDBs/IMGT_retrieved',
          './Databases/default/outputs',
         './test/test_data/PDBs/Bad','./test/test_data/PDBs/Bad/pMHCI',
-        './test/test_data/PDBs/Bad/pMHCII', './test/test_data/csv_pkl_files'
+        './test/test_data/PDBs/Bad/pMHCII', './test/test_data'
         ]
 
 for D in dirs:

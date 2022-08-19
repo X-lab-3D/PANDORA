@@ -427,7 +427,7 @@ def score_peptide_alignment(target, template, substitution_matrix='PAM30'):
 
 
 def find_template(target, database, best_n_templates = 1, benchmark=False, 
-                  blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/templates_blast_db/templates_blast_db'):
+                  blastdb=PANDORA.PANDORA_data + 'templates_blast_db/templates_blast_db'):
     ''' Selects the template structure that is best suited as template for homology modelling of the target
 
     Args:
@@ -844,7 +844,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
 
     return results
 
-def blast_mhc_seq(seq, chain='M', blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db'):
+def blast_mhc_seq(seq, chain='M', blastdb=PANDORA.PANDORA_data + '/refseq_blast_db/refseq_blast_db'):
     try:
         command = (' ').join(['blastp','-db',blastdb, 
                                                  '-query',

@@ -1,6 +1,5 @@
 # Data folders.
 /Databases
-#/Databases/csv_pkl_files
 #/Databases/default/Alignments
 #/Databases/default/FASTAs
 #/Databases/default/PDBs/*

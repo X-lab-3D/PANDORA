@@ -2,7 +2,6 @@ import os
 
 os.system('mkdir ./Databases')
 os.system('mkdir ./Databases/default')
-os.system('mkdir ./Databases/default/csv_pkl_files')
 os.system('mkdir ./Databases/default/PDBs')
 os.system('mkdir ./Databases/default/PDBs/pMHCI')
 os.system('mkdir ./Databases/default/PDBs/pMHCII')
@@ -10,10 +9,10 @@ os.system('mkdir ./Databases/default/PDBs/Bad')
 os.system('mkdir ./Databases/default/PDBs/Bad/pMHCI')
 os.system('mkdir ./Databases/default/PDBs/Bad/pMHCII')
 os.system('mkdir ./Databases/default/PDBs/IMGT_retrieved/')
+os.system('mkdir ./test/test_data')
 os.system('mkdir ./test/test_data/PDBs/Bad')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCI')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCII')
-os.system('mkdir ./test/test_data/csv_pkl_files')
 
 
 
