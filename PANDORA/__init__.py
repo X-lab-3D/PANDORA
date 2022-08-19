@@ -7,7 +7,7 @@ Path to PANDORA installation
 :meta hide-value:
 '''
 
-PANDORA_data = os.path.join(os.path.dirname(PANDORA_path), 'PANDORA_files', 'data')
+PANDORA_data = os.path.join(os.path.dirname(PANDORA_path), 'Databases', 'data')
 # PANDORA_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 alpha_genes = ['HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G',

@@ -105,7 +105,7 @@ class Pandora:
     def prep_output_dir(self):
         ''' Create an output directory and move the template pdb there
             Uses self.output_dir (str): Path to output directory.
-                Defaults to <PANDORA_location>/PANDORA_files/data/outputs.
+                Defaults to <PANDORA_location>/Databases/data/outputs.
 
         Args:
             None

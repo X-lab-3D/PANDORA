@@ -302,7 +302,7 @@ see [Class Diagram](https://github.com/DarioMarzella/PANDORA/blob/master/images/
 
 The following file structure is prepared to store the output files for each case. Each modelling case is given a specific name based on target and template ID.
 
-Please note that the modelling results consisting genretaed models by default are stored in *./PANDORA_files/data/outputs/* directory
+Please note that the modelling results consisting genretaed models by default are stored in *./Databases/data/outputs/* directory
 
 - Main outputs: *molpdf_DOPE.tsv, *BL*.pdb, modeller.log(
 - Input files prepared for modelling: *contacs_*.list, *.ali*
@@ -310,7 +310,7 @@ Please note that the modelling results consisting genretaed models by default ar
 - MODELLER by product outputs(Generated during the modelling): *D0*, DL*, *IL*.pdb , , *.ini, *.lrsr, *.rsr, *.sch, ...*
 
 ```
-PANDORA_files
+Databases
   └── data
      └── outputs                         Default directory to save output
         └── <target_name>_<template_id>  Each user's modelling case is given a specific name
