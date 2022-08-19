@@ -1,16 +1,16 @@
 # Data folders.
 /Databases
 #/Databases/csv_pkl_files
-#/Databases/data/Alignments
-#/Databases/data/FASTAs
-#/Databases/data/PDBs/*
-#/Databases/data/temp
-#/Databases/data/bkup_PDBs
-#/Databases/data/Targets/*
-#/Databases/data/unused_templates/*
-#/Databases/data/dist_files/*
-#/Databases/data/allele_profiles/*
-#/Databases/data/netMHCpan_set/*
+#/Databases/default/Alignments
+#/Databases/default/FASTAs
+#/Databases/default/PDBs/*
+#/Databases/default/temp
+#/Databases/default/bkup_PDBs
+#/Databases/default/Targets/*
+#/Databases/default/unused_templates/*
+#/Databases/default/dist_files/*
+#/Databases/default/allele_profiles/*
+#/Databases/default/netMHCpan_set/*
 #/Databases/outputs/*
 
 #Secondary projects
