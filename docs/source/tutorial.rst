@@ -31,7 +31,7 @@ Please note that you can specify output directory yourself, otherwise will be ge
 >>>
 >>> ## B. Create Target object
 >>> target = PMHC.Target(
->>>     allele_ty:pe='HLA-A*0201'
+>>>     allele_type=['HLA-A*0201'],
 >>>     peptide='LLFGYPVYV',
 >>>     anchors = [2,9])
 >>>
