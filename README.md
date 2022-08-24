@@ -109,6 +109,12 @@ PANDORA needs a PDB template database to work (retrieved from  [IMGT](http://www
 
 Alternatively, you can generate your template database(suggested) with the following python3 code:
 
+First, generate the necessary folders by running:
+```
+python install.py
+```
+Then, run the following script changing the path to the database you want to generate:
+
 ```python
 ## import requested modules
 from PANDORA.PMHC import PMHC
@@ -117,7 +123,7 @@ from PANDORA.Database import Database
 
 ## A. Create local Database
 db = Database.Database()
-db.construct_database(save='path/to/pandora_Database.pkl')
+db.construct_database(save='<path/to/pandora_Database.pkl>')
 ```
 
 Note: generating a database can take more than one hour and a half, so we advice to run it as background process or submit it as cluster job.
