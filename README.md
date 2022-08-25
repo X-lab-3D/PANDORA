@@ -162,7 +162,7 @@ from PANDORA.Database import Database
 db = Database.load('path/to/pandora_Database.pkl')
 
 ## B. Create Target object
-target = PMHC.Target(id = 'myTestCase'
+target = PMHC.Target(id = 'myTestCase',
     allele_type = ['HLA-A*0201'],
     peptide = 'LLFGYPVYV',
     anchors = [2,9])
