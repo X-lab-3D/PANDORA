@@ -116,7 +116,7 @@ from PANDORA.Database import Database
 
 ## A. Create local Database
 db = Database.Database()
-db.construct_database(save='path/to/pandora_Database.pkl')
+db.construct_database(save='<path_to_PANDORA>/Databases/default/db.pkl')
 ```
 
 Note: generating a database can take more than one hour and a half, so we advice to run it as background process or submit it as cluster job.
