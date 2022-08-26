@@ -98,7 +98,7 @@ class Database:
 
         databases_data_dir = PANDORA.PANDORA_data
         #Construct blast database for blast-based sequence-based template selection
-        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ 'templates_blast_db',
+        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ '/templates_blast_db',
         #                         db_name='templates_blast_db')
 
         #Download and parse HLA and MHC sequences reference data
