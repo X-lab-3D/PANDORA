@@ -4,6 +4,7 @@ from PANDORA.PMHC import PMHC
 from PANDORA.Database import Database_functions
 import os
 import subprocess
+from joblib import Parallel, delayed
 
 class Database:
 
@@ -25,21 +26,35 @@ class Database:
         self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', data_dir = data_dir, out_tsv='all_MHII_IDs.tsv')
 
 
-    def __clean_MHCI_file(self, pdb_id, data_dir, remove_biopython_object):
+    def clean_MHCI_file(self, pdb_id, data_dir, remove_biopython_object):
         """ Clean all MHCI structures"""
-        return Database_functions.parse_pMHCI_pdb(pdb_id,
-                                                   indir = data_dir + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
-                                                   outdir = data_dir + '/PDBs/pMHCI',
-                                                   bad_dir = data_dir + '/PDBs/Bad/pMHCI',
-                                                   remove_biopython_object=remove_biopython_object)
+        try: 
+            templ = Database_functions.parse_pMHCI_pdb(pdb_id,
+                                                    indir = data_dir + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
+                                                    outdir = data_dir + '/PDBs/pMHCI',
+                                                    bad_dir = data_dir + '/PDBs/Bad/pMHCI',
+                                                    remove_biopython_object=remove_biopython_object)
+            if templ != None:
+                self.MHCI_data[pdb_id] = templ
 
-    def __clean_MHCII_file(self, pdb_id, data_dir, remove_biopython_object):
+        except Exception as e:
+            print('something went wrong parsing %s:' %pdb_id)
+            print(e)
+
+    def clean_MHCII_file(self, pdb_id, data_dir, remove_biopython_object):
         """ Clean all MHCII structures. Returns a list of bad PDBs"""
-        return Database_functions.parse_pMHCII_pdb(pdb_id,
+        try: 
+            templ = Database_functions.parse_pMHCII_pdb(pdb_id,
                                                    indir = data_dir + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                                                    outdir = data_dir + '/PDBs/pMHCII',
                                                    bad_dir = data_dir + '/PDBs/Bad/pMHCII',
                                                    remove_biopython_object=remove_biopython_object)
+            if templ != None:
+                self.MHCII_data[pdb_id] = templ
+
+        except Exception as e:
+            print('something went wrong parsing %s' %pdb_id)
+            print(e)
 
     def update_ref_sequences(self):
         """Downloads and parse HLA and other MHC sequences to compile reference fastas.
@@ -73,28 +88,12 @@ class Database:
         # Construct the MHCI database
         if MHCI:
             # Parse all MHCI files
-            for id in self.__IDs_list_MHCI:
-                try:
-                    templ = self.__clean_MHCI_file(pdb_id = id, data_dir=data_dir,
-                                                   remove_biopython_object=remove_biopython_objects)
-                    if templ != None:
-                        self.MHCI_data[id] = templ
-                except Exception as e:
-                    print('something went wrong parsing %s:' %id)
-                    print(e)
+            Parallel(n_jobs = -1)(delayed(self.clean_MHCI_file)(id, data_dir, remove_biopython_objects) for id in self.__IDs_list_MHCI)
 
         # Construct the MHCII database
         if MHCII:
             # Parse all MHCII files
-            for id in self.__IDs_list_MHCII:
-                try:
-                    templ = self.__clean_MHCII_file(pdb_id = id, data_dir=data_dir,
-                                                    remove_biopython_object=remove_biopython_objects)
-                    if templ != None:
-                        self.MHCII_data[id] = templ
-                except Exception as e:
-                    print('something went wrong parsing %s' %id)
-                    print(e)
+            Parallel(n_jobs = -1)(delayed(self.clean_MHCII_file)(id, data_dir, remove_biopython_objects) for id in self.__IDs_list_MHCII)
 
         databases_data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/'
         #Construct blast database for blast-based sequence-based template selection
