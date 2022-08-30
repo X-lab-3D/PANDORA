@@ -8,8 +8,7 @@ from joblib import Parallel, delayed
 
 class Database:
 
-    def __init__(self, n_jobs = -1):
-        self.n_jobs = n_jobs
+    def __init__(self):
         self.MHCI_data = {}
         self.MHCII_data = {}
         self.ref_MHCI_sequences = {}
@@ -65,7 +64,8 @@ class Database:
     def construct_database(self, save, data_dir = PANDORA.PANDORA_data,
                            MHCI=True, MHCII=True, download=True,
                            update_ref_sequences=True, 
-                           remove_biopython_objects = True):
+                           remove_biopython_objects = True,
+                           n_jobs = -1):
         '''construct_database(self, save, data_dir = PANDORA.PANDORA_data, MHCI=True, MHCII=True, download=True, update_ref_sequences=True)
         Construct the database. Download, clean and add all structures
 
@@ -89,12 +89,12 @@ class Database:
         # Construct the MHCI database
         if MHCI:
             # Parse all MHCI files
-            Parallel(n_jobs = self.n_jobs)(delayed(self.clean_MHCI_file)(id, data_dir, remove_biopython_objects) for id in self.__IDs_list_MHCI)
+            Parallel(n_jobs = n_jobs)(delayed(self.clean_MHCI_file)(id, data_dir, remove_biopython_objects) for id in self.__IDs_list_MHCI)
 
         # Construct the MHCII database
         if MHCII:
             # Parse all MHCII files
-            Parallel(n_jobs = self.n_jobs)(delayed(self.clean_MHCII_file)(id, data_dir, remove_biopython_objects) for id in self.__IDs_list_MHCII)
+            Parallel(n_jobs = n_jobs)(delayed(self.clean_MHCII_file)(id, data_dir, remove_biopython_objects) for id in self.__IDs_list_MHCII)
 
         databases_data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/'
         #Construct blast database for blast-based sequence-based template selection
