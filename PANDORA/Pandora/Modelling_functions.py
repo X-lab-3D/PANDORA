@@ -713,7 +713,7 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
 
     if target.MHC_class == 'II':
         with open(output_dir.replace('\\ ', ' ') + '/MyLoop.py', 'w') as myloopscript:
-            MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r') #Hotfix only for the run --> Fix before commit!
+            MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r')
             for line in MyL_temp:
                 if 'ANCHORS_PLACEHOLDER' in line:
                     if anch[0] == 0:
