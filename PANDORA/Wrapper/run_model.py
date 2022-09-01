@@ -48,4 +48,4 @@ def run_model(args):
 
     # Run the modelling
     mod.model(n_loop_models=n_loop_models, n_jobs=n_jobs,
-              stdev=0.1, benchmark=benchmark, pickle_out=pickle_out)
+              stdev=0.5, benchmark=benchmark, pickle_out=pickle_out)
