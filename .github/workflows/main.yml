@@ -22,10 +22,11 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
+      - name: Set up conda
+        uses: conda-incubator/setup-miniconda@v2
       - name: Set up directories
         run: python test/install_git_test.py
       - name: Install package
-        uses: conda-incubator/setup-miniconda@v2
         run: |
           alias KEY_MODELLER=${{ secrets.MODELLER_KEY }}
           pip install joblib
