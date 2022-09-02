@@ -116,10 +116,15 @@ from PANDORA.Database import Database
 
 ## A. Create local Database
 db = Database.Database()
-db.construct_database(save='<path_to_PANDORA>/Databases/default/db.pkl')
+db.construct_database(save='Databases/<user_folder>/db.pkl')
 ```
 
-Note: generating a database can take more than one hour and a half, so we advice to run it as background process or submit it as cluster job.
+Note 1: in the case of generation of template database, data are saved by default into `Databases/default`. It is possible to modify the folder name (`default`) by creating a `config.json` file in the current working directory using `data_folder_name` as a key, and the desired folder name as a value:
+```
+{"data_folder_name": "<folder_in_PANDORA_files>"}
+```
+
+Note 2: generating a database can take more than one hour and a half, so we advice to run it as background process or submit it as cluster job.
 
 ## (Optional) Install NetMHCpan and/or NetMHCIIpan
 

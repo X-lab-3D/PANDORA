@@ -1,16 +1,5 @@
 # Data folders.
 /Databases
-#/Databases/default/Alignments
-#/Databases/default/FASTAs
-#/Databases/default/PDBs/*
-#/Databases/default/temp
-#/Databases/default/bkup_PDBs
-#/Databases/default/Targets/*
-#/Databases/default/unused_templates/*
-#/Databases/default/dist_files/*
-#/Databases/default/allele_profiles/*
-#/Databases/default/netMHCpan_set/*
-#/Databases/outputs/*
 
 #Secondary projects
 /william

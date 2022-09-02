@@ -1,19 +1,31 @@
 import os
+from os.path import exists
+from pathlib import Path
+import json
+
+user_folder_path = Path(__file__).parents[1]
+print(user_folder_path)
+
+if exists(user_folder_path / 'config.json'):
+    with open(user_folder_path / 'config.json') as f:
+        data = json.load(f)
+        data_folder = data['data_folder_name']
+else:
+    data_folder = 'default'
 
 os.system('mkdir ./Databases')
-os.system('mkdir ./Databases/default')
-os.system('mkdir ./Databases/default/PDBs')
-os.system('mkdir ./Databases/default/PDBs/pMHCI')
-os.system('mkdir ./Databases/default/PDBs/pMHCII')
-os.system('mkdir ./Databases/default/PDBs/Bad')
-os.system('mkdir ./Databases/default/PDBs/Bad/pMHCI')
-os.system('mkdir ./Databases/default/PDBs/Bad/pMHCII')
-os.system('mkdir ./Databases/default/PDBs/IMGT_retrieved/')
+os.system(f'mkdir ./Databases/{data_folder}')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCI')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCII')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad/pMHCI')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad/pMHCII')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs/IMGT_retrieved/')
 os.system('mkdir ./test/test_data')
 os.system('mkdir ./test/test_data/PDBs/Bad')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCI')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCII')
-
 
 
 # netMHCII Pan install

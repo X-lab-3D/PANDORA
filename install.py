@@ -1,12 +1,21 @@
+from os.path import exists
 import os
+import json
+
+if exists('config.json'):
+    with open('config.json') as f:
+        data = json.load(f)
+        data_folder = data['data_folder_name']
+else:
+    data_folder = 'default'
 
 dirs = [
-        './Databases', './Databases/default',
-        './Databases/default/mhcseqs', './Databases/default/PDBs',
-        './Databases/default/PDBs/pMHCI', './Databases/default/PDBs/pMHCII',
-        './Databases/default/PDBs/Bad', './Databases/default/PDBs/Bad/pMHCI',
-        './Databases/default/PDBs/Bad/pMHCII', './Databases/default/PDBs/IMGT_retrieved',
-         './Databases/default/outputs',
+        './Databases', f'./Databases/{data_folder}',
+        f'./Databases/{data_folder}/mhcseqs', f'./Databases/{data_folder}/PDBs',
+        f'./Databases/{data_folder}/PDBs/pMHCI', f'./Databases/{data_folder}/PDBs/pMHCII',
+        f'./Databases/{data_folder}/PDBs/Bad', f'./Databases/{data_folder}/PDBs/Bad/pMHCI',
+        f'./Databases/{data_folder}/PDBs/Bad/pMHCII', f'./Databases/{data_folder}/PDBs/IMGT_retrieved',
+        f'./Databases/{data_folder}/outputs',
         './test/test_data/PDBs/Bad','./test/test_data/PDBs/Bad/pMHCI',
         './test/test_data/PDBs/Bad/pMHCII', './test/test_data'
         ]

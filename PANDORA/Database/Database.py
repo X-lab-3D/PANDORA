@@ -218,14 +218,14 @@ class Database:
 
         subprocess.check_call((' ').join(['makeblastdb','-dbtype','prot',
                                           '-in', infile,'-out',
-                                          outpath+'/'+db_name]), shell=True)
+                                          outpath + '/' + db_name]), shell=True)
 
     def construct_both_blast_db(self, data_dir=PANDORA.PANDORA_data):
 
         #Define db name and path
-        db_name='templates_blast_db'
-        outpath=data_dir+ db_name
-        out_fasta = outpath+'/'+db_name+'.fasta'
+        db_name = 'templates_blast_db'
+        outpath = data_dir + '/' + db_name
+        out_fasta = outpath + '/'+ db_name +'.fasta'
 
         #Create db directory
         if not os.path.isdir(outpath):
@@ -240,16 +240,16 @@ class Database:
                                 db_name=db_name)
 
         #Define db name and path
-        db_name='refseq_blast_db'
-        outpath=data_dir+ db_name
-        out_fasta = outpath+'/'+db_name+'.fasta'
+        db_name = 'refseq_blast_db'
+        outpath = data_dir + '/' + db_name
+        out_fasta = outpath + '/' + db_name + '.fasta'
 
         #Create db directory
         if not os.path.isdir(outpath):
             subprocess.check_call('mkdir %s' %outpath, shell=True)
 
         #Create .fasta for the db
-        command='cat %sHuman_MHC_data.fasta %sNonHuman_MHC_data.fasta > %s' %(data_dir,
+        command='cat %s/Human_MHC_data.fasta %s/NonHuman_MHC_data.fasta > %s' %(data_dir,
                                                                               data_dir,
                                                                               out_fasta)
         subprocess.check_call(command, shell=True)
