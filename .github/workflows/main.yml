@@ -28,9 +28,9 @@ jobs:
         run: |
           alias KEY_MODELLER=${{ secrets.MODELLER_KEY }}
           pip install joblib
-          conda install -c bioconda muscle
-          conda install -c salilab modeller
-          conda install -c bioconda blast
+          $CONDA install -c bioconda muscle=3.8
+          $CONDA install -c salilab modeller
+          $CONDA install -c bioconda blast
           python -m pip install --upgrade pip
           pip install -e .[test]
 
