@@ -17,6 +17,6 @@ with open(modeller_config_file, 'r') as f:
         
 with open(modeller_config_file, 'w') as f:
     print("Writing MODELLER config file")
-    for line in f:
+    for line in modeller_config:
         f.write(line.replace("XXXX", a.license))
         print(line.replace("XXXX", a.license))
