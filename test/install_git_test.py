@@ -17,7 +17,7 @@ os.system('mkdir ./test/test_data/PDBs/Bad/pMHCII')
 os.system('mkdir ./test/test_data/csv_pkl_files')
 
 modeller_config_file = '/usr/share/miniconda/envs/test/lib/modeller-10.2/modlib/modeller/config.py'
-modeller_license_key = sys.arg[1]
+modeller_license_key = sys.argv[1]
 
 modeller_config = []
 with open(modeller_config_file, 'r') as f:
