@@ -25,9 +25,9 @@ jobs:
       - name: Set up conda test
         uses: conda-incubator/setup-miniconda@v2
         with:
-      #KEY_MODELLER: ${{ secrets.MODELLER_KEY }}
           auto-activate-base: true
           activate-environment: ""
+      #KEY_MODELLER: ${{ secrets.MODELLER_KEY }}
       - name: Set up directories
         run: | 
           python test/install_git_test.py 
