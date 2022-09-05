@@ -29,22 +29,21 @@ jobs:
       #    activate-environment: ""
       - name: Set up directories
         run: python test/install_git_test.py
+
       - name: Install package
         shell: bash -l {0}
         run: |
-          alias KEY_MODELLER=${{ secrets.MODELLER_KEY }}
           pip install joblib
-          conda install -c bioconda muscle=3.8
-          conda install -c salilab modeller
-          conda install -c bioconda blast
           python -m pip install --upgrade pip
           pip install -e .[test]
 
       - name: Test with pytest
         shell: bash -l {0}
         run: |
-          alias blastp='$CONDA/bin/blastp'
-          alias muscle='$CONDA/bin/muscle'
+          alias KEY_MODELLER=${{ secrets.MODELLER_KEY }}
+          conda install -c bioconda muscle=3.8
+          conda install -c salilab modeller
+          conda install -c bioconda blast
           pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
 
       - name: Coveralls
