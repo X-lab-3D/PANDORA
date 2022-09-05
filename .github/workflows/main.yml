@@ -43,6 +43,7 @@ jobs:
         run: |
           KEY_MODELLER=${{ secrets.MODELLER_KEY }}
           conda install -c salilab modeller
+          conda install -c bioconda muscle
           conda install -c bioconda blast
           alias blastp='$CONDA/bin/blastp'
           alias muscle='$CONDA/bin/muscle'
