@@ -50,7 +50,7 @@ jobs:
           KEY_MODELLER: ${{ secrets.MODELLER_KEY }}
         run: |
           conda install -c salilab modeller
-          python test/set_modeller_license.py -l "$KEY_MODELLER"
+          python test/set_modeller_license.py
           conda install -c bioconda muscle
           conda install -c bioconda blast
           alias blastp='$CONDA/bin/blastp'
