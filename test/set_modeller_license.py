@@ -21,4 +21,3 @@ with open(modeller_config_file, 'w') as f:
     print("Writing MODELLER config file")
     for line in modeller_config:
         f.write(line.replace("XXXX", license))
-        print(line.replace("XXXX", license))
