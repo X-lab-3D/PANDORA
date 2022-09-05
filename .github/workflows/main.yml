@@ -50,12 +50,12 @@ jobs:
           KEY_MODELLER: ${{ secrets.MODELLER_KEY }}
         run: |
           conda install -c salilab modeller
+          python test/set_modeller_license.py -l "$KEY_MODELLER"
           conda install -c bioconda muscle
           conda install -c bioconda blast
           alias blastp='$CONDA/bin/blastp'
           alias muscle='$CONDA/bin/muscle'
           pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
-      #    python test/set_modeller_license.py -l "$KEY_MODELLER"
 
 
       - name: Coveralls
