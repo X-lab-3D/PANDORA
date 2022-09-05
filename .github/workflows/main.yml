@@ -25,8 +25,8 @@ jobs:
       - name: Set up conda test
         uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: base
           auto-activate-base: true
+          activate-environment: ""
       - name: Set up directories
         run: | 
           python test/install_git_test.py 
