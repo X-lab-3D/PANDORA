@@ -22,18 +22,14 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
-      - name: Set MODELLER license
-        run:
-          KEY_MODELLER=${{ secrets.MODELLER_KEY }}
       - name: Set up conda test
         uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: test
-          environment-file: test_env.yml
-          auto-activate-base: false
+          activate-environment: base
+          auto-activate-base: true
       - name: Set up directories
         run: | 
-          python test/install_git_test.py
+          python test/install_git_test.py 
 
       - name: Install package
         shell: bash -l {0}
@@ -45,12 +41,12 @@ jobs:
       - name: Test with pytest
         shell: bash -l {0}
         run: |
+          KEY_MODELLER=${{ secrets.MODELLER_KEY }}
+          conda install -c salilab modeller
           conda install -c bioconda blast
           alias blastp='$CONDA/bin/blastp'
           alias muscle='$CONDA/bin/muscle'
           pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
-      # KEY_MODELLER=${{ secrets.MODELLER_KEY }}
-      # conda install -c salilab modeller
 
       - name: Coveralls
         env:
