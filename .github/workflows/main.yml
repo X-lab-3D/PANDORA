@@ -41,6 +41,7 @@ jobs:
           pip install -e .[test]
 
       - name: Test with pytest
+        shell: bash -l {0}
         run: |
           alias blastp='$CONDA/bin/blastp'
           alias muscle='$CONDA/bin/muscle'
