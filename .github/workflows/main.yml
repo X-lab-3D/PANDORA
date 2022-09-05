@@ -29,9 +29,7 @@ jobs:
           environment-file: test_env.yml
           auto-activate-base: false
       - name: Set up directories
-        run: |
-          alias KEY_MODELLER=${{ secrets.MODELLER_KEY }}
-          python test/install_git_test.py KEY_MODELLER
+        run: python test/install_git_test.py
 
       - name: Install package
         shell: bash -l {0}
@@ -40,15 +38,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[test]
 
-      # alias KEY_MODELLER=${{ secrets.MODELLER_KEY }}
-      # conda install -c bioconda muscle=3.8
-      # conda install -c salilab modeller
-      # conda install -c bioconda blast
-      # alias blastp='$CONDA/bin/blastp'
-      # alias muscle='$CONDA/bin/muscle'
       - name: Test with pytest
         shell: bash -l {0}
         run: |
+          alias KEY_MODELLER=${{ secrets.MODELLER_KEY }}
+          conda install -c bioconda muscle=3.8
+          conda install -c salilab modeller
+          conda install -c bioconda blast
+          alias blastp='$CONDA/bin/blastp'
+          alias muscle='$CONDA/bin/muscle'
           pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
 
       - name: Coveralls
