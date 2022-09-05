@@ -8,12 +8,13 @@ arg_parser.add_argument(
 )
 a = arg_parser.parse_args()
 
-modeller_config_file = '/usr/share/miniconda/envs/test/lib/modeller-10.2/modlib/modeller/config.py'
+modeller_config_file = '/usr/share/miniconda/lib/modeller-10.2/modlib/modeller/config.py'
 
 modeller_config = []
 with open(modeller_config_file, 'r') as f:
     for line in f:
         modeller_config.append(line)
+        
 with open(modeller_config_file, 'w') as f:
     print("Writing MODELLER config file")
     for line in f:
