@@ -24,12 +24,16 @@ jobs:
           python-version: 3.8
       - name: Set up conda
         uses: conda-incubator/setup-miniconda@v2
+          with:
+            auto-activate-base: true
+            activate-environment: ""
       - name: Set up directories
         run: python test/install_git_test.py
       - name: Install package
         run: |
           alias KEY_MODELLER=${{ secrets.MODELLER_KEY }}
           pip install joblib
+          conda activate base
           conda install -c bioconda muscle=3.8
           conda install -c salilab modeller
           conda install -c bioconda blast
