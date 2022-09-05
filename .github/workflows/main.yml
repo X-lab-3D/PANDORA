@@ -37,12 +37,13 @@ jobs:
           conda install -c bioconda muscle=3.8
           conda install -c salilab modeller
           conda install -c bioconda blast
-          alias blastp='$CONDA/bin/blastp'
           python -m pip install --upgrade pip
           pip install -e .[test]
 
       - name: Test with pytest
         run: |
+          alias blastp='$CONDA/bin/blastp'
+          alias muscle='$CONDA/bin/muscle'
           pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
 
       - name: Coveralls
