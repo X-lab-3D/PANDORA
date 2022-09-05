@@ -7,15 +7,15 @@ on: [push, pull_request, workflow_dispatch]
 
 # A workflow  run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  env:
-    KEY_MODELLER: ${{ secrets.MODELLER_KEY }}
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
+    env:
+      KEY_MODELLER: ${{ secrets.MODELLER_KEY }}
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+    
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
@@ -49,6 +49,7 @@ jobs:
       - name: Test with pytest
         shell: bash -l {0}
         run: |
+          echo "$KEY_MODELLER"
           conda install -c salilab modeller
           python test/set_modeller_license.py
           conda install -c bioconda muscle
