@@ -250,7 +250,7 @@ class Database:
             subprocess.check_call('mkdir %s' %outpath, shell=True)
 
         #Create .fasta for the db
-        command='cat %s/Human_MHC_data.fasta %s/NonHuman_MHC_data.fasta > %s' %(data_dir,
+        command='cat %s/mhcseqs/Human_MHC_data.fasta %s/mhcseqs/NonHuman_MHC_data.fasta > %s' %(data_dir,
                                                                               data_dir,
                                                                               out_fasta)
         subprocess.check_call(command, shell=True)
