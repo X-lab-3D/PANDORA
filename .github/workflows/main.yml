@@ -67,4 +67,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage.xml
         run: |
+          conda install -c conda-forge coveralls
           coveralls --service=github
