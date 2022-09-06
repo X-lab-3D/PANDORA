@@ -25,19 +25,21 @@ class Database:
         self.__IDs_list_MHCII = Database_functions.download_ids_imgt('MH2', data_dir = data_dir, out_tsv='all_MHII_IDs.tsv')
 
 
-    def __clean_MHCI_file(self, pdb_id, data_dir):
+    def __clean_MHCI_file(self, pdb_id, data_dir, remove_biopython_object):
         """ Clean all MHCI structures"""
         return Database_functions.parse_pMHCI_pdb(pdb_id,
                                                    indir = data_dir + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                                                    outdir = data_dir + '/PDBs/pMHCI',
-                                                   bad_dir = data_dir + '/PDBs/Bad/pMHCI')
+                                                   bad_dir = data_dir + '/PDBs/Bad/pMHCI',
+                                                   remove_biopython_object=remove_biopython_object)
 
-    def __clean_MHCII_file(self, pdb_id, data_dir):
+    def __clean_MHCII_file(self, pdb_id, data_dir, remove_biopython_object):
         """ Clean all MHCII structures. Returns a list of bad PDBs"""
         return Database_functions.parse_pMHCII_pdb(pdb_id,
                                                    indir = data_dir + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                                                    outdir = data_dir + '/PDBs/pMHCII',
-                                                   bad_dir = data_dir + '/PDBs/Bad/pMHCII')
+                                                   bad_dir = data_dir + '/PDBs/Bad/pMHCII',
+                                                   remove_biopython_object=remove_biopython_object)
 
     def update_ref_sequences(self):
         """Downloads and parse HLA and other MHC sequences to compile reference fastas.
@@ -46,7 +48,8 @@ class Database:
 
     def construct_database(self, save, data_dir = PANDORA.PANDORA_data,
                            MHCI=True, MHCII=True, download=True,
-                           update_ref_sequences=True):
+                           update_ref_sequences=True, 
+                           remove_biopython_objects = True):
         '''construct_database(self, save, data_dir = PANDORA.PANDORA_data, MHCI=True, MHCII=True, download=True, update_ref_sequences=True)
         Construct the database. Download, clean and add all structures
 
@@ -57,7 +60,10 @@ class Database:
             MHCII (bool): Parse data for MHCII. Defaults to True.
             download (bool): If True, download the structures data from IMGT. Defaults to True.
             update_ref_sequences (bool): If True, downloads and parse reference sequence strcutres. Defaults to True
-
+            remove_biopython_objects (bool): If True, removes the biopython pdb 
+                objects from the template objects to make the database considerably lighter.
+                Switch to False only if the biopython objects are necessary. Defaults to True.
+            
         Returns: Database object
 
         '''
@@ -69,22 +75,26 @@ class Database:
             # Parse all MHCI files
             for id in self.__IDs_list_MHCI:
                 try:
-                    templ = self.__clean_MHCI_file(pdb_id = id, data_dir = data_dir)
+                    templ = self.__clean_MHCI_file(pdb_id = id, data_dir=data_dir,
+                                                   remove_biopython_object=remove_biopython_objects)
                     if templ != None:
                         self.MHCI_data[id] = templ
-                except:
-                    pass
+                except Exception as e:
+                    print('something went wrong parsing %s:' %id)
+                    print(e)
 
         # Construct the MHCII database
         if MHCII:
             # Parse all MHCII files
             for id in self.__IDs_list_MHCII:
                 try:
-                    templ = self.__clean_MHCII_file(pdb_id = id, data_dir = data_dir)
+                    templ = self.__clean_MHCII_file(pdb_id = id, data_dir=data_dir,
+                                                    remove_biopython_object=remove_biopython_objects)
                     if templ != None:
                         self.MHCII_data[id] = templ
-                except:
+                except Exception as e:
                     print('something went wrong parsing %s' %id)
+                    print(e)
 
         databases_data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/'
         #Construct blast database for blast-based sequence-based template selection
@@ -106,7 +116,9 @@ class Database:
 
         print('Database correctly generated')
 
-    def add_structure(self, id, allele_type, peptide = '', MHC_class = 'I', chain_seq = [], anchors = [], pdb_path = False, pdb = False):
+    def add_structure(self, id, allele_type, peptide = '', 
+                      MHC_class = 'I', chain_seq = [], anchors = [], 
+                      pdb_path = False, pdb = False, remove_biopython_object=True):
         ''' Add a single structure to the database
 
         Args:
@@ -127,10 +139,14 @@ class Database:
                 raise ValueError('Structure id or path of .pdb files was not given. Enter value for id and pdb_path')
         # Add to MHCI data
         if MHC_class == 'I':
-            self.MHCI_data[id] = PMHC.Template(id, allele_type, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
+            self.MHCI_data[id] = PMHC.Template(id, allele_type, peptide, 
+                                               MHC_class, chain_seq, anchors, 
+                                               pdb_path, pdb, remove_biopython_object)
         # Add to MHCII data
         if MHC_class == 'II':
-            self.MHCII_data[id] = PMHC.Template(id, allele_type, peptide, MHC_class, chain_seq, anchors, pdb_path, pdb)
+            self.MHCII_data[id] = PMHC.Template(id, allele_type, peptide, 
+                                                MHC_class, chain_seq, anchors, 
+                                                pdb_path, pdb, remove_biopython_object)
 
 
     def write_db_into_fasta(self, outfile):
@@ -138,7 +154,6 @@ class Database:
         Writes structure db into a fasta file (to be later used to build a blast database)
 
         Args:
-            MHC_class (str): I or II.
             outfile (str): output file path.
 
         Returns:
@@ -148,17 +163,29 @@ class Database:
 
         sequences = []
         for template in self.MHCI_data.values():
+            #Get Header and sequence
             header, seq = Database_functions.get_sequence_for_fasta(
                                         template, MHC_class='I', chain='M')
+            #Keep only the G-domain
+            seq = seq[PANDORA.MHCI_G_domain[0][0]:PANDORA.MHCI_G_domain[0][1]]
+            #Append to the list
             sequences.append((header, seq))
 
         for template in self.MHCII_data.values():
+            #Get Header and sequence
             header, seq = Database_functions.get_sequence_for_fasta(
                                         template, MHC_class='II', chain='M')
+            #Keep only the G-domain
+            seq = seq[PANDORA.MHCII_G_domain[0][0]:PANDORA.MHCII_G_domain[0][1]]
+            #Append to the list
             sequences.append((header, seq))
 
+            #Get Header and sequence
             header, seq = Database_functions.get_sequence_for_fasta(
                                         template, MHC_class='II', chain='N')
+            #Keep only the G-domain
+            seq = seq[PANDORA.MHCII_G_domain[1][0]:PANDORA.MHCII_G_domain[1][1]]
+            #Append to the list
             sequences.append((header, seq))
 
         self.all_sequences = sequences

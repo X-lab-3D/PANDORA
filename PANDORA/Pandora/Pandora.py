@@ -10,13 +10,18 @@ from datetime import datetime
 
 class Pandora:
 
-    def __init__(self, target, database=None, template=None, output_dir=PANDORA.PANDORA_data + '/outputs'):
+    def __init__(self, target, database=None, template=None, output_dir=False):
         '''__init__(self, target, database=None, template=None, output_dir=PANDORA.PANDORA_data + '/outputs')
         '''
         self.target = target
         self.template = template
         self.database = database
-        self.output_dir = output_dir
+        
+        if output_dir == False:
+            self.output_dir = PANDORA.PANDORA_data + '/outputs'
+        else:
+            self.output_dir = output_dir
+            
         self.keep_IL = False
 
         if database is None and template is None:
@@ -147,7 +152,9 @@ class Pandora:
             verbose: (bool): Print information
 
         '''
-        self.alignment = Align.Align(self.target, self.template, output_dir=self.output_dir)
+        self.alignment = Align.Align(self.target, self.template, 
+                                     output_dir=self.output_dir, 
+                                     clip_C_domain=self.clip_C_domain)
 
         # self.alignment = Align.Align2(target = self.target, template=self.template, output_dir=self.output_dir)
         # self.alignment.align_templates()
@@ -285,7 +292,8 @@ class Pandora:
 
     def model(self, n_loop_models=20, n_homology_models=1,
               best_n_templates=1, n_jobs=None, loop_refinement='slow', pickle_out=False,
-              stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, RMSD_atoms=['C', 'CA', 'N', 'O']):
+              stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, 
+              RMSD_atoms=['C', 'CA', 'N', 'O'], clip_C_domain=False):
         '''model(self, output_dir=PANDORA.PANDORA_data + '/outputs', n_loop_models=20, n_homology_models=1, best_n_templates=1, n_jobs=None, loop_refinement='slow', pickle_out=False,stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, RMSD_atoms=['C', 'CA', 'N', 'O'])
         Wrapper function that combines all modelling steps.
 
@@ -311,6 +319,10 @@ class Pandora:
             pickle_out (Optional, bool): If True, saves a pickle file containing the
                 PANDORA.PMHC.Model objects for the generated models in the
                 output directory. Defaults to False.
+            clip_C_domain (bool or list): if True, clips away the C-like domain, levaing only
+                the G-domain according to IMGT. If a listcontaining the G domain(s) 
+                span is provided, will use it to cut the sequence. The list should have 
+                this format: [(1,182)] for MHCI and [(1,91),(1,86)] for MHCII.
             RMSD_atoms (Optional, list): list of atoms to use for final RMSD calculation.
                 Works only if benchmark==True. Defaults to ['C', 'CA', 'N', 'O']
             stdev (Optional, float): standard deviation of modelling restraints.
@@ -327,6 +339,8 @@ class Pandora:
             None
 
         '''
+        
+        self.clip_C_domain = clip_C_domain
 
         if verbose:
             print('\nModelling %s...\n' %self.target.id)

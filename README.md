@@ -85,7 +85,7 @@ conda install -y -c salilab modeller
 PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) that can be installed via bioconda
 
 ```
-conda install -c bioconda muscle
+conda install -c bioconda muscle=3.8.1551
 ```
 
 #### 3. Install PANDORA
@@ -131,6 +131,9 @@ python netMHCpan_install.py
 ```
 
 ## Tutorial
+
+Are you planning to run multiple pMHC models with similar settings?
+Then hop directly to example #5 and try our Wrapper module!
 
 #### Example 1 : Generating a peptide:MHC complex given the peptide sequence
 PANDORA requires at least these information to generate models:
