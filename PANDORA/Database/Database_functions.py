@@ -1635,7 +1635,7 @@ def get_sequence_for_fasta(template, MHC_class, chain):
     return header, seq
 
 
-def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data,
+def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data + '/mhcseqs',
                              HLA_out = 'Human_MHC_data.fasta',
                              nonHLA_out = 'NonHuman_MHC_data.fasta'):
     """generate_mhcseq_database(data_dir=PANDORA.PANDORA_data, HLA_out='Human_MHC_data.fasta', nonHLA_out='NonHuman_MHC_data.fasta')
@@ -1661,9 +1661,9 @@ def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data,
 
     # Download and parse sequences
     # Human sequences
-    ref_MHCI_sequences = generate_hla_database(data_dir)
+    ref_MHCI_sequences = generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta')
     # Non-human sequences
-    ref_MHCI_sequences.update(generate_nonhla_database(data_dir))
+    ref_MHCI_sequences.update(generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'))
 
     # Change back working directory
     #os.chdir(start_dir)
@@ -1834,7 +1834,7 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
 
     # Remove pre-existing raw file
     try:
-        os.system('rm OLD_MHC_prot.fasta')
+        os.system('rm %s/OLD_MHC_prot.fasta' %data_dir)
     except:
         pass
 

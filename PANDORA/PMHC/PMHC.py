@@ -401,9 +401,9 @@ class Target(PMHC):
         # Define correct fasta file
         if input_file == None:
             if self.allele_type[0].startswith('HLA'):
-                input_file = PANDORA.PANDORA_data+ '/Human_MHC_data.fasta'
+                input_file = PANDORA.PANDORA_data+ '/mhcseqs/Human_MHC_data.fasta'
             else:
-                input_file = PANDORA.PANDORA_data+ '/NonHuman_MHC_data.fasta'
+                input_file = PANDORA.PANDORA_data+ '/mhcseqs/NonHuman_MHC_data.fasta'
 
         # Parse Fasta file
         fasta_sequences = SeqIO.parse(input_file,'fasta')
