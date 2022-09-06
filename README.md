@@ -116,12 +116,12 @@ from PANDORA.Database import Database
 
 ## A. Create local Database
 db = Database.Database()
-db.construct_database(save='Databases/<user_folder>/db.pkl')
+db.construct_database()
 ```
 
 Note 1: in the case of generation of template database, data are saved by default into `Databases/default`. It is possible to modify the folder name (`default`) by creating a `config.json` file in the current working directory using `data_folder_name` as a key, and the desired folder name as a value:
 ```
-{"data_folder_name": "<folder_in_PANDORA_files>"}
+{"data_folder_name": "<folder_in_Databases>"}
 ```
 
 Note 2: generating a database can take more than one hour and a half, so we advice to run it as background process or submit it as cluster job.
@@ -160,7 +160,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. Create local Database
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 ## B. Create Target object
 target = PMHC.Target(id = 'myTestCase'
@@ -189,7 +189,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. load the pregenerated Database  of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 ## B. Create Target object
 target = PMHC.Target(id = 'myTestCase'
@@ -215,7 +215,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 ## B. Create Target object
 target = PMHC.Target('1A1M',
@@ -237,7 +237,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 ## B. Create Target object
 target = PMHC.Target(id = 'myMHCIITestCase'
@@ -264,7 +264,7 @@ from PANDORA.Database import Database
 from PANDORA.Wrapper import Wrapper
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 ## B. Create the wrapper object
 wrap =  Wrapper.Wrapper()
@@ -285,7 +285,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 target = PMHC.Target(id='myMHCIITestCase'
     MHC_class = 'II',

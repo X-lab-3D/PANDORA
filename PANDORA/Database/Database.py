@@ -46,7 +46,7 @@ class Database:
         Returns a dictionary that can be used to select the desired reference sequence"""
         self.ref_MHCI_sequences = Database_functions.generate_mhcseq_database()
 
-    def construct_database(self, save, data_dir = PANDORA.PANDORA_data,
+    def construct_database(self, save=PANDORA.PANDORA_data + '/PANDORA_database.pkl', data_dir = PANDORA.PANDORA_data,
                            MHCI=True, MHCII=True, download=True,
                            update_ref_sequences=True, 
                            remove_biopython_objects = True):
@@ -54,7 +54,8 @@ class Database:
         Construct the database. Download, clean and add all structures
 
         Args:
-            save (str/bool): Filename of database, can be False if you don't want to save the database
+            save (str/bool): Filename of database pkl object. If False, does not save the database pkl. 
+                If a path is provided, saved the database .pkl to that path. Defaults to PANDORA.PANDORA_data + '/default/PANDORA_database.pkl'.
             data_dir (str): Path of data directory. Defaults to PANDORA.PANDORA_data.
             MHCI (bool): Parse data for MHCI. Defaults to True.
             MHCII (bool): Parse data for MHCII. Defaults to True.
@@ -308,7 +309,7 @@ class Database:
         if save:
             self.save(save)
 
-    def save(self, fn = 'db.pkl'):
+    def save(self, fn = PANDORA.PANDORA_data + '/PANDORA_database.pkl'):
         """Save the database as a pickle file
 
         :param fn: (str) pathname of file
@@ -316,12 +317,13 @@ class Database:
         with open(fn, "wb") as pkl_file:
             pickle.dump(self, pkl_file)
 
-def load(file_name):
+def load(file_name = PANDORA.PANDORA_data + '/PANDORA_database.pkl'):
     """Loads a pre-generated database
 
 
     Args:
-        file_name (str): Dabase file name/path.
+        file_name (str): Dabase file name/path. 
+            Defaults to PANDORA.PANDORA_data + '/PANDORA_database.pkl'.
 
     Returns:
         Database.Database: Database object.
