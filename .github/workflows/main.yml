@@ -68,4 +68,5 @@ jobs:
           path-to-lcov: coverage.xml
         run: |
           conda install -c conda-forge coveralls
+          alias coveralls='$CONDA/bin/coveralls'
           coveralls --service=github
