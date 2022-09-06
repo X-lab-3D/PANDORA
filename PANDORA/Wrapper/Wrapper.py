@@ -107,7 +107,7 @@ class Wrapper():
                     ## to the default values in PMHC.Target.__init__()
                     ## Assign anchors
                     if anchors_col:
-                        anchors = tuple([int(x) for x in row[anchors_col].split(';')])
+                        anchors = list([int(x) for x in row[anchors_col].split(';')])
                         targets[target_id]['anchors'] = anchors
                     else:
                         targets[target_id]['anchors'] = []
@@ -229,7 +229,7 @@ class Wrapper():
                     print(("Exception: {0}".format(err)))
                 try:
                     mod.find_template(benchmark=benchmark)
-                    jobs[target_id] = [tar, mod.template, self.targets[target_id]['outdir']]
+                    jobs[target_id] = {'target':tar, 'template':mod.template, 'outdir':self.targets[target_id]['outdir']}
                 except Exception as err:
                     print('Skipping Target %s at template selection step for the following reason:' %target_id)
                     print(("Exception: {0}".format(err)))
@@ -239,7 +239,8 @@ class Wrapper():
         self.jobs = jobs
 
     def run_pandora(self, num_cores=1, n_loop_models=20, n_jobs=None,
-                    benchmark=False, collective_output_dir=False, pickle_out=False):
+                    benchmark=False, collective_output_dir=False, 
+                    pickle_out=False, clip_C_domain=False):
         """Runs Pandora in parallel jobs.
 
 
@@ -258,6 +259,10 @@ class Wrapper():
                 Defaults to False.
             pickle_out (bool, optional): If True, outputs a pickle file
                 containing every model object. Defaults to False.
+            clip_C_domain (bool or list): if True, clips away the C-like domain, levaing only
+                the G-domain according to IMGT. If a listcontaining the G domain(s) 
+                span is provided, will use it to cut the sequence. The list should have 
+                this format: [(1,182)] for MHCI and [(1,91),(1,86)] for MHCII.
 
         Returns:
             None.
@@ -265,11 +270,13 @@ class Wrapper():
         """
 
         for job in self.jobs:
-            if self.jobs[job][-1] != '':
-                self.jobs[job].extend([n_loop_models, n_jobs, benchmark, pickle_out])
-            elif self.jobs[job][-1] == '' and collective_output_dir:
-                self.jobs[job][-1] = collective_output_dir
-                self.jobs[job].extend([n_loop_models, n_jobs, benchmark, pickle_out])
-            else:
-                self.jobs[job].extend([n_loop_models, n_jobs, benchmark, pickle_out])
+            #if self.jobs[job][-1] != '':
+            self.jobs[job].update({'n_loop_models':n_loop_models, 'n_jobs':n_jobs, 
+                                   'benchmark':benchmark, 'pickle_out':pickle_out,
+                                   'collective_output_dir':collective_output_dir})
+           # elif self.jobs[job][-1] == '' and collective_output_dir:
+           #     self.jobs[job][-1] = collective_output_dir
+           #     self.jobs[job].extend([n_loop_models, n_jobs, benchmark, pickle_out])
+           # else:
+           #     self.jobs[job].extend([n_loop_models, n_jobs, benchmark, pickle_out])
         Parallel(n_jobs = num_cores, verbose = 1)(delayed(run_model)(job) for job in list(self.jobs.values()))
