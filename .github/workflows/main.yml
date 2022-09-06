@@ -61,7 +61,9 @@ jobs:
           pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
       #    python test/set_modeller_license.py
 
-
+  coveralls:
+    runs-on: ubuntu-late  
+    steps:
       - name: Coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
