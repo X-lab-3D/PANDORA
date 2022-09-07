@@ -46,7 +46,7 @@ class Database:
         Returns a dictionary that can be used to select the desired reference sequence"""
         self.ref_MHCI_sequences = Database_functions.generate_mhcseq_database()
 
-    def construct_database(self, save, data_dir = PANDORA.PANDORA_data,
+    def construct_database(self, save=PANDORA.PANDORA_data + '/PANDORA_database.pkl', data_dir = PANDORA.PANDORA_data,
                            MHCI=True, MHCII=True, download=True,
                            update_ref_sequences=True, 
                            remove_biopython_objects = True):
@@ -54,7 +54,8 @@ class Database:
         Construct the database. Download, clean and add all structures
 
         Args:
-            save (str/bool): Filename of database, can be False if you don't want to save the database
+            save (str/bool): Filename of database pkl object. If False, does not save the database pkl. 
+                If a path is provided, saved the database .pkl to that path. Defaults to PANDORA.PANDORA_data + '/default/PANDORA_database.pkl'.
             data_dir (str): Path of data directory. Defaults to PANDORA.PANDORA_data.
             MHCI (bool): Parse data for MHCI. Defaults to True.
             MHCII (bool): Parse data for MHCII. Defaults to True.
@@ -96,9 +97,9 @@ class Database:
                     print('something went wrong parsing %s' %id)
                     print(e)
 
-        databases_data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/'
+        databases_data_dir = PANDORA.PANDORA_data
         #Construct blast database for blast-based sequence-based template selection
-        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ '/csv_pkl_files/templates_blast_db',
+        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ '/templates_blast_db',
         #                         db_name='templates_blast_db')
 
         #Download and parse HLA and MHC sequences reference data
@@ -106,7 +107,7 @@ class Database:
             self.update_ref_sequences()
 
         #Construct blast database for retriving mhc allele
-        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ '/csv_pkl_files/refseq_blast_db',
+        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ 'refseq_blast_db',
         #                         db_name='refseq_blast_db')
 
         self.construct_both_blast_db(databases_data_dir)
@@ -204,7 +205,7 @@ class Database:
         Construc blast database for seq based template selection
 
         Args:
-            outpath (str, optional): Data dir folder. Defaults to PANDORA.PANDORA_data+ '/csv_pkl_files/'.
+            outpath (str, optional): Data dir folder. Defaults to PANDORA.PANDORA_data.
             db_name (str, optional): Name of the db folder and fasta file. Defaults to 'MHC_blast_db'.
         Returns:
             None.
@@ -218,14 +219,14 @@ class Database:
 
         subprocess.check_call((' ').join(['makeblastdb','-dbtype','prot',
                                           '-in', infile,'-out',
-                                          outpath+'/'+db_name]), shell=True)
+                                          outpath + '/' + db_name]), shell=True)
 
-    def construct_both_blast_db(self, data_dir=PANDORA.PANDORA_data+ '/csv_pkl_files/'):
+    def construct_both_blast_db(self, data_dir=PANDORA.PANDORA_data):
 
         #Define db name and path
-        db_name='templates_blast_db'
-        outpath=data_dir+ db_name
-        out_fasta = outpath+'/'+db_name+'.fasta'
+        db_name = 'templates_blast_db'
+        outpath = data_dir + '/' + db_name
+        out_fasta = outpath + '/'+ db_name +'.fasta'
 
         #Create db directory
         if not os.path.isdir(outpath):
@@ -240,16 +241,16 @@ class Database:
                                 db_name=db_name)
 
         #Define db name and path
-        db_name='refseq_blast_db'
-        outpath=data_dir+ db_name
-        out_fasta = outpath+'/'+db_name+'.fasta'
+        db_name = 'refseq_blast_db'
+        outpath = data_dir + '/' + db_name
+        out_fasta = outpath + '/' + db_name + '.fasta'
 
         #Create db directory
         if not os.path.isdir(outpath):
             subprocess.check_call('mkdir %s' %outpath, shell=True)
 
         #Create .fasta for the db
-        command='cat %sHuman_MHC_data.fasta %sNonHuman_MHC_data.fasta > %s' %(data_dir,
+        command='cat %s/mhcseqs/Human_MHC_data.fasta %s/mhcseqs/NonHuman_MHC_data.fasta > %s' %(data_dir,
                                                                               data_dir,
                                                                               out_fasta)
         subprocess.check_call(command, shell=True)
@@ -308,7 +309,7 @@ class Database:
         if save:
             self.save(save)
 
-    def save(self, fn = 'db.pkl'):
+    def save(self, fn = PANDORA.PANDORA_data + '/PANDORA_database.pkl'):
         """Save the database as a pickle file
 
         :param fn: (str) pathname of file
@@ -316,12 +317,13 @@ class Database:
         with open(fn, "wb") as pkl_file:
             pickle.dump(self, pkl_file)
 
-def load(file_name):
+def load(file_name = PANDORA.PANDORA_data + '/PANDORA_database.pkl'):
     """Loads a pre-generated database
 
 
     Args:
-        file_name (str): Dabase file name/path.
+        file_name (str): Dabase file name/path. 
+            Defaults to PANDORA.PANDORA_data + '/PANDORA_database.pkl'.
 
     Returns:
         Database.Database: Database object.

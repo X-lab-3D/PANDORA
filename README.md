@@ -116,10 +116,15 @@ from PANDORA.Database import Database
 
 ## A. Create local Database
 db = Database.Database()
-db.construct_database(save='path/to/pandora_Database.pkl')
+db.construct_database()
 ```
 
-Note: generating a database can take more than one hour and a half, so we advice to run it as background process or submit it as cluster job.
+Note 1: in the case of generation of template database, data are saved by default into `Databases/default`. It is possible to modify the folder name (`default`) by creating a `config.json` file in the current working directory using `data_folder_name` as a key, and the desired folder name as a value:
+```
+{"data_folder_name": "<folder_in_Databases>"}
+```
+
+Note 2: generating a database can take more than one hour and a half, so we advice to run it as background process or submit it as cluster job.
 
 ## (Optional) Install NetMHCpan and/or NetMHCIIpan
 
@@ -155,7 +160,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. Create local Database
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 ## B. Create Target object
 target = PMHC.Target(id = 'myTestCase'
@@ -184,7 +189,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. load the pregenerated Database  of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 ## B. Create Target object
 target = PMHC.Target(id = 'myTestCase'
@@ -210,7 +215,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 ## B. Create Target object
 target = PMHC.Target('1A1M',
@@ -232,7 +237,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 ## B. Create Target object
 target = PMHC.Target(id = 'myMHCIITestCase'
@@ -259,7 +264,7 @@ from PANDORA.Database import Database
 from PANDORA.Wrapper import Wrapper
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 ## B. Create the wrapper object
 wrap =  Wrapper.Wrapper()
@@ -280,7 +285,7 @@ from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 target = PMHC.Target(id='myMHCIITestCase'
     MHC_class = 'II',
@@ -302,7 +307,7 @@ see [Class Diagram](https://github.com/DarioMarzella/PANDORA/blob/master/images/
 
 The following file structure is prepared to store the output files for each case. Each modelling case is given a specific name based on target and template ID.
 
-Please note that the modelling results consisting genretaed models by default are stored in *./PANDORA_files/data/outputs/* directory
+Please note that the modelling results consisting genretaed models by default are stored in *./Databases/default/outputs/* directory
 
 - Main outputs: *molpdf_DOPE.tsv, *BL*.pdb, modeller.log(
 - Input files prepared for modelling: *contacs_*.list, *.ali*
@@ -310,7 +315,7 @@ Please note that the modelling results consisting genretaed models by default ar
 - MODELLER by product outputs(Generated during the modelling): *D0*, DL*, *IL*.pdb , , *.ini, *.lrsr, *.rsr, *.sch, ...*
 
 ```
-PANDORA_files
+Databases
   └── data
      └── outputs                         Default directory to save output
         └── <target_name>_<template_id>  Each user's modelling case is given a specific name

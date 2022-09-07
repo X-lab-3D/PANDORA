@@ -1,14 +1,23 @@
+from os.path import exists
 import os
+import json
+
+if exists('config.json'):
+    with open('config.json') as f:
+        data = json.load(f)
+        data_folder = data['data_folder_name']
+else:
+    data_folder = 'default'
 
 dirs = [
-        './PANDORA_files', './PANDORA_files/data', './PANDORA_files/data/csv_pkl_files',
-        './PANDORA_files/data/csv_pkl_files/mhcseqs', './PANDORA_files/data/PDBs',
-        './PANDORA_files/data/PDBs/pMHCI', './PANDORA_files/data/PDBs/pMHCII',
-        './PANDORA_files/data/PDBs/Bad', './PANDORA_files/data/PDBs/Bad/pMHCI',
-        './PANDORA_files/data/PDBs/Bad/pMHCII', './PANDORA_files/data/PDBs/IMGT_retrieved',
-         './PANDORA_files/data/outputs',
+        './Databases', f'./Databases/{data_folder}',
+        f'./Databases/{data_folder}/mhcseqs', f'./Databases/{data_folder}/PDBs',
+        f'./Databases/{data_folder}/PDBs/pMHCI', f'./Databases/{data_folder}/PDBs/pMHCII',
+        f'./Databases/{data_folder}/PDBs/Bad', f'./Databases/{data_folder}/PDBs/Bad/pMHCI',
+        f'./Databases/{data_folder}/PDBs/Bad/pMHCII', f'./Databases/{data_folder}/PDBs/IMGT_retrieved',
+        f'./Databases/{data_folder}/outputs',
         './test/test_data/PDBs/Bad','./test/test_data/PDBs/Bad/pMHCI',
-        './test/test_data/PDBs/Bad/pMHCII', './test/test_data/csv_pkl_files'
+        './test/test_data/PDBs/Bad/pMHCII', './test/test_data'
         ]
 
 for D in dirs:

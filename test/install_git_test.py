@@ -1,20 +1,31 @@
 import os
+from os.path import exists
+from pathlib import Path
+import json
 
-os.system('mkdir ./PANDORA_files')
-os.system('mkdir ./PANDORA_files/data')
-os.system('mkdir ./PANDORA_files/data/csv_pkl_files')
-os.system('mkdir ./PANDORA_files/data/PDBs')
-os.system('mkdir ./PANDORA_files/data/PDBs/pMHCI')
-os.system('mkdir ./PANDORA_files/data/PDBs/pMHCII')
-os.system('mkdir ./PANDORA_files/data/PDBs/Bad')
-os.system('mkdir ./PANDORA_files/data/PDBs/Bad/pMHCI')
-os.system('mkdir ./PANDORA_files/data/PDBs/Bad/pMHCII')
-os.system('mkdir ./PANDORA_files/data/PDBs/IMGT_retrieved/')
+user_folder_path = Path(__file__).parents[1]
+print(user_folder_path)
+
+if exists(user_folder_path / 'config.json'):
+    with open(user_folder_path / 'config.json') as f:
+        data = json.load(f)
+        data_folder = data['data_folder_name']
+else:
+    data_folder = 'default'
+
+os.system('mkdir ./Databases')
+os.system(f'mkdir ./Databases/{data_folder}')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCI')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCII')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad/pMHCI')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad/pMHCII')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs/IMGT_retrieved/')
+os.system('mkdir ./test/test_data')
 os.system('mkdir ./test/test_data/PDBs/Bad')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCI')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCII')
-os.system('mkdir ./test/test_data/csv_pkl_files')
-
 
 
 # netMHCII Pan install

@@ -104,7 +104,7 @@ def download_ids_imgt(ReceptorType, data_dir = PANDORA.PANDORA_data, out_tsv = F
     IDs_list = [x[3][-4:] for x in IDs_list]
 
     if out_tsv:
-        outfile = open(data_dir + '/csv_pkl_files/' + out_tsv, 'w')
+        outfile = open(data_dir + '/' + out_tsv, 'w')
         outfile.write(ReceptorType + ' IMGT IDs\n')
         for ID in IDs_list:
             outfile.write(ID + '\n')
@@ -1635,14 +1635,14 @@ def get_sequence_for_fasta(template, MHC_class, chain):
     return header, seq
 
 
-def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/',
+def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data + '/mhcseqs',
                              HLA_out = 'Human_MHC_data.fasta',
                              nonHLA_out = 'NonHuman_MHC_data.fasta'):
-    """generate_mhcseq_database(data_dir=PANDORA.PANDORA_data+ '/csv_pkl_files/', HLA_out='Human_MHC_data.fasta', nonHLA_out='NonHuman_MHC_data.fasta')
+    """generate_mhcseq_database(data_dir=PANDORA.PANDORA_data, HLA_out='Human_MHC_data.fasta', nonHLA_out='NonHuman_MHC_data.fasta')
     Downloads and parse HLA and other MHC sequences to compile reference fastas
 
     Args:
-        data_dir (str, optional): Data directory. Defaults to PANDORA.PANDORA_data/csv_pkl_files/.
+        data_dir (str, optional): Data directory. Defaults to PANDORA.PANDORA_data.
         HLA_out (str, optional): Output file for HLA sequences. Defaults to 'Human_MHC_data.fasta'.
         nonHLA_out (str, optional): Output file for non human MHCs. Defaults to 'NonHuman_MHC_data.fasta'.
 
@@ -1661,9 +1661,9 @@ def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data+ '/csv_pkl_files/',
 
     # Download and parse sequences
     # Human sequences
-    ref_MHCI_sequences = generate_hla_database(data_dir)
+    ref_MHCI_sequences = generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta')
     # Non-human sequences
-    ref_MHCI_sequences.update(generate_nonhla_database(data_dir))
+    ref_MHCI_sequences.update(generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'))
 
     # Change back working directory
     #os.chdir(start_dir)
@@ -1686,7 +1686,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
     ###
     # Rename pre-existing raw file
     try:
-        os.system('mv %shla_prot.fasta %sOLD_hla_prot.fasta' %(data_dir, data_dir))
+        os.system('mv %s/hla_prot.fasta %s/OLD_hla_prot.fasta' %(data_dir, data_dir))
     except:
         pass
 
@@ -1701,7 +1701,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
     HLAs = {}
     to_write = {}
     #Parse the fasta files
-    for seq_record in SeqIO.parse(data_dir + 'hla_prot.fasta', "fasta"):
+    for seq_record in SeqIO.parse(data_dir + '/hla_prot.fasta', "fasta"):
         allele_fullname = seq_record.description.split(' ')[1]
         #allele_significant = allele_fullname[:8]
         #If the allele name ends with ':', trim it away
@@ -1737,7 +1737,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
             to_write['HLA-'+allele] = str(putatives[0].seq)
 
     #Write output fasta file
-    with open(data_dir + HLA_out, 'w') as outfile:
+    with open(data_dir + '/' + HLA_out, 'w') as outfile:
         for allele in to_write:
             outfile.write('>'+allele+'\n')
             for i in range(len(to_write[allele])):
@@ -1771,7 +1771,7 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
     ###
     # Rename pre-existing raw file
     try:
-        os.system('mv %sMHC_prot.fasta %sOLD_MHC_prot.fasta' %(data_dir, data_dir))
+        os.system('mv %s/MHC_prot.fasta %s/OLD_MHC_prot.fasta' %(data_dir, data_dir))
     except:
         pass
 
@@ -1821,7 +1821,7 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
             to_write[allele] = str(putatives[0].seq)
 
     #Write output fasta file
-    with open(data_dir + nonHLA_out, 'w') as outfile:
+    with open(data_dir + '/' + nonHLA_out, 'w') as outfile:
         for allele in to_write:
             outfile.write('>'+allele+'\n')
             for i in range(len(to_write[allele])):
@@ -1834,7 +1834,7 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
 
     # Remove pre-existing raw file
     try:
-        os.system('rm OLD_MHC_prot.fasta')
+        os.system('rm %s/OLD_MHC_prot.fasta' %data_dir)
     except:
         pass
 
