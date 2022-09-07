@@ -512,36 +512,17 @@ def renumber(pdb):
     return pdb
 
 
-def write_pdb(pdb, out_path, get_header_from=False):
+def write_pdb(pdb, out_path, pdb_id,
+    IMGT_link='https://www.imgt.org/3Dstructure-DB/cgi/details.cgi?pdbcode=XXXX&Part=File'):
     ''' Write bio.pdb object to file, can use the header of the original pdb (bio.pdb cant remember file headers)
 
     Args:
         pdb: bio.pdb object
         out_path: (string) output path of pdb file
-        get_header_from: (string) get the header from another pdb file
 
     Returns:
 
     '''
-
-    def get_head_and_remarks(pdb_file):
-        ''' Get the head and remarks of an IMGT pdb file
-
-        Args:
-            pdb_file: (string) path to original pdb file
-
-        Returns: (list) list of lines
-
-        '''
-        # Take all lines of the pdb file up until the "ATOM" part
-        with open(pdb_file) as infile:
-            header = []
-            for line in infile:
-                if line.startswith('ATOM'):
-                    break
-                header.append(line[:-1])
-
-        return header
 
     def line_prepender(filename, line):
         ''' Add a line in front of a file
@@ -558,17 +539,18 @@ def write_pdb(pdb, out_path, get_header_from=False):
             f.write(line.rstrip('\r\n') + '\n' + content)
 
     # If the original pdb file path is given, use that header and paste it before the ATOM lines
-    if get_header_from:
-        header = get_head_and_remarks(get_header_from)  # get the header
+    #if get_header_from:
+    #    header = get_head_and_remarks(get_header_from)  # get the header
 
     # Write pdb
     io = PDBIO()
     io.set_structure(pdb)
     io.save(out_path)
 
-    if get_header_from:  # Write the original header to pdb file
-        for line in header[::-1]:
-            line_prepender(out_path, line)
+    # Add header with link to the IMGT structure
+    IMGT_link = IMGT_link.replace('XXXX', pdb_id)
+    header = 'REMARK 410 ' + IMGT_link
+    line_prepender(out_path, header)
 
 
 def unzip_pdb(ID, indir, outdir):
@@ -1382,7 +1364,7 @@ def parse_pMHCI_pdb(pdb_id,
         except:
             log(pdb_id, 'Failed, Could not locate Alpha chain. Found: ' + chain_lens, logfile)
             raise Exception
-
+        
         helix, sheet = False, False
         try:
             snd_struc, log_message = find_pept_secondary_structure(pdb_file, pdb, pept_chain, MHC_chains)
@@ -1397,21 +1379,21 @@ def parse_pMHCI_pdb(pdb_id,
         except:
             log(pdb_id, 'Failed, Error in finding secondary structures in the peptide', logfile)
             raise Exception
-
+        
         # Get allele per each chain
         try:
             a_allele = format_alleles_MHCI(alleles, MHC_chains)
         except:
             log(pdb_id, 'Failed, Could not format alleles', logfile)
             raise Exception
-
+        
         hetatm_in_groove, log_message = check_hetatoms_in_binding_groove(pdb, MHC_chains)
         if hetatm_in_groove:
             log(pdb_id, 'Failed, Heteroatoms in binding groove between the peptide and MHC', logfile)
             raise Exception
         if log_message:
             log(pdb_id, 'Warning, ' + log_message, logfile)
-
+        
         try:                 # Reformat chains
             pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
             pdb = ensure_order(pdb, MHC_chains)
@@ -1419,7 +1401,7 @@ def parse_pMHCI_pdb(pdb_id,
         except:
             log(pdb_id, 'Failed, Could not reformat structure', logfile)
             raise Exception
-
+        
         try:  # get the chain sequences from the pdb file
             # seqs = seqs_from_pdb(pdb_file, MHC_chains)
             #seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
@@ -1445,11 +1427,12 @@ def parse_pMHCI_pdb(pdb_id,
         if templ.anchors[1] - templ.anchors[0] < 6:
             log(pdb_id, 'Failed, the anchors seem to be too close to each other. This might depend on GitHub issue #146', logfile)
             raise Exception
-
+        
         # clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
         # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
-        write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
-
+        write_pdb(pdb=pdb, out_path='%s/%s.pdb' % (outdir, pdb_id),
+                    pdb_id=pdb_id)#, pdb_file)
+        
 
         return templ
 
@@ -1602,7 +1585,8 @@ def parse_pMHCII_pdb(pdb_id,
 
             # clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
-            write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
+            write_pdb(pdb=pdb, out_path='%s/%s.pdb' % (outdir, pdb_id),
+                        pdb_id=pdb_id)#, pdb_file)
 
             return templ
 
@@ -1619,18 +1603,21 @@ def get_sequence_for_fasta(template, MHC_class, chain):
     if chain == 'M':
         alleles = [x for x in template.allele_type if any(y in x for y in PANDORA.alpha_genes)]
         header = template.id+'_alpha' +'; '+ (',').join(alleles)
+
         seq = template.M_chain_seq
+        #Clip sequences to keep only the G-domain
         if MHC_class =='I':
-            seq = seq[:180]
+            seq = seq[:PANDORA.MHCI_G_domain[0][1]]
         elif MHC_class =='II':
-            seq = seq[:84]
+            seq = seq[:PANDORA.MHCII_G_domain[0][1]]
 
     elif chain == 'N':
         alleles = [x for x in template.allele_type if any(y in x for y in PANDORA.beta_genes)]
         header = template.id+'_beta' +'; '+ (',').join(alleles)
-        seq = template.N_chain_seq
 
-        seq = seq[:94]
+        seq = template.N_chain_seq
+        #Clip sequences to keep only the G-domain
+        seq = seq[:PANDORA.MHCII_G_domain[1][1]]
 
     return header, seq
 

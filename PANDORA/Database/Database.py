@@ -35,7 +35,8 @@ class Database:
                                                     bad_dir = data_dir + '/PDBs/Bad/pMHCI',
                                                     remove_biopython_object=remove_biopython_object)
             if templ != None:
-                self.MHCI_data[pdb_id] = templ
+                #self.MHCI_data[pdb_id] = templ
+                return (pdb_id, templ)
 
         except Exception as e:
             print('something went wrong parsing %s:' %pdb_id)
@@ -50,7 +51,8 @@ class Database:
                                                    bad_dir = data_dir + '/PDBs/Bad/pMHCII',
                                                    remove_biopython_object=remove_biopython_object)
             if templ != None:
-                self.MHCII_data[pdb_id] = templ
+                #self.MHCI_data[pdb_id] = templ
+                return (pdb_id, templ)
 
         except Exception as e:
             print('something went wrong parsing %s' %pdb_id)
@@ -90,27 +92,22 @@ class Database:
         # Construct the MHCI database
         if MHCI:
             # Parse all MHCI files
-            Parallel(n_jobs = n_jobs)(delayed(self.clean_MHCI_file)(id, data_dir, remove_biopython_objects) for id in self.__IDs_list_MHCI)
+            templates = Parallel(n_jobs = n_jobs)(delayed(self.clean_MHCI_file)(id, data_dir, remove_biopython_objects) for id in self.__IDs_list_MHCI)
+            templates = [x for x in templates if x != None]
+            self.MHCI_data = {key: value for (key, value) in templates}
 
         # Construct the MHCII database
         if MHCII:
             # Parse all MHCII files
-            Parallel(n_jobs = n_jobs)(delayed(self.clean_MHCII_file)(id, data_dir, remove_biopython_objects) for id in self.__IDs_list_MHCII)
-
-        databases_data_dir = PANDORA.PANDORA_data
-        #Construct blast database for blast-based sequence-based template selection
-        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ '/templates_blast_db',
-        #                         db_name='templates_blast_db')
+            templates = Parallel(n_jobs = n_jobs)(delayed(self.clean_MHCII_file)(id, data_dir, remove_biopython_objects) for id in self.__IDs_list_MHCII)
+            templates = [x for x in templates if x != None]
+            self.MHCII_data = {key: value for key, value in templates}
 
         #Download and parse HLA and MHC sequences reference data
         if update_ref_sequences:
             self.update_ref_sequences()
 
-        #Construct blast database for retriving mhc allele
-        # self.construct_blast_db(outpath=PANDORA.PANDORA_data+ 'refseq_blast_db',
-        #                         db_name='refseq_blast_db')
-
-        self.construct_both_blast_db(databases_data_dir)
+        self.construct_both_blast_db()
 
         if save:
             self.save(save)
