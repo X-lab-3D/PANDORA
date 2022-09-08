@@ -1296,11 +1296,13 @@ def parse_pMHCI_pdb(pdb_id,
                      remove_biopython_object=True):
     ''' Clean one MHCI pdb file downloaded from IMGT
 
-    Args:
-        pdb_id: (string) id of pdb file
-        indir: (string) path of the input dir (where the .gz files are)
-        outdir: (string) path of the output dir (where the unzipped .pdb files go)
-        bad_dir: (string) path of the output dir (where the unsuitable .pdb files go)
+        Args:
+        pdb_id (str): id of pdb file
+        indir (str): path of the input dir (where the .gz files are)
+        outdir (str): path of the output dir (where the unzipped .pdb files go)
+        bad_dir (str): path of the output dir (where the unsuitable .pdb files go)
+        keep_bad (str): Keep the unsuitable pdb files in the bad_dir. If False, 
+            it will remove the files instead of moving them. Defaults to False.
         custom_map (dict): custom map for 3-to-1 letter aa name translation.
 
     Returns: Template object
@@ -1458,10 +1460,12 @@ def parse_pMHCII_pdb(pdb_id,
     ''' Clean one MHCII pdb file downloaded from IMGT
 
     Args:
-        pdb_id: (string) id of pdb file
-        indir: (string) path of the input dir (where the .gz files are)
-        outdir: (string) path of the output dir (where the unzipped .pdb files go)
-        bad_dir: (string) path of the output dir (where the unsuitable .pdb files go)
+        pdb_id (str): id of pdb file
+        indir (str): path of the input dir (where the .gz files are)
+        outdir (str): path of the output dir (where the unzipped .pdb files go)
+        bad_dir (str): path of the output dir (where the unsuitable .pdb files go)
+        keep_bad (str): Keep the unsuitable pdb files in the bad_dir. If False, 
+            it will remove the files instead of moving them. Defaults to False.
         custom_map (dict): custom map for 3-to-1 letter aa name translation.
 
     Returns: Template object
