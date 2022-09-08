@@ -512,36 +512,17 @@ def renumber(pdb):
     return pdb
 
 
-def write_pdb(pdb, out_path, get_header_from=False):
+def write_pdb(pdb, out_path, pdb_id,
+    IMGT_link='https://www.imgt.org/3Dstructure-DB/cgi/details.cgi?pdbcode=XXXX&Part=File'):
     ''' Write bio.pdb object to file, can use the header of the original pdb (bio.pdb cant remember file headers)
 
     Args:
         pdb: bio.pdb object
         out_path: (string) output path of pdb file
-        get_header_from: (string) get the header from another pdb file
 
     Returns:
 
     '''
-
-    def get_head_and_remarks(pdb_file):
-        ''' Get the head and remarks of an IMGT pdb file
-
-        Args:
-            pdb_file: (string) path to original pdb file
-
-        Returns: (list) list of lines
-
-        '''
-        # Take all lines of the pdb file up until the "ATOM" part
-        with open(pdb_file) as infile:
-            header = []
-            for line in infile:
-                if line.startswith('ATOM'):
-                    break
-                header.append(line[:-1])
-
-        return header
 
     def line_prepender(filename, line):
         ''' Add a line in front of a file
@@ -558,17 +539,18 @@ def write_pdb(pdb, out_path, get_header_from=False):
             f.write(line.rstrip('\r\n') + '\n' + content)
 
     # If the original pdb file path is given, use that header and paste it before the ATOM lines
-    if get_header_from:
-        header = get_head_and_remarks(get_header_from)  # get the header
+    #if get_header_from:
+    #    header = get_head_and_remarks(get_header_from)  # get the header
 
     # Write pdb
     io = PDBIO()
     io.set_structure(pdb)
     io.save(out_path)
 
-    if get_header_from:  # Write the original header to pdb file
-        for line in header[::-1]:
-            line_prepender(out_path, line)
+    # Add header with link to the IMGT structure
+    IMGT_link = IMGT_link.replace('XXXX', pdb_id)
+    header = 'REMARK 410 ' + IMGT_link
+    line_prepender(out_path, header)
 
 
 def unzip_pdb(ID, indir, outdir):
@@ -1310,15 +1292,17 @@ def parse_pMHCI_pdb(pdb_id,
                      indir = PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                      outdir = PANDORA.PANDORA_data + '/PDBs/pMHCI',
                      bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCI',
-                     custom_map={"MSE":"M"},
+                     keep_bad=False, custom_map={"MSE":"M"},
                      remove_biopython_object=True):
     ''' Clean one MHCI pdb file downloaded from IMGT
 
-    Args:
-        pdb_id: (string) id of pdb file
-        indir: (string) path of the input dir (where the .gz files are)
-        outdir: (string) path of the output dir (where the unzipped .pdb files go)
-        bad_dir: (string) path of the output dir (where the unsuitable .pdb files go)
+        Args:
+        pdb_id (str): id of pdb file
+        indir (str): path of the input dir (where the .gz files are)
+        outdir (str): path of the output dir (where the unzipped .pdb files go)
+        bad_dir (str): path of the output dir (where the unsuitable .pdb files go)
+        keep_bad (str): Keep the unsuitable pdb files in the bad_dir. If False, 
+            it will remove the files instead of moving them. Defaults to False.
         custom_map (dict): custom map for 3-to-1 letter aa name translation.
 
     Returns: Template object
@@ -1336,143 +1320,152 @@ def parse_pMHCI_pdb(pdb_id,
         # Unzip file (also check if the file is not empty) and save the path of this file
         pdb_file = unzip_pdb(pdb_id, indir, outdir)
 
-        log_message = change_modified_res(pdb_file, change_CIR=False)
-        if log_message:
-            log(pdb_id, 'Warning, ' + log_message, logfile)
-
-        pdb = PDBParser(QUIET=True).get_structure('MHCI', pdb_file)
-        # Remove waters and duplicated chains, then renumber
-        pdb = remove_duplicated_chains(pdb)
-        # pdb = remember_IMGT_numbering(pdb)
-        pdb = renumber(pdb)
-
-        # Get allele per each chain
         try:
-            alleles = get_chainid_alleles_MHCI(pdb_file)
-        except:
-            log(pdb_id, 'Failed, Could not find allele type', logfile)
-            raise Exception
-
-        try:            #Check if the peptide is merged to the MHC, cut it loose and put it in a new chain
-            pdb, log_message = un_merge_pept_chain(pdb, pdb_file)
+            log_message = change_modified_res(pdb_file, change_CIR=False)
             if log_message:
                 log(pdb_id, 'Warning, ' + log_message, logfile)
-        except:
-            log(pdb_id, 'Failed, Could not cut peptide from MHC chain', logfile)
-            raise Exception
 
-        chain_lens = '; '.join([i.id + ':' + str(len(i)) for i in pdb.get_chains() if i.id != ' '])
-        try:                # Find the peptide chain
-            pept_chain = find_peptide_chain(pdb)
-        except:
+            pdb = PDBParser(QUIET=True).get_structure('MHCI', pdb_file)
+            # Remove waters and duplicated chains, then renumber
+            pdb = remove_duplicated_chains(pdb)
+            # pdb = remember_IMGT_numbering(pdb)
+            pdb = renumber(pdb)
 
-            log(pdb_id, 'Failed, Could not find a suitable peptide chain with a length between 7 and 25. Found: ' + chain_lens, logfile)
-            raise Exception
+            # Get allele per each chain
+            try:
+                alleles = get_chainid_alleles_MHCI(pdb_file)
+            except:
+                log(pdb_id, 'Failed, Could not find allele type', logfile)
+                raise Exception
 
-        if check_non_canonical_res(pdb[0][pept_chain]):
-            log(pdb_id, 'Failed, Non canonical residues in the peptide chain', logfile)
-            raise Exception
+            try:            #Check if the peptide is merged to the MHC, cut it loose and put it in a new chain
+                pdb, log_message = un_merge_pept_chain(pdb, pdb_file)
+                if log_message:
+                    log(pdb_id, 'Warning, ' + log_message, logfile)
+            except:
+                log(pdb_id, 'Failed, Could not cut peptide from MHC chain', logfile)
+                raise Exception
 
-        if check_missing_pept_residues(pdb, chain=pept_chain):
-            log(pdb_id, 'Failed, Peptide chain is missing residues', logfile)
-            raise Exception
+            chain_lens = '; '.join([i.id + ':' + str(len(i)) for i in pdb.get_chains() if i.id != ' '])
+            try:                # Find the peptide chain
+                pept_chain = find_peptide_chain(pdb)
+            except:
 
-        try:                 # Find out which chains are the Alpha and Peptide chain
-            MHC_chains = find_chains_MHCI(pdb, pept_chain, list(alleles.keys()))
-        except:
-            log(pdb_id, 'Failed, Could not locate Alpha chain. Found: ' + chain_lens, logfile)
-            raise Exception
+                log(pdb_id, 'Failed, Could not find a suitable peptide chain with a length between 7 and 25. Found: ' + chain_lens, logfile)
+                raise Exception
 
-        helix, sheet = False, False
-        try:
-            snd_struc, log_message = find_pept_secondary_structure(pdb_file, pdb, pept_chain, MHC_chains)
+            if check_non_canonical_res(pdb[0][pept_chain]):
+                log(pdb_id, 'Failed, Non canonical residues in the peptide chain', logfile)
+                raise Exception
 
+            if check_missing_pept_residues(pdb, chain=pept_chain):
+                log(pdb_id, 'Failed, Peptide chain is missing residues', logfile)
+                raise Exception
+
+            try:                 # Find out which chains are the Alpha and Peptide chain
+                MHC_chains = find_chains_MHCI(pdb, pept_chain, list(alleles.keys()))
+            except:
+                log(pdb_id, 'Failed, Could not locate Alpha chain. Found: ' + chain_lens, logfile)
+                raise Exception
+            
+            helix, sheet = False, False
+            try:
+                snd_struc, log_message = find_pept_secondary_structure(pdb_file, pdb, pept_chain, MHC_chains)
+
+                if log_message:
+                    log(pdb_id, 'Warning, ' + log_message, logfile)
+                    if 'helix' in snd_struc:
+                        helix = snd_struc['helix']
+                    if 'sheet' in snd_struc:
+                        sheet = snd_struc['sheet']
+
+            except:
+                log(pdb_id, 'Failed, Error in finding secondary structures in the peptide', logfile)
+                raise Exception
+            
+            # Get allele per each chain
+            try:
+                a_allele = format_alleles_MHCI(alleles, MHC_chains)
+            except:
+                log(pdb_id, 'Failed, Could not format alleles', logfile)
+                raise Exception
+            
+            hetatm_in_groove, log_message = check_hetatoms_in_binding_groove(pdb, MHC_chains)
+            if hetatm_in_groove:
+                log(pdb_id, 'Failed, Heteroatoms in binding groove between the peptide and MHC', logfile)
+                raise Exception
             if log_message:
                 log(pdb_id, 'Warning, ' + log_message, logfile)
-                if 'helix' in snd_struc:
-                    helix = snd_struc['helix']
-                if 'sheet' in snd_struc:
-                    sheet = snd_struc['sheet']
+            
+            try:                 # Reformat chains
+                pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
+                pdb = ensure_order(pdb, MHC_chains)
+                pdb = replace_chain_names(MHC_chains, pdb,['M', 'P'])  # Rename chains to M,P # Renumber from 1
+            except:
+                log(pdb_id, 'Failed, Could not reformat structure', logfile)
+                raise Exception
+            
+            try:  # get the chain sequences from the pdb file
+                # seqs = seqs_from_pdb(pdb_file, MHC_chains)
+                #seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
+                seqs = {chain.id : seq1(''.join([res.resname for res in chain]), custom_map=custom_map) for chain in pdb.get_chains()}
+            except:
+                log(pdb_id, 'Failed, Could not fetch chain sequences from pdb file', logfile)
+                raise Exception
 
-        except:
-            log(pdb_id, 'Failed, Error in finding secondary structures in the peptide', logfile)
-            raise Exception
+            if not check_pMHC(pdb):
+                log(pdb_id, 'Failed, Structure did not pass the test.', logfile)
+                raise Exception
 
-        # Get allele per each chain
-        try:
-            a_allele = format_alleles_MHCI(alleles, MHC_chains)
-        except:
-            log(pdb_id, 'Failed, Could not format alleles', logfile)
-            raise Exception
+            # Get structure resolution
+            resolution = get_resolution(pdb_file)
 
-        hetatm_in_groove, log_message = check_hetatoms_in_binding_groove(pdb, MHC_chains)
-        if hetatm_in_groove:
-            log(pdb_id, 'Failed, Heteroatoms in binding groove between the peptide and MHC', logfile)
-            raise Exception
-        if log_message:
-            log(pdb_id, 'Warning, ' + log_message, logfile)
+            # Create MHC_structure object
+            templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'],
+                                peptide=seqs['P'], pdb=pdb, pdb_path=pdb_file,
+                                resolution=resolution, sheet=sheet, helix=helix,
+                                remove_biopython_object=remove_biopython_object)
 
-        try:                 # Reformat chains
-            pdb = remove_irregular_chains(pdb, MHC_chains)  # Remove all other chains from the PBD that we dont need
-            pdb = ensure_order(pdb, MHC_chains)
-            pdb = replace_chain_names(MHC_chains, pdb,['M', 'P'])  # Rename chains to M,P # Renumber from 1
-        except:
-            log(pdb_id, 'Failed, Could not reformat structure', logfile)
-            raise Exception
+            #Check if the anchor calculation went ok
+            if templ.anchors[1] - templ.anchors[0] < 6:
+                log(pdb_id, 'Failed, the anchors seem to be too close to each other. This might depend on GitHub issue #146', logfile)
+                raise Exception
+            
+            # clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
+            # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
+            write_pdb(pdb=pdb, out_path='%s/%s.pdb' % (outdir, pdb_id),
+                        pdb_id=pdb_id)#, pdb_file)
+            
+            return templ
 
-        try:  # get the chain sequences from the pdb file
-            # seqs = seqs_from_pdb(pdb_file, MHC_chains)
-            #seqs = [seq1(''.join([res.resname for res in chain])) for chain in pdb.get_chains()]
-            seqs = {chain.id : seq1(''.join([res.resname for res in chain]), custom_map=custom_map) for chain in pdb.get_chains()}
-        except:
-            log(pdb_id, 'Failed, Could not fetch chain sequences from pdb file', logfile)
-            raise Exception
-
-        if not check_pMHC(pdb):
-            log(pdb_id, 'Failed, Structure did not pass the test.', logfile)
-            raise Exception
-
-        # Get structure resolution
-        resolution = get_resolution(pdb_file)
-
-        # Create MHC_structure object
-        templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'],
-                              peptide=seqs['P'], pdb=pdb, pdb_path=pdb_file,
-                              resolution=resolution, sheet=sheet, helix=helix,
-                              remove_biopython_object=remove_biopython_object)
-
-        #Check if the anchor calculation went ok
-        if templ.anchors[1] - templ.anchors[0] < 6:
-            log(pdb_id, 'Failed, the anchors seem to be too close to each other. This might depend on GitHub issue #146', logfile)
-            raise Exception
-
-        # clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
-        # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
-        write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
+        except Exception as err:  # If something goes wrong, append the ID to the bad_ids list
+            print('Moved to bad IDs')
+            print(("Exception: {0}".format(err)))
+            if keep_bad == True:
+                log(pdb_id, 'Moved to bad IDs dir', logfile)
+                os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
+            else:
+                log(pdb_id, 'Removed', logfile)
+                os.system('rm %s/%s.pdb' % (outdir, pdb_id))
 
 
-        return templ
-
-        # except Exception as err:  # If something goes wrong, append the ID to the bad_ids list
-        #     print('Moved to bad IDs')
-        #     print(("Exception: {0}".format(err)))
-        #     log(pdb_id, 'Moved to bad IDs dir', logfile)
-        #     os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
 
 
 def parse_pMHCII_pdb(pdb_id,
                       indir=PANDORA.PANDORA_data + '/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
                       outdir = PANDORA.PANDORA_data + '/PDBs/pMHCII',
                       bad_dir = PANDORA.PANDORA_data + '/PDBs/Bad/pMHCII',
-                      custom_map={"MSE":"M"},
+                      keep_bad=False, custom_map={"MSE":"M"},
                       remove_biopython_object=True):
     ''' Clean one MHCII pdb file downloaded from IMGT
 
     Args:
-        pdb_id: (string) id of pdb file
-        indir: (string) path of the input dir (where the .gz files are)
-        outdir: (string) path of the output dir (where the unzipped .pdb files go)
-        bad_dir: (string) path of the output dir (where the unsuitable .pdb files go)
+        pdb_id (str): id of pdb file
+        indir (str): path of the input dir (where the .gz files are)
+        outdir (str): path of the output dir (where the unzipped .pdb files go)
+        bad_dir (str): path of the output dir (where the unsuitable .pdb files go)
+        keep_bad (str): Keep the unsuitable pdb files in the bad_dir. If False, 
+            it will remove the files instead of moving them. Defaults to False.
         custom_map (dict): custom map for 3-to-1 letter aa name translation.
 
     Returns: Template object
@@ -1602,12 +1595,20 @@ def parse_pMHCII_pdb(pdb_id,
 
             # clear_pdb = remember_IMGT_numbering(deepcopy(pdb), forget=True)
             # Finally, write the cleaned pdb to the output dir. Keep the header of the original file.
-            write_pdb(pdb, '%s/%s.pdb' % (outdir, pdb_id), pdb_file)
+            write_pdb(pdb=pdb, out_path='%s/%s.pdb' % (outdir, pdb_id),
+                        pdb_id=pdb_id)#, pdb_file)
 
             return templ
 
-        except:  # If something goes wrong, append the ID to the bad_ids list
-            os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
+        except Exception as err:  # If something goes wrong, append the ID to the bad_ids list
+            print('Moved to bad IDs')
+            print(("Exception: {0}".format(err)))
+            if keep_bad == True:
+                log(pdb_id, 'Moved to bad IDs dir', logfile)
+                os.system('mv %s/%s.pdb %s/%s.pdb' % (outdir, pdb_id, bad_dir, pdb_id))
+            else:
+                log(pdb_id, 'Removed', logfile)
+                os.system('rm %s/%s.pdb' % (outdir, pdb_id))
 
 def get_sequence_for_fasta(template, MHC_class, chain):
     # alpha_chains = ['HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G',
@@ -1619,18 +1620,21 @@ def get_sequence_for_fasta(template, MHC_class, chain):
     if chain == 'M':
         alleles = [x for x in template.allele_type if any(y in x for y in PANDORA.alpha_genes)]
         header = template.id+'_alpha' +'; '+ (',').join(alleles)
+
         seq = template.M_chain_seq
+        #Clip sequences to keep only the G-domain
         if MHC_class =='I':
-            seq = seq[:180]
+            seq = seq[:PANDORA.MHCI_G_domain[0][1]]
         elif MHC_class =='II':
-            seq = seq[:84]
+            seq = seq[:PANDORA.MHCII_G_domain[0][1]]
 
     elif chain == 'N':
         alleles = [x for x in template.allele_type if any(y in x for y in PANDORA.beta_genes)]
         header = template.id+'_beta' +'; '+ (',').join(alleles)
-        seq = template.N_chain_seq
 
-        seq = seq[:94]
+        seq = template.N_chain_seq
+        #Clip sequences to keep only the G-domain
+        seq = seq[:PANDORA.MHCII_G_domain[1][1]]
 
     return header, seq
 
