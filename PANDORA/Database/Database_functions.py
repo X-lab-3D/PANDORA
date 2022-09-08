@@ -1422,7 +1422,7 @@ def parse_pMHCI_pdb(pdb_id,
 
             # Create MHC_structure object
             templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'],
-                                peptide=seqs['P'], pdb=pdb, pdb_path=pdb_file,
+                                peptide=seqs['P'], pdb=pdb,
                                 resolution=resolution, sheet=sheet, helix=helix,
                                 remove_biopython_object=remove_biopython_object)
 
@@ -1589,7 +1589,7 @@ def parse_pMHCII_pdb(pdb_id,
             templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele,
                                   M_chain_seq=seqs['M'], N_chain_seq=seqs['N'],
                                   peptide=seqs['P'], MHC_class='II', pdb=pdb,
-                                  pdb_path=pdb_file, resolution=resolution,
+                                  resolution=resolution,
                                   helix=helix, sheet=sheet,
                                   remove_biopython_object=remove_biopython_object)
 
