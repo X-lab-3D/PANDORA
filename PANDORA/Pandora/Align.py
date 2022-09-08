@@ -316,8 +316,7 @@ class Align:
             # The comment line that contains the path to the file, start chain and peptide length for modeller.
             if id in self.tem_id:
                 comment = 'structure:%s:1:M:%s:P::::' % (
-                    os.path.basename(self.template[self.tem_id.index(id)].pdb_path), len(seqs[id + ' P']))
-                    # self.template[self.tem_id.index(id)].pdb_path.replace(' ', '\\ '), len(seqs[id + ' P']))
+                    os.path.basename(self.template[self.tem_id.index(id)].get_pdb_path()), len(seqs[id + ' P']))
             else:
                 comment = 'sequence:::::::::'
 
@@ -603,8 +602,7 @@ class Align2:
             # The comment line that contains the path to the file, start chain and peptide length for modeller.
             if id in tem_id:
                 comment = 'structure:%s:1:M:%s:P::::' % (
-                    os.path.basename(self.templates[tem_id.index(id)].pdb_path), len(seqs[id + ' P']))
-                    # self.template[self.tem_id.index(id)].pdb_path.replace(' ', '\\ '), len(seqs[id + ' P']))
+                    os.path.basename(self.templates[tem_id.index(id)].get_pdb_path()), len(seqs[id + ' P']))
             else:
                 comment = 'sequence:::::::::'
 
