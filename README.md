@@ -240,7 +240,7 @@ from PANDORA.Database import Database
 db = Database.load()
 
 ## B. Create Target object
-target = PMHC.Target(id = 'myMHCIITestCase'
+target = PMHC.Target(id = 'myMHCITestCase'
     allele_type = ['MH1-B*2101', 'MH1-B*2101'],
     peptide = 'TAGQSNYDRL',
     anchors = [2,10],
