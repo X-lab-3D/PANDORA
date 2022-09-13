@@ -218,11 +218,11 @@ from PANDORA.Database import Database
 db = Database.load()
 
 ## B. Create Target object
-target = PMHC.Target('1A1M',
-    db.MHCI_data['1A1M'].allele_type,
-    db.MHCI_data['1A1M'].peptide,
+target = PMHC.Target(id='1A1M',
+    allele_type=db.MHCI_data['1A1M'].allele_type,
+    peptide=db.MHCI_data['1A1M'].peptide,
     anchors = db.MHCI_data['1A1M'].anchors)
-
+    
 ## C. Perform modelling
 case = Pandora.Pandora(target, db)
 case.model(benchmark=True)
