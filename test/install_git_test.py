@@ -8,14 +8,15 @@ print(user_folder_path)
 
 data_folder = 'default'
 
-with open(user_folder_path / 'config.json', 'w') as f:
-    f.write('{"data_folder_name" : "test"}')
+# with open(user_folder_path / 'config.json', 'w') as f:
+#    f.write('{"data_folder_name" : "test"}')
+
 # if exists(user_folder_path / 'config.json'):
 #     with open(user_folder_path / 'config.json') as f:
 #         data = json.load(f)
 #         data_folder = data['data_folder_name']
 # else:
-data_folder = 'test'
+# data_folder = 'test'
 
 os.system('mkdir ./Databases')
 os.system(f'mkdir ./Databases/{data_folder}')
