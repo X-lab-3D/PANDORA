@@ -10,6 +10,8 @@ from PANDORA.Pandora import Pandora
 from PANDORA.PMHC import Model
 from PANDORA.Wrapper import Wrapper
 
+working_dir = os.path.dirname(os.path.realpath(__file__))
+
 def test_PMHC_target():
     # Create target object
     target = PMHC.Target('1A1O',
@@ -164,7 +166,8 @@ def test_template_select_MHCI():
                          anchors=db.MHCI_data['1A1O'].anchors)
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
+    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test',
+                         logfile=working_dir + '/test_data/logfile.txt')
     mod.find_template(benchmark=True)
 
     assert mod.template.id == '2X4R' and mod.template.peptide == 'NLVPMVATV'
@@ -183,28 +186,13 @@ def test_template_select_MHCII():
                          anchors=db.MHCII_data['2NNA'].anchors)
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
+    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test',
+                            logfile=working_dir + '/test_data/logfile.txt')
     mod.find_template(benchmark=True)
 
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
 
 
-@pytest.mark.skip
-def test_database_repath():
-    # Load database
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
-    # Repath database
-    db.repath(PANDORA.PANDORA_path + '/../test/test_data/PDBs', save=PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
-    
-    MHCI_flag = False
-    if db.MHCI_data['1A1O'].pdb_path == PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb':
-        MHCI_flag = True
-    MHCI_flag = False
-    if db.MHCII_data['2NNA'].pdb_path == PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCII/2NNA.pdb':
-        MHCII_flag = True
-    assert  MHCI_flag and MHCII_flag
-    
-@pytest.mark.skip
 def test_pandora_MHCI_modelling():
     # Load database
     db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
@@ -216,19 +204,19 @@ def test_pandora_MHCI_modelling():
                          anchors=db.MHCI_data['1A1O'].anchors)
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/')
+    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/',
+                            logfile=working_dir + '/test_data/logfile.txt')
     mod.model(n_loop_models=1, stdev=0.1, benchmark=True, loop_refinement='very_fast')
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
     if mod.template.id == '2X4R' and [c.id for c in mod.target.initial_model.get_chains()] == ['M', 'P']:
-        if float(mod.results[0].moldpf) < 2000 and float(mod.results[0].moldpf) > 0:
+        if float(mod.results[0].molpdf) < 2000 and float(mod.results[0].molpdf) > 0:
             pass_test = True
     # remove output file
     os.system('rm -r %s' % (mod.output_dir))
 
     assert pass_test
-
 
 @pytest.mark.skip
 def test_wrapper_MHCI():
@@ -276,7 +264,7 @@ def test_wrapper_MHCI():
     output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/'
     # Run the modellings
     wrap.run_pandora(num_cores=1, n_loop_models=1, 
-                     benchmark=False, output_dir=output_dir)
+                     benchmark=False, collective_output_dir=output_dir)
     
     #Add check model exist flag
     #Add check molpdf flag
@@ -297,13 +285,14 @@ def test_pandora_MHCII_modelling():
                          anchors=db.MHCII_data['2NNA'].anchors)
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/')
+    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/',
+                            logfile=working_dir + '/test_data/logfile.txt')
     mod.model(n_models=1, stdev=0.2, benchmark=True, loop_refinement='very_fast')
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
     if mod.template.id == '4Z7U' and [c.id for c in mod.target.initial_model.get_chains()] == ['M','N', 'P']:
-        if float(mod.results[0].moldpf) < 1000 and float(mod.results[0].moldpf) > -1000:
+        if float(mod.results[0].molpdf) < 1000 and float(mod.results[0].molpdf) > -1000:
             pass_test = True
     # remove output file
     os.system('rm -r %s' % (mod.output_dir))

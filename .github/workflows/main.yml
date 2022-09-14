@@ -9,11 +9,12 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   # This workflow contains a single job called "build"
   build:
+    environment: Base
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+    
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
@@ -22,23 +23,37 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
+      - name: Set up conda test
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-activate-base: true
+          activate-environment: ""
       - name: Set up directories
-        run: python test/install_git_test.py
+        run: | 
+          python test/install_git_test.py 
+
       - name: Install package
+        shell: bash -l {0}
         run: |
-          alias KEY_MODELLER=${{ secrets.MODELLER_KEY }}
           pip install joblib
-          conda install -c bioconda muscle
-          conda install -c salilab modeller
-          #conda install -c bioconda blast
           python -m pip install --upgrade pip
           pip install -e .[test]
 
       - name: Test with pytest
+        shell: bash -l {0}
+        env:
+          KEY_MODELLER: ${{ secrets.MODELLER_KEY }}
         run: |
+          echo $KEY_MODELLER
+          conda install -c salilab modeller
+          conda install -c bioconda muscle
+          conda install -c bioconda blast
+          alias blastp='$CONDA/bin/blastp'
+          alias muscle='$CONDA/bin/muscle'
           pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
 
       - name: Coveralls
+        shell: bash -l {0}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage.xml
