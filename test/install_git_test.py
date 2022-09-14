@@ -31,7 +31,7 @@ os.system('mkdir ./test/test_data/PDBs/Bad')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCI')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCII')
 
-os.system(f'cp ./test/test_data/PANDORA_database.pkl ./Databases/{data_folder}/')
+os.system(f'cp ./test/test_data/PANDORA_database.pkl ./Databases/{data_folder}/PANDORA_database.pkl')
 
      
 
