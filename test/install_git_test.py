@@ -15,7 +15,7 @@ with open(user_folder_path / 'config.json', 'w') as f:
 #         data = json.load(f)
 #         data_folder = data['data_folder_name']
 # else:
-data_folder = 'default'
+data_folder = 'test'
 
 os.system('mkdir ./Databases')
 os.system(f'mkdir ./Databases/{data_folder}')
@@ -31,7 +31,7 @@ os.system('mkdir ./test/test_data/PDBs/Bad')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCI')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCII')
 
-os.system('cp ./test/test_data/PANDORA_database.pkl ./Databases/test/')
+os.system(f'cp ./test/test_data/PANDORA_database.pkl ./Databases/{data_folder}/')
 
      
 
