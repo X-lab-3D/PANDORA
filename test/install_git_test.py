@@ -27,7 +27,7 @@ os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad')
 os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad/pMHCI')
 os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad/pMHCII')
 os.system(f'mkdir ./Databases/{data_folder}/PDBs/IMGT_retrieved/')
-os.system('mkdir ./test/test_data')
+
 os.system('mkdir ./test/test_data/PDBs/Bad')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCI')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCII')
