@@ -122,8 +122,18 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     Returns: (lst): list of predicted anchor predictions
 
     '''
+    
+    netmhcpan_file_path = os.getenv('netMHCIIpan', default=None)
+    netmhcpan_path = netmhcpan_file_path.strip('/netMHCIIpan')
+    netmhcpan_path = '/' + netmhcpan_path 
+
     all_netMHCpan_alleles = []
-    with open(PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/data/allele.list') as f:
+
+    #with open(PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/data/allele.list') as f:
+    #    for line in f:
+    #        all_netMHCpan_alleles.append(line.replace('\n', ''))
+
+    with open(netmhcpan_path + '/data/allele.list') as f:
         for line in f:
             all_netMHCpan_alleles.append(line.replace('\n', ''))
 
@@ -162,11 +172,15 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     target_alleles_str = ','.join(target_alleles)
 
     # Setup files
-    netmhciipan = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/netMHCIIpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s.txt' %(
-        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
-    outfile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s_prediction.txt' %(
-        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+    #netmhciipan = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/netMHCIIpan'
+    #infile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s.txt' %(
+    #    peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+    #outfile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s_prediction.txt' %(
+    #    peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+
+    netmhciipan = netmhcpan_file_path
+    infile = netmhcpan_path + '/tmp/%s_%s_%s.txt' %(peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+    outfile = netmhcpan_path + '/tmp/%s_%s_%s_prediction.txt' %(peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
@@ -224,11 +238,25 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     Returns: (lst): list of predicted anchor predictions
 
     '''
+    
+    netmhcpan_file_path = os.getenv('netMHCpan', default=None)
+    netmhcpan_path = netmhcpan_file_path.strip('/netMHCpan')
+    netmhcpan_path = '/' + netmhcpan_path 
+
     all_netMHCpan_alleles = []
-    with open(PANDORA.PANDORA_path + '/../netMHCpan-4.1/data/allelenames') as f:
+
+    #with open(PANDORA.PANDORA_path + '/../netMHCpan-4.1/data/allelenames') as f:
+    #    for line in f:
+    #        all_netMHCpan_alleles.append(line.split(' ')[0])#.replace(':',''))
+
+    #/mnt/home1/shahielm/PANDORA/PANDORA/../netMHCpan-4.1/data/allelenames
+
+    with open(netmhcpan_path + '/data/allelenames') as f:
         for line in f:
             all_netMHCpan_alleles.append(line.split(' ')[0])#.replace(':',''))
-    
+
+    #/home/shahielm/PANDORA/netMHCpan-4.1/data/allelenames
+
     ## Format alleles
     target_alleles = [i.replace('*','') for i in allele_type]
     ## Make sure only netMHCpan available alleles are used
@@ -241,11 +269,29 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     target_alleles_str = ','.join(target_alleles)
     
     # Setup files
-    netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s.txt' %(
-        peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
-    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s_prediction.txt' %(
-        peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
+    netmhcpan = netmhcpan_file_path
+    infile = netmhcpan_path + '/tmp/%s_%s_%s.txt' %(peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
+    outfile = netmhcpan_path + '/tmp/%s_%s_%s_prediction.txt' %(peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
+
+    print('1')
+    print(netmhcpan)
+    print(infile)
+    print(outfile)
+    print('2')
+
+    #/home/shahielm/PANDORA/netMHCpan-4.1
+    #/home/shahielm/PANDORA/netMHCpan-4.1/tmp/TPYDINQML_HLA-B5301_20220914_131815.txt
+    #/home/shahielm/PANDORA/netMHCpan-4.1/tmp/TPYDINQML_HLA-B5301_20220914_131815_prediction.txt
+    
+    #netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
+    #infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s.txt' %(
+    #    peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
+    #outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s_prediction.txt' %(
+    #    peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
+
+    #/mnt/home1/shahielm/PANDORA/PANDORA/../netMHCpan-4.1/netMHCpan
+    #/mnt/home1/shahielm/PANDORA/PANDORA/../netMHCpan-4.1/tmp/TPYDINQML_HLA-B5301_20220914_131524.txt
+    #/mnt/home1/shahielm/PANDORA/PANDORA/../netMHCpan-4.1/tmp/TPYDINQML_HLA-B5301_20220914_131524_prediction.txt
     
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
