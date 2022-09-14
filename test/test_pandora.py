@@ -195,7 +195,7 @@ def test_template_select_MHCII():
 
 def test_pandora_MHCI_modelling():
     # Load database
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
     target = PMHC.Target('1A1O',
                          allele_type=db.MHCI_data['1A1O'].allele_type,
@@ -221,7 +221,7 @@ def test_pandora_MHCI_modelling():
 @pytest.mark.skip
 def test_wrapper_MHCI():
     # Load database
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data_repath.pkl')
+    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create Wrapper object
     wrap = Wrapper.Wrapper()
     # Define data_file
