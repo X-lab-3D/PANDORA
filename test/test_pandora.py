@@ -175,7 +175,7 @@ def test_template_select_MHCI():
 
 def test_template_select_MHCII():
     # Load database
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
+    db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
     target = PMHC.Target('2NNA',
                          allele_type=db.MHCII_data['2NNA'].allele_type,
@@ -195,7 +195,7 @@ def test_template_select_MHCII():
 
 def test_pandora_MHCI_modelling():
     # Load database
-    db = Database.load(PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
+    db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
     target = PMHC.Target('1A1O',
                          allele_type=db.MHCI_data['1A1O'].allele_type,
