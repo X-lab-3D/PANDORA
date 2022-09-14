@@ -88,7 +88,6 @@ class Template(PMHC):
                          N_chain_seq=N_chain_seq, anchors=anchors,
                          helix=helix, sheet=sheet)
         self.id = id
-        self.pdb_path = pdb_path
         self.pdb = pdb
         self.contacts = False
         self.resolution = resolution
@@ -104,10 +103,10 @@ class Template(PMHC):
 
         self.check_allele_name()
 
-        if not pdb_path and not pdb:
+        if not os.path.isfile(self.get_pdb_path()) and not pdb:
             raise Exception('Provide a PDB structure to the Template object first')
 
-        if pdb_path and not pdb: # If the path to a pdb file or a Bio.PDB object is given, parse the pdb
+        if not pdb: # If the path to a pdb file or a Bio.PDB object is given, parse the pdb
             self.parse_pdb()
 
         if anchors == []:
@@ -118,7 +117,7 @@ class Template(PMHC):
             self.pdb = None
 
     def get_pdb_path(self):
-        if self.pdb_path:
+        if 'pdb_path' in locals():
             return self.pdb_path
         else:
             return os.path.join(PANDORA.PANDORA_data, 'PDBs', 'pMHC' + self.MHC_class, self.id + '.pdb')
