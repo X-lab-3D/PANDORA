@@ -117,7 +117,7 @@ class Template(PMHC):
             self.pdb = None
 
     def get_pdb_path(self):
-        if hasattr(self, 'pdb_path'):
+        if 'pdb_path' in locals():
             return self.pdb_path
         else:
             return os.path.join(PANDORA.PANDORA_data, 'PDBs', 'pMHC' + self.MHC_class, self.id + '.pdb')

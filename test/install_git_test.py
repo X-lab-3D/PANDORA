@@ -20,7 +20,7 @@ data_folder = 'default'
 
 os.system('mkdir ./Databases')
 os.system(f'mkdir ./Databases/{data_folder}')
-#os.system(f'mkdir ./Databases/{data_folder}/PDBs')
+os.system(f'mkdir ./Databases/{data_folder}/PDBs')
 #os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCI')
 #os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCII')
 os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad')
@@ -31,7 +31,7 @@ os.system(f'mkdir ./Databases/{data_folder}/PDBs/IMGT_retrieved/')
 #os.system('mkdir ./test/test_data/PDBs/Bad')
 #os.system('mkdir ./test/test_data/PDBs/Bad/pMHCI')
 #os.system('mkdir ./test/test_data/PDBs/Bad/pMHCII')
-os.system(f'cp -r ./test/test_data/PDBs ./Databases{data_folder}/')
+os.system(f'cp -r ./test/test_data/PDBs/* ./Databases/{data_folder}/PDBs/')
 os.system(f'cp ./test/test_data/PANDORA_database.pkl ./Databases/{data_folder}/PANDORA_database.pkl')
 
      
