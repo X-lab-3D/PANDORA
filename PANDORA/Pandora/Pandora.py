@@ -445,7 +445,7 @@ class Pandora:
 
         #     except:
         #         self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD', 
-                            logfile=self.logfile)
+        #                   logfile=self.logfile)
         #         raise Exception('Could not calculate L-RMSD')
 
         # elif verbose and not benchmark:
