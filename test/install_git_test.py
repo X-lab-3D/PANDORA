@@ -6,12 +6,16 @@ import json
 user_folder_path = Path(__file__).parents[1]
 print(user_folder_path)
 
-if exists(user_folder_path / 'config.json'):
-    with open(user_folder_path / 'config.json') as f:
-        data = json.load(f)
-        data_folder = data['data_folder_name']
-else:
-    data_folder = 'default'
+data_folder = 'default'
+
+with open(user_folder_path / 'config.json', 'w') as f:
+    f.write('{"data_folder_name" : "test"}')
+# if exists(user_folder_path / 'config.json'):
+#     with open(user_folder_path / 'config.json') as f:
+#         data = json.load(f)
+#         data_folder = data['data_folder_name']
+# else:
+data_folder = 'default'
 
 os.system('mkdir ./Databases')
 os.system(f'mkdir ./Databases/{data_folder}')
@@ -26,6 +30,10 @@ os.system('mkdir ./test/test_data')
 os.system('mkdir ./test/test_data/PDBs/Bad')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCI')
 os.system('mkdir ./test/test_data/PDBs/Bad/pMHCII')
+
+os.system('cp ./test/test_data/PANDORA_database.pkl ./Databases/test/')
+
+     
 
 
 # netMHCII Pan install
