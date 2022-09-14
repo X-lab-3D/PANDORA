@@ -130,11 +130,10 @@ class Pandora:
 
         #for templ in self.template:
 
-        if os.path.isfile(self.template.pdb_path):
-            os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
+        if os.path.isfile(self.template.get_pdb_path()):
+            os.system('cp %s %s/%s.pdb' %(self.template.get_pdb_path(), self.output_dir, self.template.id))
         else:
-            print('Template object could not be found. Please check the path: %s.' %self.template.pdb_path)
-            print('If the path is not available, you can use Database.repath.')
+            print('Template object could not be found. Please check the path: %s.' %self.template.get_pdb_path())
             raise Exception('Template file not found.')
 
         # dd/mm/YY H:M:S
@@ -146,7 +145,7 @@ class Pandora:
 
         # copy the template structure to the output file
         #for t in self.template:
-        os.system('cp %s %s/%s.pdb' %(self.template.pdb_path, self.output_dir, self.template.id))
+        os.system('cp %s %s/%s.pdb' %(self.template.get_pdb_path(), self.output_dir, self.template.id))
 
     def align(self, verbose=True):
         ''' Create the alignment file for modeller.

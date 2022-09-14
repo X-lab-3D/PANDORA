@@ -78,7 +78,8 @@ class Template(PMHC):
             anchors: (list) list of integers specifying which residue(s) of the peptide should be fixed as an anchor
                         during the modelling. MHC class I typically has 2 anchors, while MHC class II typically has 4.
             G_domain_span (list): span of the G domain(s) over the sequence. The format should be [(1, 90),(1, 86)]
-            pdb_path: (string) path to pdb file
+            pdb_path: (string) path to pdb file. The user should provide this argument if they want to use
+                a template outside the normal templates folder.
             pdb: (Bio.PDB) Biopython PBD object
             resolution: (float) Structure resolution in Angstrom
         '''
@@ -86,6 +87,7 @@ class Template(PMHC):
                          MHC_class=MHC_class, M_chain_seq=M_chain_seq,
                          N_chain_seq=N_chain_seq, anchors=anchors,
                          helix=helix, sheet=sheet)
+        self.id = id
         self.pdb_path = pdb_path
         self.pdb = pdb
         self.contacts = False
@@ -115,6 +117,13 @@ class Template(PMHC):
         if remove_biopython_object:
             self.pdb = None
 
+    def get_pdb_path(self):
+        if self.pdb_path:
+            return self.pdb_path
+        else:
+            return os.path.join(PANDORA.PANDORA_data, 'PDBs', 'pMHC' + self.MHC_class, self.id + '.pdb')
+        
+
     def parse_pdb(self, custom_map={"MSE":"M"}):
         '''Loads pdb from path, updates self.pdb field and self.chain_seq/self.peptide if they were empty
 
@@ -124,10 +133,10 @@ class Template(PMHC):
                                 non-canonical residues. Defaults to {"MSE":"M"}.
                 '''
 
-        if self.pdb_path and not self.pdb: #if there is a path to a pdb provided and there is not already a self.pdb...
+        if self.get_pdb_path() and not self.pdb: #if there is a path to a pdb provided and there is not already a self.pdb...
             parser = PDBParser(QUIET=True)  # Create a parser object, used to read pdb files
-            self.pdb = parser.get_structure('MHC', self.pdb_path) #Create Bio.PDB object
-            self.resolution = Database_functions.get_resolution(self.pdb_path) #Get resolution from pdb file
+            self.pdb = parser.get_structure('MHC', self.get_pdb_path()) #Create Bio.PDB object
+            self.resolution = Database_functions.get_resolution(self.get_pdb_path()) #Get resolution from pdb file
 
         # If the chains or peptide are not given by the user, fetch them from the pdb
         # Get the chain sequences
@@ -171,8 +180,8 @@ class Template(PMHC):
             print('Beta-sheet: %s' % self.sheet)
         if self.helix:
             print('Alpha-helix: %s' % self.helix)
-        if self.pdb_path:
-            print('Path to PDB file: %s' %self.pdb_path)
+        if self.get_pdb_path():
+            print('Path to PDB file: %s' %self.get_pdb_path())
         if not self.pdb:
             print('PDB structure: no PDB structure provided')
         else:
