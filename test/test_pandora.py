@@ -37,8 +37,7 @@ def test_PMHC_target():
 def test_PMHC_template():
     # Create template object
     template = PMHC.Template('1A1O',
-                         allele_type=['HLA-B*5301', 'HLA-B*5301'],
-                         pdb_path=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
+                         allele_type=['HLA-B*5301', 'HLA-B*5301'])
     # check calculated anchors, M_chain, peptide, allele and pdb chains
     pass_test = False
     if (template.anchors == [2,9] and 
