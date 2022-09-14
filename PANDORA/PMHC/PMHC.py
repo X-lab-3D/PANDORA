@@ -103,7 +103,7 @@ class Template(PMHC):
 
         self.check_allele_name()
 
-        if not self.path.isfile(self.get_pdb_path()) and not pdb:
+        if not os.path.isfile(self.get_pdb_path()) and not pdb:
             raise Exception('Provide a PDB structure to the Template object first')
 
         if not pdb: # If the path to a pdb file or a Bio.PDB object is given, parse the pdb
