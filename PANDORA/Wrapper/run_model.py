@@ -45,10 +45,18 @@ def run_model(args):
     else:
         output_dir = False
 
-    mod = Pandora.Pandora(target, template=template,
-                          output_dir=output_dir)
-
+    try:
+        mod = Pandora.Pandora(target, template=template,
+                            output_dir=output_dir)
+    except Exception as e:
+        print(f"Modelling case {target.id} failed at Pandora object creation step")
+        print(f"Captured error: {e}")
+        
     # Run the modelling
-    mod.model(n_loop_models=n_loop_models, n_jobs=n_jobs,
-              stdev=0.1, benchmark=benchmark, pickle_out=pickle_out,
-              clip_C_domain=clip_C_domain)
+    try:
+        mod.model(n_loop_models=n_loop_models, n_jobs=n_jobs,
+                stdev=0.1, benchmark=benchmark, pickle_out=pickle_out,
+                clip_C_domain=clip_C_domain)
+    except Exception as e:
+        print(f"Modelling case {target.id} failed at modelling step")
+        print(f"Captured error: {e}")
