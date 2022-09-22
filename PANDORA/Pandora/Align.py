@@ -124,7 +124,8 @@ class Align:
         if self.MHC_class == 'I':
             chains = {"M" : 'alignment'}
         elif self.MHC_class == 'II':
-            chains = {"M":'M', "N":'N'}
+            chains = {"M":f'{self.tar_id}_M', 
+                    "N":f'{self.tar_id}_N'}
 
         for chain, afa_name in chains.items():
             # Align the M chain
@@ -137,7 +138,7 @@ class Align:
                 f.write(f'>{self.tar_id} {chain}\n{self.tar_m}')
             # Perform MSA with muscle
             in_file_muscle = f'{self.output_dir}/{self.tar_id}_{chain}.fasta'
-            out_file_muscle = f'{self.output_dir}/{self.tar_id}_{afa_name}.afa'
+            out_file_muscle = f'{self.output_dir}/{afa_name}.afa'
             p = subprocess.check_call(self.__muscle_command__ % (in_file_muscle,out_file_muscle),shell=True)
 
         if self.MHC_class == 'II':
@@ -324,7 +325,8 @@ class Align:
 class Align2:
 
     def init(self, target, template, output_dir=PANDORA.PANDORA_data + '/outputs'):
-        ''' Performs a alignment of the target and template(s). Will spit out a filename that will be used for modeller.
+        ''' Experimental function. Not used. 
+            Performs a alignment of the target and template(s). Will spit out a filename that will be used for modeller.
 
         Args:
             target: (Target object) The target object that will be aligned to the template structures
