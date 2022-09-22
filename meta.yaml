@@ -24,6 +24,7 @@ requirements:
     - biopython
     - modeller
     - muscle=5.1
+    - blast=2.10
     - numpy
     - numpy-base
     - pip

@@ -86,7 +86,7 @@ PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) and blast (https
 
 
 ```
-conda install -c bioconda muscle=5.1 blast=2.13.0
+conda install -c bioconda muscle=5.1 blast=2.10
 ```
 For some HPC systems the conda blast installation might not work due to missing libraries. For those cases, you can download blast from their release page and install it (make shure you add it to your PATH, otherwise PANDORA will not be able to find it): https://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/
 
