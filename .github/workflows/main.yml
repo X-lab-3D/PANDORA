@@ -46,8 +46,8 @@ jobs:
         run: |
           echo $KEY_MODELLER
           conda install -c salilab modeller
-          conda install -c bioconda muscle
-          conda install -c bioconda blast
+          conda install -c bioconda muscle=5.1
+          conda install -c bioconda blast=2.10
           alias blastp='$CONDA/bin/blastp'
           alias muscle='$CONDA/bin/muscle'
           pytest test/ --cov=PANDORA --cov-config=.coveragerc --cov-report xml:coverage.xml
