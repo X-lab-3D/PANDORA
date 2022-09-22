@@ -81,12 +81,14 @@ Then Install MODELLER with:
 conda install -y -c salilab modeller
 ```
 
-#### 2. Install Muscle
-PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) that can be installed via bioconda
+#### 2. Install Other dependencies
+PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) and blast (https://anaconda.org/bioconda/blast) that can be both installed via bioconda.
+
 
 ```
-conda install -c bioconda muscle=5.1
+conda install -c bioconda muscle=5.1 blast=2.13.0
 ```
+For some HPC systems the conda blast installation might not work due to missing libraries. For those cases, you can download blast from their release page and install it (make shure you add it to your PATH, otherwise PANDORA will not be able to find it): https://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/
 
 #### 3. Install PANDORA
 
