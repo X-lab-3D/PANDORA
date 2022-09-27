@@ -839,6 +839,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
 
         except:
             print('WARNING: Error raised while calling Model.Model() for case %s' %target.id)
+            m = None
         results.append(m)
 
 
