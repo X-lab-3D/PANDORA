@@ -122,8 +122,13 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     Returns: (lst): list of predicted anchor predictions
 
     '''
+    
+    # Retrieves the enviroment of the netMHCIIpan script and the path of the directory where this script is in 
+    netmhcpan_file_path = os.getenv('netMHCIIpan', default=None)
+    netmhcpan_path = os.path.dirname(netmhcpan_file_path) 
+
     all_netMHCpan_alleles = []
-    with open(PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/data/allele.list') as f:
+    with open(netmhcpan_path + '/data/allele.list') as f:
         for line in f:
             all_netMHCpan_alleles.append(line.replace('\n', ''))
 
@@ -162,11 +167,8 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     target_alleles_str = ','.join(target_alleles)
 
     # Setup files
-    netmhciipan = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/netMHCIIpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s.txt' %(
-        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
-    outfile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s_prediction.txt' %(
-        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+    infile = netmhcpan_path + '/tmp/%s_%s_%s.txt' %(peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+    outfile = netmhcpan_path + '/tmp/%s_%s_%s_prediction.txt' %(peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
@@ -174,7 +176,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
 
     try:
         # run netMHCIIpan
-        os.system('%s -f %s -inptype 1 -a %s > %s' % (netmhciipan, infile, target_alleles_str, outfile))
+        os.system('%s -f %s -inptype 1 -a %s > %s' % (netmhcpan_file_path, infile, target_alleles_str, outfile))
 
         # Get the output from the netMHCIIpan prediction
         # {allele: (offset, core, core_reliability, score_EL, %rank_EL)}
@@ -224,11 +226,16 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     Returns: (lst): list of predicted anchor predictions
 
     '''
+    
+    # Retrieves the enviroment of the netMHCpan script and the path of the directory where this script is in 
+    netmhcpan_file_path = os.getenv('netMHCpan', default=None)
+    netmhcpan_path = os.path.dirname(netmhcpan_file_path)
+
     all_netMHCpan_alleles = []
-    with open(PANDORA.PANDORA_path + '/../netMHCpan-4.1/data/allelenames') as f:
+    with open(netmhcpan_path + '/data/allelenames') as f:
         for line in f:
             all_netMHCpan_alleles.append(line.split(' ')[0])#.replace(':',''))
-    
+
     ## Format alleles
     target_alleles = [i.replace('*','') for i in allele_type]
     ## Make sure only netMHCpan available alleles are used
@@ -241,17 +248,14 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     target_alleles_str = ','.join(target_alleles)
     
     # Setup files
-    netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s.txt' %(
-        peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
-    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s_prediction.txt' %(
-        peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
+    infile = netmhcpan_path + '/tmp/%s_%s_%s.txt' %(peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
+    outfile = netmhcpan_path + '/tmp/%s_%s_%s_prediction.txt' %(peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
     
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
         f.write(peptide)
     
-    os.system('%s -p %s -a %s > %s' %(netmhcpan, infile, target_alleles_str, outfile))
+    os.system('%s -p %s -a %s > %s' %(netmhcpan_file_path, infile, target_alleles_str, outfile))
     
     # Get the output from the netMHCIIpan prediction
     # {allele: (core, %rank_EL)}
