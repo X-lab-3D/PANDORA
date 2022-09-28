@@ -122,18 +122,18 @@ class Align:
         # Align M and N chain for MHC II. Because the target chains need to be aligned to the respective chain of
         # the template, M and N are done seperately and later added together
         if self.MHC_class == 'I':
-            chains = {"M" : 'alignment'}
+            chains = {"M" : ('alignment', self.tem_m)}
         elif self.MHC_class == 'II':
-            chains = {"M":f'{self.tar_id}_M', 
-                    "N":f'{self.tar_id}_N'}
+            chains = {"M":(f'{self.tar_id}_M', self.tem_m), 
+                    "N":(f'{self.tar_id}_N', self.tem_n)}
 
-        for chain, afa_name in chains.items():
+        for chain, (afa_name, chain_seq) in chains.items():
             # Align the M chain
             # First write a fasta file containing all chains
             with open(f'{self.output_dir}/{self.tar_id}_{chain}.fasta',"w") as f:
                 for i in range(len(self.tem_id)):
                     # Write template id \n template seq
-                    f.write(f'>{self.tem_id[i]} {chain}\n{self.tem_m}\n')
+                    f.write(f'>{self.tem_id[i]} {chain}\n{chain_seq}\n')
                 # Write target id \n target seq
                 f.write(f'>{self.tar_id} {chain}\n{self.tar_m}')
             # Perform MSA with muscle

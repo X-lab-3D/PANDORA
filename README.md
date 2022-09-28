@@ -132,7 +132,7 @@ Note 2 (For master branch only, conda release v0.9.0): You can download the pre-
 
 ## (Optional) Install NetMHCpan and/or NetMHCIIpan
 
-PANDORA lets the user if he wants to predict peptide's anchor residues instead of using conventional predefined anchor residues.
+PANDORA lets the user to predict peptide's anchor residues instead of using conventional predefined anchor residues.
 In that case you need to download [NetMHCpan](https://services.healthtech.dtu.dk/cgi-bin/sw_request) (for peptide:MHC class I) and/or [NetMHCIIpan](https://services.healthtech.dtu.dk/cgi-bin/sw_request) (for peptide:MHC class II).
 To install, you can simply run:
 ```
