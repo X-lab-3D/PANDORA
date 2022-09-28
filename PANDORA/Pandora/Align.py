@@ -122,7 +122,7 @@ class Align:
         # Align M and N chain for MHC II. Because the target chains need to be aligned to the respective chain of
         # the template, M and N are done seperately and later added together
         if self.MHC_class == 'I':
-            chains = {"M" : 'alignment'}
+            chains = {"M" : ('alignment', self.tem_m)}
         elif self.MHC_class == 'II':
             chains = {"M":(f'{self.tar_id}_M', self.tem_m), 
                     "N":(f'{self.tar_id}_N', self.tem_n)}

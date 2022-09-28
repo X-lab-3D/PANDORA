@@ -558,7 +558,10 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
                                 key=lambda x: x[1][class_variables[2]], reverse=True)
     putative_templates = {x[0] : x[1] for x in putative_templates}
     #Keep only max score templates
-    max_score = list(putative_templates.values())[0][class_variables[2]]
+    try:
+        max_score = list(putative_templates.values())[0][class_variables[2]]
+    except IndexError:
+        raise Exception('Putative templates list empty.')
     putative_templates = {x : putative_templates[x] for x in putative_templates 
                           if putative_templates[x][class_variables[2]] == max_score}
 
