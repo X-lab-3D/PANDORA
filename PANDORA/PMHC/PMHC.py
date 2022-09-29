@@ -291,39 +291,21 @@ class Target(PMHC):
             #Use NetMHCpan to predict the anchors
             else:
                 print('WARNING: no anchor positions provided. Pandora will predict them using NetMHCpan')
-
-                netMHCpan_dir = [i for i in os.listdir(PANDORA.PANDORA_path + '/../') if
-                                 i.startswith('netMHCpan') and os.path.isdir(PANDORA.PANDORA_path + '/../'+i)]
-                if os.path.isfile(PANDORA.PANDORA_path + '/../' + netMHCpan_dir[0] + '/netMHCpan'):
-                    # predict the anchors
+                # predict the anchors
+                try:
                     self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type)
                     print('Predicted anchors: %s' %self.anchors)
-
-                else:
-                    print("Need netMHCIIpan to predict anchor positions. Please download and install netMHCpan.\n\n"
-                      "The user needs to manually download the netMHCIIpan software, since it requires agreement to an academic license agreement.\n"
-                      "1. Go to: https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1\n"
-                      "2. press the download button\n"
-                      "3. Download the most recent version appropriate for your operating system\n"
-                      "4. Untar the file and put it in the root directory of your PANDORA install\n"
-                      "5. Follow the readme or simply run netMHCpan_install.py to configure netMHCpan")
+                except:
+                    print('Error: Something went wrong when predicting the anchors using netMHCIIpan')
 
         if MHC_class =='II' and anchors == []:
             print('WARNING: no anchor positions provided. Pandora will predict them using netMHCIIpan.')
-
-            netMHCIIpan_dir = [i for i in os.listdir(PANDORA.PANDORA_path + '/../') if
-                             i.startswith('netMHCIIpan') and os.path.isdir(PANDORA.PANDORA_path + '/../'+i)]
-            if os.path.isfile(PANDORA.PANDORA_path + '/../' + netMHCIIpan_dir[0] + '/netMHCIIpan'):
-                # predict the anchors
+            # predict the anchors
+            try:
                 self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type)
-            else:
-                print("Need netMHCpan to predict anchor positions. Please download and install netMHCIIpan.\n\n"
-                      "The user needs to manually download the netMHCpan software, since it requires agreement to an academic license agreement.\n"
-                      "1. Go to: https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1\n"
-                      "2. press the download button\n"
-                      "3. Download the most recent version appropriate for your operating system\n"
-                      "4. Untar the file and put it in the root directory of your PANDORA install\n"
-                      "5. Follow the readme or simply run netMHCpan_install.py to configure netMHCIIpan")
+            except:
+                print('Error: Something went wrong when predicting the anchors using netMHCIIpan')
+
 
 
     def info(self):
