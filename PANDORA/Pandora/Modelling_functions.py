@@ -12,7 +12,6 @@ from Bio.Align import PairwiseAligner
 from datetime import datetime
 from copy import deepcopy
 import re
-import sys
 
 
 def check_target_template(target, template):
@@ -215,10 +214,9 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
         return predicted_anchors
     
     else:
-        print("Need netMHCIIpan to predict anchor positions. Please download and install netMHCIIpan.\n\n"
+        raise Exception("Need netMHCIIpan to predict anchor positions. Please download and install netMHCIIpan.\n\n"
         "You can request the software at https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1 in the 'Downloads' section.\n"
         "After installing netMHCpan, make sure it's added to your PATH or as an alias to your .bashrc / .bash_profile.\n")
-        sys.exit()
 
 def predict_anchors_netMHCpan(peptide, allele_type,
                               verbose=True, rm_output=True):
@@ -366,10 +364,9 @@ def predict_anchors_netMHCpan(peptide, allele_type,
         return predicted_anchors
     
     else:
-        print("Need netMHCpan to predict anchor positions. Please download and install netMHCpan.\n\n"
+        raise Exception("Need netMHCpan to predict anchor positions. Please download and install netMHCpan.\n\n"
         "You can request the software at https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1 in the 'Downloads' section.\n"
         "After installing netMHCpan, make sure it's added to your PATH or as an alias to your .bashrc / .bash_profile.\n")
-        sys.exit()
 
 
 def score_peptide_alignment(target, template, substitution_matrix='PAM30'):
