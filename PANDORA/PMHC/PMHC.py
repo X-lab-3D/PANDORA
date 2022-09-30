@@ -295,16 +295,18 @@ class Target(PMHC):
                 try:
                     self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type)
                     print('Predicted anchors: %s' %self.anchors)
-                except:
-                    print('Error: Something went wrong when predicting the anchors using netMHCIIpan')
+                except Exception as e:
+                    print('Error: Something went wrong when predicting the anchors using netMHCpan')
+                    raise Exception(e)
 
         if MHC_class =='II' and anchors == []:
             print('WARNING: no anchor positions provided. Pandora will predict them using netMHCIIpan.')
             # predict the anchors
             try:
                 self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type)
-            except:
+            except Exception as e:
                 print('Error: Something went wrong when predicting the anchors using netMHCIIpan')
+                raise Exception(e)
 
 
 
