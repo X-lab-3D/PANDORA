@@ -1,6 +1,24 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import tarfile
+import subprocess
+import traceback
+import glob
+import os
+
 from PANDORA.Pandora import Pandora
+
+def archive_and_remove(case):       
+    # create archive of the folder
+    with tarfile.open(f'{case}.tar', 'w') as archive:
+        case_files = glob.glob(os.path.join(case, '*'))
+        for case_file in case_files:
+            archive.add(case_file)
+    # remove the original files from the folder
+    if os.path.exists(f'{case}.tar'):
+        subprocess.check_call(f"rm -r {case}", shell=True)
+    else:
+        print(f'Error creating archive: {case}.tar, skipping the file removal')
 
 def run_model(args):
     """Runs one modelling job. Meant to be runned from Pandora.Wrapper
@@ -44,11 +62,28 @@ def run_model(args):
         output_dir = args['collective_output_dir']
     else:
         output_dir = False
-
-    mod = Pandora.Pandora(target, template=template,
-                          output_dir=output_dir)
+    
+    try:
+        mod = Pandora.Pandora(target, template=template,
+                            output_dir=output_dir)
+    except Exception as e:
+        print("Error in creating Pandora object")
+        print(e)
+        print(traceback.format_exc())
 
     # Run the modelling
-    mod.model(n_loop_models=n_loop_models, n_jobs=n_jobs,
-              stdev=0.1, benchmark=benchmark, pickle_out=pickle_out,
-              clip_C_domain=clip_C_domain)
+    try:
+        mod.model(n_loop_models=n_loop_models, n_jobs=n_jobs,
+                stdev=0.1, benchmark=benchmark, pickle_out=pickle_out,
+                clip_C_domain=clip_C_domain)
+    except:
+        print(f'##############################################################\n \
+            Failed to model case {target}')
+        print(traceback.format_exc())
+
+    try:
+        archive_and_remove(mod.output_dir)
+    except Exception as e:
+        print("Error in trying to archive")
+        print(e)
+        print(traceback.format_exc())
