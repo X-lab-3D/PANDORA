@@ -44,6 +44,7 @@ class Pandora:
         '''
 
         if verbose:
+            print('\tTarget ID: %s' % self.target.id)
             print('\tTarget MHC Class: %s' % self.target.MHC_class)
             print('\tTarget Allele:  %s' % self.target.allele_type)
             print('\tTarget Peptide: %s' % self.target.peptide)

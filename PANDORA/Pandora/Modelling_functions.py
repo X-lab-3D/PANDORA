@@ -122,10 +122,24 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     Returns: (lst): list of predicted anchor predictions
 
     '''
+    
+    # Retrieves the enviroment variable netMHCIIpan
+    netmhcpan_file_path = set([x for x in [os.getenv('netMHCIIpan', default=None), 
+                          os.popen('which netMHCIIpan').read().strip()] 
+                          if type(x) == str and re.search("\/netMHCIIpan\-\d+\.\d+\/netMHCIIpan$", x)])
+    try:
+        netmhcpan_file_path = netmhcpan_file_path.pop()
+    except:
+        raise Exception("Need netMHCIIpan to predict anchor positions. Please download and install netMHCIIpan.\n\n"
+        "You can request the software at https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1 in the 'Downloads' section.\n"
+        "After installing netMHCpan, make sure it's added to your PATH or as an alias to your .bashrc / .bash_profile.\n")
+        
+    netmhcpan_path = os.path.dirname(netmhcpan_file_path)
+
     all_netMHCpan_alleles = []
-    with open(PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/data/allele.list') as f:
+    with open(os.path.join(netmhcpan_path, 'data/allelelist.txt')) as f:
         for line in f:
-            all_netMHCpan_alleles.append(line.replace('\n', ''))
+            all_netMHCpan_alleles.append(line.split()[0].replace('\n', ''))
 
     # Format the alles to netMHCIIpan readable format
     target_alleles = [i.split('-')[-1].replace('*', '_') for i in allele_type]
@@ -162,11 +176,8 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     target_alleles_str = ','.join(target_alleles)
 
     # Setup files
-    netmhciipan = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/netMHCIIpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s.txt' %(
-        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
-    outfile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s_prediction.txt' %(
-        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+    infile = os.path.join(netmhcpan_path + '/tmp/%s_%s_%s.txt' %(peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S')))
+    outfile = os.path.join(netmhcpan_path + '/tmp/%s_%s_%s_prediction.txt' %(peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S')))
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
@@ -174,7 +185,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
 
     try:
         # run netMHCIIpan
-        os.system('%s -f %s -inptype 1 -a %s > %s' % (netmhciipan, infile, target_alleles_str, outfile))
+        subprocess.check_call('%s -f %s -inptype 1 -a %s > %s' % (netmhcpan_file_path, infile, target_alleles_str, outfile), shell=True)
 
         # Get the output from the netMHCIIpan prediction
         # {allele: (offset, core, core_reliability, score_EL, %rank_EL)}
@@ -195,7 +206,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
         return [3, 6, 8, 11]
 
     # Remove output file
-    os.system('rm %s %s' % (infile, outfile))
+    subprocess.check_call('rm %s %s' % (infile, outfile), shell=True)
 
     offset, core, core_reliability = max_scores[0]
     # Use the canonical spacing for 9-mer binding cores to predict the anchor positions
@@ -209,11 +220,11 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' % predicted_anchors)
 
     return predicted_anchors
-
+   
 
 def predict_anchors_netMHCpan(peptide, allele_type,
                               verbose=True, rm_output=True):
-    '''Uses netMHCIIpan to predict the binding core of a peptide and infer the
+    '''Uses netMHCIpan to predict the binding core of a peptide and infer the
     anchor positions from that.
 
     Args:
@@ -224,11 +235,25 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     Returns: (lst): list of predicted anchor predictions
 
     '''
-    all_netMHCpan_alleles = []
-    with open(PANDORA.PANDORA_path + '/../netMHCpan-4.1/data/allelenames') as f:
-        for line in f:
-            all_netMHCpan_alleles.append(line.split(' ')[0])#.replace(':',''))
     
+    # Retrieves the enviroment variable netMHCpan
+    netmhcpan_file_path = set([x for x in [os.getenv('netMHCpan', default=None), 
+                          os.popen('which netMHCpan').read().strip()] 
+                          if type(x) == str and re.search("\/netMHCpan\-\d+\.\d+\/netMHCpan$", x)])
+    try:
+        netmhcpan_file_path = netmhcpan_file_path.pop()
+    except:
+        raise Exception("Need netMHCpan to predict anchor positions. Please download and install netMHCpan.\n\n"
+        "You can request the software at https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1 in the 'Downloads' section.\n"
+        "After installing netMHCpan, make sure it's added to your PATH or as an alias to your .bashrc / .bash_profile.\n")
+    
+    netmhcpan_path = os.path.dirname(netmhcpan_file_path)
+
+    all_netMHCpan_alleles = []
+    with open(os.path.join(netmhcpan_path, 'data/allelenames')) as f:
+        for line in f:
+            all_netMHCpan_alleles.append(line.split()[0])#.replace(':',''))
+        
     ## Format alleles
     target_alleles = [i.replace('*','') for i in allele_type]
     ## Make sure only netMHCpan available alleles are used
@@ -237,22 +262,19 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     if len(target_alleles) == 0:
         print('ERROR: The provided Target allele is not available in NetMHCpan-4.1')
         return None
-    
+        
     target_alleles_str = ','.join(target_alleles)
-    
+        
     # Setup files
-    netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s.txt' %(
-        peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
-    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s_prediction.txt' %(
-        peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
-    
+    infile = os.path.join(netmhcpan_path, 'tmp/%s_%s_%s.txt' %(peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S')))
+    outfile = os.path.join(netmhcpan_path, 'tmp/%s_%s_%s_prediction.txt' %(peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S')))
+        
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
         f.write(peptide)
-    
-    os.system('%s -p %s -a %s > %s' %(netmhcpan, infile, target_alleles_str, outfile))
-    
+        
+    subprocess.check_call('%s -p %s -a %s > %s' %(netmhcpan_file_path, infile, target_alleles_str, outfile), shell=True)
+        
     # Get the output from the netMHCIIpan prediction
     # {allele: (core, %rank_EL)}
     pred = {}
@@ -269,19 +291,19 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     # Sort each allele result per Rank_EL
     for allele in pred:
         pred[allele] = list(sorted(pred[allele], key=lambda x:x[1]))
-    
+        
     if len(pred) == 0:
         print('ERROR: NetMHCpan-4.1 was not able to find any binding core for')
         print('the provided peptide and MHC allele')
         return None
-    
+        
     # For every allele, the binding core is predicted. Take the allele with the highest reliability score
     best_allele = min((pred[i][0][1], i) for i in pred)[1]
-    
+        
     # Do a quick alignment of the predicted core and the peptide to find the anchors. (the predicted binding core can
     # contain dashes -. Aligning them makes sure you take the right residue as anchor.
     alignment = pairwise2.align.globalxx(peptide, pred[best_allele][0][0])
-    
+        
     #If there are multiple possible solutions, take the one with no gap at the anchor (second) position
     if len(alignment)>1:
         flag = False
@@ -294,27 +316,27 @@ def predict_anchors_netMHCpan(peptide, allele_type,
                 break
         #If no options are available, take the first one
         if flag==False:
-             pept1 = alignment[0][0]
-             pept2 = alignment[0][1]
-        
+            pept1 = alignment[0][0]
+            pept2 = alignment[0][1]
+            
     else:
         pept1 = alignment[0][0]
         pept2 = alignment[0][1]
-    
+        
     # Remove gaps if in the same position
     to_remove = []
     for i, (aa1, aa2) in enumerate(zip(pept1, pept2)):
         if aa1 == aa2 == '-' and i != 0:
             to_remove.append(i)
     for x in reversed(to_remove):
-       pept1 = pept1[0:x:]+pept1[x+1::]
-       pept2 = pept2[0:x:]+pept2[x+1::]
+        pept1 = pept1[0:x:]+pept1[x+1::]
+        pept2 = pept2[0:x:]+pept2[x+1::]
 
     if verbose:
         print('Query peptide aligned to the core:')
         print(pept1)
         print(pept2)
-    
+        
     # Find the anchors by finding the first non dash from the left and from the right
     # Define chanonical ancors as starting list
     predicted_anchors = [2,len(peptide)]
@@ -334,23 +356,23 @@ def predict_anchors_netMHCpan(peptide, allele_type,
             p1 += 1
         if pept2[i] != '-':
             p2 += 1
-    
+        
     # Find the second anchor
     for i in range(len(pept2)):
         if pept2[::-1][i] != '-':
             predicted_anchors[1] = len([j for j in pept1[:len(pept1) -i] if j != '-'])
             #predicted_anchors[1] = len([j for j in pept2[::-1][i] if j != '-'])
             break
-    
+        
     if verbose:
         print('\tPredicted the binding core using netMHCpan (4.1):\n')
         print('\tIcore:\t%s\n\t%%Rank EL:\t%s\n' %(pred[best_allele][0][0], pred[best_allele][0][1] ))
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' %predicted_anchors)
-    
+        
     if rm_output:
-        os.system('rm %s' %infile)
-        os.system('rm %s' %outfile)
-
+        subprocess.check_call('rm %s' %infile, shell=True)
+        subprocess.check_call('rm %s' %outfile, shell=True)
+    
     return predicted_anchors
 
 
