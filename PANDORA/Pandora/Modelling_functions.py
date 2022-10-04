@@ -139,7 +139,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     all_netMHCpan_alleles = []
     with open(os.path.join(netmhcpan_path, 'data/allelelist.txt')) as f:
         for line in f:
-            all_netMHCpan_alleles.append(line.replace('\n', ''))
+            all_netMHCpan_alleles.append(line.split()[0].replace('\n', ''))
 
     # Format the alles to netMHCIIpan readable format
     target_alleles = [i.split('-')[-1].replace('*', '_') for i in allele_type]
@@ -252,7 +252,7 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     all_netMHCpan_alleles = []
     with open(os.path.join(netmhcpan_path, 'data/allelenames')) as f:
         for line in f:
-            all_netMHCpan_alleles.append(line.split(' ')[0])#.replace(':',''))
+            all_netMHCpan_alleles.append(line.split()[0])#.replace(':',''))
         
     ## Format alleles
     target_alleles = [i.replace('*','') for i in allele_type]
