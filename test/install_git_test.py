@@ -6,10 +6,10 @@ import json
 user_folder_path = Path(__file__).parents[1]
 print(user_folder_path)
 
-data_folder = 'default'
+data_folder = 'test'
 
-# with open(user_folder_path / 'config.json', 'w') as f:
-#    f.write('{"data_folder_name" : "test"}')
+with open(user_folder_path / 'config.json', 'w') as f:
+   f.write('{"data_folder_name" : "%s"}' %data_folder)
 
 # if exists(user_folder_path / 'config.json'):
 #     with open(user_folder_path / 'config.json') as f:
