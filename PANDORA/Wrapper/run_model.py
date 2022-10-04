@@ -52,7 +52,7 @@ def run_model(args):
     benchmark = args['benchmark']
     pickle_out = args['pickle_out']
     clip_C_domain = args['clip_C_domain']
-
+    archive_output = args['archive_output']
 
 
     # Create Pandora Object
@@ -82,7 +82,8 @@ def run_model(args):
         print(traceback.format_exc())
 
     try:
-        archive_and_remove(mod.output_dir)
+        if archive_output:
+            archive_and_remove(mod.output_dir)
     except Exception as e:
         print("Error in trying to archive")
         print(e)
