@@ -6,26 +6,35 @@ import json
 user_folder_path = Path(__file__).parents[1]
 print(user_folder_path)
 
-if exists(user_folder_path / 'config.json'):
-    with open(user_folder_path / 'config.json') as f:
-        data = json.load(f)
-        data_folder = data['data_folder_name']
-else:
-    data_folder = 'default'
+data_folder = 'test'
+
+with open(user_folder_path / 'config.json', 'w') as f:
+   f.write('{"data_folder_name" : "%s"}' %data_folder)
+
+# if exists(user_folder_path / 'config.json'):
+#     with open(user_folder_path / 'config.json') as f:
+#         data = json.load(f)
+#         data_folder = data['data_folder_name']
+# else:
+# data_folder = 'test'
 
 os.system('mkdir ./Databases')
 os.system(f'mkdir ./Databases/{data_folder}')
 os.system(f'mkdir ./Databases/{data_folder}/PDBs')
-os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCI')
-os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCII')
+#os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCI')
+#os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCII')
 os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad')
 os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad/pMHCI')
 os.system(f'mkdir ./Databases/{data_folder}/PDBs/Bad/pMHCII')
 os.system(f'mkdir ./Databases/{data_folder}/PDBs/IMGT_retrieved/')
-os.system('mkdir ./test/test_data')
-os.system('mkdir ./test/test_data/PDBs/Bad')
-os.system('mkdir ./test/test_data/PDBs/Bad/pMHCI')
-os.system('mkdir ./test/test_data/PDBs/Bad/pMHCII')
+
+#os.system('mkdir ./test/test_data/PDBs/Bad')
+#os.system('mkdir ./test/test_data/PDBs/Bad/pMHCI')
+#os.system('mkdir ./test/test_data/PDBs/Bad/pMHCII')
+os.system(f'cp -r ./test/test_data/PDBs/* ./Databases/{data_folder}/PDBs/')
+os.system(f'cp ./test/test_data/PANDORA_database.pkl ./Databases/{data_folder}/PANDORA_database.pkl')
+
+     
 
 
 # netMHCII Pan install

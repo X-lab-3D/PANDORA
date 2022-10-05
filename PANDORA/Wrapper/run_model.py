@@ -67,8 +67,8 @@ def run_model(args):
         mod = Pandora.Pandora(target, template=template,
                             output_dir=output_dir)
     except Exception as e:
-        print("Error in creating Pandora object")
-        print(e)
+        print(f"Modelling case {target.id} failed at Pandora object creation step")
+        print(f"Captured error: {e}")
         print(traceback.format_exc())
 
     # Run the modelling
@@ -76,15 +76,17 @@ def run_model(args):
         mod.model(n_loop_models=n_loop_models, n_jobs=n_jobs,
                 stdev=0.1, benchmark=benchmark, pickle_out=pickle_out,
                 clip_C_domain=clip_C_domain)
-    except:
-        print(f'##############################################################\n \
-            Failed to model case {target}')
+
+    except Exception as e:
+        print(f"Modelling case {target.id} failed at modelling step")
+        print(f"Captured error: {e}")
         print(traceback.format_exc())
 
     try:
         if archive_output:
             archive_and_remove(mod.output_dir)
     except Exception as e:
-        print("Error in trying to archive")
-        print(e)
+        print(f"Modelling case {target.id} failed at archiving step")
+        print(f"Captured error: {e}")
         print(traceback.format_exc())
+
