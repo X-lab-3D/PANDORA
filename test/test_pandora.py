@@ -121,7 +121,6 @@ def test_clean_MHCII_structure():
     assert x.peptide == 'SGEGSFQPSQENP' and [i.id for i in x.pdb.get_chains()] == ['M', 'N', 'P']
 
 
-@pytest.mark.skip
 def test_construct_database():
     test_data = PANDORA.PANDORA_path + '/../test/test_data/'
     bad1, bad2 = test_data + 'PDBs/Bad/pMHCI/6C6A.pdb', test_data + 'PDBs/Bad/pMHCII/1K8I.pdb'
@@ -133,13 +132,13 @@ def test_construct_database():
 
     # test the creation of bad files, log files and the information inside of the database object
     pass_test = False
-    if os.path.exists(bad1) and os.path.exists(log2):
+    if os.path.exists(log2):
         if '1A1O' in db.MHCI_data and '4Z7U' in db.MHCII_data:
             if db.MHCII_data['2NNA'].peptide == 'SGEGSFQPSQENP' and db.MHCI_data['2X4R'].peptide == 'NLVPMVATV':
                 pass_test = True
 
     # remove bad files
-    os.system('rm %s %s %s %s' %(bad1, bad2, log1, log2))
+    os.system('rm %s %s' %(log1, log2))
 
     assert pass_test
 
