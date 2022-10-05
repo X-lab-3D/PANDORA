@@ -144,7 +144,9 @@ def test_construct_database():
     # remove bad files
     os.system('rm %s %s' %(log1, log2))
 
-    assert log_flag and templates_flag and pass_test
+    assert log_flag
+    assert templates_flag 
+    assert pass_test
 
 
 def test_load_db():
