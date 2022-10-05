@@ -72,7 +72,7 @@ def test_contacts():
     assert pass_test
 
 
-@pytest.mark.skip
+
 def test_align():
     # initiate target and template object
     template = PMHC.Template('1A1O',
@@ -217,7 +217,7 @@ def test_pandora_MHCI_modelling():
 
     assert pass_test
 
-@pytest.mark.skip
+
 def test_wrapper_MHCI():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -247,8 +247,8 @@ def test_wrapper_MHCI():
 
     #jobs_flag = False
     try:
-        if len(wrap.jobs) == 2 and wrap.jobs['1A9B'][0].peptide == 'LPPLDITPY':
-            if wrap.jobs['2X4O'][0].peptide == 'KLTPLCVTL':
+        if len(wrap.jobs) == 2 and wrap.jobs['1A9B']['target'].peptide == 'LPPLDITPY':
+            if wrap.jobs['2X4O']['target'].peptide == 'KLTPLCVTL':
                 #jobs_flag = True
                 pass
             else:
@@ -270,7 +270,7 @@ def test_wrapper_MHCI():
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
     
-@pytest.mark.skip
+
 def test_pandora_MHCII_modelling():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -286,8 +286,7 @@ def test_pandora_MHCII_modelling():
     # Perform modelling
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/',
                             logfile=working_dir + '/test_data/logfile.txt')
-    mod.model(n_models=1, stdev=0.2, benchmark=True, loop_refinement='very_fast')
-
+    mod.model(n_loop_models=1, stdev=0.2, benchmark=True, loop_refinement='very_fast')
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
     if mod.template.id == '4Z7U' and [c.id for c in mod.target.initial_model.get_chains()] == ['M','N', 'P']:
