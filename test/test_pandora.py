@@ -72,7 +72,7 @@ def test_contacts():
     assert pass_test
 
 
-@pytest.mark.skip
+
 def test_align():
     # initiate target and template object
     template = PMHC.Template('1A1O',
@@ -121,28 +121,32 @@ def test_clean_MHCII_structure():
     assert x.peptide == 'SGEGSFQPSQENP' and [i.id for i in x.pdb.get_chains()] == ['M', 'N', 'P']
 
 
-@pytest.mark.skip
 def test_construct_database():
-    test_data = PANDORA.PANDORA_path + '/../test/test_data/'
-    bad1, bad2 = test_data + 'PDBs/Bad/pMHCI/6C6A.pdb', test_data + 'PDBs/Bad/pMHCII/1K8I.pdb'
-    log1, log2 = test_data + 'PDBs/Bad/log_MHCI.csv', test_data + 'PDBs/Bad/log_MHCII.csv'
+    #test_data = PANDORA.PANDORA_path + '/../test/test_data/'
+    #bad1, bad2 = test_data + 'PDBs/Bad/pMHCI/6C6A.pdb', test_data + 'PDBs/Bad/pMHCII/1K8I.pdb'
+    log1, log2 = PANDORA.PANDORA_data + '/PDBs/Bad/log_MHCI.csv', PANDORA.PANDORA_data + '/PDBs/Bad/log_MHCII.csv'
 
     # Construct database object
     db = Database.Database()
-    db.construct_database(save=False, download=False, data_dir=test_data)
+    db.construct_database(save=False, download=False)
 
     # test the creation of bad files, log files and the information inside of the database object
     pass_test = False
-    if os.path.exists(bad1) and os.path.exists(log2):
+    log_flag = False
+    templates_flag = False
+    if os.path.exists(log2):
+        log_flag = True
         if '1A1O' in db.MHCI_data and '4Z7U' in db.MHCII_data:
+            templates_flag = True
             if db.MHCII_data['2NNA'].peptide == 'SGEGSFQPSQENP' and db.MHCI_data['2X4R'].peptide == 'NLVPMVATV':
                 pass_test = True
 
     # remove bad files
-    os.system('rm %s %s %s %s' %(bad1, bad2, log1, log2))
+    os.system('rm %s %s' %(log1, log2))
 
+    assert log_flag
+    assert templates_flag 
     assert pass_test
-
 
 def test_load_db():
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -153,7 +157,6 @@ def test_load_db():
             pass_test = True
 
     assert pass_test
-
 
 def test_template_select_MHCI():
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -170,7 +173,6 @@ def test_template_select_MHCI():
     mod.find_template(benchmark=True)
 
     assert mod.template.id == '2X4R' and mod.template.peptide == 'NLVPMVATV'
-
 
 def test_template_select_MHCII():
     # Load database
@@ -190,7 +192,6 @@ def test_template_select_MHCII():
     mod.find_template(benchmark=True)
 
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
-
 
 def test_pandora_MHCI_modelling():
     # Load database
@@ -217,7 +218,6 @@ def test_pandora_MHCI_modelling():
 
     assert pass_test
 
-@pytest.mark.skip
 def test_wrapper_MHCI():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -247,8 +247,8 @@ def test_wrapper_MHCI():
 
     #jobs_flag = False
     try:
-        if len(wrap.jobs) == 2 and wrap.jobs['1A9B'][0].peptide == 'LPPLDITPY':
-            if wrap.jobs['2X4O'][0].peptide == 'KLTPLCVTL':
+        if len(wrap.jobs) == 2 and wrap.jobs['1A9B']['target'].peptide == 'LPPLDITPY':
+            if wrap.jobs['2X4O']['target'].peptide == 'KLTPLCVTL':
                 #jobs_flag = True
                 pass
             else:
@@ -270,7 +270,6 @@ def test_wrapper_MHCI():
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
     
-@pytest.mark.skip
 def test_pandora_MHCII_modelling():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -286,8 +285,7 @@ def test_pandora_MHCII_modelling():
     # Perform modelling
     mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/',
                             logfile=working_dir + '/test_data/logfile.txt')
-    mod.model(n_models=1, stdev=0.2, benchmark=True, loop_refinement='very_fast')
-
+    mod.model(n_loop_models=1, stdev=0.2, benchmark=True, loop_refinement='very_fast')
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
     if mod.template.id == '4Z7U' and [c.id for c in mod.target.initial_model.get_chains()] == ['M','N', 'P']:
