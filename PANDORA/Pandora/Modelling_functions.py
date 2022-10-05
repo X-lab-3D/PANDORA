@@ -1,5 +1,6 @@
 from Bio.Align import substitution_matrices
 import os
+import traceback
 import subprocess
 import PANDORA
 import pickle
@@ -860,6 +861,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
 
         except:
             print('WARNING: Error raised while calling Model.Model() for case %s' %target.id)
+            print(traceback.format_exc())
             m = None
         results.append(m)
 

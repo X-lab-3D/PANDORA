@@ -240,7 +240,7 @@ class Wrapper():
 
     def run_pandora(self, num_cores=1, n_loop_models=20, n_jobs=None,
                     benchmark=False, collective_output_dir=False, 
-                    pickle_out=False, clip_C_domain=False):
+                    pickle_out=False, clip_C_domain=False, archive=False):
         """Runs Pandora in parallel jobs.
 
 
@@ -274,7 +274,8 @@ class Wrapper():
             self.jobs[job].update({'n_loop_models':n_loop_models, 'n_jobs':n_jobs, 
                                    'benchmark':benchmark, 'pickle_out':pickle_out,
                                    'collective_output_dir':collective_output_dir,
-                                   'clip_C_domain':clip_C_domain})
+                                   'clip_C_domain':clip_C_domain,
+                                   'archive_output': archive})
 
            # elif self.jobs[job][-1] == '' and collective_output_dir:
            #     self.jobs[job][-1] = collective_output_dir
