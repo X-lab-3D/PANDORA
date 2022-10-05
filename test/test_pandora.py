@@ -124,7 +124,7 @@ def test_clean_MHCII_structure():
 def test_construct_database():
     test_data = PANDORA.PANDORA_path + '/../test/test_data/'
     #bad1, bad2 = test_data + 'PDBs/Bad/pMHCI/6C6A.pdb', test_data + 'PDBs/Bad/pMHCII/1K8I.pdb'
-    log1, log2 = PANDORA.PANDORA_data + '/PDBs/Bad/log_MHCI.csv', PANDORA.PANDORA_data + '/PDBs/Bad/log_MHCII.csv'
+    log1, log2 = test_data + 'PDBs/Bad/log_MHCI.csv', test_data + 'PDBs/Bad/log_MHCII.csv'
 
     # Construct database object
     db = Database.Database()
