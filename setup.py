@@ -44,7 +44,6 @@ setup(
        'pdb_tools',
        'pdb2sql',
        'matplotlib',
-       'dill',
        'joblib'
        ],
 
