@@ -1789,28 +1789,27 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
 
     MHCs = {}
     to_write = {}
-    #Parse the fasta files
-    fastas = [x for x in os.listdir('./') if x.startswith('MHC_prot.fasta')]
-    for fasta in fastas:
-        for seq_record in SeqIO.parse(fasta, "fasta"):
-            allele_fullname = seq_record.description.split(' ')[1]
-            #allele_significant = allele_fullname[:8]
-            #If the allele name ends with ':', trim it away
-            #if allele_significant[-1] == ':':
-            #    allele_significant = allele_significant[:-1]
-            #If the gene name is Spieces name (Xxxx-A*0 or SLA-A*0)
-            #regexp = re.search(r'([A-Z]{1}[a-z]{3}|[A-Z]{3})[-][A-Z0-9]{1:2}[*][0-9]{2:3}[:][0-9]{2:3}',allele_fullname.split('-')[0])
-            #if regexp is not None:
-                #print(regexp.group(0))
-            if allele_fullname.endswith('N') or allele_fullname.endswith('Q'):
-                pass
-            elif int(seq_record.description.split(' ')[2]) < 350 or int(seq_record.description.split(' ')[2]) > 380:
-                pass
-            else:
-                try:
-                    MHCs[allele_fullname].append(seq_record)
-                except KeyError:
-                    MHCs[allele_fullname] = [seq_record]
+    #Parse the fasta file
+    fasta = f'{data_dir}/MHC_prot.fasta'
+    for seq_record in SeqIO.parse(fasta, "fasta"):
+        allele_fullname = seq_record.description.split(' ')[1]
+        #allele_significant = allele_fullname[:8]
+        #If the allele name ends with ':', trim it away
+        #if allele_significant[-1] == ':':
+        #    allele_significant = allele_significant[:-1]
+        #If the gene name is Spieces name (Xxxx-A*0 or SLA-A*0)
+        #regexp = re.search(r'([A-Z]{1}[a-z]{3}|[A-Z]{3})[-][A-Z0-9]{1:2}[*][0-9]{2:3}[:][0-9]{2:3}',allele_fullname.split('-')[0])
+        #if regexp is not None:
+            #print(regexp.group(0))
+        if allele_fullname.endswith('N') or allele_fullname.endswith('Q'):
+            pass
+        elif int(seq_record.description.split(' ')[2]) < 350 or int(seq_record.description.split(' ')[2]) > 380:
+            pass
+        else:
+            try:
+                MHCs[allele_fullname].append(seq_record)
+            except KeyError:
+                MHCs[allele_fullname] = [seq_record]
 
     #Sort MHC sequences by length. Keep the longest
     for allele in MHCs:

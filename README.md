@@ -43,8 +43,6 @@ The installation process will take care of installing the following dependencies
 <!-- - [muscle](https://anaconda.org/bioconda/muscle) -->
 <!-- - [Modeller](https://anaconda.org/salilab/modeller) 9.23 or later -->
 - [pdb2sql](https://github.com/DeepRank/pdb2sql) (Optional, only for RMSD calculation)
-- [NetMHCpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class I anchors)
-- [NetMHCIIpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class II anchors)
 
 
 ## Installation
@@ -56,7 +54,7 @@ Prior to PANDORA installation, you need to first activate MODELLER's license. Pl
 Replace XXXX with your MODELLER License key and run the command:
 
 ```
-alias KEY_MODELLER='XXXX'
+export KEY_MODELLER='XXXX'
 ```
 
 #### 2. Install PANDORA
@@ -72,14 +70,17 @@ conda install -c csb-nijmegen csb-pandora -c salilab -c bioconda
 Prior to PANDORA installation, you need to first activate MODELLER's license. Please request MODELLER license at: https://salilab.org/modeller/registration.html
 
 Replace XXXX with your MODELLER License key and run the command:
+
 ```
-alias KEY_MODELLER='XXXX'
+export KEY_MODELLER='XXXX'
 ```
 
-Then Install MODELLER with:
+Then, install MODELLER with:
 ```
 conda install -y -c salilab modeller
 ```
+
+Note: You can also follow the instruction in the conda install output to enter your modeller key in the appropriate file afterwars, instead of setting it beforehand.
 
 #### 2. Install Other dependencies
 PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) and blast (https://anaconda.org/bioconda/blast) that can be both installed via bioconda.
@@ -120,7 +121,7 @@ from PANDORA.Database import Database
 
 ## A. Create local Database
 db = Database.Database()
-db.construct_database()
+db.construct_database(n_jobs=<n_jobs>)
 ```
 
 Note 1: in the case of generation of template database, data are saved by default into `Databases/default`. It is possible to modify the folder name (`default`) by creating a `config.json` file in the current working directory using `data_folder_name` as a key, and the desired folder name as a value:
@@ -134,15 +135,10 @@ Note 2 (For master branch only, conda release v0.9.0): You can download the pre-
 
 PANDORA lets the user to predict peptide's anchor residues instead of using conventional predefined anchor residues.
 In that case you need to download [NetMHCpan](https://services.healthtech.dtu.dk/cgi-bin/sw_request) (for peptide:MHC class I) and/or [NetMHCIIpan](https://services.healthtech.dtu.dk/cgi-bin/sw_request) (for peptide:MHC class II).
-To install, you can simply run:
-```
-python netMHCpan_install.py
-```
+
+Once you have obtained the download link, you can install them by following the instructions in their .readme files. Note that PANDORA will assume they are installed and callable from command line (as netMHCpan and netMHCIIpan).
 
 ## Tutorial
-
-Are you planning to run multiple pMHC models with similar settings?
-Then hop directly to example #5 and try our Wrapper module!
 
 #### Example 1 : Generating a peptide:MHC complex given the peptide sequence
 PANDORA requires at least these information to generate models:
@@ -181,7 +177,10 @@ case.model()
 PANDORA can model large batches of peptides in parallel. You need to provide the following peptide information in a *.tsv* or *.csv* file:
 
 - *Peptide sequence,  MHC Allele name / MHC chain sequence*
-Note: you can also add various information to your file, including anchors for each case, templates, IDs
+
+Note: you can also add various information to your file, including anchors for each case, templates, IDs.
+You can find all the arguments for the master branch version in the [documentation](https://csb-pandora.readthedocs.io/en/latest/PANDORA.Wrapper.html#module-PANDORA.Wrapper.Wrapper).
+For other branches, like development, we suggest you to use the python help() function or check directly the [docstring in the source code](https://github.com/X-lab-3D/PANDORA/blob/d43f9d91bee9f793ee7fe4cb10be3cb4e299e36d/PANDORA/Wrapper/Wrapper.py#L147).
 
 The Wrapper class will take care of generating PANDORA target objects and parallelize the modelling on the given number of cores:
 
@@ -201,6 +200,7 @@ wrap.create_targets('datafile.tsv', db)
 ## C. Perform modelling
 wrap.run_pandora(num_cores=128)
 ```
+
 #### Example 3: Create multiple loop models in a your given directory
 There are some options provided that you can input them as arguments to the functions.
 

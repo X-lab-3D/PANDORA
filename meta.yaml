@@ -38,4 +38,4 @@ about:
   home: https://github.com/X-lab-3D/PANDORA/blob/master/README.md
   license: Apache License 2.0
   summary: "PANDORA is anchor restrained modelling pipeline for generating peptide-MHC structures."
-  doc_ulr: Work In Progress
+  doc_ulr: https://csb-pandora.readthedocs.io/en/latest/?badge=latest
