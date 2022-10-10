@@ -1720,7 +1720,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
                                                  'E', 'F', 'G'] and
               350 < int(seq_record.description.split(' ')[2]) < 380) or
               (allele_fullname.split('*')[0][:2] in ['DP', 'DQ', 'DR'] and
-               170 < int(seq_record.description.split(' ')[2]) < 220)):
+               170 < int(seq_record.description.split(' ')[2]) < 270)):
             try:
                 HLAs[allele_significant].append(seq_record)
             except KeyError:
