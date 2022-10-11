@@ -457,7 +457,18 @@ class Target(PMHC):
             #print("or provide the MHC sequence as target.M_chain_seq (and target.N_chain_seq for MHCII beta chain)")
 
     def fill_allele_seq_info(self, use_templ_seq=False):
+        """_summary_
 
+        Args:
+            use_templ_seq (bool, optional): If true, it uses the template MHC sequence 
+                for each chain a sequence could not be found. This function will 
+                be removed in later releases. Defaults to False.
+
+        Raises:
+            Exception: _description_
+            Exception: _description_
+            Exception: _description_
+        """
         if self.allele_type:
             # Check allele name
             self.check_allele_name()
