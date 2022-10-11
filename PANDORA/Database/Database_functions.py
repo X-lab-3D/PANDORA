@@ -1665,9 +1665,9 @@ def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data + '/mhcseqs',
 
     # Download and parse sequences
     # Human sequences
-    ref_MHCI_sequences = generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta')
+    ref_MHCI_sequences = generate_hla_database(data_dir, HLA_out = HLA_out)
     # Non-human sequences
-    ref_MHCI_sequences.update(generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'))
+    ref_MHCI_sequences.update(generate_nonhla_database(data_dir, nonHLA_out = nonHLA_out))
 
     # Change back working directory
     #os.chdir(start_dir)
@@ -1695,7 +1695,6 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
         pass
 
     # Download Human data
-    #os.system('wget https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta')
     url = 'https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta'
     command = (' ').join(['wget', url, '-P', data_dir])
     proc = subprocess.Popen(command,  executable='/bin/bash',
@@ -1708,7 +1707,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
     for seq_record in SeqIO.parse(data_dir + '/hla_prot.fasta', "fasta"):
         allele_fullname = seq_record.description.split(' ')[1]
         #allele_significant = allele_fullname[:8]
-        #If the allele name ends with ':', trim it away
+        #Take only up to the allele identifyer, ignore the silent mutations
         allele_significant = ':'.join(allele_fullname.split(':')[:3])
         #if allele_significant[-1] == ':':
         #    allele_significant = allele_significant[:-1]
@@ -1718,9 +1717,9 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
         #Take only sequences which legth is consistent with MHCI or MHCII chains
         elif ((allele_fullname.split('*')[0][:2] in ['A', 'B', 'C',
                                                  'E', 'F', 'G'] and
-              350 < int(seq_record.description.split(' ')[2]) < 380) or
+              175 < int(seq_record.description.split(' ')[2]) < 380) or
               (allele_fullname.split('*')[0][:2] in ['DP', 'DQ', 'DR'] and
-               170 < int(seq_record.description.split(' ')[2]) < 220)):
+               170 < int(seq_record.description.split(' ')[2]) < 270)):
             try:
                 HLAs[allele_significant].append(seq_record)
             except KeyError:
