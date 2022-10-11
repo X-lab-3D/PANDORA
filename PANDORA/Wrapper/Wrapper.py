@@ -140,7 +140,8 @@ class Wrapper():
                        anchors_col=None, M_chain_col=None, N_chain_col=None,
                        outdir_col=None, benchmark=False,
                        verbose=False, start_row=None,
-                       end_row=None, use_netmhcpan=False):
+                       end_row=None, use_netmhcpan=False,
+                       use_templ_seq=False):
         """Create PANDORA targets from csv or tsv file.
 
 
@@ -182,6 +183,9 @@ class Wrapper():
                 specify at which row the samples for this job end.
             use_netmhcpan (bool, optional): If True, uses local installation
                 of netMHCPan to predict anchor positions for each target.
+            use_templ_seq (bool, optional): If true, it uses the template MHC sequence 
+                for each chain a sequence could not be found. This function will 
+                be removed in later releases. Defaults to False.
 
         Returns:
             None.
@@ -218,7 +222,7 @@ class Wrapper():
                                       MHC_class=MHC_class, anchors=self.targets[target_id]['anchors'],
                                       M_chain_seq=self.targets[target_id]['M_chain_seq'],
                                       N_chain_seq=self.targets[target_id]['N_chain_seq'],
-                                      use_netmhcpan=use_netmhcpan)
+                                      use_netmhcpan=use_netmhcpan, use_templ_seq=use_templ_seq)
                 except Exception as err:
                     print('Skipping Target %s at Target object generation step for the following reason:' %target_id)
                     print(("Exception: {0}".format(err)))

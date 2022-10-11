@@ -423,42 +423,20 @@ class Pandora:
                         logfile=self.logfile)
             raise Exception('Failed running modeller')
 
-
-        # if verbose and benchmark:
-        #     try:
-        #         print('\n\tModel\t\t\t\tMolpdf\t\tL-RMSD\t\tcore L-RMSD')
-        #         molsort = sorted(self.results, key=lambda m: float(m.molpdf))
-        #         for m in molsort:
-        #             try:
-        #                 print('\t%s\t\t%s\t\t%s\t\t%s' % (
-        #                     os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4),
-        #                     round(float(m.lrmsd), 4), round(float(m.core_lrmsd), 4)))
-        #             except AttributeError:
-        #                 try:
-        #                     print('\t%s\t\t%s\t\t%s' % (
-        #                         os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4),
-        #                         round(float(m.lrmsd), 4)))
-        #                 except AttributeError:
-        #                     print('\t%s\t\t%s' % (
-        #                         os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.moldpf), 4)))
-
-
-        #     except:
-        #         self.__log(self.target.id, self.template.id, 'Could not calculate L-RMSD', 
-        #                   logfile=self.logfile)
-        #         raise Exception('Could not calculate L-RMSD')
-
         # elif verbose and not benchmark:
         if verbose:
             print('\n\tModel\t\t\t\tMolpdf')
             for m in self.results:
                 print('\t%s\t\t%s' %(os.path.basename(m.model_path).replace('.pdb', ''), round(float(m.molpdf), 4)))
 
-        if type(self.template)==list:
+        # Check how many models have been generated
+        n_produced_models = len(self.results)
+        if n_produced_models == n_homology_models*n_loop_models:
             self.__log(self.target.id, self.template.id, 
-            'Successfully modelled %s models' %(n_homology_models*n_loop_models), 
+            f'Successfully modelled {n_produced_models} models', 
             logfile=self.logfile)
         else:
             self.__log(self.target.id, self.template.id, 
-            'Successfully modelled %s models' %(n_homology_models*n_loop_models), 
+            f'Successfully modelled only {n_produced_models} models out of {n_homology_models*n_loop_models} requested', 
             logfile=self.logfile)
+
