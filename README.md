@@ -64,6 +64,7 @@ Install with conda:
 conda install -c csb-nijmegen csb-pandora -c salilab -c bioconda
 ```
 
+Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
 ## GitHub / Pypi installation
 
 #### 1. Install Modeller:
@@ -90,6 +91,8 @@ PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) and blast (https
 conda install -c bioconda muscle=5.1 blast=2.10
 ```
 For some HPC systems the conda blast installation might not work due to missing libraries. For those cases, you can download blast from their release page and install it (make shure you add it to your PATH, otherwise PANDORA will not be able to find it): https://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/
+
+Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
 
 #### 3. Install PANDORA
 
