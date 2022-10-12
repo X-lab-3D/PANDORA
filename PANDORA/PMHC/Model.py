@@ -10,8 +10,8 @@ import traceback
 
 class Model:
 
-    def __init__(self, target, model_path='', output_dir = PANDORA.PANDORA_data, pdb=False, molpdf=0, dope=0):
-        '''__init__(self, target, model_path='', output_dir = PANDORA.PANDORA_data, pdb=False, molpdf=0, dope=0)
+    def __init__(self, target, model_path='', output_dir = os.getcwd(), pdb=False, molpdf=0, dope=0):
+        '''__init__(self, target, model_path='', output_dir = os.getcwd(), pdb=False, molpdf=0, dope=0)
          Initiate model object
 
         Args:

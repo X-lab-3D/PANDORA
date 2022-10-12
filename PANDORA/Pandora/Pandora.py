@@ -11,8 +11,8 @@ from datetime import datetime
 class Pandora:
 
     def __init__(self, target, database=None, template=None, output_dir=False, 
-                logfile = PANDORA.PANDORA_data + '/outputs/Pandora_log.txt'):
-        '''__init__(self, target, database=None, template=None, output_dir=PANDORA.PANDORA_data + '/outputs',
+                logfile = os.getcwd() + '/Pandora_log.txt'):
+        '''__init__(self, target, database=None, template=None, output_dir= os.getcwd(),
                     logfile = PANDORA.PANDORA_data + '/outputs/Pandora_log.txt')
         '''
         self.target = target
@@ -20,7 +20,7 @@ class Pandora:
         self.database = database
         
         if output_dir == False:
-            self.output_dir = PANDORA.PANDORA_data + '/outputs'
+            self.output_dir = os.getcwd()
         else:
             self.output_dir = output_dir
             
@@ -109,7 +109,7 @@ class Pandora:
     def prep_output_dir(self):
         ''' Create an output directory and move the template pdb there
             Uses self.output_dir (str): Path to output directory.
-                Defaults to <PANDORA_location>/Databases/default/outputs.
+                Defaults to os.getcwd().
 
         Args:
             None
@@ -297,7 +297,7 @@ class Pandora:
               best_n_templates=1, n_jobs=None, loop_refinement='slow', pickle_out=False,
               stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, 
               RMSD_atoms=['C', 'CA', 'N', 'O'], clip_C_domain=False):
-        '''model(self, output_dir=PANDORA.PANDORA_data + '/outputs', n_loop_models=20, n_homology_models=1, best_n_templates=1, n_jobs=None, loop_refinement='slow', pickle_out=False,stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, RMSD_atoms=['C', 'CA', 'N', 'O'])
+        '''model(self, output_dir=os.getcwd(), n_loop_models=20, n_homology_models=1, best_n_templates=1, n_jobs=None, loop_refinement='slow', pickle_out=False,stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, RMSD_atoms=['C', 'CA', 'N', 'O'])
         Wrapper function that combines all modelling steps.
 
         Args:
@@ -318,7 +318,7 @@ class Pandora:
                 Recommended to change only when producing high number of loop models
                 for one peptide. Defaults to None.
             output_dir (Optional, str): Path to output directory.
-                Defaults to PANDORA.PANDORA_data + '/outputs'.
+                Defaults to os.getcwd().
             pickle_out (Optional, bool): If True, saves a pickle file containing the
                 PANDORA.PMHC.Model objects for the generated models in the
                 output directory. Defaults to False.

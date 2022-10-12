@@ -10,7 +10,7 @@ import subprocess
 class Align:
 
     def __init__(self, target, template, clip_C_domain=False,
-                 output_dir=PANDORA.PANDORA_data + '/outputs', remove_terms=True):
+                 output_dir=os.getcwd(), remove_terms=True):
         ''' Performs a alignment of the target and template(s). Returns a filename that will be used for modeller.
 
         Args:
