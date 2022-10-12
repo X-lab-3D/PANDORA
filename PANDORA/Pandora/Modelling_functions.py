@@ -1054,7 +1054,7 @@ def allele_name_adapter(MHC_class, ori_alleles, available_alleles):
                 else:
                     alleles[a] = alleles[a][:5]
                     
-    elif MHC_class =='I':
+    elif MHC_class =='II':
         for a in range(len(alleles)):
             if alleles[a].startswith('HLA'):      # Human
                 prefix = alleles[a].split('-')[0]
