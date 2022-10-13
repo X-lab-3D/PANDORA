@@ -10,22 +10,28 @@ from datetime import datetime
 
 class Pandora:
 
-    def __init__(self, target, database=None, template=None, output_dir=False, 
-                logfile = os.getcwd() + '/Pandora_log.txt'):
-        '''__init__(self, target, database=None, template=None, output_dir= os.getcwd(),
+    def __init__(self, target, database=None, template=None, output_dir=False):
+        '''__init__(self, target, database=None, template=None, output_dir=os.getcwd(),
                     logfile = PANDORA.PANDORA_data + '/outputs/Pandora_log.txt')
         '''
         self.target = target
         self.template = template
         self.database = database
+        self.keep_IL = False
         
         if output_dir == False:
             self.output_dir = os.getcwd()
         else:
             self.output_dir = output_dir
             
-        self.keep_IL = False
-        self.logfile = logfile
+        #TODO: use self.create_output_dir()/self.prep_output_dir()
+        self.prep_output_dir()
+
+        # if logfile == False:
+        #     self.logfile = f'{self.output_dir}/{target.id}.log'
+        # else:
+        #     self.logfile = logfile
+        self.logfile = f'{self.output_dir}/{target.id}.log'
 
         if database is None and template is None:
             raise Exception('Provide a Database object so Pandora can find the best suitable template structure for '
@@ -119,7 +125,7 @@ class Pandora:
 
         # create an output directory
         try:
-            self.output_dir = '%s/%s_%s' %(self.output_dir, self.target.id, self.template.id)
+            self.output_dir = '%s/%s' %(self.output_dir, self.target.id)
             #self.output_dir = '%s/%s_%s' % (self.output_dir, self.target.id, '_'.join([i.id for i in self.template]))
 
             if not os.path.exists(self.output_dir):
@@ -129,24 +135,14 @@ class Pandora:
         except:
             raise Exception('A problem occurred while creating output directory')
 
-        #for templ in self.template:
-
+    def copy_template(self):
         if os.path.isfile(self.template.get_pdb_path()):
             os.system('cp %s %s/%s.pdb' %(self.template.get_pdb_path(), self.output_dir, self.template.id))
         else:
             print('Template object could not be found. Please check the path: %s.' %self.template.get_pdb_path())
             raise Exception('Template file not found.')
 
-        # dd/mm/YY H:M:S
-        #date_time = datetime.now().strftime("%d-%m-%Y-%H-%M-%S")
-        # Create the output dir of the specific case
-        #self.output_dir = '%s/%s_%s_%s' %(output_dir, self.target.id, '_'.join([i.id for i in self.template]), date_time)
-        #if not os.path.exists(self.output_dir):
-        #    os.makedirs(self.output_dir)
-
-        # copy the template structure to the output file
-        #for t in self.template:
-        os.system('cp %s %s/%s.pdb' %(self.template.get_pdb_path(), self.output_dir, self.template.id))
+        os.system('cp %s %s/%s.pdb' %(self.template.get_pdb_path(), self.output_dir, self.template.id))       
 
     def align(self, verbose=True):
         ''' Create the alignment file for modeller.
@@ -272,7 +268,7 @@ class Pandora:
                                                   n_homology_models=n_homology_models, loop_refinement=loop_refinement,
                                                   n_jobs=n_jobs, stdev=stdev, helix=helix, sheet=sheet)
 
-    def __log(self, target_id, template_id, error, logfile = PANDORA.PANDORA_data + '/outputs/Pandora_log.txt', verbose=True):
+    def __log(self, target_id, template_id, error, verbose=True):
         ''' Keeps track of what goes wrong while parsing
 
         Args:
@@ -284,13 +280,13 @@ class Pandora:
         '''
 
         # Create log file
-        if not os.path.exists(logfile):
-            with open(logfile, 'w') as f:
+        if not os.path.exists(self.logfile):
+            with open(self.logfile, 'w') as f:
                 f.write('Target\tTemplate\tError\n')
 
         if verbose:
             print('\t' + error)
-        with open(logfile, 'a') as f:
+        with open(self.logfile, 'a') as f:
             f.write('%s\t%s\t%s\n' % (target_id, template_id, error))
 
     def model(self, n_loop_models=20, n_homology_models=1,
@@ -356,18 +352,16 @@ class Pandora:
             try:
                 self.find_template(best_n_templates=best_n_templates, benchmark=benchmark, verbose=verbose)
             except:
-                self.__log(self.target.id, 'None', 'Could not find a template',
-                             logfile=self.logfile)
+                self.__log(self.target.id, 'None', 'Could not find a template')
                 raise Exception('Could not find a template')
 
         print('###############')
         print('TEMPLATE: ', self.template.id)
         # Prepare the output directory
         try:
-            self.prep_output_dir()
+            self.copy_template() #TODO: Use copy_template only here
         except:
-            self.__log(self.target.id, self.template.id, 'Failed creating output directory', 
-                        logfile=self.logfile)
+            self.__log(self.target.id, self.template.id, 'Failed creating output directory')
             raise Exception('Failed creating output directory')
 
 
@@ -376,32 +370,28 @@ class Pandora:
         try:
             self.align(verbose=verbose)
         except:
-            self.__log(self.target.id, self.template.id, 'Failed aligning target and template', 
-                        logfile=self.logfile)
+            self.__log(self.target.id, self.template.id, 'Failed aligning target and template')
             raise Exception('Failed aligning target and template')
 
         # Prepare the scripts that run modeller
         try:
             self.write_ini_script()
         except:
-            self.__log(self.target.id, self.template.id, 'Failed writing .ini script', 
-                        logfile=self.logfile)
+            self.__log(self.target.id, self.template.id, 'Failed writing .ini script')
             raise Exception('Failed writing .ini script')
 
         # Run modeller to create the initial model
         try:
             self.create_initial_model(verbose=verbose)
         except Exception:
-            self.__log(self.target.id, self.template.id, 'Failed creating initial model with modeller', 
-                        logfile=self.logfile)
+            self.__log(self.target.id, self.template.id, 'Failed creating initial model with modeller')
             raise Exception('Failed creating initial model with modeller')
 
         # Calculate anchor restraints
         try:
             self.anchor_contacts(verbose=verbose)
         except:
-            self.__log(self.target.id, self.template.id, 'Failed calculating anchor restraints', 
-                        logfile=self.logfile)
+            self.__log(self.target.id, self.template.id, 'Failed calculating anchor restraints')
             raise Exception('Failed calculating anchor restraints')
 
         # prepare the scripts that run modeller
@@ -410,8 +400,7 @@ class Pandora:
                                        loop_refinement=loop_refinement, n_jobs=n_jobs,
                                        stdev=stdev, helix=helix, sheet=sheet)
         except:
-            self.__log(self.target.id, self.template.id, 'Failed preparing the modeller script', 
-                        logfile=self.logfile)
+            self.__log(self.target.id, self.template.id, 'Failed preparing the modeller script')
             raise Exception('Failed preparing the modeller script')
 
         # Do the homology modelling
@@ -419,8 +408,7 @@ class Pandora:
             self.run_modeller(benchmark=benchmark, verbose=verbose, keep_IL=self.keep_IL,
                               RMSD_atoms=RMSD_atoms, pickle_out=pickle_out)
         except:
-            self.__log(self.target.id, self.template.id, 'Failed running modeller', 
-                        logfile=self.logfile)
+            self.__log(self.target.id, self.template.id, 'Failed running modeller')
             raise Exception('Failed running modeller')
 
         # elif verbose and not benchmark:
@@ -433,10 +421,8 @@ class Pandora:
         n_produced_models = len(self.results)
         if n_produced_models == n_homology_models*n_loop_models:
             self.__log(self.target.id, self.template.id, 
-            f'Successfully modelled {n_produced_models} models', 
-            logfile=self.logfile)
+            f'Successfully modelled {n_produced_models} models')
         else:
             self.__log(self.target.id, self.template.id, 
-            f'Successfully modelled only {n_produced_models} models out of {n_homology_models*n_loop_models} requested', 
-            logfile=self.logfile)
+            f'Successfully modelled only {n_produced_models} models out of {n_homology_models*n_loop_models} requested')
 
