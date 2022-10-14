@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
+from pathlib import Path
+from os.path import exists
+import json
 
 from setuptools import setup, find_packages
 
@@ -41,9 +44,7 @@ setup(
 
     install_requires=[
        'Biopython',
-       'pdb_tools',
        'pdb2sql',
-       'matplotlib',
        'joblib'
        ],
 
@@ -53,3 +54,37 @@ setup(
                  'coverage', 'coveralls', 'pycodestyle']
     }
 )
+
+#Create Database folders
+user_folder_path = Path(__file__).parents[0]
+
+if exists('config.json'):
+    with open('config.json') as f:
+        data = json.load(f)
+        data_folder = data['data_folder_name']
+else:
+    data_folder = 'default'
+
+dirs = [
+        f'{user_folder_path}/Databases', 
+        f'{user_folder_path}/Databases/{data_folder}',
+        f'{user_folder_path}/Databases/{data_folder}/mhcseqs', 
+        f'{user_folder_path}/Databases/{data_folder}/PDBs',
+        f'{user_folder_path}/Databases/{data_folder}/PDBs/pMHCI', 
+        f'{user_folder_path}/Databases/{data_folder}/PDBs/pMHCII',
+        f'{user_folder_path}/Databases/{data_folder}/PDBs/Bad', 
+        f'{user_folder_path}/Databases/{data_folder}/PDBs/Bad/pMHCI',
+        f'{user_folder_path}/Databases/{data_folder}/PDBs/Bad/pMHCII', 
+        f'{user_folder_path}/Databases/{data_folder}/PDBs/IMGT_retrieved',
+        f'{user_folder_path}/Databases/{data_folder}/outputs',
+        f'{user_folder_path}/test/test_data'
+        f'{user_folder_path}/test/test_data/PDBs/Bad',
+        f'{user_folder_path}/test/test_data/PDBs/Bad/pMHCI',
+        f'{user_folder_path}/test/test_data/PDBs/Bad/pMHCII', 
+        ]
+
+for D in dirs:
+    try:
+        os.mkdir(D)
+    except OSError:
+        print('Could not make directory: ' + D)
