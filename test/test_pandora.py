@@ -228,7 +228,7 @@ def test_wrapper_MHCI():
     # Create targets
     wrap = Wrapper.Wrapper(data_file, db, MHC_class='I', header=False, 
                         delimiter='\t', IDs_col=0, peptides_col=1, 
-                        allele_col=3, anchors_col=2, M_chain_col=4,
+                        allele_name_col=3, anchors_col=2, M_chain_col=4,
                         num_cores=1, n_loop_models=1, 
                         benchmark=False, collective_output_dir=output_dir)
     
