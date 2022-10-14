@@ -13,13 +13,13 @@ from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
 
 class Wrapper():
-    def __init__(self, data_file, database, MHC_class, delimiter = '\t',
+    def __init__(self, data_file, database, MHC_class,  num_cores=1, delimiter = '\t',
                     header=True, IDs_col=None, peptides_col=0, allele_name_col=1,
                     anchors_col=None, M_chain_col=None, N_chain_col=None,
                     outdir_col=None, benchmark=False,
                     verbose=False, start_row=None,
                     end_row=None, use_netmhcpan=False,
-                    use_templ_seq=False, num_cores=1, n_loop_models=20, n_jobs=None,
+                    use_templ_seq=False, n_loop_models=20, n_jobs=None,
                     collective_output_dir=False, 
                     pickle_out=False, clip_C_domain=False, archive=False):
 
@@ -32,6 +32,8 @@ class Wrapper():
                 information.
             database (PANDORA.Database.Database): Database object.
             MHC_class (str): MHC class of the targets, as 'I' or 'II'.
+            num_cores (int, optional): Number of parallel PANDORA jobs.
+                Each one will be sent to a different core. Defaults to 1.
             delimiter (str, optional): data_file delimiter. Do not use
                 semicolons (';') as separators. Defaults to '\t'.
             header (bool, optional): If True, assumes the data_file has a
