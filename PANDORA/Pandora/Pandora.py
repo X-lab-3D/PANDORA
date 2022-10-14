@@ -10,28 +10,14 @@ from datetime import datetime
 
 class Pandora:
 
-    def __init__(self, target, database=None, template=None, output_dir=False):
-        '''__init__(self, target, database=None, template=None, output_dir=os.getcwd(),
-                    logfile = PANDORA.PANDORA_data + '/outputs/Pandora_log.txt')
+    def __init__(self, target, database=None, template=None):
+        '''__init__(self, target, database=None, template=None, 
         '''
         self.target = target
         self.template = template
         self.database = database
         self.keep_IL = False
-        
-        if output_dir == False:
-            self.output_dir = os.getcwd()
-        else:
-            self.output_dir = output_dir
-            
-        #TODO: use self.create_output_dir()/self.prep_output_dir()
-        self.prep_output_dir()
-
-        # if logfile == False:
-        #     self.logfile = f'{self.output_dir}/{target.id}.log'
-        # else:
-        #     self.logfile = logfile
-        self.logfile = f'{self.output_dir}/{target.id}.log'
+        self.logfile = f'{self.target.output_dir}/{target.id}.log'
 
         if database is None and template is None:
             raise Exception('Provide a Database object so Pandora can find the best suitable template structure for '
@@ -112,37 +98,13 @@ class Pandora:
         if type(self.template)==list:
             self.template = self.template[0]
 
-    def prep_output_dir(self):
-        ''' Create an output directory and move the template pdb there
-            Uses self.output_dir (str): Path to output directory.
-                Defaults to os.getcwd().
-
-        Args:
-            None
-
-
-        '''
-
-        # create an output directory
-        try:
-            self.output_dir = '%s/%s' %(self.output_dir, self.target.id)
-            #self.output_dir = '%s/%s_%s' % (self.output_dir, self.target.id, '_'.join([i.id for i in self.template]))
-
-            if not os.path.exists(self.output_dir):
-                os.makedirs(self.output_dir)
-                if not os.path.exists(self.output_dir):
-                    raise Exception('A problem occurred while creating output directory')
-        except:
-            raise Exception('A problem occurred while creating output directory')
-
     def copy_template(self):
+        ''' Move the template pdb to the output directory'''
         if os.path.isfile(self.template.get_pdb_path()):
-            os.system('cp %s %s/%s.pdb' %(self.template.get_pdb_path(), self.output_dir, self.template.id))
+            os.system('cp %s %s/%s.pdb' %(self.template.get_pdb_path(), self.target.output_dir, self.template.id))
         else:
             print('Template object could not be found. Please check the path: %s.' %self.template.get_pdb_path())
-            raise Exception('Template file not found.')
-
-        os.system('cp %s %s/%s.pdb' %(self.template.get_pdb_path(), self.output_dir, self.template.id))       
+            raise Exception('Template file not found.')      
 
     def align(self, verbose=True):
         ''' Create the alignment file for modeller.
@@ -152,7 +114,7 @@ class Pandora:
 
         '''
         self.alignment = Align.Align(self.target, self.template, 
-                                     output_dir=self.output_dir, 
+                                     output_dir=self.target.output_dir, 
                                      clip_C_domain=self.clip_C_domain)
 
         # self.alignment = Align.Align2(target = self.target, template=self.template, output_dir=self.output_dir)
@@ -164,7 +126,7 @@ class Pandora:
     def write_ini_script(self):
         ''' Write the python scipt that modeller uses for creating the initial model'''
         os.chdir(os.path.dirname(PANDORA.PANDORA_path))
-        Modelling_functions.write_ini_script(self.target, self.template, self.alignment.alignment_file, self.output_dir)
+        Modelling_functions.write_ini_script(self.target, self.template, self.alignment.alignment_file, self.target.output_dir)
 
     def create_initial_model(self, python_script = 'cmd_modeller_ini.py', verbose = True):
         ''' Run modeller to create the initial model. Modeller can only output files in its work directory
@@ -178,7 +140,7 @@ class Pandora:
 
         '''
         # Change working directory
-        os.chdir(self.output_dir)
+        os.chdir(self.target.output_dir)
         # Run Modeller
         os.popen('python %s > modeller_ini.log' %python_script).read()
 
@@ -217,7 +179,7 @@ class Pandora:
             else:
                 print('\tPerforming homology modelling of %s on %s...' %(self.target.id, self.template.id))
         t0 = time.time()
-        self.results = Modelling_functions.run_modeller(self.output_dir, self.target, python_script=python_script,
+        self.results = Modelling_functions.run_modeller(self.target.output_dir, self.target, python_script=python_script,
                                                         benchmark=benchmark, pickle_out=pickle_out, keep_IL=keep_IL,
                                                         RMSD_atoms=RMSD_atoms)
         if verbose:
@@ -235,7 +197,7 @@ class Pandora:
             print('\tCalculating peptide anchor residue constraints...')
         self.target.calc_anchor_contacts()
         #    Write output file
-        with open(self.output_dir + '/contacts_' + self.target.id + '.list', 'w') as f:
+        with open(self.target.output_dir + '/contacts_' + self.target.id + '.list', 'w') as f:
                 for i in self.target.anchor_contacts:
                     f.write('\t'.join('%s' % x for x in i) + '\n')
 
@@ -264,7 +226,7 @@ class Pandora:
         '''
 
         Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file,
-                                                  self.output_dir, n_loop_models=n_loop_models,
+                                                  self.target.output_dir, n_loop_models=n_loop_models,
                                                   n_homology_models=n_homology_models, loop_refinement=loop_refinement,
                                                   n_jobs=n_jobs, stdev=stdev, helix=helix, sheet=sheet)
 

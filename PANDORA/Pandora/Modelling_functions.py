@@ -114,11 +114,15 @@ def check_presence(target, database, seq_based_templ_selection = False):
     return target_in_db
 
 
-def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
+def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, rm_netmhcpan_output=True):
     '''Uses netMHCIIpan to predict the binding core of a peptide and infer the anchor positions from that.
 
     Args:
-        target: (Target): Target object containing the peptide sequence and allele type
+        peptide: (str): AA sequence of the peptide
+        allele_type: (lst): list of strings of allele types
+        output_dir: (string) Path to output directory 
+        verbose: (bool): Print information. Default = True
+        rm_netmhcpan_output: (bool): If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
 
     Returns: (lst): list of predicted anchor predictions
 
@@ -177,8 +181,8 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     target_alleles_str = ','.join(target_alleles)
 
     # Setup files
-    infile = os.path.join(netmhcpan_path + '/tmp/%s_%s_%s.txt' %(peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S')))
-    outfile = os.path.join(netmhcpan_path + '/tmp/%s_%s_%s_prediction.txt' %(peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S')))
+    infile = os.path.join(output_dir + '%s_%s_%s.txt' %(peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S')))
+    outfile = os.path.join(output_dir + '%s_%s_%s_prediction.txt' %(peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S')))
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
@@ -206,9 +210,6 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
         print('Could not predict binding core using netMHCIIpan. Will use the most common anchor positions instead')
         return [3, 6, 8, 11]
 
-    # Remove output file
-    subprocess.check_call('rm %s %s' % (infile, outfile), shell=True)
-
     offset, core, core_reliability = max_scores[0]
     # Use the canonical spacing for 9-mer binding cores to predict the anchor positions
     predicted_anchors = [offset + 1, offset + 4, offset + 6, offset + 9]
@@ -220,18 +221,23 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
         print('\toffset:\t%s\n\tcore:\t%s\n\tprob:\t%s\n' % (offset, core, core_reliability))
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' % predicted_anchors)
 
+    if rm_netmhcpan_output:
+        subprocess.check_call('rm %s' %infile, shell=True)
+        subprocess.check_call('rm %s' %outfile, shell=True)
+
     return predicted_anchors
    
 
-def predict_anchors_netMHCpan(peptide, allele_type,
-                              verbose=True, rm_output=True):
+def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm_netmhcpan_output=True):
     '''Uses netMHCIpan to predict the binding core of a peptide and infer the
     anchor positions from that.
 
     Args:
         peptide: (str): AA sequence of the peptide
         allele_type: (lst): list of strings of allele types
-        verbose: (bool):
+        output_dir: (string) Path to output directory
+        verbose: (bool): Print information. Default = True
+        rm_netmhcpan_output: (bool): If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
 
     Returns: (lst): list of predicted anchor predictions
 
@@ -267,13 +273,13 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     target_alleles_str = ','.join(target_alleles)
         
     # Setup files
-    infile = os.path.join(netmhcpan_path, 'tmp/%s_%s_%s.txt' %(peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S')))
-    outfile = os.path.join(netmhcpan_path, 'tmp/%s_%s_%s_prediction.txt' %(peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S')))
-        
+    infile = os.path.join(output_dir, '%s_%s_%s.txt' %(peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S')))
+    outfile = os.path.join(output_dir, '%s_%s_%s_prediction.txt' %(peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S')))
+
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
         f.write(peptide)
-        
+
     subprocess.check_call('%s -p %s -a %s > %s' %(netmhcpan_file_path, infile, target_alleles_str, outfile), shell=True)
         
     # Get the output from the netMHCIIpan prediction
@@ -370,7 +376,7 @@ def predict_anchors_netMHCpan(peptide, allele_type,
         print('\tIcore:\t%s\n\t%%Rank EL:\t%s\n' %(pred[best_allele][0][0], pred[best_allele][0][1] ))
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' %predicted_anchors)
         
-    if rm_output:
+    if rm_netmhcpan_output:
         subprocess.check_call('rm %s' %infile, shell=True)
         subprocess.check_call('rm %s' %outfile, shell=True)
     
