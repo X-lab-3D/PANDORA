@@ -194,14 +194,9 @@ from PANDORA.Wrapper import Wrapper
 ## A. Load pregenerated database of all pMHC PDBs as templates
 db = Database.load()
 
-## B. Create the wrapper object
-wrap =  Wrapper.Wrapper()
+## B. Create the wrapper object. It will also run the modelling for each case.
+wrap =  Wrapper.Wrapper('datafile.tsv', db, num_cores=128)
 
-## C. Create all Target Objects based on peptides in the .tsv file
-wrap.create_targets('datafile.tsv', db)
-
-## C. Perform modelling
-wrap.run_pandora(num_cores=128)
 ```
 
 #### Example 3: Create multiple loop models in a your given directory
