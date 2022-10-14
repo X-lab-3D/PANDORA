@@ -124,18 +124,19 @@ class Align:
         if self.MHC_class == 'I':
             chains = {"M" : ('alignment', self.tem_m)}
         elif self.MHC_class == 'II':
-            chains = {"M":(f'{self.tar_id}_M', self.tem_m), 
-                    "N":(f'{self.tar_id}_N', self.tem_n)}
+            chains = {"M":(f'{self.tar_id}_M', self.tem_m, self.tar_m), 
+                    "N":(f'{self.tar_id}_N', self.tem_n, self.tar_n)}
 
-        for chain, (afa_name, chain_seq) in chains.items():
+        for chain, (afa_name, templ_chain_seq, tar_chain_seq) in chains.items():
             # Align the M chain
             # First write a fasta file containing all chains
             with open(f'{self.output_dir}/{self.tar_id}_{chain}.fasta',"w") as f:
                 for i in range(len(self.tem_id)):
                     # Write template id \n template seq
-                    f.write(f'>{self.tem_id[i]} {chain}\n{chain_seq}\n')
+                    f.write(f'>{self.tem_id[i]} {chain}\n{templ_chain_seq}\n')
+
                 # Write target id \n target seq
-                f.write(f'>{self.tar_id} {chain}\n{self.tar_m}')
+                f.write(f'>{self.tar_id} {chain}\n{tar_chain_seq}')
             # Perform MSA with muscle
             in_file_muscle = f'{self.output_dir}/{self.tar_id}_{chain}.fasta'
             out_file_muscle = f'{self.output_dir}/{afa_name}.afa'
@@ -155,7 +156,7 @@ class Align:
         aligned_pepts = self.align_peptides()
 
         # Remove all intermediate files
-        os.system('rm %s/*.fasta %s/*.afa' % (self.output_dir.replace(' ', '\\ '), self.output_dir.replace(' ', '\\ ')))
+        #os.system('rm %s/*.fasta %s/*.afa' % (self.output_dir.replace(' ', '\\ '), self.output_dir.replace(' ', '\\ ')))
         return {**seqs, **aligned_pepts}
 
     def align_peptides(self):
