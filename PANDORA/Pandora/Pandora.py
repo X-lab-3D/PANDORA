@@ -113,9 +113,7 @@ class Pandora:
             verbose: (bool): Print information
 
         '''
-        self.alignment = Align.Align(self.target, self.template, 
-                                     output_dir=self.target.output_dir, 
-                                     clip_C_domain=self.clip_C_domain)
+        self.alignment = Align.Align(self.target, self.template, clip_C_domain=self.clip_C_domain)
 
         # self.alignment = Align.Align2(target = self.target, template=self.template, output_dir=self.output_dir)
         # self.alignment.align_templates()
