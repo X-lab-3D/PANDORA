@@ -221,14 +221,16 @@ def test_pandora_MHCI_modelling():
 def test_wrapper_MHCI():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
-    # Create Wrapper object
-    wrap = Wrapper.Wrapper()
     # Define data_file
     data_file =  PANDORA.PANDORA_path + '/../test/test_data/test_MHCI_wrapper_data.tsv'
+    #Define output directory
+    output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/'
     # Create targets
-    wrap.create_targets(data_file, db, MHC_class='I', header=False, 
+    wrap = Wrapper.Wrapper(data_file, db, MHC_class='I', header=False, 
                         delimiter='\t', IDs_col=0, peptides_col=1, 
-                        allele_col=3, anchors_col=2, M_chain_col=4)
+                        allele_name_col=3, anchors_col=2, M_chain_col=4,
+                        num_cores=1, n_loop_models=1, 
+                        benchmark=False, collective_output_dir=output_dir)
     
     # Check if the jobs went as expected
     errors = []
@@ -245,28 +247,9 @@ def test_wrapper_MHCI():
     except KeyError:
         raise Exception('KeyError in targets_flag')
 
-    #jobs_flag = False
-    try:
-        if len(wrap.jobs) == 2 and wrap.jobs['1A9B']['target'].peptide == 'LPPLDITPY':
-            if wrap.jobs['2X4O']['target'].peptide == 'KLTPLCVTL':
-                #jobs_flag = True
-                pass
-            else:
-                errors.append('jobs_error')
-        else:
-            errors.append('jobs_error')
     
-    except KeyError:
-        raise Exception('KeyError in jobs_flag')
-            
-    # Define output directory
-    output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/'
-    # Run the modellings
-    wrap.run_pandora(num_cores=1, n_loop_models=1, 
-                     benchmark=False, collective_output_dir=output_dir)
-    
-    #Add check model exist flag
-    #Add check molpdf flag
+    #TODO: Add check model exist flag
+    #TODO: Add check molpdf flag
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
     

@@ -435,6 +435,11 @@ class Pandora:
             self.__log(self.target.id, self.template.id, 
             f'Successfully modelled {n_produced_models} models', 
             logfile=self.logfile)
+        elif n_produced_models > n_homology_models*n_loop_models:
+            extra_IL_models = n_produced_models - (n_homology_models*n_loop_models)
+            self.__log(self.target.id, self.template.id, 
+            f'Successfully modelled {n_produced_models-extra_IL_models} models out of {n_homology_models*n_loop_models} requested and retained {extra_IL_models} IL models', 
+            logfile=self.logfile)
         else:
             self.__log(self.target.id, self.template.id, 
             f'Successfully modelled only {n_produced_models} models out of {n_homology_models*n_loop_models} requested', 
