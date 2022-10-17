@@ -118,8 +118,6 @@ You can use the code below to generate your database. By default, the database g
 
 ```python
 ## import requested modules
-from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
 from PANDORA.Database import Database
 
 ## A. Create local Database
@@ -146,7 +144,7 @@ Once you have obtained the download link, you can install them by following the 
 #### Example 1 : Generating a peptide:MHC complex given the peptide sequence
 PANDORA requires at least these information to generate models:
 - Peptide sequence
-- MHC allele
+- MHC allele or MHC sequence
 
 Steps:
 A. Load the template database (see installation, point 4)
@@ -175,6 +173,9 @@ target = PMHC.Target(id = 'myTestCase',
 case = Pandora.Pandora(target, db)
 case.model()
 ```
+
+Note: The user can also input the MHC chain sequence directly, without having to rely on the allele name. The argument to provide in this case is `M_chain_seq` for chain Alpha (and `N_chain_seq` for chain beta, only when modelling MHC class II). Please note that PANDORA completely ignores the B2-Microglobulin for the modelling.
+
 #### Example 2: Run PANDORA Wrapper on multiple cases (running in parallel on multiple cores)
 
 PANDORA can model large batches of peptides in parallel. You need to provide the following peptide information in a *.tsv* or *.csv* file:
@@ -194,14 +195,9 @@ from PANDORA.Wrapper import Wrapper
 ## A. Load pregenerated database of all pMHC PDBs as templates
 db = Database.load()
 
-## B. Create the wrapper object
-wrap =  Wrapper.Wrapper()
+## B. Create the wrapper object. It will also run the modelling for each case.
+wrap =  Wrapper.Wrapper('datafile.tsv', db, num_cores=128)
 
-## C. Create all Target Objects based on peptides in the .tsv file
-wrap.create_targets('datafile.tsv', db)
-
-## C. Perform modelling
-wrap.run_pandora(num_cores=128)
 ```
 
 #### Example 3: Create multiple loop models in a your given directory
