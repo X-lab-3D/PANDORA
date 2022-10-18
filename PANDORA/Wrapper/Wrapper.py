@@ -8,6 +8,8 @@ import subprocess
 import traceback
 import glob
 import os
+import re
+import random
 
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
@@ -20,13 +22,10 @@ class Wrapper():
                     verbose=False, start_row=None,
                     end_row=None, use_netmhcpan=False,
                     use_templ_seq=False, n_loop_models=20, n_jobs=None,
-                    collective_output_dir=False, 
-                    pickle_out=False, clip_C_domain=False, archive=False):
-
+                    collective_output_dir=False, pickle_out=False, clip_C_domain=False,
+                    archive=False, wrapper_id=False, rm_netmhcpan_output=True):
         """Pandora wrapper object.
         Create PANDORA targets from csv or tsv file and models them.
-
-
         Args:
             data_file (str): Path to the input tsv/csv file containing targets
                 information.
@@ -86,11 +85,12 @@ class Wrapper():
                 the G-domain according to IMGT. If a listcontaining the G domain(s) 
                 span is provided, will use it to cut the sequence. The list should have 
                 this format: [(1,182)] for MHCI and [(1,91),(1,86)] for MHCII.
-
+            wrapper_id (string): id of the wrapper.
+            rm_netmhcpan_output: (bool) If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
         Returns:
             None.
-
         """
+
         self.MHC_class = MHC_class
         self.data_file = ''
         self.db = None
@@ -100,11 +100,24 @@ class Wrapper():
         self.data_file = data_file
         self.db = database
 
-        #TODO: add Wrapper ID optional argument; use the ID or generate a random ID
-        # to create an output directory.
-        # ONLY if the user gave collective_output_dir or no output directory at all.
-        # If the user gave outdir_col, that's where each case's output directory will be generated
-        #  with no wrapper output directory.
+        # Determine the wrapper id
+        if wrapper_id == False:
+            self.wrapper_id = 'myWrapperCase'
+        else:
+            self.wrapper_id = wrapper_id
+            self.wrapper_id = re.sub('[^a-zA-Z0-9 \n\.]', '-', self.wrapper_id)
+
+        if outdir_col == None:
+            # Determine the wrapper output directory
+            if collective_output_dir == False:
+                self.collective_output_dir = os.getcwd()
+            else:
+                self.collective_output_dir = collective_output_dir
+
+            self.prep_collective_output_dir()
+
+        else:
+            self.collective_output_dir = collective_output_dir
 
         ## Extract targets from data_file
         self.__get_targets_from_file(data_file, delimiter=delimiter,
@@ -125,22 +138,21 @@ class Wrapper():
                 if N_chain_col:
                     print('Target N chain seq: ', self.targets[target_id]['N_chain_seq'])
                 print('Target Anchors: ', self.targets[target_id]['anchors'])
-        
         for target_id in self.targets:
             self.targets[target_id].update({'target_id':target_id, 'MHC_class':MHC_class,
                                     'n_loop_models':n_loop_models, 
                                     'n_jobs':n_jobs, 
                                     'benchmark':benchmark, 'pickle_out':pickle_out,
-                                    'collective_output_dir':collective_output_dir,
+                                    'collective_output_dir':self.collective_output_dir,
                                     'clip_C_domain':clip_C_domain,
                                     'archive_output': archive,
                                     'db':database, 'use_netmhcpan':use_netmhcpan,
-                                    'use_templ_seq':use_templ_seq})
-
+                                    'use_templ_seq':use_templ_seq,
+                                    'rm_netmhcpan_output':rm_netmhcpan_output})
         Parallel(n_jobs = num_cores, verbose = 1)(delayed(run_case)(target) for target in list(self.targets.values()))
 
     def __get_targets_from_file(self, data_file, delimiter='\t', header=True,
-                               IDs_col=None, peptides_col=0,
+                               IDs_col=0, peptides_col=0,
                                allele_name_col=1, anchors_col=None,
                                M_chain_col=None, N_chain_col=None,
                                outdir_col=None,
@@ -150,7 +162,6 @@ class Wrapper():
             from the target file.
             Default input should be a .tsv file without any header with
             the following structure: peptides_sequence_col \t alleles_name_col
-
         Args:
             data_file (str): Path to the input tsv/csv file containing targets
                 information.
@@ -183,11 +194,8 @@ class Wrapper():
             end_row (None or int, optional): Ending row of data_file, to use when
                 splitting the data_file into multiple batches. This allows to
                 specify at which row the samples for this job end.
-
-
         Returns:
             None.
-
         """
 
         targets = {}
@@ -249,21 +257,39 @@ class Wrapper():
 
         self.targets = targets
 
-def archive_and_remove(case):       
+    def prep_collective_output_dir(self):
+        ''' Create an output directory and move the template pdb there
+            Uses self.output_dir (str): Path to output directory. Defaults to os.getcwd().
+        Args:
+            None
+        '''
+
+        # create an output directory
+        try:
+            generated_id = random.randint(10000, 99999)
+            self.collective_output_dir = os.path.join('%s/%s_%s' %(self.collective_output_dir, self.wrapper_id, generated_id))
+            print(self.collective_output_dir)
+            if not os.path.exists(self.collective_output_dir):
+                os.makedirs(self.collective_output_dir)
+                if not os.path.exists(self.collective_output_dir):
+                    raise Exception('A problem occurred while creating wrapper output directory')
+        except:
+            raise Exception('A problem occurred while creating wrapper output directory')
+
+def archive_and_remove(tar):     
     # create archive of the folder
-    with tarfile.open(f'{case}.tar', 'w') as archive:
-        case_files = glob.glob(os.path.join(case, '*'))
-        for case_file in case_files:
-            archive.add(case_file)
+    with tarfile.open(f'{tar}.tar', 'w') as archive:
+        tar_files = glob.glob(os.path.join(tar, '*'))
+        for tar_file in tar_files:
+            archive.add(tar_file)
     # remove the original files from the folder
-    if os.path.exists(f'{case}.tar'):
-        subprocess.check_call(f"rm -r {case}", shell=True)
+    if os.path.exists(f'{tar}.tar'):
+        subprocess.check_call(f"rm -r {tar}", shell=True)
     else:
-        print(f'Error creating archive: {case}.tar, skipping the file removal')
+        print(f'Error creating archive: {tar}.tar, skipping the file removal')
 
 def run_case(args):
     """Runs one modelling job. Meant to be runned from Pandora.Wrapper
-
     Args:
         args (list): List of arguments. Should be containing the following, in
             order.
@@ -271,10 +297,8 @@ def run_case(args):
         n_loop_models (int, optional): Number of loop models. Defaults to 20.
         benchmark (bool, optional): Set True if running a benchmark to retrieve
             models RMSD with reference structures. Defaults to False.
-
     Returns:
         None.
-
     """
 
     target_id = args['target_id']
@@ -288,18 +312,23 @@ def run_case(args):
         output_dir = False
     
     try:
+        # print(output_dir)
+        # print(target_id)
+        # print(args['collective_output_dir'])
         tar = PMHC.Target(target_id, allele_type=args['allele'],
                             peptide=args['peptide_sequence'] ,
                             MHC_class=args['MHC_class'], anchors=args['anchors'],
                             M_chain_seq=args['M_chain_seq'],
                             N_chain_seq=args['N_chain_seq'],
-                            use_netmhcpan=args['use_netmhcpan'], use_templ_seq=args['use_templ_seq'])
+                            use_netmhcpan=args['use_netmhcpan'], use_templ_seq=args['use_templ_seq'], 
+                            output_dir=output_dir, rm_netmhcpan_output=args['rm_netmhcpan_output'])
+                                             
     except Exception as err:
         print('Skipping Target %s at Target object generation step for the following reason:' %target_id)
         print(("Exception: {0}".format(err)))
-
+    
     try:
-        case = Pandora.Pandora(tar, database=args['db'], output_dir=output_dir)
+        case = Pandora.Pandora(tar, database=args['db'])
     except Exception as e:
         print(f"Modelling case {target_id} failed at Pandora object creation step")
         print(f"Captured error: {e}")
@@ -315,10 +344,9 @@ def run_case(args):
         print(f"Modelling case {target_id} failed at modelling step")
         print(f"Captured error: {e}")
         print(traceback.format_exc())
-
     try:
         if args['archive_output']:
-            archive_and_remove(case.output_dir)
+            archive_and_remove(tar.output_dir)
     except Exception as e:
         print(f"Modelling case {target_id} failed at archiving step")
         print(f"Captured error: {e}")
