@@ -319,7 +319,7 @@ class Pandora:
         print('TEMPLATE: ', self.template.id)
         # Prepare the output directory
         try:
-            self.copy_template() #TODO: Use copy_template only here
+            self.copy_template()
         except:
             self.__log(self.target.id, self.template.id, 'Failed creating output directory')
             raise Exception('Failed creating output directory')

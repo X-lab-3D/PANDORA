@@ -260,7 +260,7 @@ class Target(PMHC):
                                   anchor positions are not provided. Defaults to False.
             use_templ_seq (bool): If True, if no MHC chain sequences could be retrieved starting from the allele name,
                                    it will use the best template MHC sequences for the modelling.
-            output_dir: (string) Path to output directory. Defaults to os.getcwd().
+            output_dir: (string) Path to output directory. Defaults to current working directory.
             rm_netmhcpan_output: (bool) If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
         ''' 
 
@@ -279,7 +279,7 @@ class Target(PMHC):
             self.output_dir = output_dir
 
         # Output directory is created
-        self.prep_output_dir()
+        self.make_output_dir()
 
         # If the user does provide sequence info, make sure both the M and N chain are provided
         # if MHC_class == 'II' and M_chain_seq != '' and N_chain_seq == '':
@@ -585,7 +585,7 @@ class Target(PMHC):
                 print('\nWARNING: something went wrong when trying to retrieve chain M allele')
                 print('with blast. Is blastp properly installed as working as "/bin/bash blastp"?')
 
-    def prep_output_dir(self):
+    def make_output_dir(self):
         ''' Create an output directory and move the template pdb there
             Uses self.output_dir (str): Path to output directory. Defaults to os.getcwd().
         Args:
