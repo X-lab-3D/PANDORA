@@ -86,7 +86,9 @@ class Wrapper():
                 the G-domain according to IMGT. If a listcontaining the G domain(s) 
                 span is provided, will use it to cut the sequence. The list should have 
                 this format: [(1,182)] for MHCI and [(1,91),(1,86)] for MHCII.
-            wrapper_id (string): id of the wrapper.
+            wrapper_id (string): id of the wrapper. Should be alphanumeric only. 
+                If not, non-alphanumeric characters will be replaced with dashes.
+                If False, it will be randomly generated. Defaults to False.
             rm_netmhcpan_output: (bool) If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
         Returns:
             None.
@@ -103,10 +105,11 @@ class Wrapper():
 
         # Determine the wrapper id
         if wrapper_id == False:
-            self.wrapper_id = 'myWrapperCase'
+            self.wrapper_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
         else:
             self.wrapper_id = wrapper_id
-            self.wrapper_id = re.sub('[^a-zA-Z0-9 \n\.]', '-', self.wrapper_id)
+            self.wrapper_id = re.sub('[^a-zA-Z0-9]', '-', self.wrapper_id)
+
 
         if outdir_col == None:
             # Determine the wrapper output directory
@@ -115,6 +118,8 @@ class Wrapper():
             else:
                 self.collective_output_dir = collective_output_dir
 
+            self.collective_output_dir = os.path.join([self.collective_output_dir, f'{self.wrapper_id}_{self.wrapper_id}'])
+            
             self.prep_collective_output_dir()
 
         else:
@@ -269,7 +274,7 @@ class Wrapper():
         try:
             generated_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
             self.collective_output_dir = os.path.join('%s/%s_%s' %(self.collective_output_dir, self.wrapper_id, generated_id))
-            print(self.collective_output_dir)
+
             if not os.path.exists(self.collective_output_dir):
                 os.makedirs(self.collective_output_dir)
                 if not os.path.exists(self.collective_output_dir):
