@@ -1,7 +1,7 @@
 import PANDORA
 import pickle
 from PANDORA.PMHC import PMHC
-from PANDORA.Database import Database_functions
+from PANDORA import Database_functions
 import os
 import subprocess
 from joblib import Parallel, delayed

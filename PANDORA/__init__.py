@@ -6,6 +6,7 @@ import json
 # populate package namespace
 from PANDORA.Contacts import Contacts
 from PANDORA.Database import Database
+from PANDORA.Database import Database_functions
 
 version='1.0'
 PANDORA_path = os.path.dirname(os.path.abspath(__file__))
