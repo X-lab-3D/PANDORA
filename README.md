@@ -156,7 +156,7 @@ C. Generating *n* number of pMHC models (Default *n=20*)
 Please note that you can specify output directory yourself, otherwise will be generated in a default directory
 ```python
 ## import requested modules
-from PANDORA.PMHC import PMHC
+from PANDORA import PMHC
 from PANDORA import Pandora
 from PANDORA import Database
 
@@ -212,7 +212,7 @@ For instance:
 Please note that, if *anchors* is not specified or *use_netmhcpan* is set to *False*, PANDORA will automatically assign canonical anchors (P2 and PΩ). This can be done automatically only for pMHC-I structures.
 
 ```python
-from PANDORA.PMHC import PMHC
+from PANDORA import PMHC
 from PANDORA import Pandora
 from PANDORA import Database
 
@@ -235,7 +235,7 @@ case.model(n_loop_models=100)  # Generates 100 models
 Input domain secondary structure prediction information (Helix/Beta strand):
 
 ```python
-from PANDORA.PMHC import PMHC
+from PANDORA import PMHC
 from PANDORA import Pandora
 from PANDORA import Database
 
@@ -258,7 +258,7 @@ case.model(helix=target.helix)
 To model a peptide:MHC class II complex, you only need to specify that in *PMHC.Target()* function: as *MHC_class='II'* (By default it is set to model MHC class I).
 
 ```python
-from PANDORA.PMHC import PMHC
+from PANDORA import PMHC
 from PANDORA import Pandora
 from PANDORA import Database
 
@@ -284,7 +284,7 @@ Evaluate the framework on a target with a known experimental structure:
   (calculates L-RMSD to show how far the model is from the near-native structure)
 
 ```python
-from PANDORA.PMHC import PMHC
+from PANDORA import PMHC
 from PANDORA import Pandora
 from PANDORA import Database
 

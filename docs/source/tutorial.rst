@@ -21,7 +21,7 @@ C. Generating *n* number of pMHC models (Default n=20)
 Please note that you can specify output directory yourself, otherwise will be generated in a default directory
 
 >>> >>> ## import requested modules
->>> from PANDORA.PMHC import PMHC
+>>> from PANDORA import PMHC
 >>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>>
@@ -53,7 +53,7 @@ For instance:
 Please note that, if you do not input *anchors* yourself, it will automatically run NetMHCpan to predict anchors.
 
 
->>> from PANDORA.PMHC import PMHC
+>>> from PANDORA import PMHC
 >>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>>
@@ -78,7 +78,7 @@ If you want to evaluate the framework on a target with a known experimental stru
 - Set *benchmark=True* for the modelling
 (calculates L-RMSD to show how far the model is from the near-native structure)
 
->>> from PANDORA.PMHC import PMHC
+>>> from PANDORA import PMHC
 >>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>>
@@ -101,7 +101,7 @@ p:MHC-I complex with an alpha helix in the peptide
 If you have some domain knowledge of the peptide conformation, whether it forms secondary structures other than loop (Helix/Beta strand), the framework will consider that while modelling the peptide:
 
 
->>> from PANDORA.PMHC import PMHC
+>>> from PANDORA import PMHC
 >>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>>
@@ -153,7 +153,7 @@ p:MHC-II complex given the peptide sequence
 To model a peptide:MHC class II complex, you only need to specify that in *PMHC.Target()* function: as *MHC_class='II'* (By default it is set to model MHC class I).
 
 
->>> from PANDORA.PMHC import PMHC
+>>> from PANDORA import PMHC
 >>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>>
