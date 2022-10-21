@@ -181,8 +181,8 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, 
     target_alleles_str = ','.join(target_alleles)
 
     # Setup files
-    infile = os.path.join(output_dir + '/%s_%s_%s.txt' %(peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S')))
-    outfile = os.path.join(output_dir + '/%s_%s_%s_prediction.txt' %(peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S')))
+    infile = os.path.join(output_dir,f'{peptide}_{target_alleles[0].replace("*","").replace(":","")}_{datetime.today().strftime("%Y%m%d_%H%M%S")}.txt')
+    outfile = os.path.join(output_dir, f'{peptide}_{target_alleles[0].replace("*","").replace(":","")}_{datetime.today().strftime("%Y%m%d_%H%M%S")}_prediction.txt')
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
@@ -273,8 +273,8 @@ def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm
     target_alleles_str = ','.join(target_alleles)
         
     # Setup files
-    infile = os.path.join(output_dir, '/%s_%s_%s.txt' %(peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S')))
-    outfile = os.path.join(output_dir, '/%s_%s_%s_prediction.txt' %(peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S')))
+    infile = os.path.join(output_dir,f'{peptide}_{target_alleles[0].replace("*","").replace(":","")}_{datetime.today().strftime("%Y%m%d_%H%M%S")}.txt')
+    outfile = os.path.join(output_dir, f'{peptide}_{target_alleles[0].replace("*","").replace(":","")}_{datetime.today().strftime("%Y%m%d_%H%M%S")}_prediction.txt')
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:

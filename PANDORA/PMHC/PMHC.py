@@ -120,7 +120,7 @@ class Template(PMHC):
         if 'pdb_path' in locals():
             return self.pdb_path
         else:
-            return os.path.join(PANDORA.PANDORA_data, 'PDBs', 'pMHC' + self.MHC_class, self.id + '.pdb')
+            return os.path.join(PANDORA.PANDORA_data, 'PDBs', f'pMHC{self.MHC_class}', f'{self.id}.pdb')
         
 
     def parse_pdb(self, custom_map={"MSE":"M"}):

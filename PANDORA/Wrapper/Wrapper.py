@@ -118,7 +118,7 @@ class Wrapper():
             else:
                 self.collective_output_dir = collective_output_dir
 
-            self.collective_output_dir = os.path.join([self.collective_output_dir, f'{self.wrapper_id}_{self.wrapper_id}'])
+            self.collective_output_dir = os.path.join(self.collective_output_dir, f'{self.wrapper_id}_{self.wrapper_id}')
             
             self.prep_collective_output_dir()
 
