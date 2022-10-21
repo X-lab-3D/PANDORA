@@ -262,7 +262,7 @@ class Wrapper():
                         targets[target_id]['outdir'] = ''
 
         self.targets = targets
-
+        
     def prep_collective_output_dir(self):
         ''' Create an output directory and move the template pdb there
             Uses self.output_dir (str): Path to output directory. Defaults to os.getcwd().
@@ -278,18 +278,24 @@ class Wrapper():
                     raise Exception('A problem occurred while creating wrapper output directory')
         except:
             raise Exception('A problem occurred while creating wrapper output directory')
+            
+            
+def archive_and_remove(case):
+    """Archives the case folder as a .tar file to save inode space
 
-def archive_and_remove(tar):     
-    # create archive of the folder
-    with tarfile.open(f'{tar}.tar', 'w') as archive:
-        tar_files = glob.glob(os.path.join(tar, '*'))
-        for tar_file in tar_files:
-            archive.add(tar_file)
-    # remove the original files from the folder
-    if os.path.exists(f'{tar}.tar'):
-        subprocess.check_call(f"rm -r {tar}", shell=True)
-    else:
-        print(f'Error creating archive: {tar}.tar, skipping the file removal')
+    Args:
+        case (str): directory name of case to be archived
+    """ 
+    prefix_case_folder = os.path.split(case.rstrip('/'))[0]
+    case_folder = os.path.split(case.rstrip('/'))[1]   
+    try:
+        subprocess.run(f"tar -cf {case}.tar -C {prefix_case_folder} {case_folder} \
+                       --remove-files", shell=True, check=True)
+    except subprocess.CalledProcessError as cpe:
+        print(f"Something went wrong in archive case: {case}\n{cpe}")
+    except Exception as e:
+        print(e)
+
 
 def run_case(args):
     """Runs one modelling job. Meant to be runned from Pandora.Wrapper
