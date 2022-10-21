@@ -9,7 +9,7 @@ It allows the user to insert all the cases in a csv/tsv file, add various inform
 
 Wrapper Example:
 
->>> from PANDORA.Pandora import Pandora
+>>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>> from PANDORA.Wrapper import Wrapper
 >>>

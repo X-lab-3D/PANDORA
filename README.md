@@ -157,7 +157,7 @@ Please note that you can specify output directory yourself, otherwise will be ge
 ```python
 ## import requested modules
 from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
+from PANDORA import Pandora
 from PANDORA import Database
 
 ## A. Create local Database
@@ -213,7 +213,7 @@ Please note that, if *anchors* is not specified or *use_netmhcpan* is set to *Fa
 
 ```python
 from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
+from PANDORA import Pandora
 from PANDORA import Database
 
 ## A. load the pregenerated Database  of all pMHC PDBs as templates
@@ -236,7 +236,7 @@ Input domain secondary structure prediction information (Helix/Beta strand):
 
 ```python
 from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
+from PANDORA import Pandora
 from PANDORA import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
@@ -259,7 +259,7 @@ To model a peptide:MHC class II complex, you only need to specify that in *PMHC.
 
 ```python
 from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
+from PANDORA import Pandora
 from PANDORA import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
@@ -285,7 +285,7 @@ Evaluate the framework on a target with a known experimental structure:
 
 ```python
 from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
+from PANDORA import Pandora
 from PANDORA import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates

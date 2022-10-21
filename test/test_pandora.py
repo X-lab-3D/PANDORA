@@ -1,12 +1,11 @@
-import pytest
 import os
 import PANDORA
 from PANDORA import Contacts
-from PANDORA.Pandora import Align
+from PANDORA import Align
 from PANDORA import Database
 from PANDORA import Database_functions
 from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
+from PANDORA import Pandora
 from PANDORA.PMHC import Model
 from PANDORA.Wrapper import Wrapper
 

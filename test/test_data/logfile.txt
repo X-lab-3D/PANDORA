@@ -1,0 +1,5 @@
+Target	Template	Error
+1A1O	2X4R	Failed aligning target and template
+2NNA	4Z7U	Failed aligning target and template
+1A1O	2X4R	Failed aligning target and template
+2NNA	4Z7U	Failed aligning target and template

@@ -22,7 +22,7 @@ Please note that you can specify output directory yourself, otherwise will be ge
 
 >>> >>> ## import requested modules
 >>> from PANDORA.PMHC import PMHC
->>> from PANDORA.Pandora import Pandora
+>>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>>
 >>> ## A. Create local Database
@@ -54,7 +54,7 @@ Please note that, if you do not input *anchors* yourself, it will automatically 
 
 
 >>> from PANDORA.PMHC import PMHC
->>> from PANDORA.Pandora import Pandora
+>>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>>
 >>> ## A. load the pregenerated Database  of all pMHC PDBs as templates
@@ -79,7 +79,7 @@ If you want to evaluate the framework on a target with a known experimental stru
 (calculates L-RMSD to show how far the model is from the near-native structure)
 
 >>> from PANDORA.PMHC import PMHC
->>> from PANDORA.Pandora import Pandora
+>>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>>
 >>> ## A. Load pregenerated database of all pMHC PDBs as templates
@@ -102,7 +102,7 @@ If you have some domain knowledge of the peptide conformation, whether it forms 
 
 
 >>> from PANDORA.PMHC import PMHC
->>> from PANDORA.Pandora import Pandora
+>>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>>
 >>> ## A. Load pregenerated database of all pMHC PDBs as templates
@@ -130,7 +130,7 @@ PANDORA can model more than one peptide, in parallel. You need to provide the fo
 The Wrapper class is implemented to run PANDORA in parallel on multiple cores.
 
 
->>> from PANDORA.Pandora import Pandora
+>>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>> from PANDORA.Wrapper import Wrapper
 >>>
@@ -154,7 +154,7 @@ To model a peptide:MHC class II complex, you only need to specify that in *PMHC.
 
 
 >>> from PANDORA.PMHC import PMHC
->>> from PANDORA.Pandora import Pandora
+>>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>>
 >>> ## A. Load pregenerated database of all pMHC PDBs as templates

@@ -1,11 +1,9 @@
-
 import PANDORA
-from PANDORA.Pandora import Align
-from PANDORA.Pandora import Modelling_functions
+from PANDORA import Align
+from PANDORA import Modelling_functions
 import time
 import os
 from Bio.PDB import PDBParser
-from datetime import datetime
 
 
 class Pandora:

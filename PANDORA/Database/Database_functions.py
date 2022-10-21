@@ -3,7 +3,6 @@ import subprocess
 import urllib.request
 import urllib.parse
 from copy import deepcopy
-import numpy
 from Bio.PDB import PDBParser
 from Bio.PDB import PDBIO
 from Bio.PDB import parse_pdb_header
@@ -17,7 +16,6 @@ from Bio.PDB import NeighborSearch
 from Bio.SeqUtils import seq1
 from Bio.PDB import Chain
 from string import ascii_uppercase
-import re
 
 
 def fresh_parse_dirs():

@@ -10,7 +10,7 @@ import glob
 import os
 
 from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
+from PANDORA import Pandora
 
 class Wrapper():
     def __init__(self, data_file, database, MHC_class,  num_cores=1, delimiter = '\t',

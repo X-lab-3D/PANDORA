@@ -7,7 +7,7 @@ import pickle
 from PANDORA.PMHC import Model
 # from Bio import Align
 from Bio import pairwise2
-#from PANDORA.Pandora import Align
+#from PANDORA import Align
 #import statistics
 from Bio.Align import PairwiseAligner
 from datetime import datetime
