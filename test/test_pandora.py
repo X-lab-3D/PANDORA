@@ -3,7 +3,7 @@ import os
 import PANDORA
 from PANDORA import Contacts
 from PANDORA.Pandora import Align
-from PANDORA.Database import Database
+from PANDORA import Database
 from PANDORA.Database import Database_functions
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora

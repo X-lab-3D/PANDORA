@@ -10,7 +10,7 @@ It allows the user to insert all the cases in a csv/tsv file, add various inform
 Wrapper Example:
 
 >>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import Database
 >>> from PANDORA.Wrapper import Wrapper
 >>>
 >>> ## A. Load pregenerated database of all pMHC PDBs as templates

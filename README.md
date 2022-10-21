@@ -118,7 +118,7 @@ You can use the code below to generate your database. By default, the database g
 
 ```python
 ## import requested modules
-from PANDORA.Database import Database
+from PANDORA import Database
 
 ## A. Create local Database
 db = Database.Database()
@@ -158,7 +158,7 @@ Please note that you can specify output directory yourself, otherwise will be ge
 ## import requested modules
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
-from PANDORA.Database import Database
+from PANDORA import Database
 
 ## A. Create local Database
 db = Database.load()
@@ -189,7 +189,7 @@ For other branches, like development, we suggest you to use the python help() fu
 The Wrapper class will take care of generating PANDORA target objects and parallelize the modelling on the given number of cores:
 
 ```python
-from PANDORA.Database import Database
+from PANDORA import Database
 from PANDORA.Wrapper import Wrapper
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
@@ -214,7 +214,7 @@ Please note that, if *anchors* is not specified or *use_netmhcpan* is set to *Fa
 ```python
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
-from PANDORA.Database import Database
+from PANDORA import Database
 
 ## A. load the pregenerated Database  of all pMHC PDBs as templates
 db = Database.load()
@@ -237,7 +237,7 @@ Input domain secondary structure prediction information (Helix/Beta strand):
 ```python
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
-from PANDORA.Database import Database
+from PANDORA import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
 db = Database.load()
@@ -260,7 +260,7 @@ To model a peptide:MHC class II complex, you only need to specify that in *PMHC.
 ```python
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
-from PANDORA.Database import Database
+from PANDORA import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
 db = Database.load()
@@ -286,7 +286,7 @@ Evaluate the framework on a target with a known experimental structure:
 ```python
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
-from PANDORA.Database import Database
+from PANDORA import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
 db = Database.load()

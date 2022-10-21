@@ -23,7 +23,7 @@ Please note that you can specify output directory yourself, otherwise will be ge
 >>> >>> ## import requested modules
 >>> from PANDORA.PMHC import PMHC
 >>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import Database
 >>>
 >>> ## A. Create local Database
 >>> db = Database.Database()
@@ -55,7 +55,7 @@ Please note that, if you do not input *anchors* yourself, it will automatically 
 
 >>> from PANDORA.PMHC import PMHC
 >>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import Database
 >>>
 >>> ## A. load the pregenerated Database  of all pMHC PDBs as templates
 >>> db = Database.load('pandora_Database')
@@ -80,7 +80,7 @@ If you want to evaluate the framework on a target with a known experimental stru
 
 >>> from PANDORA.PMHC import PMHC
 >>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import Database
 >>>
 >>> ## A. Load pregenerated database of all pMHC PDBs as templates
 >>> db = Database.load('pandora_Database')
@@ -103,7 +103,7 @@ If you have some domain knowledge of the peptide conformation, whether it forms 
 
 >>> from PANDORA.PMHC import PMHC
 >>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import Database
 >>>
 >>> ## A. Load pregenerated database of all pMHC PDBs as templates
 >>> db = Database.load('pandora_Database')
@@ -131,7 +131,7 @@ The Wrapper class is implemented to run PANDORA in parallel on multiple cores.
 
 
 >>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import Database
 >>> from PANDORA.Wrapper import Wrapper
 >>>
 >>> ## A. Load pregenerated database of all pMHC PDBs as templates
@@ -155,7 +155,7 @@ To model a peptide:MHC class II complex, you only need to specify that in *PMHC.
 
 >>> from PANDORA.PMHC import PMHC
 >>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import Database
 >>>
 >>> ## A. Load pregenerated database of all pMHC PDBs as templates
 >>> db = Database.load('pandora_Database')
