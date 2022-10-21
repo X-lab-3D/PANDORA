@@ -182,9 +182,9 @@ class Template(PMHC):
         if self.get_pdb_path():
             print('Path to PDB file: %s' %self.get_pdb_path())
         if not self.pdb:
-            print('PDB structure: no PDB structure provided')
+            print('Biopython PDB structure: no PDB loaded')
         else:
-            print('PDB structure:')
+            print('Biopython PDB structure:')
             for (k, v) in self.pdb.header.items():
                 print('\t'+k + ':', v)
 

@@ -28,9 +28,11 @@ class Model:
 
         # Define the output directory
         if output_dir == False:
-            self.output_dir = os.getcwd()
+            self.output_dir = f"{os.getwd()}/{self.id}"
         else:
             self.output_dir = output_dir
+        
+
 
         # Check if the user gave either the path to the model pdb or the pdb itself.
         if self.model_path == '' and not pdb:

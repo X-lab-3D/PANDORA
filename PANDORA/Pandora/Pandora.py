@@ -11,8 +11,18 @@ from datetime import datetime
 class Pandora:
 
     def __init__(self, target, database=None, template=None):
-        '''__init__(self, target, database=None, template=None, 
-        '''
+        """Pandora main class. This function simply initialized the object and
+            checks for database or template availavbility.
+
+        Args:
+            target (PMHC.Target): Target object
+            database (Database.Database, optional): Pandora Database object. Defaults to None.
+            template (PMHC.Template, optional): Template object. To provide only
+                if a specific template needs to be used. Defaults to None.
+
+        Raises:
+            Exception: If no database not remplate object are provided, an exception will be raised.
+        """ 
         self.target = target
         self.template = template
         self.database = database
@@ -253,8 +263,7 @@ class Pandora:
               best_n_templates=1, n_jobs=None, loop_refinement='slow', pickle_out=False,
               stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, 
               RMSD_atoms=['C', 'CA', 'N', 'O'], clip_C_domain=False):
-        '''model(self, output_dir=os.getcwd(), n_loop_models=20, n_homology_models=1, best_n_templates=1, n_jobs=None, loop_refinement='slow', pickle_out=False,stdev=0.1, benchmark=False, verbose=True, helix=False, sheet=False, RMSD_atoms=['C', 'CA', 'N', 'O'])
-        Wrapper function that combines all modelling steps.
+        '''Wrapper function that combines all modelling steps.
 
         Args:
             benchmark: (Optional, bool) If True, performs L-RMSD calculations with target strcutre.
