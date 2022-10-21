@@ -41,7 +41,7 @@ class Model:
             self.pdb = PDBParser(QUIET=True).get_structure(self.target.id, self.model_path)
 
 
-    def calc_RMSD(self, reference_pdb, atoms = ['C', 'CA', 'N', 'O'], ligand_zone="whole"):
+    def calc_LRMSD(self, reference_pdb, atoms = ['C', 'CA', 'N', 'O'], ligand_zone="whole"):
         ''' Calculate the L-RMSD between the decoy and reference structure (ground truth).
             This function requires the pdb2sql module for L-RMSD calculation.
         Args:
