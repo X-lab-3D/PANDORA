@@ -28,7 +28,7 @@ class Model:
 
         # Define the output directory
         if output_dir == False:
-            self.output_dir = f"{os.getwd()}/{self.id}"
+            self.output_dir = f"{os.getcwd()}/{self.id}"
         else:
             self.output_dir = output_dir
         
