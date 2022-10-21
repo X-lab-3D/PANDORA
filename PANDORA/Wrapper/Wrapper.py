@@ -248,18 +248,22 @@ class Wrapper():
                         targets[target_id]['outdir'] = ''
 
         self.targets = targets
+        
+def archive_and_remove(case):
+    """archives the case folder as a .tar file to save inode space
 
-def archive_and_remove(case):       
-    # create archive of the folder
-    with tarfile.open(f'{case}.tar', 'w') as archive:
-        case_files = glob.glob(os.path.join(case, '*'))
-        for case_file in case_files:
-            archive.add(case_file)
-    # remove the original files from the folder
-    if os.path.exists(f'{case}.tar'):
-        subprocess.check_call(f"rm -r {case}", shell=True)
-    else:
-        print(f'Error creating archive: {case}.tar, skipping the file removal')
+    Args:
+        case str: directory name of case to be archived
+    """ 
+    prefix_case_folder = os.path.split(case.rstrip('/'))[0]
+    case_folder = os.path.split(case.rstrip('/'))[1]   
+    try:
+        subprocess.run(f"tar -cf {case}.tar -C {prefix_case_folder} {case_folder} \
+                       --remove-files", shell=True, check=True)
+    except subprocess.CalledProcessError as cpe:
+        print(f"Something went wrong in archive case: {case}\n{cpe}")
+    except Exception as e:
+        print(e)
 
 def run_case(args):
     """Runs one modelling job. Meant to be runned from Pandora.Wrapper
