@@ -11,7 +11,7 @@ from Bio import SeqIO
 import gzip
 import shutil
 import PANDORA
-from PANDORA.Contacts import Contacts
+from PANDORA import Contacts
 from PANDORA.PMHC import PMHC
 from Bio.PDB import NeighborSearch
 from Bio.SeqUtils import seq1

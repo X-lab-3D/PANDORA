@@ -3,6 +3,7 @@ import os
 from os.path import exists
 from pathlib import Path
 import json
+from .Contacts import Contacts
 
 version='1.0'
 PANDORA_path = os.path.dirname(os.path.abspath(__file__))

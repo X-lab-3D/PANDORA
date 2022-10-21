@@ -2,7 +2,7 @@ from Bio import SeqIO
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 import PANDORA
-from PANDORA.Contacts import Contacts
+from PANDORA import Contacts
 from PANDORA.Database import Database_functions
 from PANDORA.Pandora import Modelling_functions
 from PANDORA.PMHC import Anchors

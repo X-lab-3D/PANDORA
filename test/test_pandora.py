@@ -1,7 +1,7 @@
 import pytest
 import os
 import PANDORA
-from PANDORA.Contacts import Contacts
+from PANDORA import Contacts
 from PANDORA.Pandora import Align
 from PANDORA.Database import Database
 from PANDORA.Database import Database_functions

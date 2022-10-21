@@ -1,7 +1,4 @@
 from Bio import SeqIO
-from Bio.Align import substitution_matrices
-from Bio.Align import PairwiseAligner
-import Bio.Align
 import PANDORA
 import os
 import subprocess
