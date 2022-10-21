@@ -3,10 +3,6 @@ import os
 from os.path import exists
 from pathlib import Path
 import json
-# populate package namespace
-from PANDORA.Contacts import Contacts
-from PANDORA.Database import Database_functions
-from PANDORA.Database import Database
 
 version='1.0'
 PANDORA_path = os.path.dirname(os.path.abspath(__file__))
@@ -34,3 +30,8 @@ beta_genes = ['HLA-DQB', 'HLA-DRB', 'HLA-DPB',
 
 MHCI_G_domain=[(1,187)] #182 + 5 for tolerance
 MHCII_G_domain=[(1,86),(1,95)] #81 + 5 and 90 + 5 for tolerance
+
+# populate package namespace
+from PANDORA.Contacts import Contacts
+from PANDORA.Database import Database_functions
+from PANDORA.Database import Database
