@@ -10,6 +10,7 @@ import glob
 import os
 import re
 import random
+import string
 
 from PANDORA.PMHC import PMHC
 from PANDORA.Pandora import Pandora
@@ -266,7 +267,7 @@ class Wrapper():
 
         # create an output directory
         try:
-            generated_id = random.randint(10000, 99999)
+            generated_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
             self.collective_output_dir = os.path.join('%s/%s_%s' %(self.collective_output_dir, self.wrapper_id, generated_id))
             print(self.collective_output_dir)
             if not os.path.exists(self.collective_output_dir):

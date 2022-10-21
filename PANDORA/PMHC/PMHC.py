@@ -278,6 +278,8 @@ class Target(PMHC):
         else:
             self.output_dir = output_dir
 
+        self.output_dir = f"{self.output_dir}/{self.id}"
+
         # Output directory is created
         self.make_output_dir()
 
@@ -594,8 +596,6 @@ class Target(PMHC):
 
         # create an output directory
         try:
-            self.output_dir = '%s/%s' %(self.output_dir, self.id)
-
             if not os.path.exists(self.output_dir):
                 os.makedirs(self.output_dir)
                 if not os.path.exists(self.output_dir):

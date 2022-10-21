@@ -28,7 +28,7 @@ class Model:
 
         # Define the output directory
         if output_dir == False:
-            self.output_dir = os.getcwd
+            self.output_dir = os.getcwd()
         else:
             self.output_dir = output_dir
 
