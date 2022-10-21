@@ -1,3 +1,4 @@
+from pyexpat import model
 from Bio.PDB import PDBParser
 from Bio.PDB.Polypeptide import three_to_one
 from Bio.SeqUtils import seq1
@@ -6,6 +7,9 @@ import os
 from Bio.PDB import PDBIO
 import PANDORA
 import traceback
+from Bio.PDB import *
+import sys
+sys.path.append('~/tools/pdb2sql/pdb2sql')
 
 
 class Model:
@@ -13,7 +17,6 @@ class Model:
     def __init__(self, target, model_path='', output_dir = PANDORA.PANDORA_data, pdb=False, molpdf=0, dope=0):
         '''__init__(self, target, model_path='', output_dir = PANDORA.PANDORA_data, pdb=False, molpdf=0, dope=0)
          Initiate model object
-
         Args:
             target: Target object
             output_dir: (string) output directory
@@ -38,13 +41,11 @@ class Model:
             self.pdb = PDBParser(QUIET=True).get_structure(self.target.id, self.model_path)
 
 
-    def calc_LRMSD(self, reference_pdb, atoms = ['C', 'CA', 'N', 'O']):
+    def calc_RMSD(self, reference_pdb, atoms = ['C', 'CA', 'N', 'O'], ligand_zone="whole"):
         ''' Calculate the L-RMSD between the decoy and reference structure (ground truth).
             This function requires the pdb2sql module for L-RMSD calculation.
-
         Args:
             reference_pdb: Bio.PDB object or path to pdb file
-
         Returns: (float) L-RMSD
         '''
 
@@ -58,17 +59,25 @@ class Model:
             ref = reference_pdb
 
         # Define file names as variables
-        #decoy_path = '%s/%s_decoy.pdb' % (self.output_dir, self.target.id)
-        #ref_path = '%s/%s_ref.pdb' % (self.output_dir, self.target.id)
+        model_name = self.model_path.split('/')[-1].split('.')[1]
+        #decoy_path = '%s/%s_decoy.pdb' % (self.output_dir, model_name)
+        #ref_path = '%s/%s_ref.pdb' % (self.output_dir, model_name)
 
         # Define zones to align
         #M_lzone = list(range(4,73))
         #N_lzone = list(range(10,80))
 
-        # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
-        model_name = self.model_path.split('/')[-1].split('.')[1]
-        decoy_path, ref_path = homogenize_pdbs(self.pdb, ref, self.output_dir, model_name)
+        ## pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.       
+        #if os.path.exists(decoy_path)==False and ligand_zone.lowe()=="whole":
+        if  ligand_zone.lower()=="whole":
+            decoy_path, ref_path = homogenize_pdbs(self.pdb, ref, atoms, self.output_dir, model_name)
+        ## calculates core LRMSD    
+        elif ligand_zone.lower() == "core":
+            decoy_path, ref_path = homogenize_pdbs(self.pdb, ref, atoms, self.output_dir, model_name, anchors = self.target.anchors)
+        elif ligand_zone.lower() == "flanking":
+            decoy_path, ref_path = homogenize_pdbs(self.pdb, ref, atoms, self.output_dir,model_name, anchors = self.target.anchors, flanking=True)
 
+       
         start_dir = os.getcwd()
         os.chdir(self.output_dir)
         # Produce lzone file for the l-rmsd calculation
@@ -89,9 +98,17 @@ class Model:
             # Calculate l-rmsd between decoy and reference with pdb2sql
             sim = StructureSimilarity(decoy_path, ref_path)
             #self.lrmsd = sim.compute_lrmsd_fast(method='svd', name=atoms, lzone = lzone)
-            self.lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name = atoms)
+            if ligand_zone.lower()=="whole":
+                self.lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name = atoms)
+            ## calculates LRMSD for peptide core region
+            elif ligand_zone.lower() == "core":
+                self.core_lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name=atoms)
+            ## calculates RMSD for peptide flanking region
+            elif ligand_zone.lower() == "flanking":
+                self.flanking_lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name=atoms)
         except:
-            print('An error occurred while calculating the rmsd for target %s, model %s' %(self.target.id, self.model_path))
+            print('An error occurred while calculating the rmsd for target %s, model %s for %s' %(ref_path, decoy_path, ligand_zone))
+            #print('An error occurred while calculating the rmsd for target %s, model %s' %(self.target.id, self.model_path))
             traceback.print_exc()
             raise Exception('Please check your model and ref info for model %s' %self.model_path)
 
@@ -100,99 +117,13 @@ class Model:
         #os.chdir(os.path.dirname(PANDORA.PANDORA_path))
         os.chdir(start_dir)
 
-    def calc_Core_LRMSD(self, reference_pdb, atoms = ['C', 'CA', 'N', 'O']):
-        ''' Calculate the L-RMSD between the decoy and reference structure (ground truth)
-
-        Args:
-            reference_pdb: Bio.PDB object or path to pdb file
-
-        Returns: (float) L-RMSD
-        '''
-
-        from pdb2sql import StructureSimilarity
-
-        # load target pdb
-        if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first
-            ref = PDBParser(QUIET=True).get_structure('MHC', reference_pdb)
-        else:
-            ref = reference_pdb
-
-        # Define file names as variables
-        decoy_path = '%s/%s_decoy.pdb' % (self.output_dir, self.target.id)
-        ref_path = '%s/%s_ref.pdb' % (self.output_dir, self.target.id)
-
-        # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
-        homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id, anchors = self.target.anchors)
-
-        start_dir = os.getcwd()
-        os.chdir(self.output_dir)
-        # Produce lzone file for the l-rmsd calculation
-        #lzone = get_Gdomain_lzone('%s/%s_ref.pdb' %(self.output_dir, self.target.id), self.output_dir, self.target.MHC_class)
-        # Get decoy structure to superpose
-        #decoy_db = psb2sql()
-
-        # Calculate l-rmsd between decoy and reference with pdb2sql
-        sim = StructureSimilarity(decoy_path, ref_path)
-        self.core_lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name=atoms)
-
-
-        # remove intermediate files
-        os.system('rm %s %s' %(decoy_path, ref_path))
-        #os.chdir(os.path.dirname(PANDORA.PANDORA_path))
-        os.chdir(start_dir)
-
-    def calc_flanking_LRMSD(self, reference_pdb, atoms=['C', 'CA', 'N', 'O']):
-        ''' Calculate the L-RMSD between the decoy and reference structure (ground truth)
-
-        Args:
-            reference_pdb: Bio.PDB object or path to pdb file
-
-        Returns: (float) L-RMSD
-        '''
-
-        from pdb2sql import StructureSimilarity
-
-        # load target pdb
-        if isinstance(reference_pdb, str):  # if its a string, it should be the path of the pdb, then load pdb first
-            ref = PDBParser(QUIET=True).get_structure('MHC', reference_pdb)
-        else:
-            ref = reference_pdb
-
-        # Define file names as variables
-        decoy_path = '%s/%s_decoy.pdb' % (self.output_dir, self.target.id)
-        ref_path = '%s/%s_ref.pdb' % (self.output_dir, self.target.id)
-        #
-        # decoy_path = '%s/%s_decoy.pdb' % (output_dir, target.id)
-        # ref_path = '%s/%s_ref.pdb' % (output_dir, target.id)
-
-        # pdb2sql needs 1 big chain and 1 ligand chain with correct numbering, for MHCII, this means merging the chains.
-        homogenize_pdbs(self.pdb, ref, self.output_dir, self.target.id, anchors=self.target.anchors, flanking=True)
-
-        # homogenize_pdbs(pdb, ref, output_dir, target.id, anchors=target.anchors, flanking=True)
-
-        os.chdir(self.output_dir)
-        # Produce lzone file for the l-rmsd calculation
-        # lzone = get_Gdomain_lzone('%s/%s_ref.pdb' %(self.output_dir, self.target.id), self.output_dir, self.target.MHC_class)
-        # Get decoy structure to superpose
-        # decoy_db = psb2sql()
-
-        # Calculate l-rmsd between decoy and reference with pdb2sql
-        sim = StructureSimilarity(decoy_path, ref_path)
-        self.flanking_lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name=atoms)
-
-        # remove intermediate files
-        os.system('rm %s %s' % (decoy_path, ref_path))
-        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
-
+    
 
 def merge_chains(pdb):
     ''' Merges two chains of MHCII to one chain. pdb2sql can only calculate L-rmsd with one chain.
-
     Args:
         pdb: Bio.PDB object
-
     Returns: Bio.PDB object with its M and N chain merged as M chain
-
     '''
     # Merge chains
     if 'N' in [chain.id for chain in pdb.get_chains()]:
@@ -211,14 +142,11 @@ def merge_chains(pdb):
 
 def renumber(pdb_ref, pdb_decoy, custom_map={"MSE":"M"}):
     ''' aligns two pdb's and renumber them accordingly.
-
     Args:
         pdb_ref:   Bio.PDB object
         pdb_decoy: Bio.PDB object
         
-
     Returns: Bio.PDB objects with renumbered residues
-
     '''
     ref_sequences = [[chain.id, seq1(''.join([res.resname for res in chain]), custom_map=custom_map)] for chain in pdb_ref.get_chains()]
                     #[[chain.id, ('').join([seq1(res.resname) for res in chain])]
@@ -231,7 +159,8 @@ def renumber(pdb_ref, pdb_decoy, custom_map={"MSE":"M"}):
     decoy_sequences.sort()
     
     assert(len(ref_sequences) == len(decoy_sequences))
-    
+
+
     for ind in range(len(ref_sequences)):
         pair = pairwise2.align.globalxx(ref_sequences[ind][1], decoy_sequences[ind][1])[0]
         ref_sequences[ind][1]   = pair.seqA
@@ -239,17 +168,16 @@ def renumber(pdb_ref, pdb_decoy, custom_map={"MSE":"M"}):
         
     ref_sequences = [[seq[0],[i+1 for i,res in enumerate(seq[1]) if res != '-']] for seq in ref_sequences]
     decoy_sequences = [[seq[0],[i+1 for i,res in enumerate(seq[1]) if res != '-']] for seq in decoy_sequences]
-    
+
+
+
     def assign(pdb, pdb_sequences):
         ''' Renumbers the pdb using aligned sequences. 
-
         Args:
             pdb_ref:   Bio.PDB object
             pdb_decoy: Bio.PDB object
             
-
         Returns: Bio.PDB objects with renumbered residues
-
         '''
         
         
@@ -266,30 +194,19 @@ def renumber(pdb_ref, pdb_decoy, custom_map={"MSE":"M"}):
     pdb_ref = assign(pdb_ref, ref_sequences)
     pdb_decoy = assign(pdb_decoy, decoy_sequences)
 
-    return pdb_ref, pdb_decoy
+    return pdb_ref, pdb_decoy , ref_sequences, decoy_sequences
 
-# decoy = PDBParser(QUIET=True).get_structure('MHC', y.model_path)
-#
-#
-# for i in decoy[0]['P']:
-#     print(i.id)
-#
-# decoy = deepcopy(y.pdb)
-# target_id = target.id
-# anchors=target.anchors
-# flanking=True
-
-def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False, flanking=False):
+def homogenize_pdbs(decoy, ref, atoms, output_dir,  target_id = 'MHC' , anchors =False, flanking=False):
     ''' Make sure that the decoy and reference structure have the same structure sequences.
-
     Args:
         decoy: Bio.PDB object of the decoy structure
         ref: Bio.PDB object of the reference structure
         output_dir: (string) directory that is used to write intermediate files
-
     Returns: (tuple) Bio.PDB objects with the same structure sequence
-
     '''
+    ref_p_len=len(ref[0]['P'])
+    decoy_p_len=len(decoy[0]['P'])
+    
 
     # If you give the anchors, the core L-RMSD will be calculated.
     # The peptide residues before and after the first and last anchor residue will be discarded.
@@ -304,15 +221,15 @@ def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False, f
 
     # If you give the anchors AND flanking = True, the flanking L-RMSD will be calculated. Only if the peptide is
     # also longer than the binding core. The peptide binding core will be discarded
-    if anchors and flanking and len(decoy[0]['P']) > 9:
-        for x in range(len(decoy[0]['P'])):
+
+    elif anchors and flanking and decoy_p_len > 9:
+        for x in range(ref_p_len):
             for i in decoy[0]['P']:
                 if i.id[1] >= anchors[0] and i.id[1] <= anchors[-1]:
                     decoy[0]['P'].detach_child(i.id)
             for i in ref[0]['P']:
                 if i.id[1] >= anchors[0] and i.id[1] <= anchors[-1]:
                     ref[0]['P'].detach_child(i.id)
-
 
 
     # remove c-like domain and keep only g domain
@@ -323,32 +240,39 @@ def homogenize_pdbs(decoy, ref, output_dir, target_id = 'MHC', anchors =False, f
     decoy = merge_chains(decoy)
     # merge chains of the reference
     ref = merge_chains(ref)
-    ref, decoy = renumber(ref, decoy)
+
+    #Renumber and trim unaligned residues
+    ############### Added
+    ref, decoy , ref_sequences, decoy_sequences= renumber(ref, decoy)
+
+    ref ,decoy = trim_indels(ref, decoy, ref_sequences, decoy_sequences)
+
+    # trim unaligned atoms
+    #ref, decoy , ref_sequences, decoy_sequences= renumber(ref, decoy)
+    ref, decoy = remove_mismatched_atoms_from_pdb( ref, decoy,  atoms)
+
 
     # Write pdbs
     decoy_path = '%s/%s_decoy.pdb' % (output_dir, target_id)
     io = PDBIO()
     io.set_structure(decoy)
-    io.save('%s/%s_decoy.pdb' % (output_dir, target_id))
+    io.save(decoy_path, select=NotDisordered())
 
     ref_path = '%s/%s_ref.pdb' % (output_dir, target_id)
     io = PDBIO()
     io.set_structure(ref)
-    io.save('%s/%s_ref.pdb' % (output_dir, target_id))
+    io.save(ref_path, select=NotDisordered())
 
     return decoy_path, ref_path
 
 def get_Gdomain_lzone(ref_pdb, output_dir, MHC_class):
     """ Produce a lzone file for pdb2sql.
-
     Args:
         ref_pdb (str): path to the pdb file to use for the lzone
         output_dir (str): output directory
         MHC_class (str): Class of the MHC
-
     Raises:
         Exception: In case there are unexpected chain names it raises an exception
-
     Returns:
         outfile (str): Path to the output file
     """
@@ -396,7 +320,7 @@ def get_Gdomain_lzone(ref_pdb, output_dir, MHC_class):
             #output.write('fit\n')
     return outfile
 
-def remove_C_like_domain(pdb):
+def remove_C_like_domain(pdb, need_to_be_removed=None):
     '''Removes the C-like domain from a MHC struture and keeps only the G domain
     Args:
         pdb: (Bio.PDB): Bio.PDB object with chains names M (N for MHCII) and P
@@ -420,10 +344,180 @@ def remove_C_like_domain(pdb):
     if 'N' not in [chain.id for chain in pdb.get_chains()]:
         for chain in pdb.get_chains():
             if chain.id == 'M':
-                need_to_be_removed = [res.id for res in chain if res.id[1] > 180]
-                _ = [chain.detach_child(x) for x in need_to_be_removed]
+                ########################## Added
+                if need_to_be_removed ==None:
+                    need_to_be_removed = [res.id for res in chain if res.id[1] > 180]
+                    _ = [chain.detach_child(x) for x in need_to_be_removed]
+
+                else:
+                    #  Remove them
+                    for id in need_to_be_removed:
+                        #if (chain.__contains__(id)):
+                            chain.detach_child((' ', id, ' '))
+                ######################### End added
+                
     return pdb
 
 #ValueError: Invalid column name lzone. Possible names are
 #['rowID', 'serial', 'name', 'altLoc', 'resName', 'chainID', 'resSeq',
 # 'iCode', 'x', 'y', 'z', 'occ', 'temp', 'element', 'model']
+
+
+def trim_indels(pdb_ref, pdb_decoy, ref_sequences, decoy_sequences):
+    ''' Trim indels for both reference and decoy PDBs
+
+    Args:
+        pdb_ref:   Bio.PDB object with chains names M (N for MHCII) and P
+        pdb_decoy: Bio.PDB object with chains names M (N for MHCII) and P
+        ref_sequences (list): List of residue numbers in reference PDB 
+        decoy_sequences (list): List of residue numbers in decoy PDB 
+        
+
+    Returns: Bio.PDB objects (reference and decoy) with matched residues
+    '''
+
+    ref_decoy_inconsistency=list(set(ref_sequences[0][1]) - set(decoy_sequences[0][1]))
+    decoy_ref_inconsistency=list(set(decoy_sequences[0][1]) - set(ref_sequences[0][1]))
+   
+    need_to_be_removed_ref=list()
+
+    ref_M_length=ref_sequences[0][-1][-1]
+
+    for i  in  ref_decoy_inconsistency:
+        
+        need_to_be_removed_ref.append(i)
+        if i>1 and ((i-1) in ref_sequences[0][1]):
+            need_to_be_removed_ref.append(i-1)
+        if i<ref_M_length and  ((i+1) in ref_sequences[0][1]):
+            need_to_be_removed_ref.append(i+1)
+ 
+    need_to_be_removed_ref=list(set(need_to_be_removed_ref))
+
+    
+    decoy_M_length = decoy_sequences[0][-1][-1]
+    need_to_be_removed_decoy=list()
+    for i  in  decoy_ref_inconsistency:
+  
+        need_to_be_removed_decoy.append(i)
+        if i>1 and ((i-1) in decoy_sequences[0][1]): 
+            need_to_be_removed_decoy.append(i-1)
+        if i<decoy_M_length and ((i+1) in decoy_sequences[0][1]):
+            need_to_be_removed_decoy.append(i+1)
+            
+    need_to_be_removed_decoy=list(set(need_to_be_removed_decoy))
+
+    new_remove_decoy=list(set(need_to_be_removed_ref) & set(decoy_sequences[0][1]))
+    need_to_be_removed_decoy = list(set(need_to_be_removed_decoy + new_remove_decoy))
+
+    new_remove_ref=list(set(need_to_be_removed_decoy) & set(ref_sequences[0][1]))
+    need_to_be_removed_ref = list(set(need_to_be_removed_ref + new_remove_ref))
+    
+    try:
+        pdb_ref = remove_C_like_domain(pdb_ref, need_to_be_removed_ref)
+    except:
+        print('These residue IDs not in ref: %s' %need_to_be_removed_ref)
+        print(ref_sequences[0][1])
+    try:
+        pdb_decoy = remove_C_like_domain(pdb_decoy, need_to_be_removed_decoy)
+    except:
+        print(decoy_sequences[0][1])
+        print('The residue IDs not in decoy: %s' %need_to_be_removed_decoy)
+    return pdb_ref, pdb_decoy
+
+
+def get_residue_atoms(decoy_res, ref_res):
+    ''' Retrieves all atom names of a given residue for both reference and decoy
+
+    Args:
+        ref_res (Bio.PDB.Residue): Residue object from reference PDB
+        decoy_res (Bio.PDB.Residue): Residue object from decoy PDB         
+
+    Returns: Bio.PDB.Atom objects (reference and decoy) of the given residues
+    '''
+    
+    decoy_atoms= list()
+    for atom in decoy_res.get_atoms():
+        decoy_atoms.append(atom.id)
+
+    ref_atoms = list()
+    for atom in ref_res.get_atoms():
+        ref_atoms.append(atom.id)
+
+    return decoy_atoms, ref_atoms
+
+
+def remove_atoms_from_res( ref_chain,  decoy_chain, i):
+    '''
+    Mismatched residues in Reference is removed both from decoy and reference
+    '''
+    ref_chain.detach_child((' ', i+1, ' '))
+    decoy_chain.detach_child((' ', i+1, ' '))
+    print("Mismatch residue in ref vs decoy in resi %s ->  removed in ref & decoy" %(i+1))   
+
+def remove_mismatched_atoms_from_res(diff_atoms, dif_res, atoms):
+    '''
+    Mismatched atoms in the given residue object is removed
+    '''
+    diff_removed = list()
+
+    for d in diff_atoms:
+        if d in atoms:
+            dif_res.detach_child(d)
+            diff_removed.append(d)
+    return diff_removed
+
+def remove_mismatched_atoms_from_pdb(ref, decoy, atoms):
+    '''
+    Mismatched atoms in the given PDB object is removed
+    '''
+    for c in decoy.get_chains():
+
+       chain_id = c.id
+       print("chain %s:" %chain_id)
+       decoy_m_len=len(decoy[0][chain_id])
+
+       for i in range(decoy_m_len):
+           try:
+           
+                ref_res = ref[0][chain_id][(' ', i+1, ' ')]
+                decoy_res = decoy[0][chain_id][(' ', i+1, ' ')]
+
+                # if ref_res.get_resname() != decoy_res.get_resname(): # Eliminate mismatched residues
+                if ref_res.get_resname() == 'MSE': # Eliminate mismatched residues
+                    remove_atoms_from_res( ref[0][chain_id],  decoy[0][chain_id], i)
+
+                else: # residues matched
+
+                   decoy_atoms, ref_atoms = get_residue_atoms(decoy_res, ref_res)  
+
+                   if(set(decoy_atoms) != set(ref_atoms)) :
+                       diff_decoy = set(decoy_atoms) - set(ref_atoms)
+                       if diff_decoy:
+                           decoy_diff_occured = remove_mismatched_atoms_from_res(diff_decoy, decoy_res, atoms)
+       
+                       diff_ref = set(ref_atoms) - set(decoy_atoms)
+                       if diff_ref:
+                           ref_diff_occured = remove_mismatched_atoms_from_res(diff_ref, ref_res, atoms)
+
+                       if decoy_diff_occured and len(decoy_diff_occured) >0:
+                           print("Mismatched atoms of Decoy vs ref in residue %d is: %s" %(i+1,decoy_diff_occured))
+                       if ref_diff_occured and len(ref_diff_occured) >0:
+                           print("Mismatched atoms of ref vs decoy in residue %d is: %s" %(i+1,ref_diff_occured))           
+           except:
+               continue
+    return ref, decoy
+
+
+keepAltID = 'A'
+class NotDisordered(Select):  # Inherit methods from Select class
+    '''
+    Keep one Alternative location for the given atom
+    '''
+    def accept_atom(self, atom):
+        if (not atom.is_disordered()) or atom.get_altloc() == keepAltID:
+            atom.set_altloc(" ")  # Eliminate alt location ID before output.
+            return True
+        else:  # Alt location was not one to be output.
+            return False
+        
+
