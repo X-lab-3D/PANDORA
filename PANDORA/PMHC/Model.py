@@ -9,7 +9,6 @@ import PANDORA
 import traceback
 from Bio.PDB import *
 import sys
-sys.path.append('~/tools/pdb2sql/pdb2sql')
 
 
 class Model:
@@ -42,12 +41,18 @@ class Model:
 
 
     def calc_LRMSD(self, reference_pdb, atoms = ['C', 'CA', 'N', 'O'], ligand_zone="whole"):
-        ''' Calculate the L-RMSD between the decoy and reference structure (ground truth).
+        """Calculate the L-RMSD between the decoy and reference structure (ground truth).
             This function requires the pdb2sql module for L-RMSD calculation.
+
         Args:
             reference_pdb: Bio.PDB object or path to pdb file
-        Returns: (float) L-RMSD
-        '''
+            atoms (list, optional): The list of atoms of the ligand selected to calculte the LRMSD . Defaults to ['C', 'CA', 'N', 'O'].
+            ligand_zone (str, optional): The region of the Ligand selected to calculate the LRMSD. Defaults to "whole".
+
+        Raises:
+            Exception: PDB2SQL LRMSD claulation failed
+        Returns: (float) L-RMSD calculated by PDB2SQL
+        """        
 
         #from pdb2sql import pdb2sql, superpose, StructureSimilarity
         from pdb2sql import StructureSimilarity
@@ -113,8 +118,7 @@ class Model:
             raise Exception('Please check your model and ref info for model %s' %self.model_path)
 
         # remove intermediate files
-        #os.system('rm %s/%s_decoy.pdb %s/%s_ref.pdb' %(self.output_dir, self.target.id, self.output_dir, self.target.id))
-        #os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+        os.system('rm %s %s' %(decoy_path, ref_path))
         os.chdir(start_dir)
 
     
@@ -321,11 +325,12 @@ def get_Gdomain_lzone(ref_pdb, output_dir, MHC_class):
     return outfile
 
 def remove_C_like_domain(pdb, need_to_be_removed=None):
-    '''Removes the C-like domain from a MHC struture and keeps only the G domain
+    """ Removes the C-like domain from a MHC struture and keeps only the G domain
     Args:
         pdb: (Bio.PDB): Bio.PDB object with chains names M (N for MHCII) and P
+        need_to_be_removed (list, optional):list of atoms to remove from M chain. Defaults to None.
     Returns: (Bio.PDB): Bio.PDB object without the C-like domain
-    '''
+    """
 
     # If MHCII, remove the C-like domain from the M-chain (res 80 and higher) and the N-chain (res 90 and higher)
     if 'N' in [chain.id for chain in pdb.get_chains()]:
@@ -344,17 +349,16 @@ def remove_C_like_domain(pdb, need_to_be_removed=None):
     if 'N' not in [chain.id for chain in pdb.get_chains()]:
         for chain in pdb.get_chains():
             if chain.id == 'M':
-                ########################## Added
                 if need_to_be_removed ==None:
                     need_to_be_removed = [res.id for res in chain if res.id[1] > 180]
                     _ = [chain.detach_child(x) for x in need_to_be_removed]
 
                 else:
-                    #  Remove them
+                    #  Remove the list of given atom names 
                     for id in need_to_be_removed:
                         #if (chain.__contains__(id)):
                             chain.detach_child((' ', id, ' '))
-                ######################### End added
+
                 
     return pdb
 
@@ -367,10 +371,10 @@ def trim_indels(pdb_ref, pdb_decoy, ref_sequences, decoy_sequences):
     ''' Trim indels for both reference and decoy PDBs
 
     Args:
-        pdb_ref:   Bio.PDB object with chains names M (N for MHCII) and P
-        pdb_decoy: Bio.PDB object with chains names M (N for MHCII) and P
-        ref_sequences (list): List of residue numbers in reference PDB 
-        decoy_sequences (list): List of residue numbers in decoy PDB 
+        pdb_ref (Bio.PDB): object with chains names M (N for MHCII) and P
+        pdb_decoy (Bio.PDB): object with chains names M (N for MHCII) and P
+        ref_sequences : List of residue numbers in reference PDB 
+        decoy_sequences : List of residue numbers in decoy PDB 
         
 
     Returns: Bio.PDB objects (reference and decoy) with matched residues
@@ -467,9 +471,15 @@ def remove_mismatched_atoms_from_res(diff_atoms, dif_res, atoms):
     return diff_removed
 
 def remove_mismatched_atoms_from_pdb(ref, decoy, atoms):
-    '''
-    Mismatched atoms in the given PDB object is removed
-    '''
+    """ Mismatched atoms in the given PDB object is removed
+    Args:
+        ref (Bio.PDB): object with chains names M (N for MHCII) and P
+        decoy (Bio.PDB): object with chains names M (N for MHCII) and P
+        atoms (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """  
     for c in decoy.get_chains():
 
        chain_id = c.id
@@ -508,12 +518,12 @@ def remove_mismatched_atoms_from_pdb(ref, decoy, atoms):
     return ref, decoy
 
 
-keepAltID = 'A'
 class NotDisordered(Select):  # Inherit methods from Select class
     '''
     Keep one Alternative location for the given atom
     '''
     def accept_atom(self, atom):
+        keepAltID = 'A'
         if (not atom.is_disordered()) or atom.get_altloc() == keepAltID:
             atom.set_altloc(" ")  # Eliminate alt location ID before output.
             return True
