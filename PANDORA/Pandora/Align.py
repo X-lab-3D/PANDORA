@@ -9,8 +9,7 @@ import subprocess
 
 class Align:
 
-    def __init__(self, target, template, clip_C_domain=False,
-                 output_dir=PANDORA.PANDORA_data + '/outputs', remove_terms=True):
+    def __init__(self, target, template, clip_C_domain=False, remove_terms=True):
         ''' Performs a alignment of the target and template(s). Returns a filename that will be used for modeller.
 
         Args:
@@ -33,7 +32,7 @@ class Align:
             self.template = template
         else:
             self.template = [template]
-        self.output_dir = output_dir # + '/%s_%s' %('_'.join([i.id for i in self.template]), self.target.id)
+        self.output_dir = target.output_dir # + '/%s_%s' %('_'.join([i.id for i in self.template]), self.target.id)
         self.__muscle_command__ = 'muscle -align %s -output %s -quiet'
 
 
