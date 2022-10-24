@@ -232,7 +232,6 @@ class Template(PMHC):
                     print('The allele will not be changed')
 
 
-
 class Target(PMHC):
 
     def __init__(self, id, peptide, allele_type=[], MHC_class = 'I',

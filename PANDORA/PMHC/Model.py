@@ -1,5 +1,4 @@
 from Bio.PDB import PDBParser
-from Bio.PDB.Polypeptide import three_to_one
 from Bio.SeqUtils import seq1
 from Bio import pairwise2
 import os
