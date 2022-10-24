@@ -33,7 +33,9 @@ MHCII_G_domain=[(1,86),(1,95)] #81 + 5 and 90 + 5 for tolerance
 
 # populate package namespace
 from PANDORA.Contacts import Contacts
+from PANDORA.PMHC import Model
 from PANDORA.Pandora import Modelling_functions
+from PANDORA.PMHC import Anchors
 from PANDORA.Database import Database_functions
 from PANDORA.Database import Database
 from PANDORA.Pandora import Align

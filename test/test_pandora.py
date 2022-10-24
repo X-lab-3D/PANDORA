@@ -6,7 +6,7 @@ from PANDORA import Database
 from PANDORA import Database_functions
 from PANDORA.PMHC import PMHC
 from PANDORA import Pandora
-from PANDORA.PMHC import Model
+from PANDORA import Model
 from PANDORA.Wrapper import Wrapper
 
 working_dir = os.path.dirname(os.path.realpath(__file__))

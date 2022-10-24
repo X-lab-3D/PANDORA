@@ -4,7 +4,7 @@ from Bio.SeqUtils import seq1
 import PANDORA
 from PANDORA import Contacts
 from PANDORA import Modelling_functions
-from PANDORA.PMHC import Anchors
+from PANDORA import Anchors
 from abc import ABC, abstractmethod
 import os
 import re

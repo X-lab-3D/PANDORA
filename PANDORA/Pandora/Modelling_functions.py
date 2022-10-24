@@ -4,7 +4,7 @@ import traceback
 import subprocess
 import PANDORA
 import pickle
-from PANDORA.PMHC import Model
+from PANDORA import Model
 # from Bio import Align
 from Bio import pairwise2
 #from PANDORA import Align
