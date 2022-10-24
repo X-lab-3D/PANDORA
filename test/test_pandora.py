@@ -86,9 +86,10 @@ def test_align():
                                        'DLGTLRGYYNQSEAGSHTVQRMYGCDVGSDWRFLRGYHQYAYDGKDYIALKEDLRSWTAADMAAQTTKHKWEAAHV'
                                        'AEQLRAYLEGTCVEWLRRYLENGKETLQRTDAPKTHMTHHAVSDHEATLRCWALSFYPAEITLTWQRDGEDQTQDT'
                                        'ELVETRPAGDGTFQKWAAVVVPSGQEQRYTCHVQHEGLPKPLTLRWE',
-                         anchors = [2, 9])
+                         anchors = [2, 9],
+                         output_dir=PANDORA.PANDORA_path + '/../test/')
     # align target and template
-    a = Align.Align(target, template, output_dir=PANDORA.PANDORA_path + '/../test/')
+    a = Align.Align(target, template)
     # check keys of aligned output and output .ali file path
     pass_test = False
     if a.aligned_seqs_and_pept['1A1O P'] == 'KPIVQYDNF' and '2X4R M' in a.aligned_seqs_and_pept:
@@ -165,11 +166,11 @@ def test_template_select_MHCI():
                          allele_type=db.MHCI_data['1A1O'].allele_type,
                          peptide=db.MHCI_data['1A1O'].peptide,
                          M_chain_seq=db.MHCI_data['1A1O'].M_chain_seq,
-                         anchors=db.MHCI_data['1A1O'].anchors)
+                         anchors=db.MHCI_data['1A1O'].anchors,
+                         output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test',
-                         logfile=working_dir + '/test_data/logfile.txt')
+    mod = Pandora.Pandora(target, db)
     mod.find_template(benchmark=True)
 
     assert mod.template.id == '2X4R' and mod.template.peptide == 'NLVPMVATV'
@@ -184,11 +185,11 @@ def test_template_select_MHCII():
                          MHC_class= 'II',
                          M_chain_seq=db.MHCII_data['2NNA'].M_chain_seq,
                          N_chain_seq=db.MHCII_data['2NNA'].N_chain_seq,
-                         anchors=db.MHCII_data['2NNA'].anchors)
+                         anchors=db.MHCII_data['2NNA'].anchors,
+                         output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test')
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test',
-                            logfile=working_dir + '/test_data/logfile.txt')
+    mod = Pandora.Pandora(target, db)
     mod.find_template(benchmark=True)
 
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
@@ -201,11 +202,11 @@ def test_pandora_MHCI_modelling():
                          allele_type=db.MHCI_data['1A1O'].allele_type,
                          peptide=db.MHCI_data['1A1O'].peptide,
                          M_chain_seq=db.MHCI_data['1A1O'].M_chain_seq,
-                         anchors=db.MHCI_data['1A1O'].anchors)
+                         anchors=db.MHCI_data['1A1O'].anchors,
+                         output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/')
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/',
-                            logfile=working_dir + '/test_data/logfile.txt')
+    mod = Pandora.Pandora(target, db)
     mod.model(n_loop_models=1, stdev=0.1, benchmark=True, loop_refinement='very_fast')
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
@@ -214,7 +215,7 @@ def test_pandora_MHCI_modelling():
         if float(mod.results[0].molpdf) < 2000 and float(mod.results[0].molpdf) > 0:
             pass_test = True
     # remove output file
-    os.system('rm -r %s' % (mod.output_dir))
+    os.system('rm -r %s' % (target.output_dir))
 
     assert pass_test
 
@@ -252,7 +253,7 @@ def test_wrapper_MHCI():
     #TODO: Add check molpdf flag
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
-    
+
 def test_pandora_MHCII_modelling():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -263,11 +264,11 @@ def test_pandora_MHCII_modelling():
                          MHC_class= 'II',
                          M_chain_seq=db.MHCII_data['2NNA'].M_chain_seq,
                          N_chain_seq=db.MHCII_data['2NNA'].N_chain_seq,
-                         anchors=db.MHCII_data['2NNA'].anchors)
+                         anchors=db.MHCII_data['2NNA'].anchors,
+                         output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/')
 
     # Perform modelling
-    mod = Pandora.Pandora(target, db, output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/',
-                            logfile=working_dir + '/test_data/logfile.txt')
+    mod = Pandora.Pandora(target, db)
     mod.model(n_loop_models=1, stdev=0.2, benchmark=True, loop_refinement='very_fast')
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
@@ -275,7 +276,7 @@ def test_pandora_MHCII_modelling():
         if float(mod.results[0].molpdf) < 1000 and float(mod.results[0].molpdf) > -1000:
             pass_test = True
     # remove output file
-    os.system('rm -r %s' % (mod.output_dir))
+    os.system('rm -r %s' % (target.output_dir))
     assert pass_test
 
 def test_rmsd():
@@ -286,11 +287,11 @@ def test_rmsd():
                          allele_type=db.MHCI_data['1A1O'].allele_type,
                          peptide=db.MHCI_data['1A1O'].peptide,
                          M_chain_seq=db.MHCI_data['1A1O'].M_chain_seq,
-                         anchors=db.MHCI_data['1A1O'].anchors)
+                         anchors=db.MHCI_data['1A1O'].anchors,
+                         output_dir=PANDORA.PANDORA_path + '/../test')
 
     # Initiate Model object
-    m = Model.Model(target, model_path=PANDORA.PANDORA_path + '/../test/test_data/1A1O.BL00010001.pdb',
-                    output_dir=PANDORA.PANDORA_path + '/../test')
+    m = Model.Model(target, model_path=PANDORA.PANDORA_path + '/../test/test_data/1A1O.BL00010001.pdb')
     # Calculate L-RMSD and Core L-RMSD
     m.calc_LRMSD(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
     m.calc_Core_LRMSD(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')

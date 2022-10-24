@@ -117,7 +117,7 @@ class Template(PMHC):
         if 'pdb_path' in locals():
             return self.pdb_path
         else:
-            return os.path.join(PANDORA.PANDORA_data, 'PDBs', 'pMHC' + self.MHC_class, self.id + '.pdb')
+            return os.path.join(PANDORA.PANDORA_data, 'PDBs', f'pMHC{self.MHC_class}', f'{self.id}.pdb')
         
 
     def parse_pdb(self, custom_map={"MSE":"M"}):
@@ -178,9 +178,9 @@ class Template(PMHC):
         if self.get_pdb_path():
             print('Path to PDB file: %s' %self.get_pdb_path())
         if not self.pdb:
-            print('PDB structure: no PDB structure provided')
+            print('Biopython PDB structure: no PDB loaded')
         else:
-            print('PDB structure:')
+            print('Biopython PDB structure:')
             for (k, v) in self.pdb.header.items():
                 print('\t'+k + ':', v)
 
@@ -237,7 +237,8 @@ class Target(PMHC):
     def __init__(self, id, peptide, allele_type=[], MHC_class = 'I',
                  M_chain_seq = '', N_chain_seq = '', anchors = [],
                  helix=False, sheet=False, templates = False,
-                 use_netmhcpan = False, use_templ_seq=False):
+                 use_netmhcpan = False, use_templ_seq=False, output_dir=False,
+                 rm_netmhcpan_output=True):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
         Args:
@@ -253,14 +254,29 @@ class Target(PMHC):
             use_netmhcpan (bool): If True, uses local installation of NetMHCPan to predict the anchors when
                                   anchor positions are not provided. Defaults to False.
             use_templ_seq (bool): If True, if no MHC chain sequences could be retrieved starting from the allele name,
-                                    it will use the best template MHC sequences for the modelling.
-        '''
+                                   it will use the best template MHC sequences for the modelling.
+            output_dir: (string) Path to output directory. Defaults to current working directory.
+            rm_netmhcpan_output: (bool) If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
+        ''' 
 
         super().__init__(id, peptide, allele_type, MHC_class, M_chain_seq, N_chain_seq, anchors, helix, sheet)
         self.templates = templates
         self.initial_model = False
         self.contacts = False
         self.anchor_contacts = False
+
+        # Changes all special characters in the case id to '-'
+        self.id = re.sub('[^a-zA-Z0-9 \n\.]', '-', id)
+
+        if output_dir == False:
+            self.output_dir = os.getcwd()
+        else:
+            self.output_dir = output_dir
+
+        self.output_dir = f"{self.output_dir}/{self.id}"
+
+        # Output directory is created
+        self.make_output_dir()
 
         # If the user does provide sequence info, make sure both the M and N chain are provided
         # if MHC_class == 'II' and M_chain_seq != '' and N_chain_seq == '':
@@ -290,7 +306,7 @@ class Target(PMHC):
                 print('WARNING: no anchor positions provided. Pandora will predict them using NetMHCpan')
                 # predict the anchors
                 try:
-                    self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type)
+                    self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type, self.output_dir, rm_netmhcpan_output=rm_netmhcpan_output)
                     print('Predicted anchors: %s' %self.anchors)
                 except Exception as e:
                     print('Error: Something went wrong when predicting the anchors using netMHCpan')
@@ -300,7 +316,7 @@ class Target(PMHC):
             print('WARNING: no anchor positions provided. Pandora will predict them using netMHCIIpan.')
             # predict the anchors
             try:
-                self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type)
+                self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type, self.output_dir, rm_netmhcpan_output=rm_netmhcpan_output)
             except Exception as e:
                 print('Error: Something went wrong when predicting the anchors using netMHCIIpan')
                 raise Exception(e)
@@ -565,3 +581,19 @@ class Target(PMHC):
             except:
                 print('\nWARNING: something went wrong when trying to retrieve chain M allele')
                 print('with blast. Is blastp properly installed as working as "/bin/bash blastp"?')
+
+    def make_output_dir(self):
+        ''' Create an output directory and move the template pdb there
+            Uses self.output_dir (str): Path to output directory. Defaults to os.getcwd().
+        Args:
+            None
+        '''
+
+        # create an output directory
+        try:
+            if not os.path.exists(self.output_dir):
+                os.makedirs(self.output_dir)
+                if not os.path.exists(self.output_dir):
+                    raise Exception('A problem occurred while creating output directory')
+        except:
+            raise Exception('A problem occurred while creating output directory')
