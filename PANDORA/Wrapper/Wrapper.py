@@ -155,7 +155,7 @@ class Wrapper():
         Parallel(n_jobs = num_cores, verbose = 1)(delayed(run_case)(target) for target in list(self.targets.values()))
 
     def __get_targets_from_file(self, data_file, delimiter='\t', header=True,
-                               IDs_col=0, peptides_col=0,
+                               IDs_col=None, peptides_col=0,
                                allele_name_col=1, anchors_col=None,
                                M_chain_col=None, N_chain_col=None,
                                outdir_col=None,
