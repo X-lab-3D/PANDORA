@@ -3,17 +3,14 @@
 
 import csv
 from joblib import Parallel, delayed
-import tarfile
 import subprocess
 import traceback
-import glob
 import os
+from PANDORA import Target
+from PANDORA import Pandora
 import re
 import random
 import string
-
-from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
 
 class Wrapper():
     def __init__(self, data_file, database, MHC_class,  num_cores=1, delimiter = '\t',
@@ -158,7 +155,7 @@ class Wrapper():
         Parallel(n_jobs = num_cores, verbose = 1)(delayed(run_case)(target) for target in list(self.targets.values()))
 
     def __get_targets_from_file(self, data_file, delimiter='\t', header=True,
-                               IDs_col=0, peptides_col=0,
+                               IDs_col=None, peptides_col=0,
                                allele_name_col=1, anchors_col=None,
                                M_chain_col=None, N_chain_col=None,
                                outdir_col=None,
@@ -321,10 +318,7 @@ def run_case(args):
         output_dir = False
     
     try:
-        # print(output_dir)
-        # print(target_id)
-        # print(args['collective_output_dir'])
-        tar = PMHC.Target(target_id, allele_type=args['allele'],
+        tar = Target(target_id, allele_type=args['allele'],
                             peptide=args['peptide_sequence'] ,
                             MHC_class=args['MHC_class'], anchors=args['anchors'],
                             M_chain_seq=args['M_chain_seq'],

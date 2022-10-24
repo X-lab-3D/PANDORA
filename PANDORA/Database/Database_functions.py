@@ -3,7 +3,6 @@ import subprocess
 import urllib.request
 import urllib.parse
 from copy import deepcopy
-import numpy
 from Bio.PDB import PDBParser
 from Bio.PDB import PDBIO
 from Bio.PDB import parse_pdb_header
@@ -11,13 +10,12 @@ from Bio import SeqIO
 import gzip
 import shutil
 import PANDORA
-from PANDORA.Contacts import Contacts
-from PANDORA.PMHC import PMHC
+from PANDORA import Contacts
+from PANDORA import Template
 from Bio.PDB import NeighborSearch
 from Bio.SeqUtils import seq1
 from Bio.PDB import Chain
 from string import ascii_uppercase
-import re
 
 
 def fresh_parse_dirs():
@@ -1417,13 +1415,10 @@ def parse_pMHCI_pdb(pdb_id,
                 log(pdb_id, 'Failed, Structure did not pass the test.', logfile)
                 raise Exception
 
-            # Get structure resolution
-            resolution = get_resolution(pdb_file)
-
             # Create MHC_structure object
-            templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'],
+            templ = Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'],
                                 peptide=seqs['P'], pdb=pdb,
-                                resolution=resolution, sheet=sheet, helix=helix,
+                                sheet=sheet, helix=helix,
                                 remove_biopython_object=remove_biopython_object)
 
             #Check if the anchor calculation went ok
@@ -1582,14 +1577,10 @@ def parse_pMHCII_pdb(pdb_id,
                 log(pdb_id, 'Failed, Structure did not pass the test.', logfile)
                 raise Exception
 
-            # Get structure resolution
-            resolution = get_resolution(pdb_file)
-
             # Create MHC_structure object
-            templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele,
+            templ = Template(pdb_id, allele_type=a_allele + b_allele,
                                   M_chain_seq=seqs['M'], N_chain_seq=seqs['N'],
                                   peptide=seqs['P'], MHC_class='II', pdb=pdb,
-                                  resolution=resolution,
                                   helix=helix, sheet=sheet,
                                   remove_biopython_object=remove_biopython_object)
 

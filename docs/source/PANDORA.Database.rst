@@ -9,7 +9,7 @@ Through this class you can specify the type of structures you want to download (
 
 Basic building Example:
 
->>> from PANDORA.Database import Database
+>>> from PANDORA import Database
 >>>
 >>> db = Database.Database()
 >>> db.construct_database(save='./database/full_db.pkl', download=True)
@@ -19,7 +19,7 @@ A database can be easily loaded and edited.
 Custom structures (i.e. not coming from IMGT) can be also added to the database by using ``Database.add_structure()`` function.
 To do so, you will need to read your structure into a Biopython structure object:
 
->>> from PANDORA.Database import Database
+>>> from PANDORA import Database
 >>>
 >>> #Load the database
 >>> db = Database.load('./database/full_db.pkl')

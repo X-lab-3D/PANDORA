@@ -21,9 +21,9 @@ C. Generating *n* number of pMHC models (Default n=20)
 Please note that you can specify output directory yourself, otherwise will be generated in a default directory
 
 >>> >>> ## import requested modules
->>> from PANDORA.PMHC import PMHC
->>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import PMHC
+>>> from PANDORA import Pandora
+>>> from PANDORA import Database
 >>>
 >>> ## A. Create local Database
 >>> db = Database.Database()
@@ -53,9 +53,9 @@ For instance:
 Please note that, if you do not input *anchors* yourself, it will automatically run NetMHCpan to predict anchors.
 
 
->>> from PANDORA.PMHC import PMHC
->>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import PMHC
+>>> from PANDORA import Pandora
+>>> from PANDORA import Database
 >>>
 >>> ## A. load the pregenerated Database  of all pMHC PDBs as templates
 >>> db = Database.load('pandora_Database')
@@ -78,9 +78,9 @@ If you want to evaluate the framework on a target with a known experimental stru
 - Set *benchmark=True* for the modelling
 (calculates L-RMSD to show how far the model is from the near-native structure)
 
->>> from PANDORA.PMHC import PMHC
->>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import PMHC
+>>> from PANDORA import Pandora
+>>> from PANDORA import Database
 >>>
 >>> ## A. Load pregenerated database of all pMHC PDBs as templates
 >>> db = Database.load('pandora_Database')
@@ -101,9 +101,9 @@ p:MHC-I complex with an alpha helix in the peptide
 If you have some domain knowledge of the peptide conformation, whether it forms secondary structures other than loop (Helix/Beta strand), the framework will consider that while modelling the peptide:
 
 
->>> from PANDORA.PMHC import PMHC
->>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import PMHC
+>>> from PANDORA import Pandora
+>>> from PANDORA import Database
 >>>
 >>> ## A. Load pregenerated database of all pMHC PDBs as templates
 >>> db = Database.load('pandora_Database')
@@ -130,8 +130,8 @@ PANDORA can model more than one peptide, in parallel. You need to provide the fo
 The Wrapper class is implemented to run PANDORA in parallel on multiple cores.
 
 
->>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import Pandora
+>>> from PANDORA import Database
 >>> from PANDORA.Wrapper import Wrapper
 >>>
 >>> ## A. Load pregenerated database of all pMHC PDBs as templates
@@ -153,9 +153,9 @@ p:MHC-II complex given the peptide sequence
 To model a peptide:MHC class II complex, you only need to specify that in *PMHC.Target()* function: as *MHC_class='II'* (By default it is set to model MHC class I).
 
 
->>> from PANDORA.PMHC import PMHC
->>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
+>>> from PANDORA import PMHC
+>>> from PANDORA import Pandora
+>>> from PANDORA import Database
 >>>
 >>> ## A. Load pregenerated database of all pMHC PDBs as templates
 >>> db = Database.load('pandora_Database')

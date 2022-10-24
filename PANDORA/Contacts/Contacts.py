@@ -1,4 +1,3 @@
-
 from Bio.PDB import PDBParser
 from Bio.PDB import NeighborSearch
 

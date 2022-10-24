@@ -30,3 +30,17 @@ beta_genes = ['HLA-DQB', 'HLA-DRB', 'HLA-DPB',
 
 MHCI_G_domain=[(1,187)] #182 + 5 for tolerance
 MHCII_G_domain=[(1,86),(1,95)] #81 + 5 and 90 + 5 for tolerance
+
+# populate package namespace
+from PANDORA.Contacts import Contacts
+from PANDORA.PMHC import Model
+from PANDORA.Pandora import Modelling_functions
+from PANDORA.PMHC import Anchors
+from PANDORA.PMHC.PMHC import Template
+from PANDORA.Database import Database_functions
+from PANDORA.Database import Database
+from PANDORA.Pandora import Align
+from PANDORA.Pandora import Pandora
+from PANDORA.PMHC.PMHC import Target
+from PANDORA.PMHC.PMHC import PMHC
+from PANDORA.Wrapper import Wrapper

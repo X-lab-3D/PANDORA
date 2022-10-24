@@ -1,20 +1,20 @@
-import pytest
 import os
 import PANDORA
-from PANDORA.Contacts import Contacts
-from PANDORA.Pandora import Align
-from PANDORA.Database import Database
-from PANDORA.Database import Database_functions
-from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
-from PANDORA.PMHC import Model
-from PANDORA.Wrapper import Wrapper
+from PANDORA import Contacts
+from PANDORA import Align
+from PANDORA import Database
+from PANDORA import Database_functions
+from PANDORA import Template
+from PANDORA import Pandora
+from PANDORA import Target
+from PANDORA import Model
+from PANDORA import Wrapper
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
 
 def test_PMHC_target():
     # Create target object
-    target = PMHC.Target('1A1O',
+    target = Target('1A1O',
                          allele_type=['HLA-B*5301', 'HLA-B*5301'],
                          peptide='KPIVQYDNF',
                          M_chain_seq = 'GSHSMRYFYTAMSRPGRGEPRFIAVGYVDDTQFVRFDSDAASPRTEPRPPWIEQEGPEYWDRNTQIFKTNTQTYRE'
@@ -36,7 +36,7 @@ def test_PMHC_target():
 
 def test_PMHC_template():
     # Create template object
-    template = PMHC.Template('1A1O',
+    template = Template('1A1O',
                          allele_type=['HLA-B*5301', 'HLA-B*5301'])
     # check calculated anchors, M_chain, peptide, allele and pdb chains
     pass_test = False
@@ -54,7 +54,7 @@ def test_fail_PMHC():
     # Try to fail initiating a template object
     pass_test = False
     try:
-        PMHC.Template('id', ['allele'])
+        Template('id', ['allele'])
     except:
         pass_test = True
 
@@ -75,11 +75,11 @@ def test_contacts():
 
 def test_align():
     # initiate target and template object
-    template = PMHC.Template('1A1O',
+    template = Template('1A1O',
                          allele_type=['HLA-B*5301', 'HLA-B*5301'],
                          pdb_path=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb',
                              anchors = [2, 9])
-    target = PMHC.Target('2X4R',
+    target = Target('2X4R',
                          allele_type=['test'],
                          peptide='NLVPMVATV',
                          M_chain_seq = 'GSHSMRYFFTSVSRPGRGEPRFIAVGYVDDTQFVRFDSDAASQRMEPRAPWIEQEGPEYWDGETRKVKAHSQTHRV'
@@ -162,7 +162,7 @@ def test_load_db():
 def test_template_select_MHCI():
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
-    target = PMHC.Target('1A1O',
+    target = Target('1A1O',
                          allele_type=db.MHCI_data['1A1O'].allele_type,
                          peptide=db.MHCI_data['1A1O'].peptide,
                          M_chain_seq=db.MHCI_data['1A1O'].M_chain_seq,
@@ -179,7 +179,7 @@ def test_template_select_MHCII():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
-    target = PMHC.Target('2NNA',
+    target = Target('2NNA',
                          allele_type=db.MHCII_data['2NNA'].allele_type,
                          peptide=db.MHCII_data['2NNA'].peptide,
                          MHC_class= 'II',
@@ -198,7 +198,7 @@ def test_pandora_MHCI_modelling():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
-    target = PMHC.Target('1A1O',
+    target = Target('1A1O',
                          allele_type=db.MHCI_data['1A1O'].allele_type,
                          peptide=db.MHCI_data['1A1O'].peptide,
                          M_chain_seq=db.MHCI_data['1A1O'].M_chain_seq,
@@ -258,7 +258,7 @@ def test_pandora_MHCII_modelling():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
-    target = PMHC.Target('2NNA',
+    target = Target('2NNA',
                          allele_type=db.MHCII_data['2NNA'].allele_type,
                          peptide=db.MHCII_data['2NNA'].peptide,
                          MHC_class= 'II',
@@ -283,7 +283,7 @@ def test_rmsd():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
-    target = PMHC.Target('1A1O',
+    target = Target('1A1O',
                          allele_type=db.MHCI_data['1A1O'].allele_type,
                          peptide=db.MHCI_data['1A1O'].peptide,
                          M_chain_seq=db.MHCI_data['1A1O'].M_chain_seq,

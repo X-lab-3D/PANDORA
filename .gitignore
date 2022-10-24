@@ -1,46 +1,18 @@
 # Data folders.
 /Databases
 
-#Secondary projects
-/william
-
 # Misc
 *.egg-info
-*/__pycache__/
+/PANDORA/*/__pycache__/
 /PANDORA/__pycache__/
 .DS_Store
-/PANDORA/junk/modelling/.DS_Store
-/PANDORA/tools/contact-chainID_allAtoms
-/PANDORA/modelling/*.pyc
-/PANDORA/junk/modelling/__pycache__/
-/PANDORA/tools/*.pyc
-/PANDORA/tools/__pycache__/
-/PANDORA/parsing/*.pyc
-/PANDORA/junk/parsing/__pycache__/
+
 ._*
 *.out
 *.swp
 *.sh.e*
 *.sh.o*
-/Pandora_MHCI_and_MHCII_data
-/db.pkl
-/log_MHCI.csv
-/anchors/*
-/MHCII_anchors.txt
-/test_db
-/MHCII_test_db
-/MHCI_test_db
-/MHCI_anchors_test.csv
-/MHCI_anchors.txt
-/MHCI_anchors.csv
-/IDs_and_bad_IDs_dict.pkl
-/best_anchor_tets.py
-/allele_selection.csv
-/all_contacts_for_anchors_1ZHL.list
-/all_contacts_for_anchors_1ZHK.list
-/27_03_21_Pandora_db
-/PANDORA/contact-chainID_allAtoms
-/PANDORA/contact-chainID_allAtoms.cpp
-/netMHCIIpan-4.0/
-/netMHCIIpan-4.0/data/
-/netMHCIIpan-4.0/data/netMHCIIpan-4.0_thresholds/
+/test/*.fasta
+/test/*ali
+/test/BL*.pdb
+/test/test_output/*
