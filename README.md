@@ -156,7 +156,7 @@ C. Generating *n* number of pMHC models (Default *n=20*)
 Please note that you can specify output directory yourself, otherwise will be generated in a default directory
 ```python
 ## import requested modules
-from PANDORA import PMHC
+from PANDORA import Target
 from PANDORA import Pandora
 from PANDORA import Database
 
@@ -164,7 +164,7 @@ from PANDORA import Database
 db = Database.load()
 
 ## B. Create Target object
-target = PMHC.Target(id = 'myTestCase',
+target = Target(id = 'myTestCase',
     allele_type = 'HLA-A*0201',
     peptide = 'LLFGYPVYV',
     anchors = [2,9])
@@ -212,7 +212,7 @@ For instance:
 Please note that, if *anchors* is not specified or *use_netmhcpan* is set to *False*, PANDORA will automatically assign canonical anchors (P2 and PΩ). This can be done automatically only for pMHC-I structures.
 
 ```python
-from PANDORA import PMHC
+from PANDORA import Target
 from PANDORA import Pandora
 from PANDORA import Database
 
@@ -220,7 +220,7 @@ from PANDORA import Database
 db = Database.load()
 
 ## B. Create Target object
-target = PMHC.Target(id = 'myTestCase',
+target = Target(id = 'myTestCase',
     allele_type = ['HLA-B*5301', 'HLA-B*5302'],
     peptide = 'TPYDINQML',
     use_netmhcpan = True)
@@ -235,7 +235,7 @@ case.model(n_loop_models=100)  # Generates 100 models
 Input domain secondary structure prediction information (Helix/Beta strand):
 
 ```python
-from PANDORA import PMHC
+from PANDORA import Target
 from PANDORA import Pandora
 from PANDORA import Database
 
@@ -243,7 +243,7 @@ from PANDORA import Database
 db = Database.load()
 
 ## B. Create Target object
-target = PMHC.Target(id = 'myMHCITestCase',
+target = Target(id = 'myMHCITestCase',
     allele_type = 'MH1-B*2101',
     peptide = 'TAGQSNYDRL',
     anchors = [2,10],
@@ -258,14 +258,14 @@ case.model(helix=target.helix)
 To model a peptide:MHC class II complex, you only need to specify that in *PMHC.Target()* function: as *MHC_class='II'* (By default it is set to model MHC class I).
 
 ```python
-from PANDORA import PMHC
+from PANDORA import Target
 from PANDORA import Pandora
 from PANDORA import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
 db = Database.load()
 
-target = PMHC.Target(id='myMHCIITestCase'
+target = Target(id='myMHCIITestCase'
     MHC_class = 'II',
     allele_type = ['HLA-DRA*0102', 'HLA-DRA*0101', 'HLA-DRB1*0101'],
     peptide = 'GELIGILNAAKVPAD',
@@ -284,7 +284,7 @@ Evaluate the framework on a target with a known experimental structure:
   (calculates L-RMSD to show how far the model is from the near-native structure)
 
 ```python
-from PANDORA import PMHC
+from PANDORA import Target
 from PANDORA import Pandora
 from PANDORA import Database
 
@@ -292,7 +292,7 @@ from PANDORA import Database
 db = Database.load()
 
 ## B. Create Target object
-target = PMHC.Target(id='1A1M',
+target = Target(id='1A1M',
     allele_type=db.MHCI_data['1A1M'].allele_type,
     peptide=db.MHCI_data['1A1M'].peptide,
     anchors = db.MHCI_data['1A1M'].anchors)

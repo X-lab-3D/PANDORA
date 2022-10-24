@@ -3,13 +3,10 @@
 
 import csv
 from joblib import Parallel, delayed
-import tarfile
 import subprocess
 import traceback
-import glob
 import os
-
-from PANDORA.PMHC import PMHC
+from PANDORA import Target
 from PANDORA import Pandora
 
 class Wrapper():
@@ -292,7 +289,7 @@ def run_case(args):
         output_dir = False
     
     try:
-        tar = PMHC.Target(target_id, allele_type=args['allele'],
+        tar = Target(target_id, allele_type=args['allele'],
                             peptide=args['peptide_sequence'] ,
                             MHC_class=args['MHC_class'], anchors=args['anchors'],
                             M_chain_seq=args['M_chain_seq'],

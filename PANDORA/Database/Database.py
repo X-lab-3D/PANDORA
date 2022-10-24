@@ -1,6 +1,6 @@
 import PANDORA
 import pickle
-from PANDORA.PMHC import PMHC
+from PANDORA import Template
 from PANDORA import Database_functions
 import os
 import subprocess
@@ -137,12 +137,12 @@ class Database:
                 raise ValueError('Structure id or path of .pdb files was not given. Enter value for id and pdb_path')
         # Add to MHCI data
         if MHC_class == 'I':
-            self.MHCI_data[id] = PMHC.Template(id, allele_type, peptide, 
+            self.MHCI_data[id] = Template(id, allele_type, peptide, 
                                                MHC_class, chain_seq, anchors, 
                                                pdb_path, pdb, remove_biopython_object)
         # Add to MHCII data
         if MHC_class == 'II':
-            self.MHCII_data[id] = PMHC.Template(id, allele_type, peptide, 
+            self.MHCII_data[id] = Template(id, allele_type, peptide, 
                                                 MHC_class, chain_seq, anchors, 
                                                 pdb_path, pdb, remove_biopython_object)
 

@@ -36,8 +36,10 @@ from PANDORA.Contacts import Contacts
 from PANDORA.PMHC import Model
 from PANDORA.Pandora import Modelling_functions
 from PANDORA.PMHC import Anchors
+from PANDORA.PMHC.PMHC import Template
 from PANDORA.Database import Database_functions
 from PANDORA.Database import Database
 from PANDORA.Pandora import Align
 from PANDORA.Pandora import Pandora
-#from PANDORA.PMHC import PMHC
+from PANDORA.PMHC.PMHC import Target
+from PANDORA.PMHC.PMHC import PMHC

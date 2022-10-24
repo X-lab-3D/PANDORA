@@ -11,7 +11,7 @@ import gzip
 import shutil
 import PANDORA
 from PANDORA import Contacts
-from PANDORA.PMHC import PMHC
+from PANDORA import Template
 from Bio.PDB import NeighborSearch
 from Bio.SeqUtils import seq1
 from Bio.PDB import Chain
@@ -1416,7 +1416,7 @@ def parse_pMHCI_pdb(pdb_id,
                 raise Exception
 
             # Create MHC_structure object
-            templ = PMHC.Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'],
+            templ = Template(pdb_id, allele_type=a_allele, M_chain_seq=seqs['M'],
                                 peptide=seqs['P'], pdb=pdb,
                                 sheet=sheet, helix=helix,
                                 remove_biopython_object=remove_biopython_object)
@@ -1578,7 +1578,7 @@ def parse_pMHCII_pdb(pdb_id,
                 raise Exception
 
             # Create MHC_structure object
-            templ = PMHC.Template(pdb_id, allele_type=a_allele + b_allele,
+            templ = Template(pdb_id, allele_type=a_allele + b_allele,
                                   M_chain_seq=seqs['M'], N_chain_seq=seqs['N'],
                                   peptide=seqs['P'], MHC_class='II', pdb=pdb,
                                   helix=helix, sheet=sheet,
