@@ -43,3 +43,4 @@ from PANDORA.Pandora import Align
 from PANDORA.Pandora import Pandora
 from PANDORA.PMHC.PMHC import Target
 from PANDORA.PMHC.PMHC import PMHC
+from PANDORA.Wrapper import Wrapper

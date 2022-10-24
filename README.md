@@ -190,7 +190,7 @@ The Wrapper class will take care of generating PANDORA target objects and parall
 
 ```python
 from PANDORA import Database
-from PANDORA.Wrapper import Wrapper
+from PANDORA import Wrapper
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
 db = Database.load()

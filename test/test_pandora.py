@@ -8,7 +8,7 @@ from PANDORA import Template
 from PANDORA import Pandora
 from PANDORA import Target
 from PANDORA import Model
-from PANDORA.Wrapper import Wrapper
+from PANDORA import Wrapper
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
 
