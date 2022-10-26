@@ -222,7 +222,7 @@ class Database:
 
         #Define db name and path
         db_name = 'templates_blast_db'
-        outpath = data_dir + '/' + db_name
+        outpath = data_dir + '/BLAST_databases/' + db_name
         out_fasta = outpath + '/'+ db_name +'.fasta'
 
         #Create db directory
@@ -239,7 +239,7 @@ class Database:
 
         #Define db name and path
         db_name = 'refseq_blast_db'
-        outpath = data_dir + '/' + db_name
+        outpath = data_dir + '/BLAST_databases/' + db_name
         out_fasta = outpath + '/' + db_name + '.fasta'
 
         #Create db directory
@@ -247,7 +247,7 @@ class Database:
             subprocess.check_call('mkdir %s' %outpath, shell=True)
 
         #Create .fasta for the db
-        command='cat %s/mhcseqs/Human_MHC_data.fasta %s/mhcseqs/NonHuman_MHC_data.fasta > %s' %(data_dir,
+        command='cat %s/mhcseqs/HLA_cleaned.fasta %s/mhcseqs/MHC_cleaned.fasta > %s' %(data_dir,
                                                                               data_dir,
                                                                               out_fasta)
         subprocess.check_call(command, shell=True)

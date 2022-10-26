@@ -1631,15 +1631,15 @@ def get_sequence_for_fasta(template, MHC_class, chain):
 
 
 def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data + '/mhcseqs',
-                             HLA_out = 'Human_MHC_data.fasta',
-                             nonHLA_out = 'NonHuman_MHC_data.fasta'):
-    """generate_mhcseq_database(data_dir=PANDORA.PANDORA_data, HLA_out='Human_MHC_data.fasta', nonHLA_out='NonHuman_MHC_data.fasta')
+                             HLA_out = 'HLA_cleaned.fasta',
+                             nonHLA_out = 'MHC_cleaned.fasta'):
+    """generate_mhcseq_database(data_dir=PANDORA.PANDORA_data, HLA_out='HLA_cleaned.fasta', nonHLA_out='MHC_cleaned.fasta')
     Downloads and parse HLA and other MHC sequences to compile reference fastas
 
     Args:
         data_dir (str, optional): Data directory. Defaults to PANDORA.PANDORA_data.
-        HLA_out (str, optional): Output file for HLA sequences. Defaults to 'Human_MHC_data.fasta'.
-        nonHLA_out (str, optional): Output file for non human MHCs. Defaults to 'NonHuman_MHC_data.fasta'.
+        HLA_out (str, optional): Output file for HLA sequences. Defaults to 'HLA_cleaned.fasta'.
+        nonHLA_out (str, optional): Output file for non human MHCs. Defaults to 'MHC_cleaned.fasta'.
 
     Returns:
         None.
@@ -1665,12 +1665,12 @@ def generate_mhcseq_database(data_dir = PANDORA.PANDORA_data + '/mhcseqs',
     return ref_MHCI_sequences
 
 
-def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
+def generate_hla_database(data_dir, HLA_out = 'HLA_cleaned.fasta'):
     """
     Downloads and parse HLA sequences
 
     Args:
-        HLA_out (str, optional): Output file for HLA sequences. Defaults to 'Human_MHC_data.fasta'.
+        HLA_out (str, optional): Output file for HLA sequences. Defaults to 'HLA_cleaned.fasta'.
 
     Returns:
         None.
@@ -1681,13 +1681,13 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
     ###
     # Rename pre-existing raw file
     try:
-        os.system('mv %s/hla_prot.fasta %s/OLD_hla_prot.fasta' %(data_dir, data_dir))
+        os.system('mv %s/HLA_raw.fasta %s/OLD_HLA_raw.fasta' %(data_dir, data_dir))
     except:
         pass
 
     # Download Human data
     url = 'https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta'
-    command = (' ').join(['wget', url, '-P', data_dir])
+    command = (' ').join(['wget', url, '-O', f'{data_dir}/HLA_raw.fasta'])
     proc = subprocess.Popen(command,  executable='/bin/bash',
                                  shell=True, stdout=subprocess.PIPE)
     print(proc.stdout.read())
@@ -1695,7 +1695,7 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
     HLAs = {}
     to_write = {}
     #Parse the fasta files
-    for seq_record in SeqIO.parse(data_dir + '/hla_prot.fasta', "fasta"):
+    for seq_record in SeqIO.parse(f'{data_dir}/HLA_raw.fasta', "fasta"):
         allele_fullname = seq_record.description.split(' ')[1]
         #allele_significant = allele_fullname[:8]
         #Take only up to the allele identifyer, ignore the silent mutations
@@ -1743,18 +1743,18 @@ def generate_hla_database(data_dir, HLA_out = 'Human_MHC_data.fasta'):
 
     # Remove pre-existing raw file
     try:
-        os.system('rm %s/OLD_hla_prot.fasta' %data_dir)
+        os.system(f'rm {data_dir}/OLD_HLA_raw.fasta')
     except:
         pass
 
     return to_write
 
-def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
+def generate_nonhla_database(data_dir, nonHLA_out = 'MHC_cleaned.fasta'):
     """
     Downloads and parse non human MHC sequences
 
     Args:
-        nonHLA_out (str, optional): Output file for non human MHCs. Defaults to 'NonHuman_MHC_data.fasta'.
+        nonHLA_out (str, optional): Output file for non human MHCs. Defaults to 'MHC_cleaned.fasta'.
 
     Returns:
         None.
@@ -1765,14 +1765,14 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
     ###
     # Rename pre-existing raw file
     try:
-        os.system('mv %s/MHC_prot.fasta %s/OLD_MHC_prot.fasta' %(data_dir, data_dir))
+        os.system(f'mv {data_dir}/MHC_raw.fasta {data_dir}/OLD_MHC_raw.fasta')
     except:
         pass
 
     # Download other animlas data
     #os.system('wget https://raw.githubusercontent.com/ANHIG/IPDMHC/Latest/MHC_prot.fasta')
     url = 'https://raw.githubusercontent.com/ANHIG/IPDMHC/Latest/MHC_prot.fasta'
-    command = (' ').join(['wget', url, '-P', data_dir])
+    command = (' ').join(['wget', url, '-O', f'{data_dir}/MHC_raw.fasta'])
     proc = subprocess.Popen(command,  executable='/bin/bash',
                                  shell=True, stdout=subprocess.PIPE)
     print(proc.stdout.read())
@@ -1780,7 +1780,7 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
     MHCs = {}
     to_write = {}
     #Parse the fasta file
-    fasta = f'{data_dir}/MHC_prot.fasta'
+    fasta = f'{data_dir}/MHC_raw.fasta'
     for seq_record in SeqIO.parse(fasta, "fasta"):
         allele_fullname = seq_record.description.split(' ')[1]
         #allele_significant = allele_fullname[:8]
@@ -1827,7 +1827,7 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'NonHuman_MHC_data.fasta'):
 
     # Remove pre-existing raw file
     try:
-        os.system('rm %s/OLD_MHC_prot.fasta' %data_dir)
+        os.system(f'rm {data_dir}/OLD_MHC_raw.fasta')
     except:
         pass
 

@@ -408,9 +408,9 @@ class Target(PMHC):
         # Define correct fasta file
         if input_file == None:
             if self.allele_type[0].startswith('HLA'):
-                input_file = PANDORA.PANDORA_data+ '/mhcseqs/Human_MHC_data.fasta'
+                input_file = PANDORA.PANDORA_data+ '/mhcseqs/HLA_cleaned.fasta'
             else:
-                input_file = PANDORA.PANDORA_data+ '/mhcseqs/NonHuman_MHC_data.fasta'
+                input_file = PANDORA.PANDORA_data+ '/mhcseqs/MHC_cleaned.fasta'
 
         # Parse Fasta file
         fasta_sequences = SeqIO.parse(input_file,'fasta')
@@ -535,7 +535,7 @@ class Target(PMHC):
             try:
                 blast_results = Modelling_functions.blast_mhc_seq(self.M_chain_seq,
                                                                   chain='M',
-                                                                  blastdb=PANDORA.PANDORA_data + '/refseq_blast_db/refseq_blast_db')
+                                                                  blastdb=PANDORA.PANDORA_data + '/BLAST_databases/refseq_blast_db/refseq_blast_db')
                 #Take only the allele names with the highest id score
                 top_id = blast_results[0][1]
                 self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
@@ -574,7 +574,7 @@ class Target(PMHC):
             try:
                 blast_results = Modelling_functions.blast_mhc_seq(self.N_chain_seq,
                                                                   chain='N',
-                                                                  blastdb=PANDORA.PANDORA_data + '/refseq_blast_db/refseq_blast_db')
+                                                                  blastdb=PANDORA.PANDORA_data + '/BLAST_databases/refseq_blast_db/refseq_blast_db')
                 #Take only the allele names with the highest id score
                 top_id = blast_results[0][1]
                 self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
