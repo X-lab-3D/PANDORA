@@ -1681,13 +1681,13 @@ def generate_hla_database(data_dir, HLA_out = 'HLA_cleaned.fasta'):
     ###
     # Rename pre-existing raw file
     try:
-        os.system('mv %s/hla_raw.fasta %s/OLD_hla_raw.fasta' %(data_dir, data_dir))
+        os.system('mv %s/HLA_raw.fasta %s/OLD_HLA_raw.fasta' %(data_dir, data_dir))
     except:
         pass
 
     # Download Human data
     url = 'https://raw.githubusercontent.com/ANHIG/IMGTHLA/Latest/hla_prot.fasta'
-    command = (' ').join(['wget', url, '-O', f'{data_dir}/hla_raw.fasta'])
+    command = (' ').join(['wget', url, '-O', f'{data_dir}/HLA_raw.fasta'])
     proc = subprocess.Popen(command,  executable='/bin/bash',
                                  shell=True, stdout=subprocess.PIPE)
     print(proc.stdout.read())
@@ -1695,7 +1695,7 @@ def generate_hla_database(data_dir, HLA_out = 'HLA_cleaned.fasta'):
     HLAs = {}
     to_write = {}
     #Parse the fasta files
-    for seq_record in SeqIO.parse(f'{data_dir}/hla_raw.fasta', "fasta"):
+    for seq_record in SeqIO.parse(f'{data_dir}/HLA_raw.fasta', "fasta"):
         allele_fullname = seq_record.description.split(' ')[1]
         #allele_significant = allele_fullname[:8]
         #Take only up to the allele identifyer, ignore the silent mutations
@@ -1743,7 +1743,7 @@ def generate_hla_database(data_dir, HLA_out = 'HLA_cleaned.fasta'):
 
     # Remove pre-existing raw file
     try:
-        os.system(f'rm {data_dir}/OLD_hla_raw.fasta')
+        os.system(f'rm {data_dir}/OLD_HLA_raw.fasta')
     except:
         pass
 
