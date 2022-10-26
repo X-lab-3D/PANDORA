@@ -69,6 +69,7 @@ dirs = [
         f'{user_folder_path}/Databases', 
         f'{user_folder_path}/Databases/{data_folder}',
         f'{user_folder_path}/Databases/{data_folder}/mhcseqs', 
+        f'{user_folder_path}/Databases/{data_folder}/BLAST_databases',
         f'{user_folder_path}/Databases/{data_folder}/PDBs',
         f'{user_folder_path}/Databases/{data_folder}/PDBs/pMHCI', 
         f'{user_folder_path}/Databases/{data_folder}/PDBs/pMHCII',
@@ -77,7 +78,8 @@ dirs = [
         f'{user_folder_path}/Databases/{data_folder}/PDBs/Bad/pMHCII', 
         f'{user_folder_path}/Databases/{data_folder}/PDBs/IMGT_retrieved',
         f'{user_folder_path}/Databases/{data_folder}/outputs',
-        f'{user_folder_path}/test/test_data'
+        f'{user_folder_path}/test/',
+        f'{user_folder_path}/test/test_data',
         f'{user_folder_path}/test/test_data/PDBs/Bad',
         f'{user_folder_path}/test/test_data/PDBs/Bad/pMHCI',
         f'{user_folder_path}/test/test_data/PDBs/Bad/pMHCII', 
@@ -86,5 +88,5 @@ dirs = [
 for D in dirs:
     try:
         os.mkdir(D)
-    except OSError:
-        print('Could not make directory: ' + D)
+    except OSError as e:
+        print(f'Could not make directory: {D} \n Reason: {e}')
