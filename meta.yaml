@@ -1,5 +1,5 @@
 {% set name = "csb-pandora" %}
-{% set version = "1.0" %}
+{% set version = "2.0.0alpha1" %}
 
 package:
   name: "{{ name|lower }}"

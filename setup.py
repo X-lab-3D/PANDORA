@@ -37,8 +37,7 @@ setup(
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.7+',
     ],
 
 
@@ -90,3 +89,11 @@ for D in dirs:
         os.mkdir(D)
     except OSError as e:
         print(f'Could not make directory: {D} \n Reason: {e}')
+
+try:
+    os.popen('wget https://zenodo.org/record/7318263/files/default.tar.gz?download=1').read()
+    os.popen(f'tar -xzvf default.tar.gz -C {user_folder_path}/Databases/{data_folder}').read()
+    os.popen('rm ./default.tar.gz').read()
+except Error as e:
+    print(f'WARNING: received error while installing database: {e}')
+    print('To be able to use PANDORA you will have to generate a new database. Please follow the instructions in the README.')
