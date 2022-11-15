@@ -69,7 +69,12 @@ setup(
         'doc': ['recommonmark', 'sphinx', 'sphinx_rtd_theme'],
         'test': ['pytest', 'pytest-runner', 'pytest-cov',
                  'coverage', 'coveralls', 'pycodestyle']
-    }
+    },
+    
+    cmdclass={
+        'develop': PostDevelopCommand,
+        'install': PostInstallCommand,
+    },
 )
 
 def post_install_jobs():
