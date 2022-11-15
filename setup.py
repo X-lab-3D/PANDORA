@@ -19,7 +19,7 @@ with open('README.md') as readme_file:
 setup(
     name='PANDORA',
     version=version['__version__'],
-    description='Model peptide-MHC I complexes using anchor distance restrains in MODELLER',
+    description='Model peptide-MHC complexes using anchor distance restrains in MODELLER',
     long_description=readme + '\n\n',
     long_description_content_type='text/markdown',
     author='Dario Marzella, Farzaneh Parizi, Li Xue',
@@ -37,9 +37,12 @@ setup(
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.7+',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
-
 
     install_requires=[
        'Biopython',
@@ -91,9 +94,11 @@ for D in dirs:
         print(f'Could not make directory: {D} \n Reason: {e}')
 
 try:
-    os.popen('wget https://zenodo.org/record/7318263/files/default.tar.gz?download=1').read()
-    os.popen(f'tar -xzvf default.tar.gz -C {user_folder_path}/Databases/{data_folder}').read()
-    os.popen('rm ./default.tar.gz').read()
-except Error as e:
+    print('Downloading pre-built database from zenodo...')
+    os.popen(f'wget https://sandbox.zenodo.org/record/1129456/files/default.tar.gz?download=1 -O {user_folder_path}/Databases/default.tar.gz').read()
+    print('Copying the database')
+    os.popen(f'tar -xzvf {user_folder_path}/Databases/default.tar.gz -C {user_folder_path}/Databases/{data_folder}').read()
+    os.popen(f'rm {user_folder_path}/Databases/default.tar.gz').read()
+except Exception as e:
     print(f'WARNING: received error while installing database: {e}')
     print('To be able to use PANDORA you will have to generate a new database. Please follow the instructions in the README.')
