@@ -6,9 +6,10 @@ package:
   name: "{{ name|lower }}"
   version: "{{ version }}"
 
-#source:
-#  git_rev:
-#  git_url: git@github.com:X-lab-3D/PANDORA.git
+source:
+ git_rev:
+ git_url: git@github.com:X-lab-3D/PANDORA.git
+ git_tag: update_external_database
 
 build:
  number: {{ build_number }}
@@ -43,6 +44,6 @@ about:
   doc_ulr: https://csb-pandora.readthedocs.io/en/latest/?badge=latest
 
 # outputs:
-#   - name: build-db
+#     name: build-db
 #     script: conda_setup.py
 #     script_interpreter: python
