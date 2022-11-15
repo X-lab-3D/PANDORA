@@ -43,6 +43,6 @@ about:
   summary: "PANDORA is anchor restrained modelling pipeline for generating peptide-MHC structures."
   doc_ulr: https://csb-pandora.readthedocs.io/en/latest/?badge=latest
 
-outputs:
-  - name: databases
-    script: conda_setup.py
+# outputs:
+#   - name: databases
+#     script: conda_setup.py
