@@ -44,6 +44,5 @@ about:
   doc_ulr: https://csb-pandora.readthedocs.io/en/latest/?badge=latest
 
 outputs:
-    name: setup_database
+  - name: databases
     script: conda_setup.py
-    script_interpreter: python
