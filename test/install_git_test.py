@@ -6,9 +6,9 @@ import json
 user_folder_path = Path(__file__).parents[1]
 print(user_folder_path)
 
-data_folder = './Databases/test'
+data_folder = './PANDORA_database/test'
 
-with open(user_folder_path / 'config.json', 'w') as f:
+with open(f'{user_folder_path}/PANDORA/config.json', 'w') as f:
    f.write('{"data_folder_name" : "%s"}' %data_folder)
 
 # if exists(user_folder_path / 'config.json'):
@@ -18,7 +18,7 @@ with open(user_folder_path / 'config.json', 'w') as f:
 # else:
 # data_folder = 'test'
 
-os.system('mkdir ./Databases')
+os.system('mkdir ./PANDORA_database')
 os.system(f'mkdir {data_folder}')
 os.system(f'mkdir {data_folder}/PDBs')
 #os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCI')
