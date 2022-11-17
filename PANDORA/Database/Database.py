@@ -1,10 +1,14 @@
-import PANDORA
 import pickle
-from PANDORA import Template
-from PANDORA import Database_functions
 import os
 import subprocess
+import json
 from joblib import Parallel, delayed
+import argparse
+
+import PANDORA
+from PANDORA import Template
+from PANDORA import Database_functions
+
 
 class Database:
 
@@ -300,3 +304,98 @@ def load(file_name = PANDORA.PANDORA_data + '/PANDORA_database.pkl'):
         return db
     except FileNotFoundError:
         raise Exception('Database file not found. Are you sure you have it? If not, run Database.construct_database()')
+
+
+def create_db_folders(db_path=None):
+    # input_flag = False
+    # default_path = '~/PANDORA_databases'
+    # while input_flag == False:
+    #     print('Please enter the path where to download the PANDORA database.')
+    #     print(f'By default, the default database will be downloaded in {default_path}. Otherwise, you can enter a different path.')
+    #     user_input = str(input(default_path +'\n') or default_path)
+        
+    #     if os.path.exists(user_input) or user_input==f'{default_path}' or user_input.lower()=='y' or user_input.lower()=='yes':
+    #         db_path = user_input
+    #         input_flag = True
+    #     else:
+    #         print('No valid answer provided. Please provide an existing path or just press ENTER')
+
+
+    #from PANDORA import Database
+
+    config_file = f"{PANDORA.PANDORA_path}/config.json"
+    if db_path != None:
+        data = {'data_folder_name' : db_path}
+        json_object = json.dumps(data)
+        with open(f"{PANDORA.PANDORA_path}/config.json", "w") as outfile:
+            outfile.write(json_object)
+    elif os.path.exists(config_file):
+        with open(config_file) as f:
+            data = json.load(f)
+            db_path = data['data_folder_name']
+    else:
+        raise Exception('No db_path provided or config.json file found')
+
+    parent_db_path = ('/').join(db_path.split('/')[:-1])
+    dirs = [parent_db_path,
+            db_path,
+            f'{db_path}/mhcseqs', 
+            f'{db_path}/BLAST_databases',
+            f'{db_path}/PDBs',
+            f'{db_path}/PDBs/pMHCI', 
+            f'{db_path}/PDBs/pMHCII',
+            f'{db_path}/PDBs/Bad', 
+            f'{db_path}/PDBs/Bad/pMHCI',
+            f'{db_path}/PDBs/Bad/pMHCII', 
+            f'{db_path}/PDBs/IMGT_retrieved',
+            ]
+
+    for D in dirs:
+        if not os.path.isdir(os.path.expanduser(D)):
+            try:
+                subprocess.check_call(f'mkdir {D}', shell=True)
+            except Exception as e:
+                print(f'Could not make directory: {D} \n Reason: {e}')
+        else:
+            print(f'WARNING: folder {D} already exists!')
+
+def fetch_database(db_out_path, db_url='https://sandbox.zenodo.org/record/1129456/files/default.tar.gz?download=1'):
+    #user_folder_path = Path(__file__).parents[0]
+
+    try:
+        parent_db_path = ('/').join(db_out_path.split('/')[:-1])
+
+        print('Downloading pre-built database from zenodo...')
+        os.popen(f'wget {db_url} -O {parent_db_path}/default.tar.gz').read()
+        print('Copying the database')
+        os.popen(f'tar -xzvf {parent_db_path}/default.tar.gz -C {db_out_path}').read()
+        os.popen(f'rm {parent_db_path}/default.tar.gz').read()
+        print('Checking...')
+        if not os.path.exists(f'{db_out_path}/PANDORA_database.pkl'):
+            print('Database correctly retrieved')
+        else:
+            print('ERROR: Something is missing from the retrieved database.')
+            print('Please check the path you provided')
+            raise Exception('Missing PANDORA_database.pkl')
+
+    except Exception as e:
+        print(f'WARNING: received error while installing database: {e}')
+        print('To be able to use PANDORA you will have to generate a new database. Please follow the instructions in the README.')
+
+def install_database(db_path='~/PANDORA_databases/default'):
+    create_db_folders(db_path)
+    fetch_database(db_out_path=db_path)
+
+def cmd_install_database():
+    parser = argparse.ArgumentParser(
+    prog="PANDORA",
+    description="PANDORA fetch database from zotero",
+    )
+    parser.add_argument(
+        '-d','--destination-path', default='~/PANDORA_databases/default',
+        help='Full path to the database destination'
+    )
+
+    args = parser.parse_args()
+
+    install_database(args.destination_path)
