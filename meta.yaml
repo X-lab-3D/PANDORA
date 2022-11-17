@@ -7,13 +7,16 @@ package:
   version: "{{ version }}"
 
 source:
- git_rev:
- git_url: git@github.com:X-lab-3D/PANDORA.git
- git_tag: update_external_database
+  git_rev:
+  git_url: git@github.com:X-lab-3D/PANDORA.git
+  git_tag: update_external_database
 
 build:
- number: {{ build_number }}
- script: "{{ PYTHON }} setup.py install --single-version-externally-managed --record=record.txt"
+  number: {{ build_number }}
+  entry_points:
+    - pandora-fetch = PANDORA.Database.Database:install_database
+  #script: "{{ PYTHON }} setup.py install --single-version-externally-managed --record=record.txt"
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --ignore-installed
 
 requirements:
   build:
