@@ -6,7 +6,7 @@ import json
 user_folder_path = Path(__file__).parents[1]
 print(user_folder_path)
 
-data_folder = './PANDORA_database/test'
+data_folder = './PANDORA_databases/test'
 
 with open(f'{user_folder_path}/PANDORA/config.json', 'w') as f:
    f.write('{"data_folder_name" : "%s"}' %data_folder)
@@ -18,7 +18,7 @@ with open(f'{user_folder_path}/PANDORA/config.json', 'w') as f:
 # else:
 # data_folder = 'test'
 
-os.system('mkdir ./PANDORA_database')
+os.system('mkdir ./PANDORA_databases')
 os.system(f'mkdir {data_folder}')
 os.system(f'mkdir {data_folder}/PDBs')
 #os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCI')
