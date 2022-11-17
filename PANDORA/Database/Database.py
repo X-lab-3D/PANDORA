@@ -368,7 +368,7 @@ def fetch_database(db_out_path, db_url='https://sandbox.zenodo.org/record/112945
         print('Downloading pre-built database from zenodo...')
         os.popen(f'wget {db_url} -O {parent_db_path}/default.tar.gz').read()
         print('Copying the database')
-        os.popen(f'tar -xzvf {parent_db_path}/default.tar.gz -C {db_out_path}').read()
+        os.popen(f'tar -xzvf {parent_db_path}/default.tar.gz -C {parent_db_path}').read()
         os.popen(f'rm {parent_db_path}/default.tar.gz').read()
         print('Checking...')
         if not os.path.exists(f'{db_out_path}/PANDORA_database.pkl'):

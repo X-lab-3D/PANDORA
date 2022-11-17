@@ -18,9 +18,9 @@ if exists(module_path / 'config.json'):
         data = json.load(f)
         data_folder = data['data_folder_name']
 else:
-    data_folder = 'default'
+    data_folder = '~/PANDORA_database/default'
 
-PANDORA_data = os.path.join(os.path.dirname(PANDORA_path), 'Databases', data_folder)
+PANDORA_data = os.path.expanduser(data_folder)
 
 alpha_genes = ['HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G',
                 'HLA-DQA', 'HLA-DRA', 'HLA-DPA',
