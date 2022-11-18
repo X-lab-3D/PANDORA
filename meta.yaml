@@ -9,13 +9,17 @@ package:
 source:
   git_rev:
   git_url: git@github.com:X-lab-3D/PANDORA.git
-  git_tag: update_external_database
+  git_tag: add_cmd_options
   #path: .
 
 build:
   number: {{ build_number }}
   entry_points:
-    - pandora-fetch = PANDORA.Database.Database:install_database
+    - pandora-fetch = PANDORA.cmd_pandora:cmd_install_database
+    - pandora-create = PANDORA.cmd_pandora:cmd_create_database
+    - pandora-run = PANDORA.cmd_pandora:cmd_run_pandora
+    - pandora-wrapper = PANDORA.cmd_pandora:cmd_run_wrapper
+    
   script: "{{ PYTHON }} setup.py install --single-version-externally-managed --record=record.txt"
   #script: {{ PYTHON }} -m pip install . -vv --no-deps --ignore-installed
 
