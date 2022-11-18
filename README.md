@@ -107,14 +107,30 @@ git checkout development
 pip install -e .
 
 ```
+## Download Template Database
+PANDORA needs a PDB template database to work. All the structures are retrieved from [IMGT](http://www.imgt.org/3Dstructure-DB/) database.
 
+The database can be quickly retrieved by zenodo by running the command-line tool:
 
-## Generate / download template Database
+```bash
+pandora-fetch
+```
 
-PANDORA needs a PDB template database to work. The suggested way is to generate it from scratch, to have as many templates as possible. 
-All the structures are retrieved from  [IMGT](http://www.imgt.org/3Dstructure-DB/) database.
+Alternatively, the same function can be done in python:
 
-You can use the code below to generate your database. By default, the database generation will use all the available cores for the process. You can change it by changing the paramente 'n_jobs' for Database.contruct_database().
+```python
+from PANDORA import Database
+
+Database.install_database()
+```
+
+### (Advanced) Generate template Database
+
+You can also generate the database from scratch, downloading and parsing the structures directly from IMGT. This will ensure you to have as many templates as possible, as the quickly-retrievable database will not be re-released often. 
+
+You can use the code below to generate your database. 
+
+Note 1:  By default, the database generation will use all the available cores for the process. You can change this behaviour by changing the paramente 'n_jobs' for Database.contruct_database().
 
 ```python
 ## import requested modules
@@ -125,12 +141,12 @@ db = Database.Database()
 db.construct_database(n_jobs=<n_jobs>)
 ```
 
-Note 1: in the case of generation of template database, data are saved by default into `Databases/default`. It is possible to modify the folder name (`default`) by creating a `config.json` file in the current working directory using `data_folder_name` as a key, and the desired folder name as a value:
+Note 2: the database is saved by default into `~/PANDORA_databases/default`. It is possible to modify the folder name (`default`) by creating a `config.json` file in the PANDORA installation folder using `data_folder_name` as a key, and the desired folder name as a value, like in the example below:
 ```
 {"data_folder_name": "<folder_in_Databases>"}
 ```
 
-Note 2 (For master branch only, conda release v0.9.0): You can download the pre-made database from https://github.com/X-lab-3D/PANDORA_database (pMHC I only, generated on 23/03/2021) and follow the [instructions](https://github.com/X-lab-3D/PANDORA_database/blob/main/README.md). Please be sure you re-path your database as explained in the instructions.
+Note 3 (For master branch only, conda release v0.9.0): You can download the pre-made database from https://github.com/X-lab-3D/PANDORA_database (pMHC I only, generated on 23/03/2021) and follow the [instructions](https://github.com/X-lab-3D/PANDORA_database/blob/main/README.md). Please be sure you re-path your database as explained in the instructions.
 
 ## (Optional) Install NetMHCpan and/or NetMHCIIpan
 

@@ -4,23 +4,23 @@ from os.path import exists
 from pathlib import Path
 import json
 
-version='1.0'
+version='2.0.0a1'
 PANDORA_path = os.path.dirname(os.path.abspath(__file__))
-user_folder_path = Path(__file__).parents[1]
+module_path = Path(__file__).parents[0]
 
 '''
 Path to PANDORA installation
 :meta hide-value:
 '''
 
-if exists(user_folder_path / 'config.json'):
-    with open(user_folder_path / 'config.json') as f:
+if exists(module_path / 'config.json'):
+    with open(module_path / 'config.json') as f:
         data = json.load(f)
         data_folder = data['data_folder_name']
 else:
-    data_folder = 'default'
+    data_folder = '~/PANDORA_database/default'
 
-PANDORA_data = os.path.join(os.path.dirname(PANDORA_path), 'Databases', data_folder)
+PANDORA_data = os.path.expanduser(data_folder)
 
 alpha_genes = ['HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G',
                 'HLA-DQA', 'HLA-DRA', 'HLA-DPA',
