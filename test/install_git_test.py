@@ -21,6 +21,8 @@ with open(f'{user_folder_path}/PANDORA/config.json', 'w') as f:
 os.system('mkdir ./PANDORA_databases')
 os.system(f'mkdir {data_folder}')
 os.system(f'mkdir {data_folder}/PDBs')
+os.system(f'mkdir {data_folder}/mhcseqs') 
+os.system(f'mkdir {data_folder}/BLAST_databases') 
 #os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCI')
 #os.system(f'mkdir ./Databases/{data_folder}/PDBs/pMHCII')
 os.system(f'mkdir {data_folder}/PDBs/Bad')
