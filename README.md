@@ -176,7 +176,7 @@ from PANDORA import Target
 from PANDORA import Pandora
 from PANDORA import Database
 
-## A. Create local Database
+## A. Load local Database
 db = Database.load()
 
 ## B. Create Target object
@@ -208,7 +208,7 @@ The Wrapper class will take care of generating PANDORA target objects and parall
 from PANDORA import Database
 from PANDORA import Wrapper
 
-## A. Load pregenerated database of all pMHC PDBs as templates
+## A. Load local database
 db = Database.load()
 
 ## B. Create the wrapper object. It will also run the modelling for each case.
