@@ -307,22 +307,17 @@ def load(file_name = PANDORA.PANDORA_data + '/PANDORA_database.pkl'):
 
 
 def create_db_folders(db_path=None):
-    # input_flag = False
-    # default_path = '~/PANDORA_databases'
-    # while input_flag == False:
-    #     print('Please enter the path where to download the PANDORA database.')
-    #     print(f'By default, the default database will be downloaded in {default_path}. Otherwise, you can enter a different path.')
-    #     user_input = str(input(default_path +'\n') or default_path)
-        
-    #     if os.path.exists(user_input) or user_input==f'{default_path}' or user_input.lower()=='y' or user_input.lower()=='yes':
-    #         db_path = user_input
-    #         input_flag = True
-    #     else:
-    #         print('No valid answer provided. Please provide an existing path or just press ENTER')
+    """Generates the database folders AND the config.json file if absent
 
+    Args:
+        db_path (str, optional): Path to the database to generate. If None,
+                    it will look for a path provided in the config.json file.
+                    Otherwise it will write or overrite the config.json file with 
+                    the provided path. Defaults to None.
 
-    #from PANDORA import Database
-
+    Raises:
+        Exception: _description_
+    """
     config_file = f"{PANDORA.PANDORA_path}/config.json"
     if db_path != None:
         data = {'data_folder_name' : db_path}
@@ -360,7 +355,18 @@ def create_db_folders(db_path=None):
             print(f'WARNING: folder {D} already exists!')
 
 def fetch_database(db_out_path, db_url='https://sandbox.zenodo.org/record/1129456/files/default.tar.gz?download=1'):
-    #user_folder_path = Path(__file__).parents[0]
+    """Downloads the pre-generated database from zotero.
+
+    Args:
+        db_out_path (str): Path to the database to be downloaded,  
+            should be pointing at a "PANDORA_databases" folder.
+        db_url (str, optional): URL for the zenodo database. 
+            Defaults to 'https://sandbox.zenodo.org/record/1129456/files/default.tar.gz?download=1'.
+
+    Raises:
+        Exception: If the PANDORA_database.pkl file is not found in the destination folder,
+            it raises an exception.
+    """    
 
     try:
         parent_db_path = ('/').join(db_out_path.split('/')[:-1])
@@ -383,10 +389,18 @@ def fetch_database(db_out_path, db_url='https://sandbox.zenodo.org/record/112945
         print('To be able to use PANDORA you will have to generate a new database. Please follow the instructions in the README.')
 
 def install_database(db_path='~/PANDORA_databases/default'):
+    """Wrapper to create the database folders and fetch the zenodo database.
+
+    Args:
+        db_path (str, optional): Path where to download the database. 
+            Defaults to '~/PANDORA_databases/default'.
+    """    
     create_db_folders(db_path)
     fetch_database(db_out_path=db_path)
 
 def cmd_install_database():
+    """Command line tool to run install_database.
+    """    
     parser = argparse.ArgumentParser(
     prog="PANDORA",
     description="PANDORA fetch database from zotero",
@@ -398,4 +412,4 @@ def cmd_install_database():
 
     args = parser.parse_args()
 
-    install_database(args.destination_path)
+    install_database(db_path=args.destination_path)
