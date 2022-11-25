@@ -19,7 +19,7 @@ with open('README.md') as readme_file:
     readme = readme_file.read()
 
 setup(
-    name='PANDORA',
+    name='CSB-PANDORA',
     version=version['__version__'],
     description='Model peptide-MHC complexes using anchor distance restrains in MODELLER',
     long_description=readme + '\n\n',
