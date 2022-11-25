@@ -71,7 +71,7 @@ class Database:
                            MHCI=True, MHCII=True, download=True,
                            update_ref_sequences=True, 
                            remove_biopython_objects = True,
-                           n_jobs = -1):
+                           n_jobs = 1):
         '''construct_database(self, save, data_dir = PANDORA.PANDORA_data, MHCI=True, MHCII=True, download=True, update_ref_sequences=True)
         Construct the database. Download, clean and add all structures
 
@@ -86,6 +86,8 @@ class Database:
             remove_biopython_objects (bool): If True, removes the biopython pdb 
                 objects from the template objects to make the database considerably lighter.
                 Switch to False only if the biopython objects are necessary. Defaults to True.
+            n_jobs (int): number of parallel processes to use. Set to -1 to use all the available cores.
+                Defaults to 1.
             
         Returns: Database object
 
@@ -397,19 +399,3 @@ def install_database(db_path='~/PANDORA_databases/default'):
     """    
     create_db_folders(db_path)
     fetch_database(db_out_path=db_path)
-
-def cmd_install_database():
-    """Command line tool to run install_database.
-    """    
-    parser = argparse.ArgumentParser(
-    prog="PANDORA",
-    description="PANDORA fetch database from zotero",
-    )
-    parser.add_argument(
-        '-d','--destination-path', default='~/PANDORA_databases/default',
-        help='Full path to the database destination'
-    )
-
-    args = parser.parse_args()
-
-    install_database(db_path=args.destination_path)

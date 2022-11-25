@@ -128,9 +128,13 @@ Database.install_database()
 
 You can also generate the database from scratch, downloading and parsing the structures directly from IMGT. This will ensure you to have as many templates as possible, as the quickly-retrievable database will not be re-released often. 
 
-You can use the code below to generate your database. 
+The database can be generated with the command-line tool:
 
-Note 1:  By default, the database generation will use all the available cores for the process. You can change this behaviour by changing the paramente 'n_jobs' for Database.contruct_database().
+```bash
+pandora-create
+```
+
+Or with the pythoncode below: 
 
 ```python
 ## import requested modules
@@ -141,7 +145,10 @@ db = Database.Database()
 db.construct_database(n_jobs=<n_jobs>)
 ```
 
+Note 1:  By default, the database generation will use one core only. You can sensitevly speed it up by changing the paramenter --num-cores for pandora-create ot 'n_jobs' for Database.contruct_database().
+
 Note 2: the database is saved by default into `~/PANDORA_databases/default`. It is possible to modify the folder name (`default`) by creating a `config.json` file in the PANDORA installation folder using `data_folder_name` as a key, and the desired folder name as a value, like in the example below:
+
 ```
 {"data_folder_name": "<folder_in_Databases>"}
 ```
@@ -169,7 +176,15 @@ B. Creating a Template object based on the given target information
 
 C. Generating *n* number of pMHC models (Default *n=20*)
 
-Please note that you can specify output directory yourself, otherwise will be generated in a default directory
+Please note that you can specify output directory yourself, otherwise will be generated in a folder named as the case ID in the current working directory.
+
+Command-line:
+```bash
+pandora-run -m I -i myTestCase -a HLA-A*0201 -p LLFGYPVYV -k 2,9
+```
+Please run `pandora-run --help` for further information about the arguments.
+
+Python:
 ```python
 ## import requested modules
 from PANDORA import Target
@@ -202,7 +217,13 @@ Note: you can also add various information to your file, including anchors for e
 You can find all the arguments for the master branch version in the [documentation](https://csb-pandora.readthedocs.io/en/latest/PANDORA.Wrapper.html#module-PANDORA.Wrapper.Wrapper).
 For other branches, like development, we suggest you to use the python help() function or check directly the [docstring in the source code](https://github.com/X-lab-3D/PANDORA/blob/d43f9d91bee9f793ee7fe4cb10be3cb4e299e36d/PANDORA/Wrapper/Wrapper.py#L147).
 
-The Wrapper class will take care of generating PANDORA target objects and parallelize the modelling on the given number of cores:
+The Wrapper class will take care of generating PANDORA target objects and parallelize the modelling on the given number of cores <n_cores>:
+
+Command-line:
+```bash
+pandora-wrapper -m I -f datafile.tsv -h False  -p 0 -a 1 -d tab
+```
+Please run `pandora-wrapper --help` for further information about the arguments.
 
 ```python
 from PANDORA import Database
@@ -212,7 +233,7 @@ from PANDORA import Wrapper
 db = Database.load()
 
 ## B. Create the wrapper object. It will also run the modelling for each case.
-wrap =  Wrapper.Wrapper('datafile.tsv', db, num_cores=128)
+wrap =  Wrapper.Wrapper('datafile.tsv', db, num_cores=<n_cores>)
 
 ```
 

@@ -47,7 +47,7 @@ setup(
     ],
 
     install_requires=[
-       'Biopython',
+       'biopython',
        'pdb2sql',
        'joblib'
        ],

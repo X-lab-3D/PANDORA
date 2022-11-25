@@ -28,7 +28,8 @@ def cmd_create_database():
     """    
     parser = argparse.ArgumentParser(
     prog="PANDORA",
-    description="Generate a new PANDORA database",
+    description="Generate a new PANDORA database. As the procedure can be long,\
+     we advice to use the --num-cores option to parallelize the process.",
     )
 
     parser.add_argument(
@@ -44,21 +45,18 @@ def cmd_create_database():
     )
 
     args = parser.parse_args()
-    ## import requested modules
-    from PANDORA import Database
 
-    ## A. Create local Database
     db = Database.Database()
     db.construct_database(n_jobs=args.num_cores)
 
 
 def cmd_run_pandora():
-#if __name__=='__main__':
     """Command line tool to run one pandora case
     """
     parser = argparse.ArgumentParser(
     prog="PANDORA",
     description="Run one pMHC modelling case",
+    epilog="Example: pandora-run -p LLFGYPVYV -a HLA-A*02:01 -m I",
     )
 
     parser.add_argument(
@@ -101,7 +99,7 @@ def cmd_run_pandora():
 
     args = parser.parse_args()
 
-    #Parse arguments
+    # Parse arguments
     if not args.id:
         args.id = f'{args.peptide}_{args.allele}'
     
@@ -110,16 +108,16 @@ def cmd_run_pandora():
     else:
         args.anchors = [int(x) for x in args.anchors.split(',')]
     
-    ## A. Load local Database
+    # Load local Database
     db = Database.load()
 
-    ## B. Create Target object
+    # Create Target object
     target = Target(id = args.id,
         allele_type = args.allele,
         peptide = args.peptide,
         anchors = args.anchors)
 
-    ## C. Perform modelling
+    # Perform modelling
     case = Pandora.Pandora(target, db)
     case.model(n_loop_models=args.loop_models)
 
@@ -129,7 +127,7 @@ def cmd_run_wrapper():
     """
     parser = argparse.ArgumentParser(
     prog="PANDORA",
-    description="Run one pMHC modelling case",
+    description="Run the PANDORA.Wrapper on a tsv or csv file.",
     )
 
     parser.add_argument(
@@ -148,8 +146,8 @@ def cmd_run_wrapper():
     )    
 
     parser.add_argument(
-        '-H','--header', store_true=True, required=True,
-        help='Wether there is or not a header. If True, the first line\
+        '-H','--header', type=bool, required=True,
+        help='Whether there is or not a header. If True, the first line\
             of the input file will be ignored for the modellings.',
     )    
 
@@ -199,13 +197,13 @@ def cmd_run_wrapper():
 
     args = parser.parse_args()
 
-    ## A. Load local database
+    # Load local database
     db = Database.load()
 
     if args.delimiter=='tab':
         args.delimiter='\t'
 
-    ## B. Create the wrapper object. It will also run the modelling for each case.
+    # Create the wrapper object. It will also run the modelling for each case.
     wrap =  Wrapper.Wrapper(data_file=args.input_file, database=db, 
         num_cores=args.num_cores, wrapper_id=args.id, header=args.header,
         MHC_class=args.mhc_class, delimiter=args.delimiter,
