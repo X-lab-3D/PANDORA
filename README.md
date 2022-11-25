@@ -37,16 +37,17 @@ The following installations are required to start PANDORA installation:
 - conda
 - pip3
 
-The installation process will take care of installing the following dependencies (see [Installation](#installation)), no need to install them yourself.
+The (conda) installation process will take care of installing the following dependencies (see [Installation](#installation)):
 
 - [BioPython](https://anaconda.org/conda-forge/biopython)
-<!-- - [muscle](https://anaconda.org/bioconda/muscle) -->
-<!-- - [Modeller](https://anaconda.org/salilab/modeller) 9.23 or later -->
-- [pdb2sql](https://github.com/DeepRank/pdb2sql) (Optional, only for RMSD calculation)
+- [muscle](https://anaconda.org/bioconda/muscle) >= 5.1
+- [Modeller](https://anaconda.org/salilab/modeller) >= 9.3
+- [Blast](https://anaconda.org/bioconda/blast) >= 10.2
+<!-- - [pdb2sql](https://github.com/DeepRank/pdb2sql) (Optional, only for RMSD calculation) -->
 
 
 ## Installation
-### Conda Installation (AVAILABLE ONLY FOR MASTER BRANCH)
+### Conda Installation (AVAILABLE FOR DEVELOPMENT BRANCH ONLY)
 
 #### 1. Get a Modeller Key License:
 Prior to PANDORA installation, you need to first activate MODELLER's license. Please request MODELLER license at: https://salilab.org/modeller/registration.html
