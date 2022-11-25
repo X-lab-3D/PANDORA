@@ -267,7 +267,7 @@ class Target(PMHC):
         self.anchor_contacts = False
 
         # Changes all special characters in the case id to '-'
-        self.id = re.sub('[^a-zA-Z0-9 \n\.]', '-', id)
+        self.id = re.sub('[^a-zA-Z0-9 \n\.]', '_', id)
 
         if output_dir == False:
             self.output_dir = os.getcwd()
