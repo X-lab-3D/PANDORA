@@ -66,7 +66,7 @@ def cmd_run_pandora():
 
     parser.add_argument(
         '-a','--allele', required=True, type=str,
-        help='Name of the target MHC allele',
+        help='Name of the target MHC allele. Multiple alleles should be separated by a comma.',
     )
     
     parser.add_argument(
@@ -107,6 +107,8 @@ def cmd_run_pandora():
         args.anchors = []
     else:
         args.anchors = [int(x) for x in args.anchors.split(',')]
+
+    args.allele=args.allele.split(',')
     
     # Load local Database
     db = Database.load()
