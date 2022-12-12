@@ -14,6 +14,7 @@
 - [Overview](#overview)
 - [Dependencies](#dependencies)
 - [Installation](#installation)
+- [Docker](#docker)
 - [Tutorial](#tutorial)
 - [Code Design](#code-design)
 - [Output](#output)
@@ -66,7 +67,7 @@ conda install -c csb-nijmegen csb-pandora -c salilab -c bioconda
 ```
 
 Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
-## GitHub / Pypi installation
+### GitHub / Pypi installation
 
 #### 1. Install Modeller:
 Prior to PANDORA installation, you need to first activate MODELLER's license. Please request MODELLER license at: https://salilab.org/modeller/registration.html
@@ -108,7 +109,7 @@ git checkout development
 pip install -e .
 
 ```
-## Download Template Database
+### Download Template Database
 PANDORA needs a PDB template database to work. All the structures are retrieved from [IMGT](http://www.imgt.org/3Dstructure-DB/) database.
 
 The database can be quickly retrieved by zenodo by running the command-line tool:
@@ -156,12 +157,79 @@ Note 2: the database is saved by default into `~/PANDORA_databases/default`. It 
 
 Note 3 (For master branch only, conda release v0.9.0): You can download the pre-made database from https://github.com/X-lab-3D/PANDORA_database (pMHC I only, generated on 23/03/2021) and follow the [instructions](https://github.com/X-lab-3D/PANDORA_database/blob/main/README.md). Please be sure you re-path your database as explained in the instructions.
 
-## (Optional) Install NetMHCpan and/or NetMHCIIpan
+### (Optional) Install NetMHCpan and/or NetMHCIIpan
 
 PANDORA lets the user to predict peptide's anchor residues instead of using conventional predefined anchor residues.
 In that case you need to download [NetMHCpan](https://services.healthtech.dtu.dk/cgi-bin/sw_request) (for peptide:MHC class I) and/or [NetMHCIIpan](https://services.healthtech.dtu.dk/cgi-bin/sw_request) (for peptide:MHC class II).
 
 Once you have obtained the download link, you can install them by following the instructions in their .readme files. Note that PANDORA will assume they are installed and callable from command line (as netMHCpan and netMHCIIpan).
+
+## Docker
+The Docker release is currently not uploaded on DockerHub and, due to licensing of external software (MODELLER and NetMHCpan), the only way to use at this moment is by building the docker image directly from the recipe.
+
+We advice to use Docker only in case Conda or Git/Pypi installations are not possible in your system.
+
+1)  Get MODELELR lincense (and optional softwares, if desired)
+   
+First, you will always need to get a modeller license key and, optionally, the netMHCpan and netMHCIIpan installation packages (see [Installation](#installation) for details).
+
+2) Download PANDORA
+
+Download the GitHub repository and switch to the development branch:
+```
+git clone https://github.com/X-lab-3D/PANDORA.git
+cd PANDORA
+git checkout development
+```
+
+3) Add your license key
+   
+Now open the dockerfile and replace the "XXXX" at line 16 with your MODELLER license key.
+
+4) (Optional) Install netMHCpan and/or netMHCIIpan
+   
+Download netMHCpan or netMHCIIpan directly into the PANDORA repository you cloned, then proceed with the installation as explained in their own .readme files until points 2.a and 2.b.
+
+**For points 2.a and 2.b, make sure you set** NHOME to "/app/netMHCpan-\<version>" and TMPDIR to "/app/netMHCpan-\<version>/tmp" where \<version> is the version of the software you downloaded (same for netMHCIIpan, as "/app/netMHCIIpan-\<version>").
+
+Finally, open the PANDORA dockerfile, uncomment lines 25-26, plus the lines referring to the software you want to install (29-30 for netMHCpan and 33-34 for netMHCIIpan), save and close the file.
+
+In case, later, netMHCpan cannot be found by PANDORA, it might mean this step did not work as intended. 
+
+5) Create a database folder in your local machine
+
+To avoid re-downloading the PANDORA database every time you run your docker container, you will need to dowload the database in a folder synced between the container and the local machine.
+To do so, create a folder (wherever you prefer in your machine). We will call the absolute path to this folder \<path/to/local/db>
+
+6) Compile the docker image
+   
+Make sure you are in the PANDORA repo, then run:
+```
+docker build -t pandora .
+```
+You may chance "pandora" to the name you want to give to your docker image.
+Also, be advised that including netMHCpan or netMHCIIpan into the image will take docker a considerable longer time.
+
+7) Run the docker container
+
+Run the docker container **while linking the local database folder to the docker one**:
+```
+docker run -v <path/to/local/db>:/root/PANDORA_databases/default/ -it pandora
+```
+
+8) (First time only) Download the PANDORA database
+Inside your docker container, run the following to download the database:
+```
+pandora-fetch
+```
+It will be downloaded into a folder we previously linked to \<path/to/local/db>, thus will finally end up in your local machine.
+
+9) Enjoy!
+
+Done! Now you are ready to use PANDORA. Just remember to always run the docker container with:
+```
+docker run -v <path/to/local/db>:/root/PANDORA_databases/default/ -it pandora
+```
 
 ## Tutorial
 
