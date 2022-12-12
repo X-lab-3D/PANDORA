@@ -70,7 +70,6 @@ def download_unzip_imgt_structures(data_dir = PANDORA.PANDORA_data,
     if del_kabat_files:
         os.system('rm IMGT3DFlatFiles/*.prot.gz')
     os.chdir(PANDORA.PANDORA_path)
-    #os.chdir('../../../../')
 
 
 def download_ids_imgt(ReceptorType, data_dir = PANDORA.PANDORA_data, out_tsv = False):
