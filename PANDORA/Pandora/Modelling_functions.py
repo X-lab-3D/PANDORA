@@ -815,12 +815,14 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     Returns: (list) of Model objects
 
     '''
+    # Identify current working directory
+    cwd = os.getcwd()
 
     # Change working directory
     os.chdir(output_dir)
     # run Modeller to perform homology modelling
     os.popen('python3 %s > modeller.log' %python_script).read()
-    os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+    os.chdir(cwd)
 
     # Parse .log file
     logf = []

@@ -173,6 +173,7 @@ class Model:
 
         # homogenize_pdbs(pdb, ref, output_dir, target.id, anchors=target.anchors, flanking=True)
 
+        start_dir = os.getcwd()
         os.chdir(self.output_dir)
         # Produce lzone file for the l-rmsd calculation
         # lzone = get_Gdomain_lzone('%s/%s_ref.pdb' %(self.output_dir, self.target.id), self.output_dir, self.target.MHC_class)
@@ -185,7 +186,7 @@ class Model:
 
         # remove intermediate files
         os.system('rm %s %s' % (decoy_path, ref_path))
-        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+        os.chdir(start_dir)
 
 
 def merge_chains(pdb):

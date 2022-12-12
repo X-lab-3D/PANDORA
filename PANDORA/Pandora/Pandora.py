@@ -131,7 +131,7 @@ class Pandora:
 
     def write_ini_script(self):
         ''' Write the python scipt that modeller uses for creating the initial model'''
-        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+        #os.chdir(os.path.dirname(PANDORA.PANDORA_path))
         Modelling_functions.write_ini_script(self.target, self.template, self.alignment.alignment_file, self.target.output_dir)
 
     def create_initial_model(self, python_script = 'cmd_modeller_ini.py', verbose = True):
@@ -145,6 +145,9 @@ class Pandora:
             verbose:  (bool): Print information. Default = True
 
         '''
+        # Identify current working directory
+        cwd = os.getcwd()
+
         # Change working directory
         os.chdir(self.target.output_dir)
         # Run Modeller
@@ -158,7 +161,7 @@ class Pandora:
             raise Exception('.ini file could not be modelled. Please check modeller_ini.log. Is your MODELLER correctly installed?')
 
         # Change working directory back
-        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+        os.chdir(cwd)
         if verbose:
             print('\tSuccessfully created the initital model')
 
