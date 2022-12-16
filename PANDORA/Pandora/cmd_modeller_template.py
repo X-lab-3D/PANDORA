@@ -11,20 +11,20 @@ for i in range(int('%s')):        ## PARALLEL_JOB_LINE_TO_COMPLETE ## DO NOT DEL
     j.append(MP.local_slave())    ## PARALLEL_JOB_LINE ## DO NOT DELETE THIS COMMENT!
 
 M.log.verbose()                                # request verbose output
-env = M.environ()                              # create a new MODELLER environment to build this model in
+env = M.environ(restyp_lib_file="/home/shahielm/Automate/combined_restyp_file.lib")                              # create a new MODELLER environment to build this model in
 
 # directories for input atom files
 #env.io.atom_files_directory = ['.', '../atom_files']
 env.io.atom_files_directory = './'
 
 # Read in HETATM records from template PDBs
-#env.io.hetatm = True
+env.io.hetatm = True
 env.io.water = True
 
 a = MyLoop(env, alnfile = '%s',
               knowns = '%s', sequence = '%s',              #Be sure those two arguments are always in the same line!
               loop_assess_methods = MA.assess.DOPE)
-
+a.toplib = '/home/shahielm/Automate/combined_top_heav_lib_file.lib'
 
 a.starting_model= 1                          # index of the first model
 a.ending_model  = int('%s')                  # index of the last model
@@ -36,7 +36,6 @@ a.max_var_iterations = 300                    # Select length of optimizations
 a.max_molpdf = 1e6                            # do not stop unless obj.func. > 1E6
 
 # Loop Modelling
-
 a.loop.starting_model = 1           # First loop model
 a.loop.ending_model   = int('%s')          # Last loop model
 a.loop.md_level       = MA.refine.slow   # Loop model refinement level

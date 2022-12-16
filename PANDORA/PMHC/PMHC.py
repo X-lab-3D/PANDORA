@@ -36,6 +36,20 @@ class PMHC(ABC):
         self.helix = helix
         self.sheet = sheet
 
+        self.mod_peptide = self.peptide
+
+        similar_dict = {"(CIR)" : ["R", "8"],
+                        "(ALY)" : ["K", "9"],
+                        "(NMM)" : ["R", "+"],
+                        "(MLZ)" : ["K", "="],
+                        "(SEP)" : ["S", "?"],
+                        "(CSS)" : ["C", "`"]
+                        }
+        for ptm in similar_dict:
+            if ptm in self.peptide:
+                self.peptide = self.peptide.replace(ptm, similar_dict[ptm][0])
+                self.mod_peptide = self.mod_peptide.replace(ptm, similar_dict[ptm][1])
+
         if type(allele_type) == list:
             self.allele_type = allele_type
         elif type(allele_type) == str:

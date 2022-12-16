@@ -85,8 +85,7 @@ class Align:
             self.tar_n = self.target.N_chain_seq
 
         # P chain
-        self.tar_p = self.target.peptide
-
+        self.tar_p = self.target.mod_peptide
         # Perform alignment
         self.aligned_seqs_and_pept = self.align_chains()
         # Cut extra N-terminal and C-terminal
