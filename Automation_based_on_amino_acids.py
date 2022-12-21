@@ -46,7 +46,7 @@ def obtain_seperate_rtf(ptm):
                     elif part_of_ptm == True:
                         info += line       
             with open(f"{ptm}.txt", "w") as output:
-                output.write(info + "PATC FIRS NONE LAST NONE\n")
+                output.write(info + "PATC FIRS NTER LAST CTER\n")
             output.close()
 
 def create_edited_file(ptm):
