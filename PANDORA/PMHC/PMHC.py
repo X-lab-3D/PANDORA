@@ -38,17 +38,21 @@ class PMHC(ABC):
 
         self.mod_peptide = self.peptide
 
-        similar_dict = {"(CIR)" : ["R", "8"],
-                        "(ALY)" : ["K", "9"],
-                        "(NMM)" : ["R", "+"],
-                        "(MLZ)" : ["K", "="],
-                        "(SEP)" : ["S", "?"],
-                        "(CSS)" : ["C", "`"]
-                        }
-        for ptm in similar_dict:
+        all_ptm_info = {}
+        with open(os.path.join(os.getcwd(), "combined_restyp_file.lib"), "r") as file:
+            restyp_data = file.readlines()
+            file.close()
+        ptm_restyp_data = restyp_data[118:]
+        for line in ptm_restyp_data:
+            pdb3 = line.split("|")[1].strip()
+            pdb1 = line.split("|")[2].strip()
+            std = line.split("|")[3].strip()
+            all_ptm_info[pdb3] = [pdb1, std]
+
+        for ptm in all_ptm_info:
             if ptm in self.peptide:
-                self.peptide = self.peptide.replace(ptm, similar_dict[ptm][0])
-                self.mod_peptide = self.mod_peptide.replace(ptm, similar_dict[ptm][1])
+                self.mod_peptide = self.mod_peptide.replace(f"({ptm})", all_ptm_info[ptm][0])
+                self.peptide = self.peptide.replace(f"({ptm})", all_ptm_info[ptm][1])
 
         if type(allele_type) == list:
             self.allele_type = allele_type

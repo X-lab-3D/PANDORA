@@ -3,6 +3,7 @@ from itertools import permutations
 
 def obtain_seperate_rtf(ptm):
     info = ""
+    apply_patch = True
     residue_topology_files = [os.path.join(os.getcwd(), "Toppar/toppar_all36_prot_modify_res.str"), 
         os.path.join(os.getcwd(), "Toppar/toppar_all36_prot_na_combined.str")]
     # with open("/home/shahielm/toppar/top_all36_prot.rtf", "r") as file:
@@ -34,13 +35,18 @@ def obtain_seperate_rtf(ptm):
                         info = line
                     elif "RESI" in line or "PRES" in line:
                         part_of_ptm = False
+                    elif part_of_ptm == True and "GROUP" in line:
+                        pass
+                    elif part_of_ptm == True and "CMAP" in line:
+                        pass
+                    elif part_of_ptm == True and "DONOR" in line:
+                        pass
+                    elif part_of_ptm == True and "ACCEPTOR" in line:
+                        pass
                     elif part_of_ptm == True:
-                        #print(line)
-                        info += line
-                   
+                        info += line       
             with open(f"{ptm}.txt", "w") as output:
-                output.write(info)
-                #output.truncate(output.tell()-2)
+                output.write(info + "PATC FIRS NONE LAST NONE\n")
             output.close()
 
 def create_edited_file(ptm):
