@@ -11,7 +11,7 @@ for i in range(int('%s')):        ## PARALLEL_JOB_LINE_TO_COMPLETE ## DO NOT DEL
     j.append(MP.local_slave())    ## PARALLEL_JOB_LINE ## DO NOT DELETE THIS COMMENT!
 
 M.log.verbose()                                # request verbose output
-env = M.environ(restyp_lib_file=os.path.join(os.path.dirname(os.getcwd()), "combined_restyp_file.lib"))                              # create a new MODELLER environment to build this model in
+env = M.environ(restyp_lib_file=os.path.join(os.path.dirname(os.getcwd()), "PTM_implementation/combined_restyp_file.lib"))                              # create a new MODELLER environment to build this model in
 
 # directories for input atom files
 #env.io.atom_files_directory = ['.', '../atom_files']
@@ -24,7 +24,7 @@ env.io.water = True
 a = MyLoop(env, alnfile = '%s',
               knowns = '%s', sequence = '%s',              #Be sure those two arguments are always in the same line!
               loop_assess_methods = MA.assess.DOPE)
-a.toplib = os.path.join(os.path.dirname(os.getcwd()), "combined_top_heav_lib_file.lib")
+a.toplib = os.path.join(os.path.dirname(os.getcwd()), "PTM_implementation/combined_top_heav_lib_file.lib")
 
 a.starting_model= 1                          # index of the first model
 a.ending_model  = int('%s')                  # index of the last model

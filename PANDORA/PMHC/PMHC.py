@@ -36,23 +36,37 @@ class PMHC(ABC):
         self.helix = helix
         self.sheet = sheet
 
-        self.mod_peptide = self.peptide
+        # Checks if there is a PTM in the target peptide chain
+        if "(" in peptide and ")" in peptide:
+            restyp_ptm_info = {}
+            with open(os.path.join(os.getcwd(), "PTM_implementation/combined_restyp_file.lib"), "r") as custom_restyp:
+                restyp_data = custom_restyp.readlines()
+                custom_restyp.close()
+            # restyp.lib is read to obtain the pdb3, pdb1 and std of the PTMs
+            with open(os.path.join(os.path.dirname(os.getcwd()), "miniconda3/lib/modeller-10.2/modlib/restyp.lib"),"r") as restyp:
+                restyp_file_length = (len(restyp.readlines()))
+            restyp.close()
+            # Only the PTM related lines are stored
+            ptm_restyp_data = restyp_data[restyp_file_length:]
 
-        all_ptm_info = {}
-        with open(os.path.join(os.getcwd(), "combined_restyp_file.lib"), "r") as file:
-            restyp_data = file.readlines()
-            file.close()
-        ptm_restyp_data = restyp_data[118:]
-        for line in ptm_restyp_data:
-            pdb3 = line.split("|")[1].strip()
-            pdb1 = line.split("|")[2].strip()
-            std = line.split("|")[3].strip()
-            all_ptm_info[pdb3] = [pdb1, std]
+            # Obtain the pdb3, pdb1 and the one letter symbol for the most 
+            # similar amino acid for each PTM and store these in a dictionary
+            for line in ptm_restyp_data:
+                pdb3 = line.split("|")[1].strip()
+                pdb1 = line.split("|")[2].strip()
+                std = line.split("|")[3].strip()
+                restyp_ptm_info[pdb3] = [pdb1, std]
 
-        for ptm in all_ptm_info:
-            if ptm in self.peptide:
-                self.mod_peptide = self.mod_peptide.replace(f"({ptm})", all_ptm_info[ptm][0])
-                self.peptide = self.peptide.replace(f"({ptm})", all_ptm_info[ptm][1])
+            # Make two peptide chains, one which is used for finding the 
+            # template and the other for the modelling
+            for ptm in restyp_ptm_info:
+                if ptm in self.peptide:
+                    # Peptide chain with pdb1 used for alignment/modelling
+                    self.mod_peptide = self.peptide.replace(f"({ptm})", restyp_ptm_info[ptm][0])
+                    # peptide chain with used for finding the template
+                    self.peptide = self.peptide.replace(f"({ptm})", restyp_ptm_info[ptm][1])
+        else:
+            self.peptide = peptide
 
         if type(allele_type) == list:
             self.allele_type = allele_type

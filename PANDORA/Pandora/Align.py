@@ -85,7 +85,13 @@ class Align:
             self.tar_n = self.target.N_chain_seq
 
         # P chain
-        self.tar_p = self.target.mod_peptide
+        # Determines which attribute to use. If there is a PTM in the peptide
+        # chain of the target, then it will use mod_peptide, it will use peptide
+        # if this is not the case.
+        if hasattr(self.target, "mod_peptide"):
+            self.tar_p = self.target.mod_peptide
+        else:
+            self.tar_p = self.target.peptide
         # Perform alignment
         self.aligned_seqs_and_pept = self.align_chains()
         # Cut extra N-terminal and C-terminal
