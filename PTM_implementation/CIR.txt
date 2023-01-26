@@ -1,0 +1,59 @@
+RESI CIR               0.000
+ATOM N       NH1      -0.470
+ATOM HN      H         0.310
+ATOM CA      CT1       0.070
+ATOM HA      HB1       0.090
+ATOM CB      CG321    -0.180
+ATOM HB1     HGA2      0.090
+ATOM HB2     HGA2      0.090
+ATOM CG      CG321    -0.180
+ATOM HG2     HGA2      0.090
+ATOM HG1     HGA2      0.090
+ATOM CD      CG321    -0.037
+ATOM HD1     HGA2      0.090
+ATOM HD2     HGA2      0.090
+ATOM NE      NG2S1    -0.309
+ATOM HE      HGP1      0.267
+ATOM CZ      CG2O6     0.284
+ATOM OH      OG2D1    -0.450
+ATOM NH      NG2S2    -0.525
+ATOM HH1     HGP1      0.295
+ATOM HH2     HGP1      0.295
+ATOM C       C         0.510
+ATOM O       O        -0.510
+BOND        N      CA       C      CA
+BOND        C      +N      CA      HA
+BOND       CA      CB       N      HN
+BOND       CB     HB1      CB     HB2      CB      CG
+BOND       CG     HG2      CG     HG1      CG      CD
+BOND       CD     HD1      CD     HD2      CD      NE
+BOND       NE      HE      NE      CZ
+BOND       CZ      NH
+BOND       NH     HH1      NH     HH2
+BOND        O       C
+BOND       CZ      OH
+IMPR       CZ      NE      NH      OH
+IMPR        N      -C      CA      HN       C      CA      +N       O
+IC -C   CA   *N   HN    1.3477  123.93  180.00  114.45   0.9984
+IC -C   N    CA   C     1.3477  123.93  180.00  106.57   1.5180
+IC N    CA   C    +N    1.4506  106.57  180.00  117.72   1.3463
+IC +N   CA   *C   O     1.3463  117.72  180.00  120.59   1.2291
+IC CA   C    +N   +CA   1.5180  117.72  180.00  124.35   1.4461
+IC N    C    *CA  CB    1.4481  105.39  121.93  109.00   1.5562
+IC N    C    *CA  HA    1.4481  105.39 -118.15  107.60   1.0826
+IC N    CA   CB   CG    1.4454  113.29   29.61  116.25   1.5461
+IC CG   CA   *CB  HB1   1.5461  116.25 -118.39  106.71   1.1150
+IC HB1  CA   *CB  HB2   1.1150  106.71 -115.29  110.77   1.1120
+IC CA   CB   CG   CD    1.5618  116.25   60.01  116.24   1.5376
+IC CD   CB   *CG  HG2   1.5376  116.24  122.23  108.77   1.1135
+IC HG2  CB   *CG  HG1   1.1135  108.77  115.10  108.43   1.1120
+IC CB   CG   CD   NE    1.5461  116.24 -165.91  112.01   1.4371
+IC NE   CG   *CD  HD1   1.4371  112.01 -122.11  109.24   1.1133
+IC HD1  CG   *CD  HD2   1.1133  109.24 -117.19  110.87   1.1098
+IC CG   CD   NE   CZ    1.5376  112.01   75.36  121.56   1.3662
+IC CZ   CD   *NE  HE    1.3662  121.56  177.67  117.81   0.9928
+IC CD   NE   CZ   NH    1.4371  121.56  177.60  112.91   1.3526
+IC NH   NE   *CZ  OH    1.3526  112.91  179.71  125.20   1.2323
+IC NE   CZ   NH   HH1   1.3662  112.91 -178.00  117.80   0.9967
+IC HH1  CZ   *NH  HH2   0.9967  117.80  175.79  120.59   0.9952
+PATC FIRS NTER LAST CTER
