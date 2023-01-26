@@ -36,37 +36,6 @@ class PMHC(ABC):
         self.helix = helix
         self.sheet = sheet
 
-        # Checks if there is a PTM in the target peptide chain
-        if "(" in peptide and ")" in peptide:
-            restyp_ptm_info = {}
-            with open(os.path.join(os.getcwd(), "PTM_implementation/combined_restyp_file.lib"), "r") as custom_restyp:
-                restyp_data = custom_restyp.readlines()
-                custom_restyp.close()
-            # restyp.lib is read to obtain the pdb3, pdb1 and std of the PTMs
-            with open(os.path.join(os.path.dirname(os.getcwd()), "miniconda3/lib/modeller-10.2/modlib/restyp.lib"),"r") as restyp:
-                restyp_file_length = (len(restyp.readlines()))
-            restyp.close()
-            # Only the PTM related lines are stored
-            ptm_restyp_data = restyp_data[restyp_file_length:]
-
-            # Obtain the pdb3, pdb1 and the one letter symbol for the most 
-            # similar amino acid for each PTM and store these in a dictionary
-            for line in ptm_restyp_data:
-                pdb3 = line.split("|")[1].strip()
-                pdb1 = line.split("|")[2].strip()
-                std = line.split("|")[3].strip()
-                restyp_ptm_info[pdb3] = [pdb1, std]
-
-            # Make two peptide chains, one which is used for finding the 
-            # template and the other for the modelling
-            for ptm in restyp_ptm_info:
-                if ptm in self.peptide:
-                    # Peptide chain with pdb1 used for alignment/modelling
-                    self.mod_peptide = self.peptide.replace(f"({ptm})", restyp_ptm_info[ptm][0])
-                    # peptide chain with used for finding the template
-                    self.peptide = self.peptide.replace(f"({ptm})", restyp_ptm_info[ptm][1])
-        else:
-            self.peptide = peptide
 
         if type(allele_type) == list:
             self.allele_type = allele_type
@@ -87,6 +56,7 @@ class PMHC(ABC):
         @abstractmethod
         def calc_anchor_contacts(self):
             pass
+
 
 
 class Template(PMHC):
@@ -293,6 +263,7 @@ class Target(PMHC):
         ''' 
 
         super().__init__(id, peptide, allele_type, MHC_class, M_chain_seq, N_chain_seq, anchors, helix, sheet)
+
         self.templates = templates
         self.initial_model = False
         self.contacts = False
@@ -300,6 +271,12 @@ class Target(PMHC):
 
         # Changes all special characters in the case id to '-'
         self.id = re.sub('[^a-zA-Z0-9 \n\.]', '_', id)
+
+        # Checks if there is a PTM in the target peptide chain
+        if "(" in peptide and ")" in peptide:
+            self.mod_peptide, self.peptide = self.translate_ptms(peptide)
+        else:
+            self.peptide = peptide
 
         if output_dir == False:
             self.output_dir = os.getcwd()
@@ -331,7 +308,7 @@ class Target(PMHC):
                 print('WARNING: no anchor positions provided. Pandora will assign them to canonical anchor position.')
                 print('If you want PANDORA to use NetMHCpan to predict the anchors set use_netmhcpan as True')
                 anchor_1 = 2
-                anchor_2 = len(peptide)
+                anchor_2 = len(self.peptide)
                 anchors = [anchor_1, anchor_2]
                 self.anchors = anchors
             #Use NetMHCpan to predict the anchors
@@ -354,6 +331,48 @@ class Target(PMHC):
                 print('Error: Something went wrong when predicting the anchors using netMHCIIpan')
                 raise Exception(e)
 
+    def translate_ptms(self, peptide):
+        '''Checks if the given PTMs have a topology in the residue topology files.
+
+        Args:
+            peptide (str): peptide sequence
+
+        Returns:
+            mod_peptide (str): peptide chain with one-letter code for the ptm
+            used for alignment/modelling.
+            peptide (str): peptide chain with similar residue code for the ptm 
+            used for finding the template.
+
+        '''
+
+        restyp_ptm_info = {}
+        with open(os.path.join(os.getcwd(), "PTM_implementation/combined_restyp_file.lib"), "r") as custom_restyp:
+            restyp_data = custom_restyp.readlines()
+            custom_restyp.close()
+        # restyp.lib is read to obtain the pdb3, pdb1 and std of the PTMs
+        with open(os.path.join(os.path.dirname(os.getcwd()), "miniconda3/lib/modeller-10.2/modlib/restyp.lib"),"r") as restyp:
+            restyp_file_length = (len(restyp.readlines()))
+        restyp.close()
+        # Only the PTM related lines are stored
+        ptm_restyp_data = restyp_data[restyp_file_length:]
+
+        # Obtain the pdb3, pdb1 and the one letter symbol for the most 
+        # similar amino acid for each PTM and store these in a dictionary
+        for line in ptm_restyp_data:
+            pdb3 = line.split("|")[1].strip()
+            pdb1 = line.split("|")[2].strip()
+            std = line.split("|")[3].strip()
+            restyp_ptm_info[pdb3] = [pdb1, std]
+
+        # Make two peptide chains, one which is used for finding the 
+        # template and the other for the modelling
+        for ptm in restyp_ptm_info:
+            if ptm in peptide:
+                # Peptide chain with one-letter code for the ptm used for alignment/modelling
+                mod_peptide = peptide.replace(f"({ptm})", restyp_ptm_info[ptm][0])
+                # Peptide chain with similar residue code for the ptm used for finding the template
+                peptide = peptide.replace(f"({ptm})", restyp_ptm_info[ptm][1])
+        return mod_peptide, peptide
 
     def info(self):
         """ Print the basic info of this structure
