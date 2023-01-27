@@ -12,7 +12,7 @@ import re
 class PMHC(ABC):
 
     def __init__(self, id, peptide = '', allele_type = [], MHC_class = 'I',
-                 M_chain_seq = '', N_chain_seq = '', anchors = [],
+                 M_chain_seq = '', B2M_seq='', N_chain_seq = '', anchors = [],
                  helix=False, sheet=False):
         ''' pMHC class. Acts as a parent class to Template and Target
 
@@ -31,6 +31,7 @@ class PMHC(ABC):
         self.MHC_class = MHC_class
         self.peptide = peptide
         self.M_chain_seq = M_chain_seq
+        self.B2M_seq = B2M_seq
         self.N_chain_seq = N_chain_seq
         self.anchors = anchors
         self.helix = helix
@@ -60,7 +61,7 @@ class PMHC(ABC):
 class Template(PMHC):
 
     def __init__(self, id, peptide='',  allele_type=[], MHC_class='I',
-                 M_chain_seq='', N_chain_seq='', anchors=[], G_domain_span=False,
+                 M_chain_seq='', B2M_seq='', N_chain_seq='', anchors=[], G_domain_span=False,
                  helix=False, sheet=False, pdb_path=False, pdb=False,
                  remove_biopython_object=False):
         ''' Template structure class. This class holds all information of a template structure that is used for
@@ -83,7 +84,7 @@ class Template(PMHC):
         '''
         super().__init__(id, peptide=peptide, allele_type=allele_type,
                          MHC_class=MHC_class, M_chain_seq=M_chain_seq,
-                         N_chain_seq=N_chain_seq, anchors=anchors,
+                         B2M_seq=B2M_seq, N_chain_seq=N_chain_seq, anchors=anchors,
                          helix=helix, sheet=sheet)
         self.id = id
         self.pdb = pdb

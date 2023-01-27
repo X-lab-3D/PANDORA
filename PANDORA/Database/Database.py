@@ -72,7 +72,7 @@ class Database:
                            update_ref_sequences=True, 
                            remove_biopython_objects = True,
                            n_jobs = 1):
-        '''construct_database(self, save, data_dir = PANDORA.PANDORA_data, MHCI=True, MHCII=True, download=True, update_ref_sequences=True)
+        '''construct_database(self, save=PANDORA.PANDORA_data + '/PANDORA_database.pkl', data_dir = PANDORA.PANDORA_data, MHCI=True, MHCII=True, download=True, update_ref_sequences=True, remove_biopython_objects = True, n_jobs = 1)
         Construct the database. Download, clean and add all structures
 
         Args:
