@@ -86,8 +86,10 @@ class Align:
 
         if self.MHC_class == 'I' and self.target.B2M_seq == '':
             self.tar_b = self.tem_b
-        else:
+        elif self.MHC_class == 'I' and self.target.B2M_seq != '':
             self.tar_b = self.target.B2M_seq
+        else:
+            pass
             
         # N chains (only for MHCII)
         if self.MHC_class == 'II' and self.target.N_chain_seq == '':
@@ -136,9 +138,14 @@ class Align:
 
         # Align M and N chain for MHC II. Because the target chains need to be aligned to the respective chain of
         # the template, M and N are done seperately and later added together
-        if self.MHC_class == 'I':
+        # MHC-I with B2M
+        if self.MHC_class == 'I' and not self.clip_C_domain:
             chains = {"M" : (f'{self.tar_id}_M', self.tem_m, self.tar_m),
                       "B":(f'{self.tar_id}_B', self.tem_b, self.tar_b)}
+        # MHC-I without B2M
+        elif self.MHC_class == 'I' and self.clip_C_domain:
+            chains = {"M" : (f'{self.tar_id}_M', self.tem_m, self.tar_m)}
+        # MHC-II
         elif self.MHC_class == 'II':
             chains = {"M":(f'{self.tar_id}_M', self.tem_m, self.tar_m), 
                     "N":(f'{self.tar_id}_N', self.tem_n, self.tar_n)}
@@ -164,7 +171,8 @@ class Align:
         #elif self.MHC_class == 'II':
         # Merge M and N chain into one file
         OD = self.output_dir.replace(' ', '\\ ')
-        subprocess.check_call(f'cat {OD}/{self.tar_id}_M.afa {OD}/{self.tar_id}_{list(chains.keys())[1]}.afa > {OD}/alignment.afa',
+        files = (' ').join([f'{OD}/{self.tar_id}_{list(chains.keys())[i]}.afa' for i in range(len(chains))])
+        subprocess.check_call(f'cat {files} > {OD}/alignment.afa',
                               shell=True)
 
         # Load aligned seqs into dict
@@ -326,8 +334,10 @@ class Align:
                 comment = 'sequence:::::::::'
 
             # The sequences
-            if self.MHC_class == 'I':
+            if self.MHC_class == 'I' and not self.clip_C_domain:
                 seq = f"{seqs[id+' M']}/{seqs[id+' B']}/{seqs[id+' P']}*"
+            elif self.MHC_class == 'I' and self.clip_C_domain:
+                seq = f"{seqs[id+' M']}/{seqs[id+' P']}*"
             elif self.MHC_class == 'II':
                 seq = f"{seqs[id+' M']}/{seqs[id+' N']}/{seqs[id+' P']}*"
 

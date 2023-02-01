@@ -612,7 +612,7 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
 
     return templates, scores, keep_IL
 
-def write_ini_script(target, template, alignment_file, output_dir):
+def write_ini_script(target, template, alignment_file, output_dir, clip_C_domain=False):
     ''' Writes the MyLoop.py and cmd_modeller_ini.py files. This function takes two template python scripts and fills
         in the required information: Anchor positions for the MyLoop file and structure name + alignment file for the
         cmd_modeller_ini file.
@@ -631,7 +631,13 @@ def write_ini_script(target, template, alignment_file, output_dir):
         with open(output_dir+ '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
             for line in MyL_temp:
-                if 'self.residue_range' in line and 'M.selection' in line:
+                # Include or not B2M depending on clip_C_domain
+                if '#RENAME SEGMENTS PLACEHOLDER' in line:
+                    if not clip_C_domain:
+                        myloopscript.write("        self.rename_segments(segment_ids=['M', 'B', 'P'], renumber_residues=[1, 1, 1])")
+                    else:
+                        myloopscript.write("        self.rename_segments(segment_ids=['M', 'P'], renumber_residues=[1, 1])")
+                elif 'self.residue_range' in line and 'M.selection' in line:
                     myloopscript.write(line % (anch[0]+1, anch[-1]-1))
                 elif 'SPECIAL_RESTRAINTS_BREAK' in line:
                     break
@@ -692,7 +698,7 @@ def write_ini_script(target, template, alignment_file, output_dir):
 
 
 def write_modeller_script(target, template, alignment_file, output_dir, n_homology_models=1, n_loop_models = 20,
-                          loop_refinement='slow', n_jobs=None, stdev=0.1, helix = False, sheet = False):
+                          loop_refinement='slow', n_jobs=None, stdev=0.1, helix = False, sheet = False, clip_C_domain=False):
     ''' Write script that refines the loops of the peptide
     
     Args:
@@ -723,14 +729,25 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
         with open(output_dir.replace('\\ ', ' ') + '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
             for line in MyL_temp:
-                if 'self.residue_range' in line and 'M.selection' in line:
+                # Include or not B2M depending on clip_C_domain
+                if '#RENAME SEGMENTS PLACEHOLDER' in line:
+                    if not clip_C_domain:
+                        myloopscript.write("        self.rename_segments(segment_ids=['M', 'B', 'P'], renumber_residues=[1, 1, 1])")
+                    else:
+                        myloopscript.write("        self.rename_segments(segment_ids=['M', 'P'], renumber_residues=[1, 1])")
+                # Add flexible region selection range
+                elif 'self.residue_range' in line and 'M.selection' in line:
                     myloopscript.write(line %(anch[0]+1, anch[-1]-1))  # write the first anchor
-                elif 'contact_file = open' in line:
-                    myloopscript.write(line %(target.id))
+                # Add restraints standard deviation (only effective on non-fixed residues)
                 elif 'STDEV MARKER' in line:
                     myloopscript.write(line %(stdev))
+                # Add contact file name
+                elif 'contact_file = open' in line:
+                    myloopscript.write(line %(target.id))
+                # Add Alpha helix restraints
                 elif helix and 'ALPHA-HELIX-MARKER' in line:
                     myloopscript.write(line.replace('# ALPHA-HELIX-MARKER', 'rsr.add(M.secondary_structure.alpha(self.residue_range("%s:P", "%s:P")))' %(helix[0], helix[1])))
+                # Add Beta sheet restraints
                 elif sheet and 'BETA-SHEET-MARKER' in line:
                     myloopscript.write(line.replace('# BETA-SHEET-MARKER', 'rsr.add(M.secondary_structure.sheet(atoms["%s"], atoms["%s"], sheet_h_bonds=%s))' %(sheet[0], sheet[1], sheet[2])))
                 else:
