@@ -1525,7 +1525,7 @@ def parse_pMHCII_pdb(pdb_id,
 
             try:
                 helix, sheet = False, False
-                snd_struc, log_message = find_pept_secondary_structure(pdb_file, pdb, pept_chain, MHC_chains)
+                snd_struc, log_message = find_pept_secondary_structure(pdb_file, pdb, pept_chain)
                 if log_message:
                     log(pdb_id, 'Warning, ' + log_message, logfile)
                     if 'helix' in snd_struc:
