@@ -108,7 +108,7 @@ def test_clean_MHCI_structure():
                        bad_dir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/Bad',
                        remove_biopython_object=False)
 
-    assert x.peptide == 'KPIVQYDNF' and [i.id for i in x.pdb.get_chains()] == ['M', 'P']
+    assert x.peptide == 'KPIVQYDNF' and [i.id for i in x.pdb.get_chains()] == ['M', 'B', 'P']
 
 
 def test_clean_MHCII_structure():
