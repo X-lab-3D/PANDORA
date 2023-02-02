@@ -48,7 +48,10 @@ class Pandora:
             print('\tTarget MHC Class: %s' % self.target.MHC_class)
             print('\tTarget Allele:  %s' % self.target.allele_type)
             print('\tTarget Peptide: %s' % self.target.peptide)
-            print('\tTarget Anchors: %s\n' % (',').join([str(x) for x in self.target.anchors]))
+            try:
+                print('\tTarget Anchors: %s\n' % (',').join([str(x) for x in self.target.anchors]))
+            except TypeError:
+                raise Exception('ERROR: Anchors missing at template selection step')
 
         if self.template is None: # Only find the best template if the user didn't specify one
             # if verbose and self.target.M_chain_seq != '' and seq_based_templ_selection:

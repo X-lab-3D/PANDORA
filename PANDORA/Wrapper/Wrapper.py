@@ -69,8 +69,8 @@ class Wrapper():
             use_netmhcpan (bool, optional): If True, uses local installation
                 of netMHCPan to predict anchor positions for each target.
             use_templ_seq (bool, optional): If true, it uses the template MHC sequence 
-                for each chain a sequence could not be found. This function will 
-                be removed in later releases. Defaults to False.
+                for each chain a sequence could not be found. This function is mainly
+                for benchmarking purposes. Defaults to False.
                     num_cores (int, optional): Number of parallel PANDORA jobs.
                 Each one will be sent to a different core. Defaults to 1.
             n_loop_models (int, optional): Number of  loop models.
@@ -105,7 +105,7 @@ class Wrapper():
             self.wrapper_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
         else:
             self.wrapper_id = wrapper_id
-            self.wrapper_id = re.sub('[^a-zA-Z0-9]', '-', self.wrapper_id)
+            self.wrapper_id = re.sub('[^a-zA-Z0-9]', '_', self.wrapper_id)
 
 
         if outdir_col == None:
@@ -115,7 +115,7 @@ class Wrapper():
             else:
                 self.collective_output_dir = collective_output_dir
 
-            self.collective_output_dir = os.path.join(self.collective_output_dir, f'{self.wrapper_id}_{self.wrapper_id}')
+            self.collective_output_dir = os.path.join(self.collective_output_dir, self.wrapper_id)
             
             self.prep_collective_output_dir()
 
@@ -133,6 +133,7 @@ class Wrapper():
         ## Print targets info
         if verbose:
             for target_id in self.targets:
+                print('\n')
                 print('Target ID: ', target_id)
                 print('Target MHC_class: ', MHC_class)
                 print('Target allele: ', self.targets[target_id]['allele'])
@@ -141,6 +142,7 @@ class Wrapper():
                 if N_chain_col:
                     print('Target N chain seq: ', self.targets[target_id]['N_chain_seq'])
                 print('Target Anchors: ', self.targets[target_id]['anchors'])
+                
         for target_id in self.targets:
             self.targets[target_id].update({'target_id':target_id, 'MHC_class':MHC_class,
                                     'n_loop_models':n_loop_models, 
@@ -329,6 +331,7 @@ def run_case(args):
     except Exception as err:
         print('Skipping Target %s at Target object generation step for the following reason:' %target_id)
         print(("Exception: {0}".format(err)))
+        return
     
     try:
         case = Pandora.Pandora(tar, database=args['db'])
@@ -336,6 +339,7 @@ def run_case(args):
         print(f"Modelling case {target_id} failed at Pandora object creation step")
         print(f"Captured error: {e}")
         print(traceback.format_exc())
+        return
 
     # Run the modelling
     try:
@@ -347,6 +351,8 @@ def run_case(args):
         print(f"Modelling case {target_id} failed at modelling step")
         print(f"Captured error: {e}")
         print(traceback.format_exc())
+        return
+    
     try:
         if args['archive_output']:
             archive_and_remove(tar.output_dir)
@@ -354,3 +360,4 @@ def run_case(args):
         print(f"Modelling case {target_id} failed at archiving step")
         print(f"Captured error: {e}")
         print(traceback.format_exc())
+        return

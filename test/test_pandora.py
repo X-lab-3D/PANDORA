@@ -132,22 +132,38 @@ def test_construct_database():
     db.construct_database(save=False, download=False)
 
     # test the creation of bad files, log files and the information inside of the database object
-    pass_test = False
+    peptide_flag = False
     log_flag = False
     templates_flag = False
+    allele_flag = False
+    B2M_flag = False
+    
     if os.path.exists(log2):
         log_flag = True
+        # Check if two templates are present
         if '1A1O' in db.MHCI_data and '4Z7U' in db.MHCII_data:
             templates_flag = True
-            if db.MHCII_data['2NNA'].peptide == 'SGEGSFQPSQENP' and db.MHCI_data['2X4R'].peptide == 'NLVPMVATV':
-                pass_test = True
+            # Check the peptide in the other two templates
+            if  db.MHCI_data['2X4R'].peptide == 'NLVPMVATV' and db.MHCII_data['2NNA'].peptide == 'SGEGSFQPSQENP':
+                peptide_flag = True
+            # Check that every template has an allele
+            if not any(
+                    db.MHCI_data[x].allele_type == [] for x in db.MHCI_data
+                    ) and not any(
+                    db.MHCII_data[x].allele_type == [] for x in db.MHCII_data):
+                    allele_flag = True
+            # Check that every template has the B2M chain
+            if not any(db.MHCI_data[x].B2M_seq == '' for x in db.MHCI_data):
+                B2M_flag = True
 
     # remove bad files
     os.system('rm %s %s' %(log1, log2))
 
     assert log_flag
     assert templates_flag 
-    assert pass_test
+    assert peptide_flag
+    assert allele_flag
+    assert B2M_flag
 
 def test_load_db():
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -211,7 +227,7 @@ def test_pandora_MHCI_modelling():
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
-    if mod.template.id == '2X4R' and [c.id for c in mod.target.initial_model.get_chains()] == ['M', 'P']:
+    if mod.template.id == '2X4R' and [c.id for c in mod.target.initial_model.get_chains()] == ['M', 'B', 'P']:
         if float(mod.results[0].molpdf) < 2000 and float(mod.results[0].molpdf) > 0:
             pass_test = True
     # remove output file
