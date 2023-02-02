@@ -233,6 +233,15 @@ docker run -v <path/to/local/db>:/root/PANDORA_databases/default/ -it pandora
 
 ## Tutorial
 
+#### Differences between pMHC-I modeling and pMHC-II modeling setups
+PANDORA is the first package capable of handling both pMHC-I and pMHC-II complexes, but with few setup differences, listed in the table below:
+
+
+| --- | pMHC-I | pMHC-II |
+| --- | --- | --- |
+| Anchors | User-provided, predicted with netMHCpan  or automatically assigned on canonical spacing | User-provided or predicted by netMHCIIpan. **Cannot** be automatically assigned.| 
+| MHC chains sequences | Alpha chain is called "M_chain_seq" and Beta chain is called "B2M_seq". Alpha chain is required (either as sequence or allele name). B2M is not required and will be retrieved from the selected template if not provided. | Alpha chain is called "M_chain_seq" and Beta chain is called "N_chain_seq". They are both required **except for HLA-DR**, for which the alpha chain will be automatically be assigned as HLA-DRA1*01:01 if not provided |
+
 #### Example 1 : Generating a peptide:MHC complex given the peptide sequence
 PANDORA requires at least these information to generate models:
 - Peptide sequence
@@ -274,7 +283,7 @@ case = Pandora.Pandora(target, db)
 case.model()
 ```
 
-Note: The user can also input the MHC chain sequence directly, without having to rely on the allele name. The argument to provide in this case is `M_chain_seq` for chain Alpha (and `N_chain_seq` for chain beta, only when modelling MHC class II). Please note that PANDORA completely ignores the B2-Microglobulin for the modelling.
+Note: The user can also input the MHC chain sequence directly, without having to rely on the allele name. The argument to provide in this case is `M_chain_seq` for chain Alpha and either `B2M_seq` for MHC-I or `N_chain_seq` for MHC-II beta chain.
 
 #### Example 2: Run PANDORA Wrapper on multiple cases (running in parallel on multiple cores)
 
@@ -407,6 +416,7 @@ target = Target(id='1A1M',
 case = Pandora.Pandora(target, db)
 case.model(benchmark=True)
 ```
+
 ## Code Design
 PANDORA has been implemented in an Object-Oriented Design(OOD). Resulting in a comprehensible and user-friendly framework.
 

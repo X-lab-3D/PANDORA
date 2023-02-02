@@ -12,7 +12,7 @@ Basic building Example:
 >>> from PANDORA import Database
 >>>
 >>> db = Database.Database()
->>> db.construct_database(save='./database/full_db.pkl', download=True)
+>>> db.construct_database()
 >>>
 
 A database can be easily loaded and edited.
@@ -22,11 +22,11 @@ To do so, you will need to read your structure into a Biopython structure object
 >>> from PANDORA import Database
 >>>
 >>> #Load the database
->>> db = Database.load('./database/full_db.pkl')
+>>> db = Database.load()
 >>>
 >>> db.add_structure(id='0000', allele_type=['HLA-A*02:01'],
                       peptide = 'AAALLLAAA', MHC_class = 'I',
-                      chain_seq = [], anchors = [],
+                      anchors = [],
                       pdb_path = './PDBs/pMHCI/0000.pdb', pdb = False)
 
 Database

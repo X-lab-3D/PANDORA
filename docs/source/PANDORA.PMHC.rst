@@ -15,8 +15,8 @@ Basic target Example:
 >>> from PANDORA.PMHC import Target
 >>>
 >>> target = PMHC.Target(id = 'myTestCase',
->>>     MHC_class = 'II',
->>>     allele_type = 'HLA-A*0201'
+>>>     MHC_class = 'I',
+>>>     allele_type = 'HLA-A*02:01'
 >>>     peptide = 'LLFGYPVYV',
 >>>     anchors = [2,9])
 >>>
