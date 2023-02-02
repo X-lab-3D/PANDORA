@@ -1,4 +1,5 @@
 import os
+import pytest
 import PANDORA
 from PANDORA import Contacts
 from PANDORA import Align
@@ -12,6 +13,7 @@ from PANDORA import Wrapper
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
 
+@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCI_modelling")
 def test_PMHC_target():
     # Create target object
     target = Target('1A1O',
@@ -33,7 +35,7 @@ def test_PMHC_target():
 
     assert pass_test
 
-
+@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
 def test_PMHC_template():
     # Create template object
     template = Template('1A1O',
@@ -60,7 +62,7 @@ def test_fail_PMHC():
 
     assert pass_test
 
-
+@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
 def test_contacts():
     # Calculate atom contacts
     c = Contacts.Contacts(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
@@ -72,7 +74,7 @@ def test_contacts():
     assert pass_test
 
 
-
+@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCI_modelling")
 def test_align():
     # initiate target and template object
     template = Template('1A1O',
@@ -86,6 +88,7 @@ def test_align():
                                        'DLGTLRGYYNQSEAGSHTVQRMYGCDVGSDWRFLRGYHQYAYDGKDYIALKEDLRSWTAADMAAQTTKHKWEAAHV'
                                        'AEQLRAYLEGTCVEWLRRYLENGKETLQRTDAPKTHMTHHAVSDHEATLRCWALSFYPAEITLTWQRDGEDQTQDT'
                                        'ELVETRPAGDGTFQKWAAVVVPSGQEQRYTCHVQHEGLPKPLTLRWE',
+                         B2M_seq='MIQRTPKIQVYSRHPAENGKSNFLNCYVSGFHPSDIEVDLLKNGERIEKVEHSDLSFSKDWSFYLLYYTEFTPTEKDEYACRVNHVTLSQPKIVKWDRDM',
                          anchors = [2, 9],
                          output_dir=PANDORA.PANDORA_path + '/../test/')
     # align target and template
@@ -100,7 +103,7 @@ def test_align():
 
     assert pass_test
 
-
+@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
 def test_clean_MHCI_structure():
     x = Database_functions.parse_pMHCI_pdb('1A1O',
                        indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
@@ -110,7 +113,7 @@ def test_clean_MHCI_structure():
 
     assert x.peptide == 'KPIVQYDNF' and [i.id for i in x.pdb.get_chains()] == ['M', 'B', 'P']
 
-
+@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
 def test_clean_MHCII_structure():
     x = Database_functions.parse_pMHCII_pdb('2NNA',
                        indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
@@ -175,6 +178,7 @@ def test_load_db():
 
     assert pass_test
 
+@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCI_modelling")
 def test_template_select_MHCI():
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
@@ -191,6 +195,7 @@ def test_template_select_MHCI():
 
     assert mod.template.id == '2X4R' and mod.template.peptide == 'NLVPMVATV'
 
+@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCII_modelling")
 def test_template_select_MHCII():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
