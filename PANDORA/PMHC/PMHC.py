@@ -143,6 +143,8 @@ class Template(PMHC):
         if self.MHC_class == 'I':
             if self.M_chain_seq == '':
                 self.M_chain_seq = chain_seqs[0]
+            if self.B2M_seq == '':
+                self.B2M_seq = chain_seqs[1]
             if not self.peptide:
                 self.peptide = chain_seqs[-1]
         if self.MHC_class == 'II':

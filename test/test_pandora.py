@@ -13,97 +13,7 @@ from PANDORA import Wrapper
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
 
-@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCI_modelling")
-def test_PMHC_target():
-    # Create target object
-    target = Target('1A1O',
-                         allele_type=['HLA-B*5301', 'HLA-B*5301'],
-                         peptide='KPIVQYDNF',
-                         M_chain_seq = 'GSHSMRYFYTAMSRPGRGEPRFIAVGYVDDTQFVRFDSDAASPRTEPRPPWIEQEGPEYWDRNTQIFKTNTQTYRE'
-                                       'NLRIALRYYNQSEAGSHIIQRMYGCDLGPDGRLLRGHDQSAYDGKDYIALNEDLSSWTAADTAAQITQRKWEAARV'
-                                       'AEQLRAYLEGLCVEWLRRYLENGKETLQRADPPKTHVTHHPVSDHEATLRCWALGFYPAEITLTWQRDGEDQTQDT'
-                                       'ELVETRPAGDRTFQKWAAVVVPSGEEQRYTCHVQHEGLPKPLTLRWEP',
-                         anchors = [2, 9])
-    # test if the inital model is empty, MHC class, the peptide chain, the allele and anchors
-    pass_test = False
-    if (target.initial_model == False and 
-        target.MHC_class == 'I' and 
-        target.peptide == 'KPIVQYDNF' and
-        target.anchors == [2, 9]):
-        
-        pass_test = True
-
-    assert pass_test
-
-@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
-def test_PMHC_template():
-    # Create template object
-    template = Template('1A1O',
-                         allele_type=['HLA-B*5301', 'HLA-B*5301'])
-    # check calculated anchors, M_chain, peptide, allele and pdb chains
-    pass_test = False
-    if (template.anchors == [2,9] and 
-        template.M_chain_seq != '' and 
-        template.peptide == 'KPIVQYDNF' and
-        template.allele_type == ['HLA-B*53:01', 'HLA-B*53:01'] and
-        [i.id for i in template.pdb.get_chains()] == ['M', 'P']):
-            pass_test = True
-
-    assert pass_test
-
-
-def test_fail_PMHC():
-    # Try to fail initiating a template object
-    pass_test = False
-    try:
-        Template('id', ['allele'])
-    except:
-        pass_test = True
-
-    assert pass_test
-
-@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
-def test_contacts():
-    # Calculate atom contacts
-    c = Contacts.Contacts(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
-    # check length of output, chains of the pdb and the pdb path
-    pass_test = False
-    if len(c.chain_contacts[0]) == 9 and [i.id for i in c.PDB.get_chains()] == ['M', 'P'] and c.pdb_path != '':
-        pass_test = True
-
-    assert pass_test
-
-
-@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCI_modelling")
-def test_align():
-    # initiate target and template object
-    template = Template('1A1O',
-                         allele_type=['HLA-B*5301', 'HLA-B*5301'],
-                         pdb_path=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb',
-                             anchors = [2, 9])
-    target = Target('2X4R',
-                         allele_type=['test'],
-                         peptide='NLVPMVATV',
-                         M_chain_seq = 'GSHSMRYFFTSVSRPGRGEPRFIAVGYVDDTQFVRFDSDAASQRMEPRAPWIEQEGPEYWDGETRKVKAHSQTHRV'
-                                       'DLGTLRGYYNQSEAGSHTVQRMYGCDVGSDWRFLRGYHQYAYDGKDYIALKEDLRSWTAADMAAQTTKHKWEAAHV'
-                                       'AEQLRAYLEGTCVEWLRRYLENGKETLQRTDAPKTHMTHHAVSDHEATLRCWALSFYPAEITLTWQRDGEDQTQDT'
-                                       'ELVETRPAGDGTFQKWAAVVVPSGQEQRYTCHVQHEGLPKPLTLRWE',
-                         B2M_seq='MIQRTPKIQVYSRHPAENGKSNFLNCYVSGFHPSDIEVDLLKNGERIEKVEHSDLSFSKDWSFYLLYYTEFTPTEKDEYACRVNHVTLSQPKIVKWDRDM',
-                         anchors = [2, 9],
-                         output_dir=PANDORA.PANDORA_path + '/../test/')
-    # align target and template
-    a = Align.Align(target, template)
-    # check keys of aligned output and output .ali file path
-    pass_test = False
-    if a.aligned_seqs_and_pept['1A1O P'] == 'KPIVQYDNF' and '2X4R M' in a.aligned_seqs_and_pept:
-        if os.path.basename(a.alignment_file) == '2X4R.ali':
-            pass_test = True
-    # Remove output dir
-    os.system('rm -r %s1A1O_2X4R' %(PANDORA.PANDORA_path + '/../test/'))
-
-    assert pass_test
-
-@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
+#@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
 def test_clean_MHCI_structure():
     x = Database_functions.parse_pMHCI_pdb('1A1O',
                        indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
@@ -113,7 +23,7 @@ def test_clean_MHCI_structure():
 
     assert x.peptide == 'KPIVQYDNF' and [i.id for i in x.pdb.get_chains()] == ['M', 'B', 'P']
 
-@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
+#@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
 def test_clean_MHCII_structure():
     x = Database_functions.parse_pMHCII_pdb('2NNA',
                        indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
@@ -178,7 +88,97 @@ def test_load_db():
 
     assert pass_test
 
-@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCI_modelling")
+#@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCI_modelling")
+def test_PMHC_target():
+    # Create target object
+    target = Target('1A1O',
+                         allele_type=['HLA-B*5301', 'HLA-B*5301'],
+                         peptide='KPIVQYDNF',
+                         M_chain_seq = 'GSHSMRYFYTAMSRPGRGEPRFIAVGYVDDTQFVRFDSDAASPRTEPRPPWIEQEGPEYWDRNTQIFKTNTQTYRE'
+                                       'NLRIALRYYNQSEAGSHIIQRMYGCDLGPDGRLLRGHDQSAYDGKDYIALNEDLSSWTAADTAAQITQRKWEAARV'
+                                       'AEQLRAYLEGLCVEWLRRYLENGKETLQRADPPKTHVTHHPVSDHEATLRCWALGFYPAEITLTWQRDGEDQTQDT'
+                                       'ELVETRPAGDRTFQKWAAVVVPSGEEQRYTCHVQHEGLPKPLTLRWEP',
+                         anchors = [2, 9])
+    # test if the inital model is empty, MHC class, the peptide chain, the allele and anchors
+    pass_test = False
+    if (target.initial_model == False and 
+        target.MHC_class == 'I' and 
+        target.peptide == 'KPIVQYDNF' and
+        target.anchors == [2, 9]):
+        
+        pass_test = True
+
+    assert pass_test
+
+#@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
+def test_PMHC_template():
+    # Create template object
+    template = Template('1A1O',
+                         allele_type=['HLA-B*5301', 'HLA-B*5301'])
+    # check calculated anchors, M_chain, peptide, allele and pdb chains
+    pass_test = False
+    if (template.anchors == [2,9] and 
+        template.M_chain_seq != '' and 
+        template.peptide == 'KPIVQYDNF' and
+        template.allele_type == ['HLA-B*53:01', 'HLA-B*53:01'] and
+        [i.id for i in template.pdb.get_chains()] == ['M', 'P']):
+            pass_test = True
+
+    assert pass_test
+
+
+def test_fail_PMHC():
+    # Try to fail initiating a template object
+    pass_test = False
+    try:
+        Template('id', ['allele'])
+    except:
+        pass_test = True
+
+    assert pass_test
+
+#@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
+def test_contacts():
+    # Calculate atom contacts
+    c = Contacts.Contacts(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
+    # check length of output, chains of the pdb and the pdb path
+    pass_test = False
+    if len(c.chain_contacts[0]) == 9 and [i.id for i in c.PDB.get_chains()] == ['M', 'P'] and c.pdb_path != '':
+        pass_test = True
+
+    assert pass_test
+
+
+#@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCI_modelling")
+def test_align():
+    # initiate target and template object
+    template = Template('1A1O',
+                         allele_type=['HLA-B*5301', 'HLA-B*5301'],
+                         pdb_path=PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb',
+                             anchors = [2, 9])
+    target = Target('2X4R',
+                         allele_type=['test'],
+                         peptide='NLVPMVATV',
+                         M_chain_seq = 'GSHSMRYFFTSVSRPGRGEPRFIAVGYVDDTQFVRFDSDAASQRMEPRAPWIEQEGPEYWDGETRKVKAHSQTHRV'
+                                       'DLGTLRGYYNQSEAGSHTVQRMYGCDVGSDWRFLRGYHQYAYDGKDYIALKEDLRSWTAADMAAQTTKHKWEAAHV'
+                                       'AEQLRAYLEGTCVEWLRRYLENGKETLQRTDAPKTHMTHHAVSDHEATLRCWALSFYPAEITLTWQRDGEDQTQDT'
+                                       'ELVETRPAGDGTFQKWAAVVVPSGQEQRYTCHVQHEGLPKPLTLRWE',
+                         B2M_seq='MIQRTPKIQVYSRHPAENGKSNFLNCYVSGFHPSDIEVDLLKNGERIEKVEHSDLSFSKDWSFYLLYYTEFTPTEKDEYACRVNHVTLSQPKIVKWDRDM',
+                         anchors = [2, 9],
+                         output_dir=PANDORA.PANDORA_path + '/../test/')
+    # align target and template
+    a = Align.Align(target, template)
+    # check keys of aligned output and output .ali file path
+    pass_test = False
+    if a.aligned_seqs_and_pept['1A1O P'] == 'KPIVQYDNF' and '2X4R M' in a.aligned_seqs_and_pept:
+        if os.path.basename(a.alignment_file) == '2X4R.ali':
+            pass_test = True
+    # Remove output dir
+    os.system('rm -r %s1A1O_2X4R' %(PANDORA.PANDORA_path + '/../test/'))
+
+    assert pass_test
+
+#@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCI_modelling")
 def test_template_select_MHCI():
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
@@ -195,7 +195,7 @@ def test_template_select_MHCI():
 
     assert mod.template.id == '2X4R' and mod.template.peptide == 'NLVPMVATV'
 
-@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCII_modelling")
+#@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCII_modelling")
 def test_template_select_MHCII():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
