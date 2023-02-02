@@ -13,7 +13,7 @@ from PANDORA import Wrapper
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
 
-#@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
+@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
 def test_clean_MHCI_structure():
     x = Database_functions.parse_pMHCI_pdb('1A1O',
                        indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
@@ -23,7 +23,7 @@ def test_clean_MHCI_structure():
 
     assert x.peptide == 'KPIVQYDNF' and [i.id for i in x.pdb.get_chains()] == ['M', 'B', 'P']
 
-#@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
+@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
 def test_clean_MHCII_structure():
     x = Database_functions.parse_pMHCII_pdb('2NNA',
                        indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
