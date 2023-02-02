@@ -42,7 +42,7 @@ def test_construct_database():
 
     # Construct database object
     db = Database.Database()
-    db.construct_database(save=False, download=False)
+    db.construct_database(save=PANDORA.PANDORA_data + '/PANDORA_database.pkl', download=False)
 
     # test the creation of bad files, log files and the information inside of the database object
     peptide_flag = False
@@ -121,7 +121,7 @@ def test_PMHC_template():
         template.M_chain_seq != '' and 
         template.peptide == 'KPIVQYDNF' and
         template.allele_type == ['HLA-B*53:01', 'HLA-B*53:01'] and
-        [i.id for i in template.pdb.get_chains()] == ['M', 'P']):
+        [i.id for i in template.pdb.get_chains()] == ['M', 'B', 'P']):
             pass_test = True
 
     assert pass_test
@@ -223,6 +223,7 @@ def test_pandora_MHCI_modelling():
                          allele_type=db.MHCI_data['1A1O'].allele_type,
                          peptide=db.MHCI_data['1A1O'].peptide,
                          M_chain_seq=db.MHCI_data['1A1O'].M_chain_seq,
+                         B2M_seq=db.MHCI_data['1A1O'].B2M_seq,
                          anchors=db.MHCI_data['1A1O'].anchors,
                          output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/')
 
