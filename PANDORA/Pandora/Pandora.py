@@ -48,7 +48,10 @@ class Pandora:
             print('\tTarget MHC Class: %s' % self.target.MHC_class)
             print('\tTarget Allele:  %s' % self.target.allele_type)
             print('\tTarget Peptide: %s' % self.target.peptide)
-            print('\tTarget Anchors: %s\n' % (',').join([str(x) for x in self.target.anchors]))
+            try:
+                print('\tTarget Anchors: %s\n' % (',').join([str(x) for x in self.target.anchors]))
+            except TypeError:
+                raise Exception('ERROR: Anchors missing at template selection step')
 
         if self.template is None: # Only find the best template if the user didn't specify one
             # if verbose and self.target.M_chain_seq != '' and seq_based_templ_selection:
@@ -109,7 +112,7 @@ class Pandora:
     def copy_template(self):
         ''' Move the template pdb to the output directory'''
         if os.path.isfile(self.template.get_pdb_path()):
-            os.system('cp %s %s/%s.pdb' %(self.template.get_pdb_path(), self.target.output_dir, self.template.id))
+            os.system(f'cp {self.template.get_pdb_path()} {self.target.output_dir}/{self.template.id}.pdb')
         else:
             print('Template object could not be found. Please check the path: %s.' %self.template.get_pdb_path())
             raise Exception('Template file not found.')      
@@ -132,7 +135,10 @@ class Pandora:
     def write_ini_script(self):
         ''' Write the python scipt that modeller uses for creating the initial model'''
         #os.chdir(os.path.dirname(PANDORA.PANDORA_path))
-        Modelling_functions.write_ini_script(self.target, self.template, self.alignment.alignment_file, self.target.output_dir)
+        Modelling_functions.write_ini_script(target=self.target, template=self.template, 
+                                             alignment_file=self.alignment.alignment_file, 
+                                             output_dir=self.target.output_dir,
+                                             clip_C_domain=self.clip_C_domain)
 
     def create_initial_model(self, python_script = 'cmd_modeller_ini.py', verbose = True):
         ''' Run modeller to create the initial model. Modeller can only output files in its work directory
@@ -209,6 +215,22 @@ class Pandora:
         with open(self.target.output_dir + '/contacts_' + self.target.id + '.list', 'w') as f:
                 for i in self.target.anchor_contacts:
                     f.write('\t'.join('%s' % x for x in i) + '\n')
+                    
+    def remove_B2M(self):
+        """
+        Rewrites the template file without Beta-2 Microglobulin
+
+        Returns:
+            None.
+
+        """
+        #Read the template file excluding B
+        with open(f'{self.target.output_dir}/{self.template.id}.pdb', 'r') as templ_f:
+            lines = [x for x in templ_f if x[20:23] != ' B ']
+        
+        #Re-write the template file
+        with open(f'{self.target.output_dir}/{self.template.id}.pdb', 'w') as templ_f:
+            templ_f.writelines(lines)
 
     def write_modeller_script(self, n_loop_models=20, n_homology_models = 1, loop_refinement='slow',
                               n_jobs=None, stdev=0.1, helix=False, sheet=False):
@@ -237,7 +259,8 @@ class Pandora:
         Modelling_functions.write_modeller_script(self.target, self.template, self.alignment.alignment_file,
                                                   self.target.output_dir, n_loop_models=n_loop_models,
                                                   n_homology_models=n_homology_models, loop_refinement=loop_refinement,
-                                                  n_jobs=n_jobs, stdev=stdev, helix=helix, sheet=sheet)
+                                                  n_jobs=n_jobs, stdev=stdev, helix=helix, sheet=sheet,
+                                                  clip_C_domain=self.clip_C_domain)
 
     def __log(self, target_id, template_id, error, verbose=True):
         ''' Keeps track of what goes wrong while parsing
@@ -327,13 +350,20 @@ class Pandora:
 
         print('###############')
         print('TEMPLATE: ', self.template.id)
-        # Prepare the output directory
+        # Copy the template in the output directory
         try:
             self.copy_template()
         except:
-            self.__log(self.target.id, self.template.id, 'Failed creating output directory')
-            raise Exception('Failed creating output directory')
+            self.__log(self.target.id, self.template.id, 'Failed copying template file')
+            raise Exception('Failed copying template file')
 
+        if self.clip_C_domain and self.target.MHC_class == 'I':
+            # Remove B2M from template
+            try:
+                self.remove_B2M()
+            except:
+                self.__log(self.target.id, self.template.id, 'Failed removing B2M from template file')
+                raise Exception('Failed removing B2M from template file')
 
 
         # Perform sequence alignment. This is used to superimpose the target on the template structure in later steps

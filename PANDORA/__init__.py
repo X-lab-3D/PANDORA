@@ -24,7 +24,7 @@ PANDORA_data = os.path.expanduser(data_folder)
 
 alpha_genes = ['HLA-A', 'HLA-B', 'HLA-C', 'HLA-E', 'HLA-F', 'HLA-G',
                 'HLA-DQA', 'HLA-DRA', 'HLA-DPA',
-                'H2-EA', 'MH2-AA']
+                'H2-', 'MH2-', 'MH1-']
 beta_genes = ['HLA-DQB', 'HLA-DRB', 'HLA-DPB',
                'H2-EB', 'MH2-AB', 'H2-AB']
 

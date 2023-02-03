@@ -12,7 +12,7 @@ import re
 class PMHC(ABC):
 
     def __init__(self, id, peptide = '', allele_type = [], MHC_class = 'I',
-                 M_chain_seq = '', N_chain_seq = '', anchors = [],
+                 M_chain_seq = '', B2M_seq='', N_chain_seq = '', anchors = [],
                  helix=False, sheet=False):
         ''' pMHC class. Acts as a parent class to Template and Target
 
@@ -31,6 +31,7 @@ class PMHC(ABC):
         self.MHC_class = MHC_class
         self.peptide = peptide
         self.M_chain_seq = M_chain_seq
+        self.B2M_seq = B2M_seq
         self.N_chain_seq = N_chain_seq
         self.anchors = anchors
         self.helix = helix
@@ -60,7 +61,7 @@ class PMHC(ABC):
 class Template(PMHC):
 
     def __init__(self, id, peptide='',  allele_type=[], MHC_class='I',
-                 M_chain_seq='', N_chain_seq='', anchors=[], G_domain_span=False,
+                 M_chain_seq='', B2M_seq='', N_chain_seq='', anchors=[], G_domain_span=False,
                  helix=False, sheet=False, pdb_path=False, pdb=False,
                  remove_biopython_object=False):
         ''' Template structure class. This class holds all information of a template structure that is used for
@@ -83,7 +84,7 @@ class Template(PMHC):
         '''
         super().__init__(id, peptide=peptide, allele_type=allele_type,
                          MHC_class=MHC_class, M_chain_seq=M_chain_seq,
-                         N_chain_seq=N_chain_seq, anchors=anchors,
+                         B2M_seq=B2M_seq, N_chain_seq=N_chain_seq, anchors=anchors,
                          helix=helix, sheet=sheet)
         self.id = id
         self.pdb = pdb
@@ -142,6 +143,8 @@ class Template(PMHC):
         if self.MHC_class == 'I':
             if self.M_chain_seq == '':
                 self.M_chain_seq = chain_seqs[0]
+            if self.B2M_seq == '':
+                self.B2M_seq = chain_seqs[1]
             if not self.peptide:
                 self.peptide = chain_seqs[-1]
         if self.MHC_class == 'II':
@@ -236,7 +239,8 @@ class Template(PMHC):
 class Target(PMHC):
 
     def __init__(self, id, peptide, allele_type=[], MHC_class = 'I',
-                 M_chain_seq = '', N_chain_seq = '', anchors = [],
+                 M_chain_seq = '', N_chain_seq = '', 
+                 B2M_seq='', anchors = [],
                  helix=False, sheet=False, templates = False,
                  use_netmhcpan = False, use_templ_seq=False, output_dir=False,
                  rm_netmhcpan_output=True):
@@ -260,7 +264,10 @@ class Target(PMHC):
             rm_netmhcpan_output: (bool) If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
         ''' 
 
-        super().__init__(id, peptide, allele_type, MHC_class, M_chain_seq, N_chain_seq, anchors, helix, sheet)
+        super().__init__(id, peptide=peptide, allele_type=allele_type, 
+                         MHC_class=MHC_class, M_chain_seq=M_chain_seq, 
+                         N_chain_seq=N_chain_seq, B2M_seq=B2M_seq, 
+                         anchors=anchors, helix=helix, sheet=sheet)
         self.templates = templates
         self.initial_model = False
         self.contacts = False
@@ -322,6 +329,8 @@ class Target(PMHC):
                 print('Error: Something went wrong when predicting the anchors using netMHCIIpan')
                 raise Exception(e)
 
+        print('###############################################')
+        self.info()
 
     def info(self):
         """ Print the basic info of this structure
@@ -469,12 +478,13 @@ class Target(PMHC):
             #print("or provide the MHC sequence as target.M_chain_seq (and target.N_chain_seq for MHCII beta chain)")
 
     def fill_allele_seq_info(self, use_templ_seq=False):
-        """_summary_
+        """Fills in MHC-II alpha chain name if missing and it tries to retireve the
+        sequence according to the allele name of vice versa
 
         Args:
             use_templ_seq (bool, optional): If true, it uses the template MHC sequence 
-                for each chain a sequence could not be found. This function will 
-                be removed in later releases. Defaults to False.
+                for each chain a sequence could not be found. This function is
+                mainly for benchmarking reason. Defaults to False.
 
         Raises:
             Exception: _description_
@@ -501,7 +511,7 @@ class Target(PMHC):
                     print('\nWARNING: chain Beta allele name found only.')
                     print('PANDORA will assume chain alpha is HLA-DRA*01')
 
-        #Check if there are allele name for each MHC chain
+        #Check if there are allele names for each MHC chain
         if self.M_chain_seq =='' and M_allele_flag:
             print('\nNo MHC alpha chain sequence was provided. Trying to retrieve it from reference sequences...')
             try:
