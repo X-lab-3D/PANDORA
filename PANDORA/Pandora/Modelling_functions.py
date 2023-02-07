@@ -649,22 +649,21 @@ def write_ini_script(target, template, alignment_file, output_dir, clip_C_domain
 
     if target.MHC_class == 'II':
         with open(output_dir + '/MyLoop.py', 'w') as myloopscript:
-            MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r')
+            MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r') #Hotfix only for the run --> Fix before commit!
             for line in MyL_temp:
                 if 'self.residue_range' in line and 'M.selection' in line:
-                    if anch[0] == 0:
-                        anch_1 = 1
-                    else:
-                        anch_1 = anch[0]
-                    if anch[-1] == (len(target.peptide)-1):
-                        anch_term = len(target.peptide)
-                    else:
-                        anch_term = anch[-1]
+                    #if anch[0] == 0:
+                    #    anch_1 = 1
+                    #else:
+                    #    anch_1 = anch[0]
+                    #if anch[-1] == (len(target.peptide)-1):
+                    #    anch_term = len(target.peptide)
+                    #else:
+                    #    anch_term = anch[-1]
                     #Write first and last anchors, to keep only the flanking regions flexible
-                    myloopscript.write(line % (1, anch_1, anch_term, len(target.peptide)))
-                    #for i in range(len(anch)-1): # Write all the inbetween acnhors if they are there
-                    #    myloopscript.write(line % (anch[i] + 2, anch[i+1]))
-                    #myloopscript.write(line % (anch[-1] + 2, len(target.peptide))) # Write the last anchor
+                    #myloopscript.write(line % (1, len(target.peptide)))
+                    myloopscript.write("        return M.selection(self.residue_range('%i:P', '%i:P'))\n" %(1, len(target.peptide)))
+
                 elif 'SPECIAL_RESTRAINTS_BREAK' in line:
                     break
                 elif 'contact_file = open' in line:
@@ -698,7 +697,9 @@ def write_ini_script(target, template, alignment_file, output_dir, clip_C_domain
 
 
 def write_modeller_script(target, template, alignment_file, output_dir, n_homology_models=1, n_loop_models = 20,
-                          loop_refinement='slow', n_jobs=None, stdev=0.1, helix = False, sheet = False, clip_C_domain=False):
+                          loop_refinement='slow', n_jobs=None, stdev=0.1, helix = False, sheet = False, 
+                          fully_flexible=False, clip_C_domain=False):
+                          
     ''' Write script that refines the loops of the peptide
     
     Args:
@@ -712,7 +713,8 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
             ore will not add any benefit but might occupy cores unnecessarily.
         loop_refinement (str): Level of loop refinement: very_fast,fast,slow,very_slow,slow_large.
             Defaults to slow
-        stdev (float): standard deviation of modelling restraints. Higher = more flexible restraints.
+        stdev (float): standard deviation of modelling restraints. Higher = more flexible restraints. 
+            This will have some effect only if fully_flexible is set to True. Defaults to 0.1
         helix (list): List of the alpha helix start and end-positions as integers. I.e. [3,8] for a helix between
             peptide residue 3 and 8.
         sheet (list): List containing: start position of B-sheet 1, start position of B-sheet 2 and the length of the
@@ -720,6 +722,8 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
             at the Oxigen atom of the 2nd residue of chain P and at the Nitrogen of the 54th residue of
             chain M and has a length of 2 H-bonds. Or; ["N:6:P", "O:13:P", -3], with -3 denoting an
             anti-parallel B-sheet with a length of 3 H-bonds.
+        fully_flexible (bool): if True, keeps the whole peptide flexible. Dicreases computational time by 30-50% 
+            but increases accuracy and allows for stdev. Defaults to False.
 
     '''
 
@@ -737,7 +741,10 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
                         myloopscript.write("        self.rename_segments(segment_ids=['M', 'P'], renumber_residues=[1, 1])")
                 # Add flexible region selection range
                 elif 'self.residue_range' in line and 'M.selection' in line:
-                    myloopscript.write(line %(anch[0]+1, anch[-1]-1))  # write the first anchor
+                    if fully_flexible:
+                        myloopscript.write(line %(1, len(target.peptide)))  # write the first anchor
+                    else:
+                        myloopscript.write(line %(anch[0]+1, anch[-1]-1))
                 # Add restraints standard deviation (only effective on non-fixed residues)
                 elif 'STDEV MARKER' in line:
                     myloopscript.write(line %(stdev))
@@ -758,7 +765,7 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
         with open(output_dir.replace('\\ ', ' ') + '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r')
             for line in MyL_temp:
-                if 'self.residue_range' in line and 'M.selection' in line:
+                if 'ANCHORS_PLACEHOLDER' in line:
                     if anch[0] == 0:
                         anch_1 = 1
                     else:
@@ -768,7 +775,13 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
                     else:
                         anch_term = anch[-1]
                     #Write first and last anchors, to keep only the flanking regions flexible
-                    myloopscript.write(line % (1, anch_1, anch_term, len(target.peptide)))
+                    if fully_flexible:
+                        #myloopscript.write(line % (1, len(target.peptide)))
+                        myloopscript.write("        return M.selection(self.residue_range('%i:P', '%i:P'))\n" %(1, len(target.peptide)))
+                    else:
+                        myloopscript.write("        return M.selection(self.residue_range('%i:P', '%i:P'), self.residue_range('%i:P', '%i:P'))\n" % 
+                                            (1, anch_1, anch_term, len(target.peptide)))
+                        #self.residue_range('%i:P', '%i:P'), self.residue_range('%i:P', '%i:P')
                     #for i in range(len(anch)-1): # Write all the inbetween acnhors if they are there
                     #    myloopscript.write(line % (anch[i] + 2, anch[i+1]))
                     #myloopscript.write(line % (anch[-1] + 2, len(target.peptide))) # Write the last anchor

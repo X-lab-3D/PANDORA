@@ -35,13 +35,15 @@ class Contacts:
 
         # If the user supplied anchors, calculate the anchor contacts
         if anchors: # Calculate peptide anchor residue - structure contacts
-            if isinstance(anchors, list):
+            if isinstance(anchors, list) or isinstance(anchors, tuple):
                 # First find which chain is the peptide chain by looking for the shortest chain
                 chain_len = [len(i) for i in self.PDB.get_chains()]
                 pept_chain = [i.id for i in self.PDB.get_chains()][chain_len.index(min(chain_len))]
                 # Only keep the contacts with
                 self.anchor_contacts = [i for i in self.chain_contacts if i[1] == pept_chain and i[2] in self.anchors or
                                         i[5] == pept_chain and i[6] in self.anchors]
+            else:
+                raise Exception('ERROR: target anchors are not a list nor a tuple')
 
         # Write output file if the user wants to
         if output_file:
