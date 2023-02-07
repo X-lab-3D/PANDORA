@@ -12,16 +12,16 @@ for generating peptide-MHC structures.
 PANDORA contains useful APIs for pre-processing pMHC template data, identify the most adequate
 template and adapt the modelling to the specifc case.
 
-Disclaimer: While PANDORA pMHC-I manuscript is available as preprint on `BiorXiv`_ and it is being reviewed for publication,
-PANDORA pMHC-II paper is still under preparation.
+Disclaimer: While PANDORA pMHC-I manuscript has been published `Frontiers in Immunology`_ ,
+PANDORA pMHC-II paper is under preparation.
 
 .. _`Pandora`: https://github.com/X-lab-3D/PANDORA
-.. _`BiorXiv`: https://www.biorxiv.org/content/10.1101/2022.03.04.482467v1
+.. _`Frontiers in Immunology`: https://www.frontiersin.org/articles/10.3389/fimmu.2022.878762/full
 
 **Pandora highlights**:
 
 - Automated Database collection from IMGT/3d-structureDB
-- Modularized peptide:MHC modelling approach
+- Modularized peptide:MHC I and II modelling approach
 - Flexible modelling scripts (editable by MODELLER expert users)
 
 Tutorial
@@ -30,7 +30,8 @@ Tutorial
 .. toctree::
    :maxdepth: 2
 
-   tutorial
+   tutorial 
+   advanced_tutorial
 
 API Reference
 -------------

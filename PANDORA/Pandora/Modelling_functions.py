@@ -1,12 +1,13 @@
 from Bio.Align import substitution_matrices
 import os
+import traceback
 import subprocess
 import PANDORA
 import pickle
-from PANDORA.PMHC import Model
+from PANDORA import Model
 # from Bio import Align
 from Bio import pairwise2
-#from PANDORA.Pandora import Align
+#from PANDORA import Align
 #import statistics
 from Bio.Align import PairwiseAligner
 from datetime import datetime
@@ -113,19 +114,37 @@ def check_presence(target, database, seq_based_templ_selection = False):
     return target_in_db
 
 
-def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
+def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, rm_netmhcpan_output=True):
     '''Uses netMHCIIpan to predict the binding core of a peptide and infer the anchor positions from that.
 
     Args:
-        target: (Target): Target object containing the peptide sequence and allele type
+        peptide: (str): AA sequence of the peptide
+        allele_type: (lst): list of strings of allele types
+        output_dir: (string) Path to output directory 
+        verbose: (bool): Print information. Default = True
+        rm_netmhcpan_output: (bool): If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
 
     Returns: (lst): list of predicted anchor predictions
 
     '''
+    
+    # Retrieves the enviroment variable netMHCIIpan
+    netmhcpan_file_path = set([x for x in [os.getenv('netMHCIIpan', default=None), 
+                          os.popen('which netMHCIIpan').read().strip()] 
+                          if type(x) == str and re.search("\/netMHCIIpan\-\d+\.\d+\/netMHCIIpan$", x)])
+    try:
+        netmhcpan_file_path = netmhcpan_file_path.pop()
+    except:
+        raise Exception("Need netMHCIIpan to predict anchor positions. Please download and install netMHCIIpan.\n\n"
+        "You can request the software at https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1 in the 'Downloads' section.\n"
+        "After installing netMHCpan, make sure it's added to your PATH or as an alias to your .bashrc / .bash_profile.\n")
+        
+    netmhcpan_path = os.path.dirname(netmhcpan_file_path)
+
     all_netMHCpan_alleles = []
-    with open(PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/data/allele.list') as f:
+    with open(os.path.join(netmhcpan_path, 'data/allelelist.txt')) as f:
         for line in f:
-            all_netMHCpan_alleles.append(line.replace('\n', ''))
+            all_netMHCpan_alleles.append(line.split()[0].replace('\n', ''))
 
     # Format the alles to netMHCIIpan readable format
     target_alleles = [i.split('-')[-1].replace('*', '_') for i in allele_type]
@@ -162,11 +181,8 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
     target_alleles_str = ','.join(target_alleles)
 
     # Setup files
-    netmhciipan = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/netMHCIIpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s.txt' %(
-        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
-    outfile = PANDORA.PANDORA_path + '/../netMHCIIpan-4.0/tmp/%s_%s_%s_prediction.txt' %(
-        peptide, target_alleles[0], datetime.today().strftime('%Y%m%d_%H%M%S'))
+    infile = os.path.join(output_dir,f'{peptide}_{target_alleles[0].replace("*","").replace(":","")}_{datetime.today().strftime("%Y%m%d_%H%M%S")}.txt')
+    outfile = os.path.join(output_dir, f'{peptide}_{target_alleles[0].replace("*","").replace(":","")}_{datetime.today().strftime("%Y%m%d_%H%M%S")}_prediction.txt')
 
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
@@ -174,7 +190,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
 
     try:
         # run netMHCIIpan
-        os.system('%s -f %s -inptype 1 -a %s > %s' % (netmhciipan, infile, target_alleles_str, outfile))
+        subprocess.check_call('%s -f %s -inptype 1 -a %s > %s' % (netmhcpan_file_path, infile, target_alleles_str, outfile), shell=True)
 
         # Get the output from the netMHCIIpan prediction
         # {allele: (offset, core, core_reliability, score_EL, %rank_EL)}
@@ -194,9 +210,6 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
         print('Could not predict binding core using netMHCIIpan. Will use the most common anchor positions instead')
         return [3, 6, 8, 11]
 
-    # Remove output file
-    os.system('rm %s %s' % (infile, outfile))
-
     offset, core, core_reliability = max_scores[0]
     # Use the canonical spacing for 9-mer binding cores to predict the anchor positions
     predicted_anchors = [offset + 1, offset + 4, offset + 6, offset + 9]
@@ -208,27 +221,46 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, verbose=True):
         print('\toffset:\t%s\n\tcore:\t%s\n\tprob:\t%s\n' % (offset, core, core_reliability))
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' % predicted_anchors)
 
+    if rm_netmhcpan_output:
+        subprocess.check_call('rm %s' %infile, shell=True)
+        subprocess.check_call('rm %s' %outfile, shell=True)
+
     return predicted_anchors
+   
 
-
-def predict_anchors_netMHCpan(peptide, allele_type,
-                              verbose=True, rm_output=True):
-    '''Uses netMHCIIpan to predict the binding core of a peptide and infer the
+def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm_netmhcpan_output=True):
+    '''Uses netMHCIpan to predict the binding core of a peptide and infer the
     anchor positions from that.
 
     Args:
         peptide: (str): AA sequence of the peptide
         allele_type: (lst): list of strings of allele types
-        verbose: (bool):
+        output_dir: (string) Path to output directory
+        verbose: (bool): Print information. Default = True
+        rm_netmhcpan_output: (bool): If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
 
     Returns: (lst): list of predicted anchor predictions
 
     '''
-    all_netMHCpan_alleles = []
-    with open(PANDORA.PANDORA_path + '/../netMHCpan-4.1/data/allelenames') as f:
-        for line in f:
-            all_netMHCpan_alleles.append(line.split(' ')[0])#.replace(':',''))
     
+    # Retrieves the enviroment variable netMHCpan
+    netmhcpan_file_path = set([x for x in [os.getenv('netMHCpan', default=None), 
+                          os.popen('which netMHCpan').read().strip()] 
+                          if type(x) == str and re.search("\/netMHCpan\-\d+\.\d+\/netMHCpan$", x)])
+    try:
+        netmhcpan_file_path = netmhcpan_file_path.pop()
+    except:
+        raise Exception("Need netMHCpan to predict anchor positions. Please download and install netMHCpan.\n\n"
+        "You can request the software at https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1 in the 'Downloads' section.\n"
+        "After installing netMHCpan, make sure it's added to your PATH or as an alias to your .bashrc / .bash_profile.\n")
+    
+    netmhcpan_path = os.path.dirname(netmhcpan_file_path)
+
+    all_netMHCpan_alleles = []
+    with open(os.path.join(netmhcpan_path, 'data/allelenames')) as f:
+        for line in f:
+            all_netMHCpan_alleles.append(line.split()[0])#.replace(':',''))
+        
     ## Format alleles
     target_alleles = [i.replace('*','') for i in allele_type]
     ## Make sure only netMHCpan available alleles are used
@@ -237,22 +269,19 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     if len(target_alleles) == 0:
         print('ERROR: The provided Target allele is not available in NetMHCpan-4.1')
         return None
-    
+        
     target_alleles_str = ','.join(target_alleles)
-    
+        
     # Setup files
-    netmhcpan = PANDORA.PANDORA_path + '/../netMHCpan-4.1/netMHCpan'
-    infile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s.txt' %(
-        peptide, target_alleles[0].replace('*','').replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
-    outfile = PANDORA.PANDORA_path + '/../netMHCpan-4.1/tmp/%s_%s_%s_prediction.txt' %(
-        peptide, target_alleles[0].replace(':',''), datetime.today().strftime('%Y%m%d_%H%M%S'))
-    
+    infile = os.path.join(output_dir,f'{peptide}_{target_alleles[0].replace("*","").replace(":","")}_{datetime.today().strftime("%Y%m%d_%H%M%S")}.txt')
+    outfile = os.path.join(output_dir, f'{peptide}_{target_alleles[0].replace("*","").replace(":","")}_{datetime.today().strftime("%Y%m%d_%H%M%S")}_prediction.txt')
+
     # Write peptide sequence to input file for netMHCIIpan
     with open(infile, 'w') as f:
         f.write(peptide)
-    
-    os.system('%s -p %s -a %s > %s' %(netmhcpan, infile, target_alleles_str, outfile))
-    
+
+    subprocess.check_call('%s -p %s -a %s > %s' %(netmhcpan_file_path, infile, target_alleles_str, outfile), shell=True)
+        
     # Get the output from the netMHCIIpan prediction
     # {allele: (core, %rank_EL)}
     pred = {}
@@ -269,19 +298,19 @@ def predict_anchors_netMHCpan(peptide, allele_type,
     # Sort each allele result per Rank_EL
     for allele in pred:
         pred[allele] = list(sorted(pred[allele], key=lambda x:x[1]))
-    
+        
     if len(pred) == 0:
         print('ERROR: NetMHCpan-4.1 was not able to find any binding core for')
         print('the provided peptide and MHC allele')
         return None
-    
+        
     # For every allele, the binding core is predicted. Take the allele with the highest reliability score
     best_allele = min((pred[i][0][1], i) for i in pred)[1]
-    
+        
     # Do a quick alignment of the predicted core and the peptide to find the anchors. (the predicted binding core can
     # contain dashes -. Aligning them makes sure you take the right residue as anchor.
     alignment = pairwise2.align.globalxx(peptide, pred[best_allele][0][0])
-    
+        
     #If there are multiple possible solutions, take the one with no gap at the anchor (second) position
     if len(alignment)>1:
         flag = False
@@ -294,27 +323,27 @@ def predict_anchors_netMHCpan(peptide, allele_type,
                 break
         #If no options are available, take the first one
         if flag==False:
-             pept1 = alignment[0][0]
-             pept2 = alignment[0][1]
-        
+            pept1 = alignment[0][0]
+            pept2 = alignment[0][1]
+            
     else:
         pept1 = alignment[0][0]
         pept2 = alignment[0][1]
-    
+        
     # Remove gaps if in the same position
     to_remove = []
     for i, (aa1, aa2) in enumerate(zip(pept1, pept2)):
         if aa1 == aa2 == '-' and i != 0:
             to_remove.append(i)
     for x in reversed(to_remove):
-       pept1 = pept1[0:x:]+pept1[x+1::]
-       pept2 = pept2[0:x:]+pept2[x+1::]
+        pept1 = pept1[0:x:]+pept1[x+1::]
+        pept2 = pept2[0:x:]+pept2[x+1::]
 
     if verbose:
         print('Query peptide aligned to the core:')
         print(pept1)
         print(pept2)
-    
+        
     # Find the anchors by finding the first non dash from the left and from the right
     # Define chanonical ancors as starting list
     predicted_anchors = [2,len(peptide)]
@@ -334,23 +363,23 @@ def predict_anchors_netMHCpan(peptide, allele_type,
             p1 += 1
         if pept2[i] != '-':
             p2 += 1
-    
+        
     # Find the second anchor
     for i in range(len(pept2)):
         if pept2[::-1][i] != '-':
             predicted_anchors[1] = len([j for j in pept1[:len(pept1) -i] if j != '-'])
             #predicted_anchors[1] = len([j for j in pept2[::-1][i] if j != '-'])
             break
-    
+        
     if verbose:
         print('\tPredicted the binding core using netMHCpan (4.1):\n')
         print('\tIcore:\t%s\n\t%%Rank EL:\t%s\n' %(pred[best_allele][0][0], pred[best_allele][0][1] ))
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' %predicted_anchors)
+        
+    if rm_netmhcpan_output:
+        subprocess.check_call('rm %s' %infile, shell=True)
+        subprocess.check_call('rm %s' %outfile, shell=True)
     
-    if rm_output:
-        os.system('rm %s' %infile)
-        os.system('rm %s' %outfile)
-
     return predicted_anchors
 
 
@@ -427,7 +456,7 @@ def score_peptide_alignment(target, template, substitution_matrix='PAM30'):
 
 
 def find_template(target, database, best_n_templates = 1, benchmark=False, 
-                  blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/templates_blast_db/templates_blast_db'):
+                  blastdb=PANDORA.PANDORA_data + '/BLAST_databases/templates_blast_db/templates_blast_db'):
     ''' Selects the template structure that is best suited as template for homology modelling of the target
 
     Args:
@@ -471,7 +500,6 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
     else:
         no_seq_chains.append('M_score')
         
-    
     if target.MHC_class == 'II':
         if target.N_chain_seq != '':
             #Keep only G-domain
@@ -559,7 +587,10 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
                                 key=lambda x: x[1][class_variables[2]], reverse=True)
     putative_templates = {x[0] : x[1] for x in putative_templates}
     #Keep only max score templates
-    max_score = list(putative_templates.values())[0][class_variables[2]]
+    try:
+        max_score = list(putative_templates.values())[0][class_variables[2]]
+    except IndexError:
+        raise Exception('Putative templates list empty.')
     putative_templates = {x : putative_templates[x] for x in putative_templates 
                           if putative_templates[x][class_variables[2]] == max_score}
 
@@ -581,7 +612,7 @@ def find_template(target, database, best_n_templates = 1, benchmark=False,
 
     return templates, scores, keep_IL
 
-def write_ini_script(target, template, alignment_file, output_dir):
+def write_ini_script(target, template, alignment_file, output_dir, clip_C_domain=False):
     ''' Writes the MyLoop.py and cmd_modeller_ini.py files. This function takes two template python scripts and fills
         in the required information: Anchor positions for the MyLoop file and structure name + alignment file for the
         cmd_modeller_ini file.
@@ -600,7 +631,13 @@ def write_ini_script(target, template, alignment_file, output_dir):
         with open(output_dir+ '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
             for line in MyL_temp:
-                if 'self.residue_range' in line and 'M.selection' in line:
+                # Include or not B2M depending on clip_C_domain
+                if '#RENAME SEGMENTS PLACEHOLDER' in line:
+                    if not clip_C_domain:
+                        myloopscript.write("        self.rename_segments(segment_ids=['M', 'B', 'P'], renumber_residues=[1, 1, 1])")
+                    else:
+                        myloopscript.write("        self.rename_segments(segment_ids=['M', 'P'], renumber_residues=[1, 1])")
+                elif 'self.residue_range' in line and 'M.selection' in line:
                     myloopscript.write(line % (anch[0]+1, anch[-1]-1))
                 elif 'SPECIAL_RESTRAINTS_BREAK' in line:
                     break
@@ -660,7 +697,9 @@ def write_ini_script(target, template, alignment_file, output_dir):
 
 
 def write_modeller_script(target, template, alignment_file, output_dir, n_homology_models=1, n_loop_models = 20,
-                          loop_refinement='slow', n_jobs=None, stdev=0.1, helix = False, sheet = False, fully_flexible=False):
+                          loop_refinement='slow', n_jobs=None, stdev=0.1, helix = False, sheet = False, 
+                          fully_flexible=False, clip_C_domain=False):
+                          
     ''' Write script that refines the loops of the peptide
     
     Args:
@@ -694,17 +733,28 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
         with open(output_dir.replace('\\ ', ' ') + '/MyLoop.py', 'w') as myloopscript:
             MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template.py', 'r')
             for line in MyL_temp:
-                if 'self.residue_range' in line and 'M.selection' in line:
+                # Include or not B2M depending on clip_C_domain
+                if '#RENAME SEGMENTS PLACEHOLDER' in line:
+                    if not clip_C_domain:
+                        myloopscript.write("        self.rename_segments(segment_ids=['M', 'B', 'P'], renumber_residues=[1, 1, 1])")
+                    else:
+                        myloopscript.write("        self.rename_segments(segment_ids=['M', 'P'], renumber_residues=[1, 1])")
+                # Add flexible region selection range
+                elif 'self.residue_range' in line and 'M.selection' in line:
                     if fully_flexible:
                         myloopscript.write(line %(1, len(target.peptide)))  # write the first anchor
                     else:
                         myloopscript.write(line %(anch[0]+1, anch[-1]-1))
-                elif 'contact_file = open' in line:
-                    myloopscript.write(line %(target.id))
+                # Add restraints standard deviation (only effective on non-fixed residues)
                 elif 'STDEV MARKER' in line:
                     myloopscript.write(line %(stdev))
+                # Add contact file name
+                elif 'contact_file = open' in line:
+                    myloopscript.write(line %(target.id))
+                # Add Alpha helix restraints
                 elif helix and 'ALPHA-HELIX-MARKER' in line:
                     myloopscript.write(line.replace('# ALPHA-HELIX-MARKER', 'rsr.add(M.secondary_structure.alpha(self.residue_range("%s:P", "%s:P")))' %(helix[0], helix[1])))
+                # Add Beta sheet restraints
                 elif sheet and 'BETA-SHEET-MARKER' in line:
                     myloopscript.write(line.replace('# BETA-SHEET-MARKER', 'rsr.add(M.secondary_structure.sheet(atoms["%s"], atoms["%s"], sheet_h_bonds=%s))' %(sheet[0], sheet[1], sheet[2])))
                 else:
@@ -795,12 +845,14 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
     Returns: (list) of Model objects
 
     '''
+    # Identify current working directory
+    cwd = os.getcwd()
 
     # Change working directory
     os.chdir(output_dir)
     # run Modeller to perform homology modelling
     os.popen('python3 %s > modeller.log' %python_script).read()
-    os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+    os.chdir(cwd)
 
     # Parse .log file
     logf = []
@@ -847,6 +899,8 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
 
         except:
             print('WARNING: Error raised while calling Model.Model() for case %s' %target.id)
+            print(traceback.format_exc())
+            m = None
         results.append(m)
 
 
@@ -856,7 +910,7 @@ def run_modeller(output_dir, target, python_script = 'cmd_modeller.py', benchmar
 
     return results
 
-def blast_mhc_seq(seq, chain='M', blastdb=PANDORA.PANDORA_data + '/csv_pkl_files/refseq_blast_db/refseq_blast_db'):
+def blast_mhc_seq(seq, chain='M', blastdb=PANDORA.PANDORA_data + '/BLAST_databases/refseq_blast_db/refseq_blast_db'):
     try:
         command = (' ').join(['blastp','-db',blastdb, 
                                                  '-query',
@@ -1038,7 +1092,7 @@ def allele_name_adapter(MHC_class, ori_alleles, available_alleles):
                 else:
                     alleles[a] = alleles[a][:5]
                     
-    elif MHC_class =='I':
+    elif MHC_class =='II':
         for a in range(len(alleles)):
             if alleles[a].startswith('HLA'):      # Human
                 prefix = alleles[a].split('-')[0]

@@ -1,7 +1,7 @@
 # PANDORA
 
 ![Build](https://github.com/X-lab-3D/PANDORA/actions/workflows/main.yml/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/PANDORA/badge.svg?branch=master&kill_cache=1)](https://coveralls.io/github/X-lab-3D/PANDORA?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/PANDORA/badge.svg?branch=development)](https://coveralls.io/github/X-lab-3D/PANDORA?branch=development)
 [![Anaconda-Server Badge](https://anaconda.org/csb-nijmegen/csb-pandora/badges/version.svg)](https://anaconda.org/csb-nijmegen/csb-pandora)
 [![Documentation Status](https://readthedocs.org/projects/csb-pandora/badge/?version=latest)](http://csb-pandora.readthedocs.io/?badge=latest)
 
@@ -14,6 +14,7 @@
 - [Overview](#overview)
 - [Dependencies](#dependencies)
 - [Installation](#installation)
+- [Docker](#docker)
 - [Tutorial](#tutorial)
 - [Code Design](#code-design)
 - [Output](#output)
@@ -37,18 +38,17 @@ The following installations are required to start PANDORA installation:
 - conda
 - pip3
 
-The installation process will take care of installing the following dependencies (see [Installation](#installation)), no need to install them yourself.
+The (conda) installation process will take care of installing the following dependencies (see [Installation](#installation)):
 
 - [BioPython](https://anaconda.org/conda-forge/biopython)
-<!-- - [muscle](https://anaconda.org/bioconda/muscle) -->
-<!-- - [Modeller](https://anaconda.org/salilab/modeller) 9.23 or later -->
-- [pdb2sql](https://github.com/DeepRank/pdb2sql) (Optional, only for RMSD calculation)
-- [NetMHCpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class I anchors)
-- [NetMHCIIpan](https://services.healthtech.dtu.dk/software.php) (Optional, only if user wants to predict peptide:MHC class II anchors)
+- [muscle](https://anaconda.org/bioconda/muscle) >= 5.1
+- [Modeller](https://anaconda.org/salilab/modeller) >= 9.3
+- [Blast](https://anaconda.org/bioconda/blast) >= 10.2
+<!-- - [pdb2sql](https://github.com/DeepRank/pdb2sql) (Optional, only for RMSD calculation) -->
 
 
 ## Installation
-### Conda Installation (suggested)
+### Conda Installation (AVAILABLE FOR DEVELOPMENT BRANCH ONLY)
 
 #### 1. Get a Modeller Key License:
 Prior to PANDORA installation, you need to first activate MODELLER's license. Please request MODELLER license at: https://salilab.org/modeller/registration.html
@@ -56,7 +56,7 @@ Prior to PANDORA installation, you need to first activate MODELLER's license. Pl
 Replace XXXX with your MODELLER License key and run the command:
 
 ```
-alias KEY_MODELLER='XXXX'
+export KEY_MODELLER='XXXX'
 ```
 
 #### 2. Install PANDORA
@@ -66,27 +66,35 @@ Install with conda:
 conda install -c csb-nijmegen csb-pandora -c salilab -c bioconda
 ```
 
-## GitHub / Pypi installation
+Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
+### GitHub / Pypi installation
 
 #### 1. Install Modeller:
 Prior to PANDORA installation, you need to first activate MODELLER's license. Please request MODELLER license at: https://salilab.org/modeller/registration.html
 
 Replace XXXX with your MODELLER License key and run the command:
+
 ```
-alias KEY_MODELLER='XXXX'
+export KEY_MODELLER='XXXX'
 ```
 
-Then Install MODELLER with:
+Then, install MODELLER with:
 ```
 conda install -y -c salilab modeller
 ```
 
-#### 2. Install Muscle
-PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) that can be installed via bioconda
+Note: You can also follow the instruction in the conda install output to enter your modeller key in the appropriate file afterwars, instead of setting it beforehand.
+
+#### 2. Install Other dependencies
+PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) and blast (https://anaconda.org/bioconda/blast) that can be both installed via bioconda.
+
 
 ```
-conda install -c bioconda muscle=3.8.1551
+conda install -c bioconda muscle=5.1 blast=2.10
 ```
+For some HPC systems the conda blast installation might not work due to missing libraries. For those cases, you can download blast from their release page and install it (make shure you add it to your PATH, otherwise PANDORA will not be able to find it): https://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/
+
+Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
 
 #### 3. Install PANDORA
 
@@ -94,51 +102,150 @@ Clone the repository:
 ```
 git clone https://github.com/X-lab-3D/PANDORA.git
 ```
-Enter the cloned directory and then install the dependencies!
+Enter the cloned directory, switch to development branch and install the package:
 ```
 cd PANDORA
+git checkout development
 pip install -e .
 
 ```
+### Download Template Database
+PANDORA needs a PDB template database to work. All the structures are retrieved from [IMGT](http://www.imgt.org/3Dstructure-DB/) database.
 
+The database can be quickly retrieved by zenodo by running the command-line tool:
 
-## Generate / download template Database
+```bash
+pandora-fetch
+```
 
-PANDORA needs a PDB template database to work (retrieved from  [IMGT](http://www.imgt.org/3Dstructure-DB/) database). You can download it from https://github.com/X-lab-3D/PANDORA_database (pMHC I only, generated on 23/03/2021) and follow the [instructions](https://github.com/X-lab-3D/PANDORA_database/blob/main/README.md). Please be sure you re-path your database as explained in the instructions.
+Alternatively, the same function can be done in python:
 
-Alternatively, you can generate your template database(suggested) with the following python3 code:
+```python
+from PANDORA import Database
+
+Database.install_database()
+```
+
+### (Advanced) Generate template Database
+
+You can also generate the database from scratch, downloading and parsing the structures directly from IMGT. This will ensure you to have as many templates as possible, as the quickly-retrievable database will not be re-released often. 
+
+The database can be generated with the command-line tool:
+
+```bash
+pandora-create
+```
+
+Or with the pythoncode below: 
 
 ```python
 ## import requested modules
-from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
-from PANDORA.Database import Database
+from PANDORA import Database
 
 ## A. Create local Database
 db = Database.Database()
-db.construct_database(save='path/to/pandora_Database.pkl')
+db.construct_database(n_jobs=<n_jobs>)
 ```
 
-Note: generating a database can take more than one hour and a half, so we advice to run it as background process or submit it as cluster job.
+Note 1:  By default, the database generation will use one core only. You can sensitevly speed it up by changing the paramenter --num-cores for pandora-create ot 'n_jobs' for Database.contruct_database().
 
-## (Optional) Install NetMHCpan and/or NetMHCIIpan
+Note 2: the database is saved by default into `~/PANDORA_databases/default`. It is possible to modify the folder name (`default`) by creating a `config.json` file in the PANDORA installation folder using `data_folder_name` as a key, and the desired folder name as a value, like in the example below:
 
-PANDORA lets the user if he wants to predict peptide's anchor residues instead of using conventional predefined anchor residues.
+```
+{"data_folder_name": "<folder_in_Databases>"}
+```
+
+Note 3 (For master branch only, conda release v0.9.0): You can download the pre-made database from https://github.com/X-lab-3D/PANDORA_database (pMHC I only, generated on 23/03/2021) and follow the [instructions](https://github.com/X-lab-3D/PANDORA_database/blob/main/README.md). Please be sure you re-path your database as explained in the instructions.
+
+### (Optional) Install NetMHCpan and/or NetMHCIIpan
+
+PANDORA lets the user to predict peptide's anchor residues instead of using conventional predefined anchor residues.
 In that case you need to download [NetMHCpan](https://services.healthtech.dtu.dk/cgi-bin/sw_request) (for peptide:MHC class I) and/or [NetMHCIIpan](https://services.healthtech.dtu.dk/cgi-bin/sw_request) (for peptide:MHC class II).
-To install, you can simply run:
+
+Once you have obtained the download link, you can install them by following the instructions in their .readme files. Note that PANDORA will assume they are installed and callable from command line (as netMHCpan and netMHCIIpan).
+
+## Docker
+The Docker release is currently not uploaded on DockerHub and, due to licensing of external software (MODELLER and NetMHCpan), the only way to use at this moment is by building the docker image directly from the recipe.
+
+We advice to use Docker only in case Conda or Git/Pypi installations are not possible in your system.
+
+1)  Get MODELELR lincense (and optional softwares, if desired)
+   
+First, you will always need to get a modeller license key and, optionally, the netMHCpan and netMHCIIpan installation packages (see [Installation](#installation) for details).
+
+2) Download PANDORA
+
+Download the GitHub repository and switch to the development branch:
 ```
-python netMHCpan_install.py
+git clone https://github.com/X-lab-3D/PANDORA.git
+cd PANDORA
+git checkout development
+```
+
+3) Add your license key
+   
+Now open the dockerfile and replace the "XXXX" at line 16 with your MODELLER license key.
+
+4) (Optional) Install netMHCpan and/or netMHCIIpan
+   
+Download netMHCpan or netMHCIIpan directly into the PANDORA repository you cloned, then proceed with the installation as explained in their own .readme files until points 2.a and 2.b.
+
+**For points 2.a and 2.b, make sure you set** NHOME to "/app/netMHCpan-\<version>" and TMPDIR to "/app/netMHCpan-\<version>/tmp" where \<version> is the version of the software you downloaded (same for netMHCIIpan, as "/app/netMHCIIpan-\<version>").
+
+Finally, open the PANDORA dockerfile, uncomment lines 25-26, plus the lines referring to the software you want to install (29-30 for netMHCpan and 33-34 for netMHCIIpan), save and close the file.
+
+In case, later, netMHCpan cannot be found by PANDORA, it might mean this step did not work as intended. 
+
+5) Create a database folder in your local machine
+
+To avoid re-downloading the PANDORA database every time you run your docker container, you will need to dowload the database in a folder synced between the container and the local machine.
+To do so, create a folder (wherever you prefer in your machine). We will call the absolute path to this folder \<path/to/local/db>
+
+6) Compile the docker image
+   
+Make sure you are in the PANDORA repo, then run:
+```
+docker build -t pandora .
+```
+You may chance "pandora" to the name you want to give to your docker image.
+Also, be advised that including netMHCpan or netMHCIIpan into the image will take docker a considerable longer time.
+
+7) Run the docker container
+
+Run the docker container **while linking the local database folder to the docker one**:
+```
+docker run -v <path/to/local/db>:/root/PANDORA_databases/default/ -it pandora
+```
+
+8) (First time only) Download the PANDORA database
+Inside your docker container, run the following to download the database:
+```
+pandora-fetch
+```
+It will be downloaded into a folder we previously linked to \<path/to/local/db>, thus will finally end up in your local machine.
+
+9) Enjoy!
+
+Done! Now you are ready to use PANDORA. Just remember to always run the docker container with:
+```
+docker run -v <path/to/local/db>:/root/PANDORA_databases/default/ -it pandora
 ```
 
 ## Tutorial
 
-Are you planning to run multiple pMHC models with similar settings?
-Then hop directly to example #5 and try our Wrapper module!
+#### Differences between pMHC-I modeling and pMHC-II modeling setups
+PANDORA is the first package capable of handling both pMHC-I and pMHC-II complexes, but with few setup differences, listed in the table below:
+
+
+| --- | pMHC-I | pMHC-II |
+| --- | --- | --- |
+| Anchors | User-provided, predicted with netMHCpan  or automatically assigned on canonical spacing | User-provided or predicted by netMHCIIpan. **Cannot** be automatically assigned.| 
+| MHC chains sequences | Alpha chain is called "M_chain_seq" and Beta chain is called "B2M_seq". Alpha chain is required (either as sequence or allele name). B2M is not required and will be retrieved from the selected template if not provided. | Alpha chain is called "M_chain_seq" and Beta chain is called "N_chain_seq". They are both required **except for HLA-DR**, for which the alpha chain will be automatically be assigned as HLA-DRA1*01:01 if not provided |
 
 #### Example 1 : Generating a peptide:MHC complex given the peptide sequence
 PANDORA requires at least these information to generate models:
 - Peptide sequence
-- MHC allele
+- MHC allele or MHC sequence
 
 Steps:
 A. Load the template database (see installation, point 4)
@@ -147,19 +254,27 @@ B. Creating a Template object based on the given target information
 
 C. Generating *n* number of pMHC models (Default *n=20*)
 
-Please note that you can specify output directory yourself, otherwise will be generated in a default directory
+Please note that you can specify output directory yourself, otherwise will be generated in a folder named as the case ID in the current working directory.
+
+Command-line:
+```bash
+pandora-run -m I -i myTestCase -a HLA-A*0201 -p LLFGYPVYV -k 2,9
+```
+Please run `pandora-run --help` for further information about the arguments.
+
+Python:
 ```python
 ## import requested modules
-from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
-from PANDORA.Database import Database
+from PANDORA import Target
+from PANDORA import Pandora
+from PANDORA import Database
 
-## A. Create local Database
-db = Database.load('path/to/pandora_Database.pkl')
+## A. Load local Database
+db = Database.load()
 
 ## B. Create Target object
-target = PMHC.Target(id = 'myTestCase'
-    allele_type = 'HLA-A*0201'
+target = Target(id = 'myTestCase',
+    allele_type = 'HLA-A*0201',
     peptide = 'LLFGYPVYV',
     anchors = [2,9])
 
@@ -167,7 +282,40 @@ target = PMHC.Target(id = 'myTestCase'
 case = Pandora.Pandora(target, db)
 case.model()
 ```
-#### Example 2 : Create multiple loop models in a your given directory
+
+Note: The user can also input the MHC chain sequence directly, without having to rely on the allele name. The argument to provide in this case is `M_chain_seq` for chain Alpha and either `B2M_seq` for MHC-I or `N_chain_seq` for MHC-II beta chain.
+
+#### Example 2: Run PANDORA Wrapper on multiple cases (running in parallel on multiple cores)
+
+PANDORA can model large batches of peptides in parallel. You need to provide the following peptide information in a *.tsv* or *.csv* file:
+
+- *Peptide sequence,  MHC Allele name / MHC chain sequence*
+
+Note: you can also add various information to your file, including anchors for each case, templates, IDs.
+You can find all the arguments for the master branch version in the [documentation](https://csb-pandora.readthedocs.io/en/latest/PANDORA.Wrapper.html#module-PANDORA.Wrapper.Wrapper).
+For other branches, like development, we suggest you to use the python help() function or check directly the [docstring in the source code](https://github.com/X-lab-3D/PANDORA/blob/d43f9d91bee9f793ee7fe4cb10be3cb4e299e36d/PANDORA/Wrapper/Wrapper.py#L147).
+
+The Wrapper class will take care of generating PANDORA target objects and parallelize the modelling on the given number of cores <n_cores>:
+
+Command-line:
+```bash
+pandora-wrapper -m I -f datafile.tsv -h False  -p 0 -a 1 -d tab
+```
+Please run `pandora-wrapper --help` for further information about the arguments.
+
+```python
+from PANDORA import Database
+from PANDORA import Wrapper
+
+## A. Load local database
+db = Database.load()
+
+## B. Create the wrapper object. It will also run the modelling for each case.
+wrap =  Wrapper.Wrapper('datafile.tsv', db, num_cores=<n_cores>)
+
+```
+
+#### Example 3: Create multiple loop models in a your given directory
 There are some options provided that you can input them as arguments to the functions.
 
 For instance:
@@ -176,19 +324,19 @@ For instance:
 - Give your target a name
 - Predict anchors by NetMHCpan
 
-Please note that, if *anchors* is not specified or *use_netmhcpan* is set to *False*, PANDORA will automatically assign canonical anchors (P2 and PΩ).
+Please note that, if *anchors* is not specified or *use_netmhcpan* is set to *False*, PANDORA will automatically assign canonical anchors (P2 and PΩ). This can be done automatically only for pMHC-I structures.
 
 ```python
-from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
-from PANDORA.Database import Database
+from PANDORA import Target
+from PANDORA import Pandora
+from PANDORA import Database
 
 ## A. load the pregenerated Database  of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 ## B. Create Target object
-target = PMHC.Target(id = 'myTestCase'
-    allele_type = ['HLA-B*5301', 'HLA-B*5301'],
+target = Target(id = 'myTestCase',
+    allele_type = ['HLA-B*5301', 'HLA-B*5302'],
     peptide = 'TPYDINQML',
     use_netmhcpan = True)
 
@@ -197,46 +345,21 @@ case = Pandora.Pandora(target, db, output_dir = '/your/directory/')
 case.model(n_loop_models=100)  # Generates 100 models
 ```
 
-#### Example 3 : Benchmark PANDORA on one modelling case
-
-Evaluate the framework on a target with a known experimental structure:
-- Provide the PDB ID for the *Target* class
-- Set *benchmark=True* for the modelling
-  (calculates L-RMSD to show how far the model is from the near-native structure)
-
-```python
-from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
-from PANDORA.Database import Database
-
-## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
-
-## B. Create Target object
-target = PMHC.Target('1A1M',
-    db.MHCI_data['1A1M'].allele_type,
-    db.MHCI_data['1A1M'].peptide,
-    anchors = db.MHCI_data['1A1M'].anchors)
-
-## C. Perform modelling
-case = Pandora.Pandora(target, db)
-case.model(benchmark=True)
-```
 #### Example 4: Model a peptide:MHCI complex with an alpha helix in the peptide
 
 Input domain secondary structure prediction information (Helix/Beta strand):
 
 ```python
-from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
-from PANDORA.Database import Database
+from PANDORA import Target
+from PANDORA import Pandora
+from PANDORA import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
 ## B. Create Target object
-target = PMHC.Target(id = 'myMHCIITestCase'
-    allele_type = ['MH1-B*2101', 'MH1-B*2101'],
+target = Target(id = 'myMHCITestCase',
+    allele_type = 'MH1-B*2101',
     peptide = 'TAGQSNYDRL',
     anchors = [2,10],
     helix = ['4', '9'])
@@ -245,44 +368,19 @@ target = PMHC.Target(id = 'myMHCIITestCase'
 case = Pandora.Pandora(target, db)
 case.model(helix=target.helix)
 ```
-#### Example 5: Benchmark PANDORA on multiple cases (running in parallel on multiple cores)
-
-PANDORA can model large batches of peptides in parallel. You need to provide the following peptide information in a *.tsv* or *.csv* file:
-
-- *Peptide sequence,  MHC Allele name*
-Note: you can also add various information to your file, including anchors for each case, templates, IDs.
-
-The Wrapper class will take care of generating PANDORA target objects and parallelize the modelling on the given number of cores:
-
-```python
-from PANDORA.Database import Database
-from PANDORA.Wrapper import Wrapper
-
-## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
-
-## B. Create the wrapper object
-wrap =  Wrapper.Wrapper()
-
-## C. Create all Target Objects based on peptides in the .tsv file
-wrap.create_targets('datafile.tsv', db)
-
-## C. Perform modelling
-wrap.run_pandora(num_cores=128)
-```
-#### Example 6: Generating a peptide:MHC class II complex given the peptide sequence
+#### Example 5: Generating a peptide:MHC class II complex given the peptide sequence
 
 To model a peptide:MHC class II complex, you only need to specify that in *PMHC.Target()* function: as *MHC_class='II'* (By default it is set to model MHC class I).
 
 ```python
-from PANDORA.PMHC import PMHC
-from PANDORA.Pandora import Pandora
-from PANDORA.Database import Database
+from PANDORA import Target
+from PANDORA import Pandora
+from PANDORA import Database
 
 ## A. Load pregenerated database of all pMHC PDBs as templates
-db = Database.load('path/to/pandora_Database.pkl')
+db = Database.load()
 
-target = PMHC.Target(id='myMHCIITestCase'
+target = Target(id='myMHCIITestCase'
     MHC_class = 'II',
     allele_type = ['HLA-DRA*0102', 'HLA-DRA*0101', 'HLA-DRB1*0101'],
     peptide = 'GELIGILNAAKVPAD',
@@ -293,6 +391,32 @@ case.model()
 ```
 Note: For MHC II, no canonical anchors can be defined. Therefore the user must either install and use NetMHCIIpan or directly input the anchors positions as *anchors* in *PMHC.Target()*
 
+#### Example 6: Benchmark PANDORA on one modelling case
+
+Evaluate the framework on a target with a known experimental structure:
+- Provide the PDB ID for the *Target* class
+- Set *benchmark=True* for the modelling
+  (calculates L-RMSD to show how far the model is from the near-native structure)
+
+```python
+from PANDORA import Target
+from PANDORA import Pandora
+from PANDORA import Database
+
+## A. Load pregenerated database of all pMHC PDBs as templates
+db = Database.load()
+
+## B. Create Target object
+target = Target(id='1A1M',
+    allele_type=db.MHCI_data['1A1M'].allele_type,
+    peptide=db.MHCI_data['1A1M'].peptide,
+    anchors = db.MHCI_data['1A1M'].anchors)
+    
+## C. Perform modelling
+case = Pandora.Pandora(target, db)
+case.model(benchmark=True)
+```
+
 ## Code Design
 PANDORA has been implemented in an Object-Oriented Design(OOD). Resulting in a comprehensible and user-friendly framework.
 
@@ -302,7 +426,7 @@ see [Class Diagram](https://github.com/DarioMarzella/PANDORA/blob/master/images/
 
 The following file structure is prepared to store the output files for each case. Each modelling case is given a specific name based on target and template ID.
 
-Please note that the modelling results consisting genretaed models by default are stored in *./PANDORA_files/data/outputs/* directory
+Please note that the modelling results consisting genretaed models by default are stored in *./Databases/default/outputs/* directory
 
 - Main outputs: *molpdf_DOPE.tsv, *BL*.pdb, modeller.log(
 - Input files prepared for modelling: *contacs_*.list, *.ali*
@@ -310,7 +434,7 @@ Please note that the modelling results consisting genretaed models by default ar
 - MODELLER by product outputs(Generated during the modelling): *D0*, DL*, *IL*.pdb , , *.ini, *.lrsr, *.rsr, *.sch, ...*
 
 ```
-PANDORA_files
+Databases
   └── data
      └── outputs                         Default directory to save output
         └── <target_name>_<template_id>  Each user's modelling case is given a specific name
