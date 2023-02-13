@@ -697,7 +697,7 @@ def write_ini_script(target, template, alignment_file, output_dir, clip_C_domain
 
 
 def write_modeller_script(target, template, alignment_file, output_dir, n_homology_models=1, n_loop_models = 20,
-                          loop_refinement='slow', n_jobs=None, stdev=0.1, helix = False, sheet = False, 
+                          loop_refinement='slow', n_jobs=None, helix = False, sheet = False, 
                           fully_flexible=False, clip_C_domain=False):
                           
     ''' Write script that refines the loops of the peptide
@@ -713,8 +713,6 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
             ore will not add any benefit but might occupy cores unnecessarily.
         loop_refinement (str): Level of loop refinement: very_fast,fast,slow,very_slow,slow_large.
             Defaults to slow
-        stdev (float): standard deviation of modelling restraints. Higher = more flexible restraints. 
-            This will have some effect only if fully_flexible is set to True. Defaults to 0.1
         helix (list): List of the alpha helix start and end-positions as integers. I.e. [3,8] for a helix between
             peptide residue 3 and 8.
         sheet (list): List containing: start position of B-sheet 1, start position of B-sheet 2 and the length of the
@@ -722,12 +720,17 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
             at the Oxigen atom of the 2nd residue of chain P and at the Nitrogen of the 54th residue of
             chain M and has a length of 2 H-bonds. Or; ["N:6:P", "O:13:P", -3], with -3 denoting an
             anti-parallel B-sheet with a length of 3 H-bonds.
-        fully_flexible (bool): if True, keeps the whole peptide flexible. Dicreases computational time by 30-50% 
-            but increases accuracy and allows for stdev. Defaults to False.
+        fully_flexible (bool or float): if True, keeps the whole peptide flexible. Increases computational time by 30-50% 
+            but increases accuracy. If float, it used as standard deviation of modelling restraints. Higher = more flexible restraints. 
+            Defaults to False. Setting it to True only will set the default standard dev iation to 0.1.
 
     '''
 
     anch = target.anchors
+    if type(fully_flexible) == float:
+        stdev = fully_flexible
+    else:
+        stdev = 0.1
 
     if target.MHC_class == 'I':
         with open(output_dir.replace('\\ ', ' ') + '/MyLoop.py', 'w') as myloopscript:
