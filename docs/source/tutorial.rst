@@ -45,7 +45,7 @@ Note 2: the database is saved by default into `~/PANDORA_databases/default`. It 
 
 
 p:MHC-I base example
---------------------------------
+--------------------
 
 PANDORA requires at least these information to generate models:
 
@@ -80,12 +80,60 @@ Please note that you can specify output directory yourself, otherwise will be ge
 >>> case = Pandora.Pandora(target, db)
 >>> case.model()
 
-Increased loop models
---------------------------------
 
-A user might want to increase the sampling or the sampling quality of the modelling.
-To do so, there are two options that can be changed in the Pandora.model function: n_loop_models and loop_refinement.
-The first option increases the number of generated loop models, while the second option controls the type of loop refinement MODELLER will perform.
+Run PANDORA on multiple cases (running in parallel on multiple cores)
+---------------------------------------------------------------------
+
+PANDORA can model more than one pMHC complex in parallel. You need to provide the following information in a *.tsv* file:
+
+- *Peptide sequence,  Allele name*
+
+
+>>> from PANDORA import Pandora
+>>> from PANDORA import Database
+>>> from PANDORA import Wrapper
+>>>
+>>> ## A. load the pre-generated templates database
+>>> db = Database.load()
+>>>
+>>> ## B. Create the wrapper object
+>>> wrap =  Wrapper(data_file='datafile.tsv', database=db, num_cores=128)
+
+
+p:MHC-II base example
+---------------------
+
+>>> from PANDORA import PMHC
+>>> from PANDORA import Pandora
+>>> from PANDORA import Database
+>>>
+>>> ## A. Load pre-generated template database
+>>> db = Database.load()
+>>>
+>>> target = PMHC.Target(
+>>>     MHC_class='II',
+>>>     allele_type = ['HLA-DRA*0101', 'HLA-DRB1*0101'],
+>>>     peptide = 'GELIGILNAAKVPAD',
+>>>     anchors = [4, 7, 9, 12])
+>>>
+>>> case = Pandora.Pandora(target, db)
+>>> case.model()
+
+
+High accuracy modelling (advised to set prepare models for MD)
+--------------------------------------------------------------
+
+Multiple options can be used to increase the modelling accuracy.
+
+The following table reports the arguments that most impact the modelling quality and computational time. The same arguments can be used for either Pandora.model() or Wrapper()
+| Option | Effect | Impact on computational time | Optimal |
+| --- | --- | --- | --- |
+| n_loop_models | Increases the modelling sampling step, generating more loop models | Computational time linearly increases with the increasing of the loop models requested. | As high as the user wants |
+| loop_refinement | MODELLER loop refinement method | Very small | "very_slow" |
+| restraints_stdev | If False (by default), the restraints are not flexible at all, locking in place the anchors (for MHC-I) or the whole binding core (for MHC-II) to the template position. An higher stdev allowes the restraints to be stretched to accomodate different anchors. Highly recommended to prevent small clashed that might deeply influence MD experiments quality| High, 50% more for pMHC-I cases and up to 90% more for pMHC-II cases| 0.2 - 0.3 . Not advised to increase over 0.5 |
+| clip_C_domain | False by default. If True, it does not model C-like domain and the Beta-2 microglobulin (if present), generating a 3D-model with only the G-domains and the peptide. | Practically none | False |
+
+Example of high accuracy pMHC-I modelling:
 
 >>> from PANDORA import PMHC
 >>> from PANDORA import Pandora
@@ -101,47 +149,30 @@ The first option increases the number of generated loop models, while the second
 >>>
 >>> ## C. Perform modelling
 >>> case = Pandora.Pandora(target, db)
->>> case.model(n_loop_models=100)  # Generates 100 models
-
-or, to perform a slower and more accurate loop refinement:
-
->>> case.model(n_loop_models=100)  # Generates 100 models
+>>> case.model(n_loop_models=100, loop_refinament="very_slow",
+>>>            restraints_stdev=0.3, clip_C_domain=False)
 
 
-Run PANDORA on multiple cases (running in parallel on multiple cores)
----------------------------------------------------------------------------
+Fast and light modelling
+------------------------
 
-PANDORA can model more than one pMHC complex in parallel. You need to provide the following information in a *.tsv* file:
-
-- *Peptide sequence,  Allele name*
-
-
->>> from PANDORA import Pandora
->>> from PANDORA import Database
->>> from PANDORA import Wrapper
->>>
->>> ## A. load the pre-generated templates database
->>> db = Database.load()
->>>
->>> ## B. Create the wrapper object
->>> wrap =  Wrapper(data_file='datafile.tsv', database=db, n_jobs=128)
-
-
-p:MHC-II base example
--------------------------------------------
+On the other hand, a user might want to quickly generate large amounts of models with a lower focus on accuracy. Here's an example of how to do so:
 
 >>> from PANDORA import PMHC
 >>> from PANDORA import Pandora
 >>> from PANDORA import Database
 >>>
->>> ## A. Load pre-generated template database
+>>> ## A. load the pre-generated templates database
 >>> db = Database.load()
 >>>
->>> target = PMHC.Target(
->>>     MHC_class='II',
->>>     allele_type = [ 'HLA-DRA*0101', 'HLA-DRB1*0101'],
->>>     peptide = 'GELIGILNAAKVPAD',
->>>     anchors = [4, 7, 9, 12])
+>>> ## B. Create Target object
+>>> target = PMHC.Target(id='myTestCase'
+>>>     allele_type = 'HLA-B*5301',
+>>>     peptide = 'TPYDINQML')
 >>>
+>>> ## C. Perform modelling
 >>> case = Pandora.Pandora(target, db)
->>> case.model()
+>>> case.model(n_loop_models=20, loop_refinament="very_fast",
+>>>            restraints_stdev=False, clip_C_domain=True)
+
+The number of loop models could in theory be reduced to less than 20 models, but we do not advise this solution to not decrease the accuracy too much.
