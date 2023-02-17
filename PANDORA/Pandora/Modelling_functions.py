@@ -698,7 +698,7 @@ def write_ini_script(target, template, alignment_file, output_dir, clip_C_domain
 
 def write_modeller_script(target, template, alignment_file, output_dir, n_homology_models=1, n_loop_models = 20,
                           loop_refinement='slow', n_jobs=None, helix = False, sheet = False, 
-                          fully_flexible=False, clip_C_domain=False):
+                          restraints_stdev=False, clip_C_domain=False):
                           
     ''' Write script that refines the loops of the peptide
     
@@ -720,15 +720,15 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
             at the Oxigen atom of the 2nd residue of chain P and at the Nitrogen of the 54th residue of
             chain M and has a length of 2 H-bonds. Or; ["N:6:P", "O:13:P", -3], with -3 denoting an
             anti-parallel B-sheet with a length of 3 H-bonds.
-        fully_flexible (bool or float): if True, keeps the whole peptide flexible. Increases computational time by 30-50% 
+        restraints_stdev (bool or float): if True, keeps the whole peptide flexible. Increases computational time by 30-50% 
             but increases accuracy. If float, it used as standard deviation of modelling restraints. Higher = more flexible restraints. 
             Defaults to False. Setting it to True only will set the default standard dev iation to 0.1.
 
     '''
 
     anch = target.anchors
-    if type(fully_flexible) == float:
-        stdev = fully_flexible
+    if type(restraints_stdev) == float:
+        stdev = restraints_stdev
     else:
         stdev = 0.1
 
@@ -744,7 +744,7 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
                         myloopscript.write("        self.rename_segments(segment_ids=['M', 'P'], renumber_residues=[1, 1])")
                 # Add flexible region selection range
                 elif 'self.residue_range' in line and 'M.selection' in line:
-                    if fully_flexible:
+                    if restraints_stdev:
                         myloopscript.write(line %(1, len(target.peptide)))  # write the first anchor
                     else:
                         myloopscript.write(line %(anch[0]+1, anch[-1]-1))
@@ -778,7 +778,7 @@ def write_modeller_script(target, template, alignment_file, output_dir, n_homolo
                     else:
                         anch_term = anch[-1]
                     #Write first and last anchors, to keep only the flanking regions flexible
-                    if fully_flexible:
+                    if restraints_stdev:
                         #myloopscript.write(line % (1, len(target.peptide)))
                         myloopscript.write("        return M.selection(self.residue_range('%i:P', '%i:P'))\n" %(1, len(target.peptide)))
                     else:

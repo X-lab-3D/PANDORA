@@ -20,7 +20,7 @@ class Wrapper():
                     start_row=None, end_row=None, use_netmhcpan=False,
                     use_templ_seq=False, n_loop_models=20, n_jobs=None,
                     collective_output_dir=False, pickle_out=False, 
-                    clip_C_domain=False, fully_flexible=False,
+                    clip_C_domain=False, restraints_stdev=False,
                     archive=False, wrapper_id=False, rm_netmhcpan_output=True):
         """Pandora wrapper object.
         Create PANDORA targets from csv or tsv file and models them.
@@ -83,7 +83,7 @@ class Wrapper():
                 the G-domain according to IMGT. If a listcontaining the G domain(s) 
                 span is provided, will use it to cut the sequence. The list should have 
                 this format: [(1,182)] for MHCI and [(1,91),(1,86)] for MHCII.
-            fully_flexible (bool or float): if True, keeps the whole peptide flexible. Increases computational time by 50-90% 
+            restraints_stdev (bool or float): if True, keeps the whole peptide flexible. Increases computational time by 50-90% 
                 but increases accuracy and prevents from artifacts at the anchor positions.
                 If float, it used as standard deviation of modelling restraints. Higher = more flexible restraints. 
                 Defaults to False. Setting it to True only will set the default standard deviation to 0.1.
@@ -156,7 +156,7 @@ class Wrapper():
                                     'benchmark':benchmark, 'pickle_out':pickle_out,
                                     'collective_output_dir':self.collective_output_dir,
                                     'clip_C_domain':clip_C_domain,
-                                    'fully_flexible':fully_flexible,
+                                    'restraints_stdev':restraints_stdev,
                                     'archive_output': archive,
                                     'db':database, 'use_netmhcpan':use_netmhcpan,
                                     'use_templ_seq':use_templ_seq,
@@ -352,7 +352,7 @@ def run_case(args):
     try:
         case.model(n_loop_models=args['n_loop_models'], n_jobs=args['n_jobs'],
                 benchmark=args['benchmark'], pickle_out=args['pickle_out'],
-                clip_C_domain=args['clip_C_domain'], fully_flexible=args['fully_flexible'])
+                clip_C_domain=args['clip_C_domain'], restraints_stdev=args['restraints_stdev'])
 
     except Exception as e:
         print(f"Modelling case {target_id} failed at modelling step")

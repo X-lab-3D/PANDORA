@@ -233,7 +233,7 @@ class Pandora:
             templ_f.writelines(lines)
 
     def write_modeller_script(self, n_loop_models=20, n_homology_models = 1, loop_refinement='slow',
-                              n_jobs=None, helix=False, sheet=False, fully_flexible=False):
+                              n_jobs=None, helix=False, sheet=False, restraints_stdev=False):
         ''' Write the script that modeller uses for the final homology modelling. Most modelling settings are set in
             this script.
 
@@ -251,7 +251,7 @@ class Pandora:
                 ["O:2:P","N:54:M",2] for a parallel B-sheet; The sheet starts at the Oxigen atom of the 2nd residue of
                 chain P and at the Nitrogen of the 54th residue of chain M and has a length of 2 H-bonds. Or;
                 ["N:6:P", "O:13:P", -3], with -3 denoting an anti-parallel B-sheet with a length of 3 H-bonds.
-            fully_flexible (bool or float): if True, keeps the whole peptide flexible. Increases computational time by 30-50% 
+            restraints_stdev (bool or float): if True, keeps the whole peptide flexible. Increases computational time by 30-50% 
                 but increases accuracy. If float, it used as standard deviation of modelling restraints. Higher = more flexible restraints. 
                 Defaults to False. Setting it to True only will set the default standard dev iation to 0.1.
 
@@ -261,7 +261,7 @@ class Pandora:
                                                   self.target.output_dir, n_loop_models=n_loop_models,
                                                   n_homology_models=n_homology_models, loop_refinement=loop_refinement,
                                                   n_jobs=n_jobs, helix=helix, sheet=sheet,
-                                                  clip_C_domain=self.clip_C_domain, fully_flexible=fully_flexible)
+                                                  clip_C_domain=self.clip_C_domain, restraints_stdev=restraints_stdev)
 
     def __log(self, target_id, template_id, error, verbose=True):
         ''' Keeps track of what goes wrong while parsing
@@ -287,7 +287,7 @@ class Pandora:
     def model(self, n_loop_models=20, n_homology_models=1,
               best_n_templates=1, n_jobs=None, loop_refinement='slow', pickle_out=False,
               benchmark=False, verbose=True, helix=False, sheet=False, 
-              RMSD_atoms=['C', 'CA', 'N', 'O'], clip_C_domain=False, fully_flexible=False):
+              RMSD_atoms=['C', 'CA', 'N', 'O'], clip_C_domain=False, restraints_stdev=False):
         '''Wrapper function that combines all modelling steps.
 
         Args:
@@ -324,7 +324,7 @@ class Pandora:
                 at the Oxigen atom of the 2nd residue of chain P and at the Nitrogen of the 54th residue of
                 chain M and has a length of 2 H-bonds. Or; ["N:6:P", "O:13:P", -3], with -3 denoting an
                 anti-parallel B-sheet with a length of 3 H-bonds.
-            fully_flexible (bool or float): if True, keeps the whole peptide flexible. Increases computational time by 50-90% 
+            restraints_stdev (bool or float): if True, keeps the whole peptide flexible. Increases computational time by 50-90% 
                 but increases accuracy and prevents from artifacts at the anchor positions.
                 If float, it used as standard deviation of modelling restraints. Higher = more flexible restraints. 
                 Defaults to False. Setting it to True only will set the default standard deviation to 0.1.
@@ -403,7 +403,7 @@ class Pandora:
                                        n_homology_models=n_homology_models,
                                        loop_refinement=loop_refinement, 
                                        n_jobs=n_jobs, helix=helix, 
-                                       sheet=sheet, fully_flexible=fully_flexible)
+                                       sheet=sheet, restraints_stdev=restraints_stdev)
         except:
             self.__log(self.target.id, self.template.id, 'Failed preparing the modeller script')
             raise Exception('Failed preparing the modeller script')

@@ -2,10 +2,11 @@ Multiple levels of parallelization
 ----------------------------------
 
 PANDORA currently supports two levels of parallelization: per-case and per-loop parallelization.
-Per-case parallelization allows the user to spread multiple p-MHC cases accross multiple cores in parallel. It is handled by the Wrapper() class.
-Per-loop parallelization allows the user to spread the same case's loop models on multiple cores in parallel. It is handled by MODELLER itself, but passed through ether the Wrapper class or the Pandora.model() function.
+Per-case parallelization allows the user to spread multiple p-MHC cases accross multiple cores in parallel. It is handled by the Wrapper() class with the argument "num_cores".
+Per-loop parallelization allows the user to spread the same case's loop models on multiple cores in parallel. It is handled by MODELLER itself and it is passed through either the Wrapper class or the Pandora.model() function with the argument "n_jobs".
 When using the default amount of loop models (20) we advise to only use per-case parllelization for time-efficency and ease-of-use.
 In case, instead, the user wants to model large number of loop models, maybe for a small or moderate amount of cases, we advise to increase the per-loop parallelization.
+Be advised: the final maximum number of CPU cores used is num_cores * n_jobs, as each parallel case will use n_jobs cores to generate its models.
 
 The following sample script will spread the 2000 loop models of one case over 4 separate CPU cores:
 
