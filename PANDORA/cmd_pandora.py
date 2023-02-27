@@ -65,7 +65,7 @@ def cmd_run_pandora():
     )
  
     parser.add_argument(
-        '-c','--clip-Ccdomain',
+        '-c','--clip-C-domain',
         help='If provided, ignores C-like domains and Beta-2 microglobulin and only \
                 models binding groove and peptide',
         action='store_true'
@@ -145,7 +145,7 @@ def cmd_run_wrapper():
     )
     
     parser.add_argument(
-        '-c','--clip-Ccdomain',
+        '-c','--clip-C-domain',
         help='If provided, ignores C-like domains and Beta-2 microglobulin and only \
                 models binding groove and peptide',
         action='store_true'
