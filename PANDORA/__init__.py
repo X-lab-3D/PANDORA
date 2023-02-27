@@ -18,7 +18,7 @@ if exists(module_path / 'config.json'):
         data = json.load(f)
         data_folder = data['data_folder_name']
 else:
-    data_folder = '~/PANDORA_database/default'
+    data_folder = '~/PANDORA_databases/default'
 
 PANDORA_data = os.path.expanduser(data_folder)
 
