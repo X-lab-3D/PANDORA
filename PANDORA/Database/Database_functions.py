@@ -577,7 +577,7 @@ def unzip_pdb(ID, indir, outdir):
     return '%s/%s.pdb' % (outdir, ID)
 
 
-def find_peptide_chain(pdb, min_len=6, max_len=26):
+def find_peptide_chain(pdb, min_len=7, max_len=25):
     ''' Find the pdb chain that is most likely the peptide based on its size
 
     Args:
@@ -592,7 +592,7 @@ def find_peptide_chain(pdb, min_len=6, max_len=26):
     # Find most likely peptide chain: first chain to be 7 < len(chain) < 25
     pept_chain = []
     for chain in pdb.get_chains():
-        if len(chain) > min_len and len(chain) < max_len and chain.id != ' ':
+        if len(chain) >= min_len and len(chain) <= max_len and chain.id != ' ':
             # print(chain.id)# Is this chain between 7 and 25?
             heteroatoms = False
             for res in chain:
