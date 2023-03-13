@@ -126,12 +126,37 @@ High accuracy modelling (advised to set prepare models for MD)
 Multiple options can be used to increase the modelling accuracy.
 
 The following table reports the arguments that most impact the modelling quality and computational time. The same arguments can be used for either Pandora.model() or Wrapper()
-| Option | Effect | Impact on computational time | Optimal |
-| --- | --- | --- | --- |
-| n_loop_models | Increases the modelling sampling step, generating more loop models | Computational time linearly increases with the increasing of the loop models requested. | As high as the user wants |
-| loop_refinement | MODELLER loop refinement method | Very small | "very_slow" |
-| restraints_stdev | If False (by default), the restraints are not flexible at all, locking in place the anchors (for MHC-I) or the whole binding core (for MHC-II) to the template position. An higher stdev allowes the restraints to be stretched to accomodate different anchors. Highly recommended to prevent small clashed that might deeply influence MD experiments quality| High, 50% more for pMHC-I cases and up to 90% more for pMHC-II cases| 0.2 - 0.3 . Not advised to increase over 0.5 |
-| clip_C_domain | False by default. If True, it does not model C-like domain and the Beta-2 microglobulin (if present), generating a 3D-model with only the G-domains and the peptide. | Practically none | False |
+
+
+.. list-table:: Modelling time and quality affecting arguments
+   :widths: 15 40 20 15
+   :header-rows: 1
+
+   * - Option 
+     - Effect 
+     - Impact on computational time 
+     - Optimal
+
+   * - n_loop_models 
+     - Increases the modelling sampling step, generating more loop models 
+     - Computational time linearly increases with the increasing of the loop models requested.
+     - As high as the user wants
+  
+   * - loop_refinement 
+     - MODELLER loop refinement method 
+     - Very small 
+     - "very_slow" 
+
+   * - restraints_stdev 
+     - If False (by default), the restraints are not flexible at all, locking in place the anchors (for MHC-I) or the whole binding core (for MHC-II) to the template position. An higher stdev allowes the restraints to be stretched to accomodate different anchors. Highly recommended to prevent small clashed that might deeply influence MD experiments quality
+     - High, 50% more for pMHC-I cases and up to 90% more for pMHC-II cases
+     - 0.2 - 0.3 . Not advised to increase over 0.5
+
+   * - clip_C_domain 
+     - False by default. If True, it does not model C-like domain and the Beta-2 microglobulin (if present), generating a 3D-model with only the G-domains and the peptide.
+     - Practically none
+     - False
+
 
 Example of high accuracy pMHC-I modelling:
 
