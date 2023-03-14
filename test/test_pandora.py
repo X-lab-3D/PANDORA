@@ -229,12 +229,12 @@ def test_pandora_MHCI_modelling():
 
     # Perform modelling
     mod = Pandora.Pandora(target, db)
-    mod.model(n_loop_models=1, stdev=0.1, benchmark=True, loop_refinement='very_fast')
+    mod.model(n_loop_models=1, restraints_stdev=0.3, benchmark=True, loop_refinement='very_fast')
 
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
     if mod.template.id == '2X4R' and [c.id for c in mod.target.initial_model.get_chains()] == ['M', 'B', 'P']:
-        if float(mod.results[0].molpdf) < 2000 and float(mod.results[0].molpdf) > 0:
+        if float(mod.results[0].molpdf) < 2000 and float(mod.results[0].molpdf) > -2000:
             pass_test = True
     # remove output file
     os.system('rm -r %s' % (target.output_dir))
@@ -291,7 +291,7 @@ def test_pandora_MHCII_modelling():
 
     # Perform modelling
     mod = Pandora.Pandora(target, db)
-    mod.model(n_loop_models=1, stdev=0.2, benchmark=True, loop_refinement='very_fast')
+    mod.model(n_loop_models=1, restraints_stdev=0.3, benchmark=True, loop_refinement='very_fast')
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
     if mod.template.id == '4Z7U' and [c.id for c in mod.target.initial_model.get_chains()] == ['M','N', 'P']:

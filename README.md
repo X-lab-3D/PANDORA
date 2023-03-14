@@ -5,7 +5,7 @@
 [![Anaconda-Server Badge](https://anaconda.org/csb-nijmegen/csb-pandora/badges/version.svg)](https://anaconda.org/csb-nijmegen/csb-pandora)
 [![Documentation Status](https://readthedocs.org/projects/csb-pandora/badge/?version=latest)](http://csb-pandora.readthedocs.io/?badge=latest)
 
-### Peptide ANchored mODelling fRAmework for peptide-MHC complexes
+### Peptide ANchored mODelling fRAmework for peptide-mhc complexes
 
 ![PANDORA](https://github.com/DarioMarzella/PANDORA/blob/master/images/flowchart_pMHCI.png?raw=true)
 
@@ -169,7 +169,7 @@ The Docker release is currently not uploaded on DockerHub and, due to licensing 
 
 We advice to use Docker only in case Conda or Git/Pypi installations are not possible in your system.
 
-1)  Get MODELELR lincense (and optional softwares, if desired)
+1)  Get MODELLER lincense (and optional softwares, if desired)
    
 First, you will always need to get a modeller license key and, optionally, the netMHCpan and netMHCIIpan installation packages (see [Installation](#installation) for details).
 
