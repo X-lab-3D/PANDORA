@@ -195,8 +195,8 @@ def cmd_run_wrapper():
     )
 
     parser.add_argument(
-        '-k','--anchors-column', type=str,
-        help='Peptide anchor positions.\
+        '-k','--anchors-column', type=int,
+        help='0-index of the column containing peptide anchor positions.\
             To be provided as series of integers separated by semicolon only.\
             Example: 2;9 for pMHC-I or 4;7;9;12 for pMHC-II',
     )
