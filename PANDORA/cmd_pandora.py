@@ -94,13 +94,20 @@ def cmd_run_pandora():
         '-p','--peptide', required=True, type=str,
         help='One-letter sequence of the target peptide.',
     )
+    
+    parser.add_argument(
+        '-N','--use-netmhcpan', default=False,
+        help='Wether or not to use Netmhcpan to predict the anchors.',
+        action='store_true'
+    )
+      
     parser.add_argument(
         '-r', '--restraints-stdev', default=False,
         help='Modelling restraints standard deviation. Keep False for a faster \
             but more rigid modelling. Defaults to False.'
     )
 
-    args = parser.parse_args()
+    args, leftovers = parser.parse_known_args()
 
     # Parse arguments
     if not args.id:
@@ -113,6 +120,11 @@ def cmd_run_pandora():
 
     args.allele=args.allele.split(',')
     
+    if args.anchors is None and args.use_netmhcpan == False:
+        print('WARNING: No anchors provided and netmhcpan is set to false. PANDORA will use canonical anchoring for MHC-I and raise an error for MHC-II')
+    elif args.anchors is not None and args.use_netmhcpan == True:
+        print('WARNING: both anchors and use_netmhcpan provided as arguments. PANDORA will use the provided anchors and skip netmhcpan predictions.')
+    
     # Load local Database
     db = Database.load()
 
@@ -120,7 +132,8 @@ def cmd_run_pandora():
     target = Target(id = args.id,
         allele_type = args.allele,
         peptide = args.peptide,
-        anchors = args.anchors)
+        anchors = args.anchors,
+        use_netmhcpan = args.use_netmhcpan)
 
     # Perform modelling
     case = Pandora.Pandora(target, db)
@@ -192,8 +205,8 @@ def cmd_run_wrapper():
     )
 
     parser.add_argument(
-        '-k','--anchors-column', type=str,
-        help='Peptide anchor positions.\
+        '-k','--anchors-column', type=int,
+        help='0-index of the column containing peptide anchor positions.\
             To be provided as series of integers separated by semicolon only.\
             Example: 2;9 for pMHC-I or 4;7;9;12 for pMHC-II',
     )
@@ -213,8 +226,15 @@ def cmd_run_wrapper():
         help='Modelling restraints standard deviation. Keep False for a faster \
             but more rigid modelling. Defaults to False.'
     )
+    
+    parser.add_argument(
+        '-N','--use-netmhcpan', default=False,
+        help='Wether or not to use Netmhcpan to predict the anchors.',
+        action='store_true'
+    )
 
-    args = parser.parse_args()
+
+    args, leftovers = parser.parse_known_args()
 
     # Load local database
     db = Database.load()
@@ -222,6 +242,11 @@ def cmd_run_wrapper():
     if args.delimiter=='tab':
         args.delimiter='\t'
 
+    if args.anchors_column is None and args.use_netmhcpan == False:
+        print('WARNING: No anchors column provided and netmhcpan is set to false. PANDORA will use canonical anchoring for MHC-I and raise an error for MHC-II')
+    elif args.anchors_column is not None and args.use_netmhcpan == True:
+        print('WARNING: both anchors column and use_netmhcpan provided as arguments. PANDORA will use the provided anchors and skip netmhcpan predictions.')
+             
     # Create the wrapper object. It will also run the modelling for each case.
     wrap =  Wrapper.Wrapper(data_file=args.input_file, database=db, 
         num_cores=args.num_cores, wrapper_id=args.id, header=args.header,
@@ -229,4 +254,5 @@ def cmd_run_wrapper():
         IDs_col=args.targets_id_column, peptides_col=args.peptides_column,
         allele_name_col=args.allele_name_column, anchors_col=args.anchors_column,
         n_loop_models=args.loop_models, collective_output_dir=args.output_path,
-        clip_C_domain=args.clip_C_domain, restraints_stdev=args.restraints_stdev)
+        clip_C_domain=args.clip_C_domain, restraints_stdev=args.restraints_stdev,
+        use_netmhcpan=args.use_netmhcpan)

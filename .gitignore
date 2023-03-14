@@ -16,3 +16,4 @@
 /test/*ali
 /test/BL*.pdb
 /test/test_output/*
+/build/
