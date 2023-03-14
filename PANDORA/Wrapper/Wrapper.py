@@ -16,12 +16,13 @@ class Wrapper():
     def __init__(self, data_file, database, MHC_class,  num_cores=1, delimiter = '\t',
                     header=True, IDs_col=None, peptides_col=0, allele_name_col=1,
                     anchors_col=None, M_chain_col=None, N_chain_col=None,
-                    outdir_col=None, benchmark=False, verbose=False,
+                    outdir_col=None, template_col=None, benchmark=False, verbose=False,
                     start_row=None, end_row=None, use_netmhcpan=False,
                     use_templ_seq=False, n_loop_models=20, n_jobs=None,
                     collective_output_dir=False, pickle_out=False, 
                     clip_C_domain=False, restraints_stdev=False,
-                    archive=False, wrapper_id=False, rm_netmhcpan_output=True):
+                    archive=False, wrapper_id=False, rm_netmhcpan_output=True,
+                    ):
         """Pandora wrapper object.
         Create PANDORA targets from csv or tsv file and models them.
         Args:
@@ -54,6 +55,8 @@ class Wrapper():
                 the targets N chain sequences (only for MHCII).
             outdir_col (None or int, optional): Column of data_file containing
                 the paths to the output folder for each case.
+            template_col (None or int, optional): 0-index column containing the template
+                ID to be used for each case. Defaults to None.
             collective_output_dir (str, optional): Output directory path for
                 all the cases. Note: This argument will be ignored if  'outdir_col'
                 has been used to generate targets with Wrapper.create_targets().
@@ -167,7 +170,7 @@ class Wrapper():
                                IDs_col=None, peptides_col=0,
                                allele_name_col=1, anchors_col=None,
                                M_chain_col=None, N_chain_col=None,
-                               outdir_col=None,
+                               outdir_col=None, template_col=None,
                                start_row=None, end_row=None,
                                ):
         """Extracts peptide sequences, alleles and anchors (if specified)
@@ -182,24 +185,26 @@ class Wrapper():
             header (bool, optional): If True, assumes the data_file has a
                 header line and skips it. If your file has no header line,
                 set it as False. Defaults to True.
-            IDs_col (int or None, optional): Column of data_file containing
+            IDs_col (int or None, optional): 0-index column of data_file containing
                 the targets IDs. If None, will automatically assign an ID
                 according to the row number. Defaults to None.
-            peptides_col (int, optional): Column of data_file containing
+            peptides_col (int, optional): 0-index column of data_file containing
                 the targets peptides. Defaults to 0.
-            allele_name_col (int, optional): Column of data_file containing
+            allele_name_col (int, optional): 0-index column of data_file containing
                 the targets alleles. Umbiguous allele cases (where the allele
                 might have multiple names) should be separated by a
                 semicolon (';'). Defaults to 1.
-            anchors_col (None or int, optional): Column of data_file containing
+            anchors_col (None or int, optional): 0-index column of data_file containing
                 the targets anchors. Anchors should be two numbers separated
                 by a semicolon (';'). Defaults to 2.
-            M_chain_col (None or int, optional): Column of data_file containing
+            M_chain_col (None or int, optional): 0-index column of data_file containing
                 the targets M chain sequences.
-            N_chain_col (None or int, optional): Column of data_file containing
+            N_chain_col (None or int, optional): 0-index column of data_file containing
                 the targets N chain sequences (only for MHCII).
-            outdir_col (None or int, optional): Column of data_file containing
+            outdir_col (None or int, optional): 0-index column of data_file containing
                 the paths to the output folder for each case.
+            template_col (None or int, optional): 0-index column containing the template
+                ID to be used for each case. Defaults to None.
             start_row (None or int, optional): Starting row of data_file, to use when
                 splitting the data_file into multiple batches. This allows to
                 specify from which row the samples for this job start.
@@ -266,6 +271,13 @@ class Wrapper():
                         targets[target_id]['outdir'] = outdir
                     else:
                         targets[target_id]['outdir'] = ''
+
+                    ## Assign template per case
+                    if template_col:
+                        template = row[template_col]
+                        targets[target_id]['template'] = [template]
+                    else:
+                        targets[target_id]['template'] = None
 
         self.targets = targets
         
@@ -341,7 +353,7 @@ def run_case(args):
         return
     
     try:
-        case = Pandora.Pandora(tar, database=args['db'])
+        case = Pandora.Pandora(tar, database=args['db'], template=args['template'])
     except Exception as e:
         print(f"Modelling case {target_id} failed at Pandora object creation step")
         print(f"Captured error: {e}")
