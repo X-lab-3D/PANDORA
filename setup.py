@@ -50,7 +50,7 @@ setup(
        'biopython',
        'pdb2sql',
        'joblib',
-       'urllib=1.26.14',
+       'urllib==1.26.14',
        ],
 
     extras_require={
