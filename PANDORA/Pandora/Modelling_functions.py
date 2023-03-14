@@ -131,7 +131,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, 
     # Retrieves the enviroment variable netMHCIIpan
     netmhcpan_file_path = set([x for x in [os.getenv('netMHCIIpan', default=None), 
                           os.popen('which netMHCIIpan').read().strip()] 
-                          if type(x) == str and re.search("\/netMHCIIpan\-\d+\.\d+\/netMHCIIpan$", x)])
+                          if type(x) == str])
     try:
         netmhcpan_file_path = netmhcpan_file_path.pop()
     except:
@@ -246,7 +246,7 @@ def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm
     # Retrieves the enviroment variable netMHCpan
     netmhcpan_file_path = set([x for x in [os.getenv('netMHCpan', default=None), 
                           os.popen('which netMHCpan').read().strip()] 
-                          if type(x) == str and re.search("\/netMHCpan\-\d+\.\d+\/netMHCpan$", x)])
+                          if type(x) == str])
     try:
         netmhcpan_file_path = netmhcpan_file_path.pop()
     except:
