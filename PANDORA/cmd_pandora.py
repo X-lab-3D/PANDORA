@@ -226,4 +226,4 @@ def cmd_run_wrapper():
         IDs_col=args.targets_id_column, peptides_col=args.peptides_column,
         allele_name_col=args.allele_name_column, anchors_col=args.anchors_column,
         n_loop_models=args.loop_models, collective_output_dir=args.output_path,
-        clip_C_domain=args.clip_C_domain)
+        clip_C_domain=args.clip_C_domain, use_netmhcpan=True)
