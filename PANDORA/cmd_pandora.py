@@ -23,7 +23,6 @@ def cmd_install_database():
     Database.install_database(db_path=args.destination_path)
 
 def cmd_create_database():
-#if __name__=='__main__':
     """Command line tool to generate a new database crom scratch
     """    
     parser = argparse.ArgumentParser(
@@ -58,47 +57,39 @@ def cmd_run_pandora():
     description="Run one pMHC modelling case",
     epilog="Example: pandora-run -p LLFGYPVYV -a HLA-A*02:01 -m I",
     )
-
     parser.add_argument(
         '-a','--allele', required=True, type=str,
         help='Name of the target MHC allele. Multiple alleles should be separated by a comma.',
     )
- 
     parser.add_argument(
         '-c','--clip-C-domain',
         help='If provided, ignores C-like domains and Beta-2 microglobulin and only \
                 models binding groove and peptide',
         action='store_true'
     )
- 
     parser.add_argument(
         '-i','--id', 
         help='ID of the target case, used to name the output folder.\
              If not provided, it will default to peptide_allele',
     )
-    
     parser.add_argument(
         '-k','--anchors', 
         help='Peptide anchor positions.\
             To be provided as series of integers separated by comma only.\
             Example: 2,9 for pMHC-I or 4,7,9,12 for pMHC-II',
     )
-       
     parser.add_argument(
         '-l','--loop-models', default=20, type=int,
         help='Number of loop models to produce',
     )
-     
     parser.add_argument(
         '-m','--mhc-class', required=True, type=str,
         help='MHC class', choices=['I','II'],
     )
-
     parser.add_argument(
         '-o','--output-path', default='./',
         help='Output folder.',
     )
-    
     parser.add_argument(
         '-p','--peptide', required=True, type=str,
         help='One-letter sequence of the target peptide.',
@@ -108,6 +99,12 @@ def cmd_run_pandora():
         '-N','--use-netmhcpan', default=False,
         help='Wether or not to use Netmhcpan to predict the anchors.',
         action='store_true'
+    )
+      
+    parser.add_argument(
+        '-r', '--restraints-stdev', default=False,
+        help='Modelling restraints standard deviation. Keep False for a faster \
+            but more rigid modelling. Defaults to False.'
     )
 
     args, leftovers = parser.parse_known_args()
@@ -140,7 +137,8 @@ def cmd_run_pandora():
 
     # Perform modelling
     case = Pandora.Pandora(target, db)
-    case.model(n_loop_models=args.loop_models, clip_C_domain=args.clip_C_domain)
+    case.model(n_loop_models=args.loop_models, clip_C_domain=args.clip_C_domain,
+               restraints_stdev=args.restraints_stdev)
 
 def cmd_run_wrapper():
     """Command line tool to run the Wrapper module
@@ -220,7 +218,13 @@ def cmd_run_wrapper():
 
     parser.add_argument(
         '-o','--output-path', default='./',
-        help='Output folder.',
+        help='Output folder. Defaults to the current working directory.',
+    )
+    
+    parser.add_argument(
+        '-r', '--restraints-stdev', default=False,
+        help='Modelling restraints standard deviation. Keep False for a faster \
+            but more rigid modelling. Defaults to False.'
     )
     
     parser.add_argument(
@@ -250,4 +254,5 @@ def cmd_run_wrapper():
         IDs_col=args.targets_id_column, peptides_col=args.peptides_column,
         allele_name_col=args.allele_name_column, anchors_col=args.anchors_column,
         n_loop_models=args.loop_models, collective_output_dir=args.output_path,
-        clip_C_domain=args.clip_C_domain, use_netmhcpan=args.use_netmhcpan)
+        clip_C_domain=args.clip_C_domain, restraints_stdev=args.restraints_stdev,
+        use_netmhcpan=args.use_netmhcpan)
