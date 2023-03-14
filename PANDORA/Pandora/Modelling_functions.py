@@ -649,19 +649,9 @@ def write_ini_script(target, template, alignment_file, output_dir, clip_C_domain
 
     if target.MHC_class == 'II':
         with open(output_dir + '/MyLoop.py', 'w') as myloopscript:
-            MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r') #Hotfix only for the run --> Fix before commit!
+            MyL_temp = open(PANDORA.PANDORA_path + '/Pandora/MyLoop_template_II.py', 'r')
             for line in MyL_temp:
                 if 'self.residue_range' in line and 'M.selection' in line:
-                    #if anch[0] == 0:
-                    #    anch_1 = 1
-                    #else:
-                    #    anch_1 = anch[0]
-                    #if anch[-1] == (len(target.peptide)-1):
-                    #    anch_term = len(target.peptide)
-                    #else:
-                    #    anch_term = anch[-1]
-                    #Write first and last anchors, to keep only the flanking regions flexible
-                    #myloopscript.write(line % (1, len(target.peptide)))
                     myloopscript.write("        return M.selection(self.residue_range('%i:P', '%i:P'))\n" %(1, len(target.peptide)))
 
                 elif 'SPECIAL_RESTRAINTS_BREAK' in line:
@@ -688,12 +678,6 @@ def write_ini_script(target, template, alignment_file, output_dir, clip_C_domain
             else:
                 modscript.write(line)
         cmd_m_temp.close()
-
-# alignment_file = mod.alignment.alignment_file
-# output_dir = mod.output_dir
-# template = mod.template
-# helix = [3, 8]
-# BETA-SHEET-MARKER
 
 
 def write_modeller_script(target, template, alignment_file, output_dir, n_homology_models=1, n_loop_models = 20,
