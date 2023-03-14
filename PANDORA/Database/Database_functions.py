@@ -1810,7 +1810,7 @@ def generate_nonhla_database(data_dir, nonHLA_out = 'MHC_cleaned.fasta'):
             to_write[allele] = str(putatives[0].seq)
 
     #Write output fasta file
-    with open(data_dir + nonHLA_out, 'w') as outfile:
+    with open(data_dir + '/' + nonHLA_out, 'w') as outfile:
         for allele in to_write:
             outfile.write('>'+allele+'\n')
             for i in range(len(to_write[allele])):
