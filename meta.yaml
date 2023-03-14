@@ -1,5 +1,5 @@
 {% set name = "csb-pandora" %}
-{% set version = "2.0.0beta" %}
+{% set version = "2.0.0beta1" %}
 {% set build_number = "0" %}
 
 package:
