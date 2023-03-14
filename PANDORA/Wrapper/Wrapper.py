@@ -16,11 +16,11 @@ class Wrapper():
     def __init__(self, data_file, database, MHC_class,  num_cores=1, delimiter = '\t',
                     header=True, IDs_col=None, peptides_col=0, allele_name_col=1,
                     anchors_col=None, M_chain_col=None, N_chain_col=None,
-                    outdir_col=None, benchmark=False,
-                    verbose=False, start_row=None,
-                    end_row=None, use_netmhcpan=False,
+                    outdir_col=None, benchmark=False, verbose=False,
+                    start_row=None, end_row=None, use_netmhcpan=False,
                     use_templ_seq=False, n_loop_models=20, n_jobs=None,
-                    collective_output_dir=False, pickle_out=False, clip_C_domain=False,
+                    collective_output_dir=False, pickle_out=False, 
+                    clip_C_domain=False, restraints_stdev=False,
                     archive=False, wrapper_id=False, rm_netmhcpan_output=True):
         """Pandora wrapper object.
         Create PANDORA targets from csv or tsv file and models them.
@@ -83,10 +83,15 @@ class Wrapper():
                 the G-domain according to IMGT. If a listcontaining the G domain(s) 
                 span is provided, will use it to cut the sequence. The list should have 
                 this format: [(1,182)] for MHCI and [(1,91),(1,86)] for MHCII.
+            restraints_stdev (bool or float): if True, keeps the whole peptide flexible. Increases computational time by 50-90% 
+                but increases accuracy and prevents from artifacts at the anchor positions.
+                If float, it used as standard deviation of modelling restraints. Higher = more flexible restraints. 
+                Defaults to False. Setting it to True only will set the default standard deviation to 0.1.
             wrapper_id (string): id of the wrapper. Should be alphanumeric only. 
                 If not, non-alphanumeric characters will be replaced with dashes.
                 If False, it will be randomly generated. Defaults to False.
-            rm_netmhcpan_output: (bool) If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
+            rm_netmhcpan_output: (bool) If True, removes the netmhcpan infile and 
+                outfile after having used them for netmhcpan.
         Returns:
             None.
         """
@@ -102,7 +107,8 @@ class Wrapper():
 
         # Determine the wrapper id
         if wrapper_id == False:
-            self.wrapper_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
+            random_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
+            self.wrapper_id = f'PandoraWrapper_{random_id}'
         else:
             self.wrapper_id = wrapper_id
             self.wrapper_id = re.sub('[^a-zA-Z0-9]', '_', self.wrapper_id)
@@ -150,6 +156,7 @@ class Wrapper():
                                     'benchmark':benchmark, 'pickle_out':pickle_out,
                                     'collective_output_dir':self.collective_output_dir,
                                     'clip_C_domain':clip_C_domain,
+                                    'restraints_stdev':restraints_stdev,
                                     'archive_output': archive,
                                     'db':database, 'use_netmhcpan':use_netmhcpan,
                                     'use_templ_seq':use_templ_seq,
@@ -344,8 +351,8 @@ def run_case(args):
     # Run the modelling
     try:
         case.model(n_loop_models=args['n_loop_models'], n_jobs=args['n_jobs'],
-                stdev=0.1, benchmark=args['benchmark'], pickle_out=args['pickle_out'],
-                clip_C_domain=args['clip_C_domain'])
+                benchmark=args['benchmark'], pickle_out=args['pickle_out'],
+                clip_C_domain=args['clip_C_domain'], restraints_stdev=args['restraints_stdev'])
 
     except Exception as e:
         print(f"Modelling case {target_id} failed at modelling step")
