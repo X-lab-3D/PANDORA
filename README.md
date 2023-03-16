@@ -20,6 +20,7 @@
 - [Output](#output)
 - [License](./LICENSE)
 - [Issues](#issues)
+- [Publication](#publication)
 
 ## Overview
 
@@ -138,6 +139,12 @@ pandora-create
 
 Or with the pythoncode below: 
 
+First, generate the necessary folders by running:
+```
+python install.py
+```
+Then, run the following script changing the path to the database you want to generate:
+
 ```python
 ## import requested modules
 from PANDORA import Database
@@ -147,7 +154,7 @@ db = Database.Database()
 db.construct_database(n_jobs=<n_jobs>)
 ```
 
-Note 1:  By default, the database generation will use one core only. You can sensitevly speed it up by changing the paramenter --num-cores for pandora-create ot 'n_jobs' for Database.contruct_database().
+Note 1:  By default, the database generation will use one core only. You can sensitevly speed it up by changing the paramenter --num-cores for pandora-create or 'n_jobs' for Database.contruct_database().
 
 Note 2: the database is saved by default into `~/PANDORA_databases/default`. It is possible to modify the folder name (`default`) by creating a `config.json` file in the PANDORA installation folder using `data_folder_name` as a key, and the desired folder name as a value, like in the example below:
 
@@ -460,3 +467,10 @@ Databases
 ## Issues
 
 If you have questions or find a bug, please report the issue in the [Github issue channel](https://github.com/X-lab-3D/PANDORA/issues).
+
+## Publication
+If you use PANDORA, please cite the following paper in your work:
+
+Marzella DF, Parizi FM, Tilborg Dv, Renaud N, Sybrandi D, Buzatu R, Rademaker DT, ‘t Hoen PAC and Xue LC (2022) PANDORA: A Fast, Anchor-Restrained Modelling Protocol for Peptide: MHC Complexes. Front. Immunol. 13:878762. doi: 10.3389/fimmu.2022.878762
+
+https://www.frontiersin.org/articles/10.3389/fimmu.2022.878762/full
