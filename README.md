@@ -1,7 +1,7 @@
 # PANDORA
 
 ![Build](https://github.com/X-lab-3D/PANDORA/actions/workflows/main.yml/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/PANDORA/badge.svg?branch=development)](https://coveralls.io/github/X-lab-3D/PANDORA?branch=development)
+[![Coverage Status](https://coveralls.io/repos/github/X-lab-3D/PANDORA/badge.svg?branch=master)](https://coveralls.io/github/X-lab-3D/PANDORA?branch=master)
 [![Anaconda-Server Badge](https://anaconda.org/csb-nijmegen/csb-pandora/badges/version.svg)](https://anaconda.org/csb-nijmegen/csb-pandora)
 [![Documentation Status](https://readthedocs.org/projects/csb-pandora/badge/?version=latest)](http://csb-pandora.readthedocs.io/?badge=latest)
 
@@ -35,7 +35,7 @@ PANDORA documentation can be found at: https://csb-pandora.readthedocs.io/en/lat
 PANDORA requires MODELLER, python and some python libraries to be installed.
 The following installations are required to start PANDORA installation:
 
-- [Python](https://www.python.org/) 3
+- [Python](https://www.python.org/) >=3.7
 - conda
 - pip3
 
@@ -45,11 +45,10 @@ The (conda) installation process will take care of installing the following depe
 - [muscle](https://anaconda.org/bioconda/muscle) >= 5.1
 - [Modeller](https://anaconda.org/salilab/modeller) >= 9.3
 - [Blast](https://anaconda.org/bioconda/blast) >= 10.2
-<!-- - [pdb2sql](https://github.com/DeepRank/pdb2sql) (Optional, only for RMSD calculation) -->
+- [pdb2sql](https://github.com/DeepRank/pdb2sql) (Required only for RMSD calculations for evaluation purposes)
 
 
 ## Installation
-### Conda Installation (AVAILABLE FOR DEVELOPMENT BRANCH ONLY)
 
 #### 1. Get a Modeller Key License:
 Prior to PANDORA installation, you need to first activate MODELLER's license. Please request MODELLER license at: https://salilab.org/modeller/registration.html
@@ -103,10 +102,9 @@ Clone the repository:
 ```
 git clone https://github.com/X-lab-3D/PANDORA.git
 ```
-Enter the cloned directory, switch to development branch and install the package:
+Enter the cloned directory and install the package:
 ```
 cd PANDORA
-git checkout development
 pip install -e .
 
 ```
@@ -182,14 +180,13 @@ First, you will always need to get a modeller license key and, optionally, the n
 
 2) Download PANDORA
 
-Download the GitHub repository and switch to the development branch:
+Download the GitHub repository:
 ```
 git clone https://github.com/X-lab-3D/PANDORA.git
 cd PANDORA
-git checkout development
 ```
 
-3) Add your license key
+1) Add your license key
    
 Now open the dockerfile and replace the "XXXX" at line 16 with your MODELLER license key.
 

@@ -35,7 +35,7 @@ setup(
     license="Apache Software License 2.0",
     keywords='PANDORA',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
@@ -66,8 +66,4 @@ setup(
             'pandora-run=PANDORA.cmd_pandora:cmd_run_pandora',
             'pandora-wrapper=PANDORA.cmd_pandora:cmd_run_wrapper',
             ],}
-    # cmdclass={
-    #     'develop': PostDevelopCommand,
-    #     'install': PostInstallCommand,
-    # },
 )

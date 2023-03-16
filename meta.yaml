@@ -1,5 +1,5 @@
 {% set name = "csb-pandora" %}
-{% set version = "2.0.0beta1" %}
+{% set version = "2.0.0beta2" %}
 {% set build_number = "0" %}
 
 package:
@@ -44,6 +44,7 @@ requirements:
     - joblib
     - pandas
     - python-dateutil
+    - urllib3=1.26.14
 
 about:
   home: https://github.com/X-lab-3D/PANDORA/blob/master/README.md

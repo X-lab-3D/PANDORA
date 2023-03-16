@@ -16,7 +16,7 @@ Basic target Example:
 >>>
 >>> target = PMHC.Target(id = 'myTestCase',
 >>>     MHC_class = 'I',
->>>     allele_type = 'HLA-A*02:01'
+>>>     allele_type = 'HLA-A*02:01',
 >>>     peptide = 'LLFGYPVYV',
 >>>     anchors = [2,9])
 >>>
