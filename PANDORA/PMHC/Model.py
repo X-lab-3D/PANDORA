@@ -1,45 +1,37 @@
 from Bio.PDB import PDBParser
-from Bio.PDB.Polypeptide import three_to_one
+from Bio.SeqUtils import seq1
 from Bio import pairwise2
 import os
 from Bio.PDB import PDBIO
 import PANDORA
 import traceback
-#import sys
-#import numpy as np
-# from copy import deepcopy
-
-
-
-# target = y.target
-# model_path = y.model_path
-# output_dir = PANDORA.PANDORA_data
-# pdb = deepcopy(y.pdb)
-# reference_pdb = '/Users/derek/Dropbox/Master_Bioinformatics/Internship/PANDORA/PANDORA_files/data/PDBs/pMHCII/1HXY.pdb'
-
 
 
 class Model:
 
-    def __init__(self, target, model_path='', output_dir = PANDORA.PANDORA_data, pdb=False, molpdf=0, dope=0):
-        '''__init__(self, target, model_path='', output_dir = PANDORA.PANDORA_data, pdb=False, molpdf=0, dope=0)
-         Initiate model object
-
+    def __init__(self, target, model_path='', output_dir=False, pdb=False, molpdf=0, dope=0):
+        ''' Initiate model object
         Args:
             target: Target object
-            output_dir: (string) output directory
             model_path: (string) path to hypothetical model
+            output_dir: (string) output directory
             pdb:  Bio.PDB object of the hypothetical model
             molpdf: (float) molpdf score
             dope:  (float) DOPE score
         '''
 
-
         self.target = target
         self.model_path = model_path
         self.molpdf = molpdf
         self.dope = dope
-        self.output_dir = output_dir
+
+        # Define the output directory
+        if output_dir == False:
+            self.output_dir = f"{os.getcwd()}/{self.target.id}"
+        else:
+            self.output_dir = output_dir
+        
+
 
         # Check if the user gave either the path to the model pdb or the pdb itself.
         if self.model_path == '' and not pdb:
@@ -181,6 +173,7 @@ class Model:
 
         # homogenize_pdbs(pdb, ref, output_dir, target.id, anchors=target.anchors, flanking=True)
 
+        start_dir = os.getcwd()
         os.chdir(self.output_dir)
         # Produce lzone file for the l-rmsd calculation
         # lzone = get_Gdomain_lzone('%s/%s_ref.pdb' %(self.output_dir, self.target.id), self.output_dir, self.target.MHC_class)
@@ -193,7 +186,7 @@ class Model:
 
         # remove intermediate files
         os.system('rm %s %s' % (decoy_path, ref_path))
-        os.chdir(os.path.dirname(PANDORA.PANDORA_path))
+        os.chdir(start_dir)
 
 
 def merge_chains(pdb):
@@ -220,7 +213,7 @@ def merge_chains(pdb):
     return pdb
 
 
-def renumber(pdb_ref, pdb_decoy):
+def renumber(pdb_ref, pdb_decoy, custom_map={"MSE":"M"}):
     ''' aligns two pdb's and renumber them accordingly.
 
     Args:
@@ -231,11 +224,14 @@ def renumber(pdb_ref, pdb_decoy):
     Returns: Bio.PDB objects with renumbered residues
 
     '''
-    ref_sequences = [[chain.id, ('').join([three_to_one(res.resname) for res in chain])]
-                      for chain in pdb_ref.get_chains()]
+    ref_sequences = [[chain.id, seq1(''.join([res.resname for res in chain]), custom_map=custom_map)] for chain in pdb_ref.get_chains()]
+                    #[[chain.id, ('').join([seq1(res.resname) for res in chain])]
+                    #  for chain in pdb_ref.get_chains()]
     ref_sequences.sort()
-    decoy_sequences = [[chain.id, ('').join([three_to_one(res.resname) for res in chain])]
-                      for chain in pdb_decoy.get_chains()]
+    decoy_sequences = [[chain.id, seq1(''.join([res.resname for res in chain]), custom_map=custom_map)] for chain in pdb_decoy.get_chains()]
+                        #[[chain.id, ('').join([seq1(res.resname) for res in chain])]
+                      #for chain in pdb_decoy.get_chains()]
+                        
     decoy_sequences.sort()
     
     assert(len(ref_sequences) == len(decoy_sequences))

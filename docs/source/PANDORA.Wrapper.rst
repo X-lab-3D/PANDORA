@@ -4,27 +4,23 @@ Wrapper Module
 
 .. automodule:: PANDORA.Wrapper
 
-This module is used to run PANDORA for large number of cases.
-It allows the user to insert all the cases in a csv/tsv file, add various information to them (template, anchor positions, M chain seq).
+The Wrapper module is used to run PANDORA in parallel on multiple cases.
+All the cases must be provided in a .csv/.tsv file, and various information can be added to them (template, anchor positions, M chain seq).
 
 Wrapper Example:
 
->>> from PANDORA.Pandora import Pandora
->>> from PANDORA.Database import Database
->>> from PANDORA.Wrapper import Wrapper
+>>> from PANDORA import Pandora
+>>> from PANDORA import Database
+>>> from PANDORA import Wrapper
 >>>
->>> ## A. Load pregenerated database of all pMHC PDBs as templates
->>> db = Database.load('pandora_Database')
+>>> ## A. Load the pre-generated templates database
+>>> db = Database.load()
 >>>
->>> ## B. Create the wrapper object
->>> wrap =  Wrapper()
+>>> ## B. Create and run wrapper with 24 concurrent jobs
+>>> wrap =  Wrapper.Wrapper(data_file='datafile.tsv', database=db, IDs_col=0, 
+>>>                         peptides_col=1, allele_name_col, n_jobs=24)
 >>>
->>> ## C. Create all Target Objects based on peptides in the .tsv file
->>> wrap.create_targets('datafile.tsv', IDs_col=0,
->>>                      peptides_col=1, allele_col=2, db)
->>>
->>> ## C. Perform modelling
->>> wrap.run_pandora(num_cores=24)
+
 
 
 Wrapper
@@ -34,11 +30,3 @@ Wrapper
     :members:
     :undoc-members:
     :show-inheritance:
-
-run_model
-----------------------------------------
-
-.. automodule:: PANDORA.Wrapper.run_model
-    :noindex:
-    :members:
-    :undoc-members:
