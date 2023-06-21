@@ -595,7 +595,8 @@ class Target(PMHC):
 
     def make_output_dir(self):
         ''' Create an output directory and move the template pdb there
-            Uses self.output_dir (str): Path to output directory. Defaults to os.getcwd().
+        Uses self.output_dir (str): Path to output directory. Defaults to os.getcwd().
+            
         Args:
             None
         '''

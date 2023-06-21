@@ -27,74 +27,74 @@ class Wrapper():
         Create PANDORA targets from csv or tsv file and models them.
         Args:
             data_file (str): Path to the input tsv/csv file containing targets
-                information.
+            information.
             database (PANDORA.Database.Database): Database object.
             MHC_class (str): MHC class of the targets, as 'I' or 'II'.
             num_cores (int, optional): Number of parallel PANDORA jobs.
-                Each one will be sent to a different core. Defaults to 1.
+            Each one will be sent to a different core. Defaults to 1.
             delimiter (str, optional): data_file delimiter. Do not use
-                semicolons (';') as separators. Defaults to '\t'.
+            semicolons (';') as separators. Defaults to '\t'.
             header (bool, optional): If True, assumes the data_file has a
-                header line and skips it. If your file has no header line,
-                set it as False. Defaults to True.
+            header line and skips it. If your file has no header line,
+            set it as False. Defaults to True.
             IDs_col (int or None, optional): Column of data_file containing
-                the targets IDs. If None, will automatically assign an ID
-                according to the row number. Defaults to None.
+            the targets IDs. If None, will automatically assign an ID
+            according to the row number. Defaults to None.
             peptides_col (int, optional): Column of data_file containing
-                the targets peptides. Defaults to 0.
+            the targets peptides. Defaults to 0.
             allele_name_col (int, optional): Column of data_file containing
-                the targets alleles. Umbiguous allele cases (where the allele
-                might have multiple names) should be separated by a
-                semicolon (';'). Defaults to 1.
+            the targets alleles. Umbiguous allele cases (where the allele
+            might have multiple names) should be separated by a
+            semicolon (';'). Defaults to 1.
             anchors_col (int, optional): Column of data_file containing
-                the targets anchors. Anchors should be two numbers separated
-                by a semicolon (';'). Defaults to 2.
+            the targets anchors. Anchors should be two numbers separated
+            by a semicolon (';'). Defaults to 2.
             M_chain_col (None or int, optional): Column of data_file containing
-                the targets M chain sequences.
+            the targets M chain sequences.
             N_chain_col (None or int, optional): Column of data_file containing
-                the targets N chain sequences (only for MHCII).
+            the targets N chain sequences (only for MHCII).
             outdir_col (None or int, optional): Column of data_file containing
-                the paths to the output folder for each case.
+            the paths to the output folder for each case.
             template_col (None or int, optional): 0-index column containing the template
-                ID to be used for each case. Defaults to None.
+            ID to be used for each case. Defaults to None.
             collective_output_dir (str, optional): Output directory path for
-                all the cases. Note: This argument will be ignored if  'outdir_col'
-                has been used to generate targets with Wrapper.create_targets().
-                Defaults to False.
+            all the cases. Note: This argument will be ignored if  'outdir_col'
+            has been used to generate targets with Wrapper.create_targets().
+            Defaults to False.
             benchmark (bool, optional): Set True only for benchmarking purpose,
-                if target structures are available. Defaults to False.
+            if target structures are available. Defaults to False.
             start_row (None or int): Starting row of data_file, to use when
-                splitting the data_file into multiple batches. This allows to
-                specify from which row the samples for this job start.
+            splitting the data_file into multiple batches. This allows to
+            specify from which row the samples for this job start.
             end_row (None or int): Ending row of data_file, to use when
-                splitting the data_file into multiple batches. This allows to
-                specify at which row the samples for this job end.
+            splitting the data_file into multiple batches. This allows to
+            specify at which row the samples for this job end.
             use_netmhcpan (bool, optional): If True, uses local installation
-                of netMHCPan to predict anchor positions for each target.
+            of netMHCPan to predict anchor positions for each target.
             use_templ_seq (bool, optional): If true, it uses the template MHC sequence 
-                for each chain a sequence could not be found. This function is mainly
-                for benchmarking purposes. Defaults to False.
-                    num_cores (int, optional): Number of parallel PANDORA jobs.
-                Each one will be sent to a different core. Defaults to 1.
+            for each chain a sequence could not be found. This function is mainly
+            for benchmarking purposes. Defaults to False.
+            num_cores (int, optional): Number of parallel PANDORA jobs.
+            Each one will be sent to a different core. Defaults to 1.
             n_loop_models (int, optional): Number of  loop models.
-                Defaults to 20.
+            Defaults to 20.
             n_jobs (int, optional): Number of parallel MODELLER loop jobs.
-                Do not increase further than n_loop_models. Defaults to None.
+            Do not increase further than n_loop_models. Defaults to None.
             pickle_out (bool, optional): If True, outputs a pickle file
-                containing every model object. Defaults to False.
+            containing every model object. Defaults to False.
             clip_C_domain (bool or list): if True, clips away the C-like domain, levaing only
-                the G-domain according to IMGT. If a listcontaining the G domain(s) 
-                span is provided, will use it to cut the sequence. The list should have 
-                this format: [(1,182)] for MHCI and [(1,91),(1,86)] for MHCII.
+            the G-domain according to IMGT. If a listcontaining the G domain(s) 
+            span is provided, will use it to cut the sequence. The list should have 
+            this format: [(1,182)] for MHCI and [(1,91),(1,86)] for MHCII.
             restraints_stdev (bool or float): if True, keeps the whole peptide flexible. Increases computational time by 50-90% 
-                but increases accuracy and prevents from artifacts at the anchor positions.
-                If float, it used as standard deviation of modelling restraints. Higher = more flexible restraints. 
-                Defaults to False. Setting it to True only will set the default standard deviation to 0.1.
+            but increases accuracy and prevents from artifacts at the anchor positions.
+            If float, it used as standard deviation of modelling restraints. Higher = more flexible restraints. 
+            Defaults to False. Setting it to True only will set the default standard deviation to 0.1.
             wrapper_id (string): id of the wrapper. Should be alphanumeric only. 
-                If not, non-alphanumeric characters will be replaced with dashes.
-                If False, it will be randomly generated. Defaults to False.
+            If not, non-alphanumeric characters will be replaced with dashes.
+            If False, it will be randomly generated. Defaults to False.
             rm_netmhcpan_output: (bool) If True, removes the netmhcpan infile and 
-                outfile after having used them for netmhcpan.
+            outfile after having used them for netmhcpan.
         Returns:
             None.
         """
@@ -284,6 +284,7 @@ class Wrapper():
     def prep_collective_output_dir(self):
         ''' Create an output directory and move the template pdb there
             Uses self.output_dir (str): Path to output directory. Defaults to os.getcwd().
+            
         Args:
             None
         '''
@@ -317,13 +318,15 @@ def archive_and_remove(case):
 
 def run_case(args):
     """Runs one modelling job. Meant to be runned from Pandora.Wrapper
+    
     Args:
         args (list): List of arguments. Should be containing the following, in
-            order.
+        order.
         target_id (str): Target id.
         n_loop_models (int, optional): Number of loop models. Defaults to 20.
         benchmark (bool, optional): Set True if running a benchmark to retrieve
-            models RMSD with reference structures. Defaults to False.
+        models RMSD with reference structures. Defaults to False.
+        
     Returns:
         None.
     """
