@@ -9,7 +9,7 @@ package:
 source:
   git_rev:
   git_url: git@github.com:X-lab-3D/PANDORA.git
-  git_tag: development
+  git_tag: master
   #path: .
 
 build:

@@ -174,7 +174,7 @@ Example of high accuracy pMHC-I modelling:
 >>>
 >>> ## C. Perform modelling
 >>> case = Pandora.Pandora(target, db)
->>> case.model(n_loop_models=100, loop_refinament="very_slow",
+>>> case.model(n_loop_models=100, loop_refinement="very_slow",
 >>>            restraints_stdev=0.3, clip_C_domain=False)
 
 
@@ -197,7 +197,7 @@ On the other hand, a user might want to quickly generate large amounts of models
 >>>
 >>> ## C. Perform modelling
 >>> case = Pandora.Pandora(target, db)
->>> case.model(n_loop_models=20, loop_refinament="very_fast",
+>>> case.model(n_loop_models=20, loop_refinement="very_fast",
 >>>            restraints_stdev=False, clip_C_domain=True)
 
 The number of loop models could in theory be reduced to less than 20 models, but we do not advise this solution to not decrease the accuracy too much.
