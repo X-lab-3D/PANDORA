@@ -1,3 +1,15 @@
+"""
+RNN module for Peptide Sequence Data Generation
+
+Authors:
+- Marieke van Vreeswijk
+- Daniel Rademaker
+
+Description:
+This script contains the implementation of a single RNN cell module 
+aimed at generating peptide sequence data.
+"""
+
 import torch
 import itertools
 import torch.nn as nn
