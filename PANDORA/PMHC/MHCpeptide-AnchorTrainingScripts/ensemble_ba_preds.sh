@@ -19,7 +19,7 @@ submit_job() {
     mkdir -p $output_dir
 
     LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -q research-hpc -a 'docker(susannakiwala/pvactools:1.5.0b)' -J "anchor_analysis_${count}" \
-    -M 8000000 -R 'select[mem>=8000] rusage[mem=8000]' -g '/user/h.xia/sat_analysis_20' \
+    -M 8000000 -R 'select[mem>=8000] rusage[mem=8000]' -g 'anchorJob' \
     -oo "/anchor_analysis/logs_r4/sample_${hla}_${len}.out" -e "/anchor_analysis/logs_r4/sample_${hla}_${len}.err" \
     pvacbind run -e $len --iedb-install-directory /opt/iedb --iedb-retries 50 --binding-threshold 500 \
     --allele-specific-binding-thresholds --keep-tmp-files --n-threads 20 $fasta_path "ANCHOR" $hla \
