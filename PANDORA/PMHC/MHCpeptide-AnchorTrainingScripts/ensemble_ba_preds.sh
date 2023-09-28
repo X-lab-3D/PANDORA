@@ -12,15 +12,15 @@ submit_job() {
     local hla=$2
     local len=$3
 
-    local fasta_path="/anchor_analysis/fasta_files_r4/${hla}/anchor_${len}mer_input.fa"
-    local output_dir="/anchor_analysis/output_files_r4/${hla}/anchor_${len}mer_output/"
+    local fasta_path="/anchor_pred/fasta_files_r4/${hla}/anchor_${len}mer_input.fa"
+    local output_dir="/anchor_pred/output_files_r4/${hla}/anchor_${len}mer_output/"
 
     echo $fasta_path
     mkdir -p $output_dir
 
-    LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -q research-hpc -a 'docker(susannakiwala/pvactools:1.5.0b)' -J "anchor_analysis_${count}" \
+    LSF_DOCKER_PRESERVE_ENVIRONMENT=false bsub -q research-hpc -a 'docker(susannakiwala/pvactools:1.5.0b)' -J "anchor_pred_${count}" \
     -M 8000000 -R 'select[mem>=8000] rusage[mem=8000]' -g 'anchorJob' \
-    -oo "/anchor_analysis/logs_r4/sample_${hla}_${len}.out" -e "/anchor_analysis/logs_r4/sample_${hla}_${len}.err" \
+    -oo "/anchorpred/logs_anchor_pred/sample_${hla}_${len}.out" -e "/anchorpred/logs_anchor_pred/sample_${hla}_${len}.err" \
     pvacbind run -e $len --iedb-install-directory /opt/iedb --iedb-retries 50 --binding-threshold 500 \
     --allele-specific-binding-thresholds --keep-tmp-files --n-threads 20 $fasta_path "ANCHOR" $hla \
     MHCflurry MHCnuggetsI NetMHC NetMHCcons NetMHCpan PickPocket SMM SMMPMBEC $output_dir
