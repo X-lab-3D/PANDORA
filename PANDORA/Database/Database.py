@@ -356,14 +356,14 @@ def create_db_folders(db_path=None):
         else:
             print(f'WARNING: folder {D} already exists!')
 
-def fetch_database(db_out_path, db_url='https://sandbox.zenodo.org/record/1163695/files/default.tar.gz?download=1'):
+def fetch_database(db_out_path, db_url='https://zenodo.org/records/7318263/files/default.tar.gz?download=1'):
     """Downloads the pre-generated database from zotero.
 
     Args:
         db_out_path (str): Path to the database to be downloaded,  
             should be pointing at a "PANDORA_databases" folder.
         db_url (str, optional): URL for the zenodo database. 
-            Defaults to 'https://sandbox.zenodo.org/record/1163695/files/default.tar.gz?download=1'.
+            Defaults to 'https://zenodo.org/records/7318263/files/default.tar.gz?download=1'.
 
     Raises:
         Exception: If the PANDORA_database.pkl file is not found in the destination folder,
