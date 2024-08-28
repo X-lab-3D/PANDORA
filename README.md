@@ -384,9 +384,9 @@ from PANDORA import Database
 ## A. Load pregenerated database of all pMHC PDBs as templates
 db = Database.load()
 
-target = Target(id='myMHCIITestCase'
+target = Target(id='myMHCIITestCase',
     MHC_class = 'II',
-    allele_type = ['HLA-DRA*0102', 'HLA-DRA*0101', 'HLA-DRB1*0101'],
+    allele_type = ['HLA-DRA*0102', 'HLA-DRB1*0101'],
     peptide = 'GELIGILNAAKVPAD',
     anchors = [4, 7, 9, 12])
 
