@@ -28,6 +28,7 @@ jobs:
         with:
           auto-activate-base: true
           activate-environment: ""
+          miniforge-version: latest
       - name: Set up directories
         run: | 
           python test/install_git_test.py 
