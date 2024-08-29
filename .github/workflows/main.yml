@@ -51,6 +51,7 @@ jobs:
           KEY_MODELLER: ${{ secrets.MODELLER_KEY }}
         run: |
           echo $KEY_MODELLER
+          conda config --set solver classic
           conda install -c salilab modeller
           conda install -c bioconda muscle=5.1
           conda install -c bioconda blast=2.10
