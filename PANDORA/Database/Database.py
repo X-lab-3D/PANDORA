@@ -18,6 +18,23 @@ class Database:
         self.ref_MHCI_sequences = {}
         self.__IDs_list_MHCI = []
         self.__IDs_list_MHCII = []
+        self.reverse = False
+        
+    def __reverse(self):
+        for temp in self.MHCII_data:
+            peptide = self.MHCII_data[temp].peptide
+            self.MHCII_data[temp].peptide = peptide[::-1]
+            self.MHCII_data[temp].anchors = [len(peptide) - anchor + 1 for anchor in self.MHCII_data[temp].anchors][::-1]
+            self.MHCII_data[temp].reverse = not self.MHCII_data[temp].reverse
+    
+    def set_reverse(self, reverse):
+        if reverse:
+            if not self.reverse:
+                self.__reverse()
+        else:
+            if self.reverse:
+                self.__reverse()
+        self.reverse = reverse
 
     def download_data(self, data_dir = PANDORA.PANDORA_data, download = True):
         """download_data(self, data_dir = PANDORA.PANDORA_data, download = True)
@@ -306,6 +323,9 @@ def load(file_name = PANDORA.PANDORA_data + '/PANDORA_database.pkl'):
     try:
         with open(file_name, 'rb') as inpkl:
             db = pickle.load(inpkl)
+            db.reverse = False
+            for temp in db.MHCII_data:
+                db.MHCII_data[temp].reverse = False 
         return db
     except FileNotFoundError:
         raise Exception('Database file not found. Are you sure you have it? If not, run Database.construct_database()')
