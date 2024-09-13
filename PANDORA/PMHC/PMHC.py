@@ -63,7 +63,7 @@ class Template(PMHC):
     def __init__(self, id, peptide='',  allele_type=[], MHC_class='I',
                  M_chain_seq='', B2M_seq='', N_chain_seq='', anchors=[], G_domain_span=False,
                  helix=False, sheet=False, pdb_path=False, pdb=False,
-                 remove_biopython_object=False):
+                 remove_biopython_object=False, reverse= False):
         ''' Template structure class. This class holds all information of a template structure that is used for
             homology modelling. This class needs a id, allele and the path to a pdb file to work. (sequence info of
             the chains and peptide can be fetched from the pdb)
@@ -100,6 +100,7 @@ class Template(PMHC):
             self.allele_type = [self.allele_type]
 
         self.check_allele_name()
+        self.reverse = reverse
 
         if not os.path.isfile(self.get_pdb_path()) and not pdb:
             print(f'ERROR:file {self.get_pdb_path()} not found')
@@ -115,11 +116,12 @@ class Template(PMHC):
         if remove_biopython_object:
             self.pdb = None
 
+
     def get_pdb_path(self):
-        if 'pdb_path' in locals():
-            return self.pdb_path
+        if not self.reverse:
+           return os.path.join(PANDORA.PANDORA_data, 'PDBs', f'pMHC{self.MHC_class}', f'{self.id}.pdb')
         else:
-            return os.path.join(PANDORA.PANDORA_data, 'PDBs', f'pMHC{self.MHC_class}', f'{self.id}.pdb')
+           return os.path.join(PANDORA.PANDORA_data, 'PDBs', f'pMHC{self.MHC_class}_reversed', f'{self.id}_reverse.pdb')
         
 
     def parse_pdb(self, custom_map={"MSE":"M"}):
@@ -243,7 +245,7 @@ class Target(PMHC):
                  B2M_seq='', anchors = [],
                  helix=False, sheet=False, templates = False,
                  use_netmhcpan = False, use_templ_seq=False, output_dir=False,
-                 rm_netmhcpan_output=True):
+                 rm_netmhcpan_output=True, reverse=False):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
         Args:
@@ -263,7 +265,8 @@ class Target(PMHC):
             output_dir: (string) Path to output directory. Defaults to current working directory.
             rm_netmhcpan_output: (bool) If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
         ''' 
-
+        
+        anchors.sort()
         super().__init__(id, peptide=peptide, allele_type=allele_type, 
                          MHC_class=MHC_class, M_chain_seq=M_chain_seq, 
                          N_chain_seq=N_chain_seq, B2M_seq=B2M_seq, 
@@ -272,6 +275,7 @@ class Target(PMHC):
         self.initial_model = False
         self.contacts = False
         self.anchor_contacts = False
+        self.reverse = reverse
 
         # Changes all special characters in the case id to '-'
         self.id = re.sub('[^a-zA-Z0-9 \n\.]', '_', id)
