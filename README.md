@@ -437,13 +437,13 @@ target = Target(id='reversedTestCase',
     MHC_class='II',
     peptide='VLQAGFFLLTRIL',
     allele_type=['HLA-DPA1*02:01', 'HLA-DPB1*01:01'],
-    anchors=[10, 7, 5, 2],  # Input anchors in reverse order
-    reverse=True)           # Flag to indicate the use of reversed peptides
+    anchors=[10, 7, 5, 2],                             # Input anchors in reverse order
+    reverse=True)                                      # Flag to indicate the use of reversed peptides
 
-## C. Perform modelling with reversed peptide
+## C. Perform modelling
 case = Pandora.Pandora(target, db)
 case.model()
-```python
+```
 
 #### Example 7: Benchmark PANDORA on one modelling case
 
