@@ -403,23 +403,25 @@ Reversed peptide binding is often observed in specific alleles of MHC-II, but PA
 
 Required Information:
 
-Peptide sequence (normal sequence)
+- Peptide sequence (normal sequence)
 
-MHC allele or MHC sequence
+- MHC allele or MHC sequence
 
-Anchor residues (input in reverse order, descending)
+- Anchor residues (input in reverse order, descending)
 
 Steps:
 
-A. Load the template database
+- A. Load the template database
 
-B. Creating a Target object based on the given target information, with the reverse option set to True
+- B. Creating a Target object based on the given target information, with the reverse option set to True
 
-C. Generating the pMHC model using the reversed template
+- C. Generating the pMHC model using the reversed template
 
-As illustrated in the figure, this example demonstrates a peptide sequence with anchor residues [10, 7, 5, 2] in reverse order.
+As illustrated in the figure, this example demonstrates a peptide sequence with anchor residues [11, 8, 6, 3] in reverse order.
 
-<img src="https://raw.githubusercontent.com/X-lab-3D/PANDORA/blob/reverse_peptide_MHCII/images/reverse_peptide.png">
+<img src="https://github.com/X-lab-3D/PANDORA/blob/reverse_peptide_MHCII/images/reverse_peptide.png" alt="Logo" width="500">
+
+How to run PANDORA for a peptide sequence with anchor residues [10, 7, 5, 2] in reverse order:
 
 ```python
 ## Import required modules
