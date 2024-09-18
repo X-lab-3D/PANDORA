@@ -402,11 +402,15 @@ Reversed peptide binding is often observed in specific alleles of MHC-II, but PA
 **Note**: When performing reversed peptide modeling, **only the anchor residues should be considered in reverse order**, while the rest of the peptide should maintain its normal sequence. This ensures that the reversed template preserves the correct binding interactions at the MHC anchor positions.
 
 Required Information:
+
 Peptide sequence (normal sequence)
+
 MHC allele or MHC sequence
+
 Anchor residues (input in reverse order, descending)
 
 Steps:
+
 A. Load the template database
 
 B. Creating a Target object based on the given target information, with the reverse option set to True
@@ -415,6 +419,7 @@ C. Generating the pMHC model using the reversed template
 
 As illustrated in the figure, this example demonstrates a peptide sequence with anchor residues [10, 7, 5, 2] in reverse order.
 
+<img src="https://raw.githubusercontent.com/X-lab-3D/PANDORA/blob/reverse_peptide_MHCII/images/reverse_peptide.png">
 
 ```python
 ## Import required modules
