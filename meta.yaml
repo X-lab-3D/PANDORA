@@ -25,7 +25,7 @@ build:
 
 requirements:
   build:
-    - python>=3.7
+    - python>=3.12
     - setuptools
     - pip
   host:
@@ -39,7 +39,7 @@ requirements:
     - numpy
     - numpy-base
     - pip
-    - python>=3.7
+    - python>=3.12
     - setuptools
     - joblib
     - pandas
