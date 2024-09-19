@@ -3,6 +3,7 @@ channels:
   - bioconda
   - salilab
   - csb-nijmegen
+  - defaults  # Added this to ensure core dependencies like `numpy` are resolved correctly
 dependencies:
   - python=3.10.6
   - muscle=5.1
@@ -17,3 +18,4 @@ dependencies:
   - biopython
   - ipython
   - urllib3=1.26.14
+  - modeller  # If modeller is needed, add this under the `salilab` channel
