@@ -379,14 +379,14 @@ def create_db_folders(db_path=None):
         else:
             print(f'WARNING: folder {D} already exists!')
 
-def fetch_database(db_out_path, db_url='https://zenodo.org/records/10067441/files/default.tar.gz?download=1'):
-    """Downloads the pre-generated database from zotero.
+def fetch_database(db_out_path, db_url='https://surfdrive.surf.nl/files/index.php/s/9hEGNUQO5ngH3KJ/download'):
+    """Downloads the pre-generated database.
 
     Args:
         db_out_path (str): Path to the database to be downloaded,  
             should be pointing at a "PANDORA_databases" folder.
-        db_url (str, optional): URL for the zenodo database. 
-            Defaults to 'https://zenodo.org/records/10067441/files/default.tar.gz?download=1'.
+        db_url (str, optional): URL  database. 
+            Defaults to 'https://surfdrive.surf.nl/files/index.php/s/9hEGNUQO5ngH3KJ/download'.
 
     Raises:
         Exception: If the PANDORA_database.pkl file is not found in the destination folder,
@@ -396,7 +396,7 @@ def fetch_database(db_out_path, db_url='https://zenodo.org/records/10067441/file
     try:
         parent_db_path = ('/').join(db_out_path.split('/')[:-1])
 
-        print('Downloading pre-built database from zenodo...')
+        print('Downloading pre-built database ...')
         os.popen(f'wget {db_url} -O {parent_db_path}/default.tar.gz').read()
         print('Copying the database')
         os.popen(f'tar -xzvf {parent_db_path}/default.tar.gz -C {parent_db_path}').read()
