@@ -1,14 +1,10 @@
-name: Update Conda
-  run: conda update -n base conda
-
 name: pandora
 channels:
   - bioconda
   - salilab
   - csb-nijmegen
-  - defaults  # Added this to ensure core dependencies like `numpy` are resolved correctly
 dependencies:
-  - python=3.10.6
+  - python=3.10
   - muscle=5.1
   - blast=2.10
   - numpy
@@ -21,4 +17,3 @@ dependencies:
   - biopython
   - ipython
   - urllib3=1.26.14
-  - modeller  # If modeller is needed, add this under the `salilab` channel
