@@ -1,3 +1,6 @@
+name: Update Conda
+  run: conda update -n base conda
+
 name: pandora
 channels:
   - bioconda
