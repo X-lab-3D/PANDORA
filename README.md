@@ -125,7 +125,7 @@ from PANDORA import Database
 Database.install_database()
 ```
 
-### (Advanced) Generate template Database
+### (Advanced) Generate template Database (does not work for reverse peptide templates, use fetch instead)
 
 You can also generate the database from scratch, downloading and parsing the structures directly from IMGT. This will ensure you to have as many templates as possible, as the quickly-retrievable database will not be re-released often. 
 
@@ -151,6 +151,7 @@ from PANDORA import Database
 db = Database.Database()
 db.construct_database(n_jobs=<n_jobs>)
 ```
+
 
 Note 1:  By default, the database generation will use one core only. You can sensitevly speed it up by changing the paramenter --num-cores for pandora-create or 'n_jobs' for Database.contruct_database().
 
