@@ -18,6 +18,23 @@ class Database:
         self.ref_MHCI_sequences = {}
         self.__IDs_list_MHCI = []
         self.__IDs_list_MHCII = []
+        self.reverse = False
+        
+    def __reverse(self):
+        for temp in self.MHCII_data:
+            peptide = self.MHCII_data[temp].peptide
+            self.MHCII_data[temp].peptide = peptide[::-1]
+            self.MHCII_data[temp].anchors = [len(peptide) - anchor + 1 for anchor in self.MHCII_data[temp].anchors][::-1]
+            self.MHCII_data[temp].reverse = not self.MHCII_data[temp].reverse
+    
+    def set_reverse(self, reverse):
+        if reverse:
+            if not self.reverse:
+                self.__reverse()
+        else:
+            if self.reverse:
+                self.__reverse()
+        self.reverse = reverse
 
     def download_data(self, data_dir = PANDORA.PANDORA_data, download = True):
         """download_data(self, data_dir = PANDORA.PANDORA_data, download = True)
@@ -306,6 +323,9 @@ def load(file_name = PANDORA.PANDORA_data + '/PANDORA_database.pkl'):
     try:
         with open(file_name, 'rb') as inpkl:
             db = pickle.load(inpkl)
+            db.reverse = False
+            for temp in db.MHCII_data:
+                db.MHCII_data[temp].reverse = False 
         return db
     except FileNotFoundError:
         raise Exception('Database file not found. Are you sure you have it? If not, run Database.construct_database()')
@@ -359,14 +379,14 @@ def create_db_folders(db_path=None):
         else:
             print(f'WARNING: folder {D} already exists!')
 
-def fetch_database(db_out_path, db_url='https://zenodo.org/records/10067441/files/default.tar.gz?download=1'):
-    """Downloads the pre-generated database from zotero.
+def fetch_database(db_out_path, db_url='https://surfdrive.surf.nl/files/index.php/s/71ksCqz1oEMHNSQ/download'):
+    """Downloads the pre-generated database.
 
     Args:
         db_out_path (str): Path to the database to be downloaded,  
             should be pointing at a "PANDORA_databases" folder.
-        db_url (str, optional): URL for the zenodo database. 
-            Defaults to 'https://zenodo.org/records/10067441/files/default.tar.gz?download=1'.
+        db_url (str, optional): URL  database. 
+            Defaults to 'https://surfdrive.surf.nl/files/index.php/s/71ksCqz1oEMHNSQ/download'.
 
     Raises:
         Exception: If the PANDORA_database.pkl file is not found in the destination folder,
@@ -376,7 +396,7 @@ def fetch_database(db_out_path, db_url='https://zenodo.org/records/10067441/file
     try:
         parent_db_path = ('/').join(db_out_path.split('/')[:-1])
 
-        print('Downloading pre-built database from zenodo...')
+        print('Downloading pre-built database ...')
         os.popen(f'wget {db_url} -O {parent_db_path}/default.tar.gz').read()
         print('Copying the database')
         os.popen(f'tar -xzvf {parent_db_path}/default.tar.gz -C {parent_db_path}').read()
