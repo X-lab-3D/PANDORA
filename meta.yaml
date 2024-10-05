@@ -25,11 +25,11 @@ build:
 
 requirements:
   build:
-    - python=3.10.15
+    - python=3.12
     - setuptools
     - pip
   host:
-    - python=3.10
+    - python=3.12
 
   run:
     - python=3.10.15
