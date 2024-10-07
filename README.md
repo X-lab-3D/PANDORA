@@ -36,7 +36,6 @@ PANDORA requires MODELLER, python and some python libraries to be installed.
 The following installations are required to start PANDORA installation:
 
 - [Python](https://www.python.org/) >=3.7
-- conda
 - pip3
 
 The (conda) installation process will take care of installing the following dependencies (see [Installation](#installation)):
@@ -61,10 +60,6 @@ export KEY_MODELLER='XXXX'
 
 #### 2. Install PANDORA
 
-Install with conda:
-```
-conda install -c csb-nijmegen csb-pandora=2.0.0beta2.2 -c salilab -c bioconda
-```
 
 Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
 ### GitHub / Pypi installation
@@ -173,7 +168,7 @@ Once you have obtained the download link, you can install them by following the 
 ## Docker
 The Docker release is currently not uploaded on DockerHub and, due to licensing of external software (MODELLER and NetMHCpan), the only way to use at this moment is by building the docker image directly from the recipe.
 
-We advice to use Docker only in case Conda or Git/Pypi installations are not possible in your system.
+We advice to use Docker only in case  Git/Pypi installations are not possible in your system.
 
 1)  Get MODELLER lincense (and optional softwares, if desired)
    
