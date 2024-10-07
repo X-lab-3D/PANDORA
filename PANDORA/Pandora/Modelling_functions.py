@@ -262,7 +262,23 @@ def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm
             all_netMHCpan_alleles.append(line.split()[0])#.replace(':',''))
         
     ## Format alleles
-    target_alleles = [i.replace('*','') for i in allele_type]
+    if any(x.startswith('HLA') for x in allele_type):
+        target_alleles = [i.replace('*','') for i in allele_type]
+    elif any(x.startswith('BoLA') for x in allele_type):
+        target_alleles = [i.replace(':','').replace('*',':') for i in allele_type]
+    elif any(x.startswith('DLA') for x in allele_type):
+        target_alleles = [i.replace(':','').replace('*','') for i in allele_type]
+    elif any(x.startswith('Eqca') for x in allele_type):
+        target_alleles = [i.replace(':','').replace('*','') for i in allele_type]
+    elif any(x.startswith('Gogo') for x in allele_type):
+        target_alleles = [i.replace(':','').replace('*','') for i in allele_type]
+    elif any(x.startswith('Mamu') for x in allele_type):
+        target_alleles = [i.replace(':','').replace('*',':') for i in allele_type]
+    elif any(x.startswith('Patr') for x in allele_type):
+        target_alleles = [i.replace(':','').replace('*','') for i in allele_type]
+    elif any(x.startswith('SLA') for x in allele_type):
+        target_alleles = [i.replace(':','').replace('*',':') for i in allele_type]
+    
     ## Make sure only netMHCpan available alleles are used
     target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
     
