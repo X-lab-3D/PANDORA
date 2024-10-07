@@ -430,6 +430,11 @@ class Target(PMHC):
             alleles = [x for x in self.allele_type if any(y in x for y in PANDORA.alpha_genes)]
         elif chain == 'N':
             alleles = [x for x in self.allele_type if any(y in x for y in PANDORA.beta_genes)]
+
+        if alleles == []:
+            print('WARNING: the provided allele(s) name have not been recognized as alpha or beta.')
+            print('this might cause PANDORA to assign the sequence to the wrong chain for MHC-II')
+            alleles = self.allele_type
         # Return the right sequences
         seq_flag = False
         #for seq in fasta_sequences:
@@ -499,7 +504,7 @@ class Target(PMHC):
         #Check if there are allele name for each MHC chain
         M_allele_flag = False
         N_allele_flag = False
-        if any(x in y for x in PANDORA.alpha_genes for y in self.allele_type):
+        if any(x in y for x in PANDORA.alpha_genes for y in self.allele_type) or self.MHC_class == 'I':
             M_allele_flag = True
         if self.MHC_class == 'II':
             if any(x in y for x in PANDORA.beta_genes for y in self.allele_type):
@@ -595,7 +600,8 @@ class Target(PMHC):
 
     def make_output_dir(self):
         ''' Create an output directory and move the template pdb there
-            Uses self.output_dir (str): Path to output directory. Defaults to os.getcwd().
+        Uses self.output_dir (str): Path to output directory. Defaults to os.getcwd().
+            
         Args:
             None
         '''

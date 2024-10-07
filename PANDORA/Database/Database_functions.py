@@ -84,8 +84,7 @@ def download_ids_imgt(ReceptorType, data_dir = PANDORA.PANDORA_data, out_tsv = F
     Returns: (list) Returns the list of IDs provided by IMGT.
 
     '''
-
-    #out_tsv = 'pMHCI_IDs_alleles_from_IMGT.tsv'
+    
     params = urllib.parse.urlencode({ 'ReceptorType' : ReceptorType,
              'type-entry': 'PDB'})
 
@@ -101,7 +100,7 @@ def download_ids_imgt(ReceptorType, data_dir = PANDORA.PANDORA_data, out_tsv = F
     IDs_list = [x[3][-4:] for x in IDs_list]
 
     if out_tsv:
-        outfile = open(data_dir + '/' + out_tsv, 'w')
+        outfile = open(f'{data_dir}/{out_tsv}', 'w')
         outfile.write(ReceptorType + ' IMGT IDs\n')
         for ID in IDs_list:
             outfile.write(ID + '\n')
@@ -1294,7 +1293,7 @@ def parse_pMHCI_pdb(pdb_id,
         outdir (str): path of the output dir (where the unzipped .pdb files go)
         bad_dir (str): path of the output dir (where the unsuitable .pdb files go)
         keep_bad (str): Keep the unsuitable pdb files in the bad_dir. If False, 
-            it will remove the files instead of moving them. Defaults to False.
+        it will remove the files instead of moving them. Defaults to False.
         custom_map (dict): custom map for 3-to-1 letter aa name translation.
 
     Returns: Template object
