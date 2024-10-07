@@ -25,11 +25,11 @@ build:
 
 requirements:
   build:
-    - python>=3.7
+    - python=3.11
     - setuptools
     - pip
   host:
-    - python>=3.7
+    - python=3.11
 
   run:
     - biopython
@@ -39,7 +39,7 @@ requirements:
     - numpy
     - numpy-base
     - pip
-    - python>=3.7
+    - python=3.11
     - setuptools
     - joblib
     - pandas
