@@ -63,7 +63,7 @@ export KEY_MODELLER='XXXX'
 
 Install with conda:
 ```
-conda install -c csb-nijmegen csb-pandora=2.0.0beta2 -c salilab -c bioconda
+conda install -c csb-nijmegen csb-pandora=2.0.0beta2.2 -c salilab -c bioconda
 ```
 
 Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
@@ -384,9 +384,9 @@ from PANDORA import Database
 ## A. Load pregenerated database of all pMHC PDBs as templates
 db = Database.load()
 
-target = Target(id='myMHCIITestCase'
+target = Target(id='myMHCIITestCase',
     MHC_class = 'II',
-    allele_type = ['HLA-DRA*0102', 'HLA-DRA*0101', 'HLA-DRB1*0101'],
+    allele_type = ['HLA-DRA*0102', 'HLA-DRB1*0101'],
     peptide = 'GELIGILNAAKVPAD',
     anchors = [4, 7, 9, 12])
 

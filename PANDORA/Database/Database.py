@@ -92,9 +92,9 @@ class Database:
         Returns: Database object
 
         '''
-        #Prepare the folders
+        #Generate the necessary folders
         create_db_folders()
-        
+    
         # Download the data
         self.download_data(download = download, data_dir = data_dir)
 
@@ -359,14 +359,14 @@ def create_db_folders(db_path=None):
         else:
             print(f'WARNING: folder {D} already exists!')
 
-def fetch_database(db_out_path, db_url='https://sandbox.zenodo.org/record/1163695/files/default.tar.gz?download=1'):
+def fetch_database(db_out_path, db_url='https://zenodo.org/records/10067441/files/default.tar.gz?download=1'):
     """Downloads the pre-generated database from zotero.
 
     Args:
         db_out_path (str): Path to the database to be downloaded,  
             should be pointing at a "PANDORA_databases" folder.
         db_url (str, optional): URL for the zenodo database. 
-            Defaults to 'https://sandbox.zenodo.org/record/1163695/files/default.tar.gz?download=1'.
+            Defaults to 'https://zenodo.org/records/10067441/files/default.tar.gz?download=1'.
 
     Raises:
         Exception: If the PANDORA_database.pkl file is not found in the destination folder,
@@ -386,7 +386,7 @@ def fetch_database(db_out_path, db_url='https://sandbox.zenodo.org/record/116369
             print('Database correctly retrieved')
         else:
             print('ERROR: Something is missing from the retrieved database.')
-            print('Please check the path you provided')
+            print('Please check the path you provided. Use Database.create_db_folders to generate the necessary folders.')
             raise Exception('Missing PANDORA_database.pkl')
 
     except Exception as e:
