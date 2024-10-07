@@ -29,8 +29,9 @@ jobs:
       - name: Set up conda test
         uses: conda-incubator/setup-miniconda@v2
         with:
-          auto-activate-base: true
-          activate-environment: ""
+          auto-activate-base: false
+          activate-environment: pandora
+          environment-file: environment.yml
           python-version: 3.11.10
           # python-version: ${{ matrix.python-version }}
           # auto-update-conda: false
