@@ -1293,7 +1293,7 @@ def parse_pMHCI_pdb(pdb_id,
         outdir (str): path of the output dir (where the unzipped .pdb files go)
         bad_dir (str): path of the output dir (where the unsuitable .pdb files go)
         keep_bad (str): Keep the unsuitable pdb files in the bad_dir. If False, 
-            it will remove the files instead of moving them. Defaults to False.
+        it will remove the files instead of moving them. Defaults to False.
         custom_map (dict): custom map for 3-to-1 letter aa name translation.
 
     Returns: Template object
