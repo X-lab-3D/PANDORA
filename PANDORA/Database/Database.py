@@ -379,14 +379,14 @@ def create_db_folders(db_path=None):
         else:
             print(f'WARNING: folder {D} already exists!')
 
-def fetch_database(db_out_path, db_url='https://surfdrive.surf.nl/files/index.php/s/71ksCqz1oEMHNSQ/download'):
+def fetch_database(db_out_path, db_url='https://surfdrive.surf.nl/files/index.php/s/D8f0n4ulfeZzsmJ/download'):
     """Downloads the pre-generated database.
 
     Args:
         db_out_path (str): Path to the database to be downloaded,  
             should be pointing at a "PANDORA_databases" folder.
         db_url (str, optional): URL  database. 
-            Defaults to 'https://surfdrive.surf.nl/files/index.php/s/71ksCqz1oEMHNSQ/download'.
+            Defaults to 'https://surfdrive.surf.nl/files/index.php/s/D8f0n4ulfeZzsmJ/download'.
 
     Raises:
         Exception: If the PANDORA_database.pkl file is not found in the destination folder,
