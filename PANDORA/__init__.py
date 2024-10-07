@@ -4,7 +4,7 @@ from os.path import exists
 from pathlib import Path
 import json
 
-version='2.0.0b2'
+version='2.0.0'
 PANDORA_path = os.path.dirname(os.path.abspath(__file__))
 module_path = Path(__file__).parents[0]
 
