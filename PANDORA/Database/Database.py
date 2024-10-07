@@ -94,7 +94,7 @@ class Database:
         '''
         #Generate the necessary folders
         create_db_folders()
-
+    
         # Download the data
         self.download_data(download = download, data_dir = data_dir)
 

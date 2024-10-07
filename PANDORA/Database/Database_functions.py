@@ -231,8 +231,11 @@ def get_chainid_alleles_MHCII(pdbf):
         try:
             if chains[chain][1][3].endswith('II-ALPHA'):
                 mhc_a[chain] = chains[chain]
-            elif chains[chain][1][3].endswith('II-BETA'):  # or chains[chain][1][3] == 'II-BETA':
+            elif chains[chain][1][3].endswith('II-BETA') or chains[chain][1][3].endswith('II-BETA-PEPTIDE'):
                 mhc_b[chain] = chains[chain]
+            elif any(x == ['G-DOMAIN', 'IMGT', 'domain', 'description', 'G-BETA'] for x in chains[chain]):#chains[chain][1][3].endswith('1C-LIKE') and any('G-BETA' in x for x in chains[chain]):
+                mhc_b[chain] = chains[chain]
+            
         except:
             pass
 
