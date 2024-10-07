@@ -1,3 +1,4 @@
+# This file is used both by conda-build and by the github action conda-incubator/setup-miniconda@v2
 name: pandora
 channels:
   - bioconda
