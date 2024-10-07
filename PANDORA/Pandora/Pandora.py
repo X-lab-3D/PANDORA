@@ -24,14 +24,12 @@ class Pandora:
         self.target = target
         self.template = template
         self.database = database
-        self.database.set_reverse(target.reverse)
         self.keep_IL = False
         self.logfile = f'{self.target.output_dir}/{target.id}.log'
 
         if database is None and template is None:
             raise Exception('Provide a Database object so Pandora can find the best suitable template structure for '
                             'modelling. Alternatively, you can specify a user defined Template object.')
-        
 
     def find_template(self, best_n_templates=1, benchmark=False, verbose=True):
         ''' Find the best template structure given a Target object
@@ -95,30 +93,26 @@ class Pandora:
                 self.pept_ali_scores.append((score, self.template.peptide, self.template.id))
             self.pept_ali_scores = self.pept_ali_scores[:best_n_templates]
 
-        #TODO: remove this line only after implementing issue #32.
-        if type(self.template)==list:
-            self.template = self.template[0]
-            
-            
+
+
         if verbose:
             if type(self.template)==list:
                 print('\tTemplates Allele:  %s' %([i.allele_type for i in self.template]))
                 print('\tTemplates Peptide: %s' %([i.peptide for i in self.template]))
                 print('\tTemplates Anchors: %s\n' %([i.anchors for i in self.template]))
-                
             else:
                 print('\tTemplate Allele:  %s' %self.template.allele_type)
                 print('\tTemplate Peptide: %s' %self.template.peptide)
-                print('\tTemplate Anchors: %s' %self.template.anchors)
-                print(f'\tTemplate Reverse: {self.template.reverse}')
-                print(f'\tTemplate PDB path: {self.template.get_pdb_path()}\n')
+                print('\tTemplate Anchors: %s\n' %self.template.anchors)
 
+        #TODO: remove this line only after implementing issue #32.
+        if type(self.template)==list:
+            self.template = self.template[0]
 
     def copy_template(self):
         ''' Move the template pdb to the output directory'''
         if os.path.isfile(self.template.get_pdb_path()):
-            basename = os.path.basename(self.template.get_pdb_path())
-            os.system(f'cp {self.template.get_pdb_path()} {self.target.output_dir}/{basename}')
+            os.system(f'cp {self.template.get_pdb_path()} {self.target.output_dir}/{self.template.id}.pdb')
         else:
             print('Template object could not be found. Please check the path: %s.' %self.template.get_pdb_path())
             raise Exception('Template file not found.')      

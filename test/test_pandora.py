@@ -110,30 +110,6 @@ def test_PMHC_target():
 
     assert pass_test
 
-#@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCII_modelling")
-def test_PMHCII_target_reverse():
-    # Create target object for reverse docking
-    target = Target('7T6I',
-                    MHC_class='II',
-                    allele_type=['HLA-B*5301', 'HLA-B*5301'],
-                    peptide='KPIVQYDNF',
-                    M_chain_seq='IKADHVSTYAAFVQTHRPTGEFMFEFDEDEQFYVDLDKKETVWHLEEFGRAFSFEAQGGLANIAILNNNLNTLIQRSNHTQAANDPPEVTVFPKEPVELGQPNTLICHIDRFFPPVLNVTWLCNGEPVTEGVAESLFLPRTDYSFHKFHYLTFVPSAEDVYDCRVEHWGLDQPLLKHWEATSG',
-                    N_chain_seq='RATPENYVYQGRQECYAFNGTQRFLERYIYNREEYARFDSDVGEFRAVTELGRPAAEYWNSQKDILEEKRAVPDRVCRHNYELDEAVTLQRRVQPKVNVSPSKKGPLQHHNLLVCHVTDFYPGSIQVRWFLNGQEETAGVVSTNLIRNGDWTFQILVMLEMTPQQGDVYICQVEHTSLDSPVTVEWKATGG',
-                    anchors=[12, 9 ,7, 4],  # reverse anchors
-                    reverse=True)  # Reverse docking scenario
-    
-    # Test if the initial model is empty, MHC class, the reversed peptide, and anchors
-    pass_test = False
-    if (target.initial_model == False and
-        target.MHC_class == 'II' and
-        target.peptide == 'KPIVQYDNF' and
-        target.anchors == [4, 7, 9, 12]):
-        
-        pass_test = True
-
-    assert pass_test
-
-
 #@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
 def test_PMHC_template():
     # Create template object
@@ -237,7 +213,7 @@ def test_template_select_MHCII():
     mod = Pandora.Pandora(target, db)
     mod.find_template(benchmark=True)
 
-    assert mod.template.id == '4GG6' and mod.template.peptide == 'SGEGSFQPSQENP'
+    assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
 
 def test_pandora_MHCI_modelling():
     # Load database
@@ -318,42 +294,12 @@ def test_pandora_MHCII_modelling():
     mod.model(n_loop_models=1, restraints_stdev=0.3, benchmark=True, loop_refinement='very_fast')
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
-    if mod.template.id == '4GG6' and [c.id for c in mod.target.initial_model.get_chains()] == ['M','N', 'P']:
+    if mod.template.id == '4Z7U' and [c.id for c in mod.target.initial_model.get_chains()] == ['M','N', 'P']:
         if float(mod.results[0].molpdf) < 1000 and float(mod.results[0].molpdf) > -1000:
             pass_test = True
     # remove output file
     os.system('rm -r %s' % (target.output_dir))
     assert pass_test
-
-def test_pandora_MHCII_reverse_modelling():
-    # Load database
-    db = Database.load()  # Assume the database loading path is correct.
-
-    # Create a target object for reverse docking
-    target = Target(id='7T6I',
-                    MHC_class='II',
-                    peptide='PVADAVIHASGKQMWQ',  # Original peptide
-                    M_chain_seq='IKADHVSTYAAFVQTHRPTGEFMFEFDEDEQFYVDLDKKETVWHLEEFGRAFSFEAQGGLANIAILNNNLNTLIQRSNHTQAANDPPEVTVFPKEPVELGQPNTLICHIDRFFPPVLNVTWLCNGEPVTEGVAESLFLPRTDYSFHKFHYLTFVPSAEDVYDCRVEHWGLDQPLLKHWEATSG',
-                    N_chain_seq='RATPENYVYQGRQECYAFNGTQRFLERYIYNREEYARFDSDVGEFRAVTELGRPAAEYWNSQKDILEEKRAVPDRVCRHNYELDEAVTLQRRVQPKVNVSPSKKGPLQHHNLLVCHVTDFYPGSIQVRWFLNGQEETAGVVSTNLIRNGDWTFQILVMLEMTPQQGDVYICQVEHTSLDSPVTVEWKATGG',
-                    anchors=[12, 9, 7, 4],  # Reverse docking anchors
-                    reverse=True)  # Reverse docking scenario
-
-    # Perform reverse modeling
-    mod = Pandora.Pandora(target, db)
-    mod.model(n_loop_models=1, restraints_stdev=0.3, benchmark=True, loop_refinement='very_fast')
-
-    # Check if the template is initiated and if the initial model is created correctly
-    pass_test = False
-    if [c.id for c in mod.target.initial_model.get_chains()] == ['M', 'N', 'P']:
-        if float(mod.results[0].molpdf) < 1000 and float(mod.results[0].molpdf) > -1000:
-            pass_test = True
-
-    # Clean up the output directory
-    os.system('rm -r %s' % (target.output_dir))
-
-    # Ensure the test passes
-    assert pass_test
-
 
 def test_rmsd():
     # Load database
@@ -375,29 +321,3 @@ def test_rmsd():
     pass_test = m.lrmsd > 1 and m.lrmsd < 1.5 and m.core_lrmsd > 1 and m.core_lrmsd < 1.5
 
     assert pass_test
-
-import pytest
-
-#@pytest.mark.skip(reason="RFor running the tests locally")
-def run_tests():
-    # List of test functions to run
-    test_functions = [
-        test_clean_MHCII_structure,
-        #test_construct_database,
-        test_load_db,
-        #test_PMHC_target,
-        #test_PMHCII_target_reverse,
-        #test_PMHC_template,
-        test_fail_PMHC,
-        #test_contacts,
-        #test_align,
-        #test_template_select_MHCII,
-        test_pandora_MHCII_modelling,
-        test_pandora_MHCII_reverse_modelling
-    ]
-
-    # Execute each test function
-    for test_func in test_functions:
-        print(f"Running {test_func.__name__}...")
-        test_func()
-
