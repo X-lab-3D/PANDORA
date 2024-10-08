@@ -1,11 +1,9 @@
 from pyexpat import model
 import os
 
-from Bio.PDB import PDBParser
-from Bio.SeqUtils import seq1
 from Bio import pairwise2
-from Bio.PDB import PDBIO
-from Bio.PDB import Select
+from Bio.SeqUtils import seq1
+from Bio.PDB import PDBParser, PDBIO, Select
 
 import PANDORA
 
