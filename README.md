@@ -66,7 +66,9 @@ Install with conda:
 conda install -c csb-nijmegen csb-pandora=2.0.0beta2.2 -c salilab -c bioconda
 ```
 
-Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
+Note 1: If your system is protected by an institutional firewall, you might not be able to use the conda installation, as described in [issue #273](https://github.com/X-lab-3D/PANDORA/issues/273). In such case, refer to the GitHub/Pypi installation below.
+
+Note 2: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
 ### GitHub / Pypi installation
 
 #### 1. Install Modeller:
@@ -465,9 +467,16 @@ Databases
 
 If you have questions or find a bug, please report the issue in the [Github issue channel](https://github.com/X-lab-3D/PANDORA/issues).
 
-## Publication
+## Publications
+
+#### Citing PANDORA
 If you use PANDORA, please cite the following paper in your work:
 
-Marzella DF, Parizi FM, Tilborg Dv, Renaud N, Sybrandi D, Buzatu R, Rademaker DT, ‘t Hoen PAC and Xue LC (2022) PANDORA: A Fast, Anchor-Restrained Modelling Protocol for Peptide: MHC Complexes. Front. Immunol. 13:878762. doi: 10.3389/fimmu.2022.878762
+Parizi, F.M., Marzella, D.F., Ramakrishnan, G., ‘T Hoen, P.A.C., Karimi-Jafari, M.H., Xue, L.C., 2023. PANDORA v2.0: Benchmarking peptide-MHC II models and software improvements. Front. Immunol. 14, 1285899. https://doi.org/10.3389/fimmu.2023.1285899
+
+https://www.frontiersin.org/journals/immunology/articles/10.3389/fimmu.2023.1285899/full
+
+#### Original work:
+Marzella, D.F., Parizi, F.M., Tilborg, D.V., Renaud, N., Sybrandi, D., Buzatu, R., Rademaker, D.T., ‘T Hoen, P.A.C., Xue, L.C., 2022. PANDORA: A Fast, Anchor-Restrained Modelling Protocol for Peptide: MHC Complexes. Front. Immunol. 13, 878762. https://doi.org/10.3389/fimmu.2022.878762
 
 https://www.frontiersin.org/articles/10.3389/fimmu.2022.878762/full
