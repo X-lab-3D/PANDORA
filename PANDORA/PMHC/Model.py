@@ -519,17 +519,3 @@ def remove_mismatched_atoms_from_pdb(ref, decoy, atoms):
                continue
     return ref, decoy
 
-
-class NotDisordered(Select):  # Inherit methods from Select class
-    '''
-    Keep one Alternative location for the given atom
-    '''
-    def accept_atom(self, atom):
-        keepAltID = 'A'
-        if (not atom.is_disordered()) or atom.get_altloc() == keepAltID:
-            atom.set_altloc(" ")  # Eliminate alt location ID before output.
-            return True
-        else:  # Alt location was not one to be output.
-            return False
-        
-
