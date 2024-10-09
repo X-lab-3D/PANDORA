@@ -30,6 +30,8 @@ It contains multiple functions to pre-process data and it's able to exploit diff
 
 PANDORA documentation can be found at: https://csb-pandora.readthedocs.io/en/latest/
 
+To use PANDORA for reverse docking, please switch to the reverse_peptide_MHCII branch.
+
 
 ## Dependencies
 PANDORA requires MODELLER, python and some python libraries to be installed.
