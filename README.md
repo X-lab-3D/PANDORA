@@ -9,6 +9,10 @@
 
 ![PANDORA](https://github.com/DarioMarzella/PANDORA/blob/master/images/flowchart_pMHCI.png?raw=true)
 
+### For Reviewers of the Reversed Peptide Modeling
+
+For the reviewing purposes of our reversed peptide modelling paper, please switch to the [reverse_peptide_MHCII](https://github.com/X-lab-3D/PANDORA/tree/reverse_peptide_MHCII) branch, and follow the [installation instructions](https://github.com/X-lab-3D/PANDORA/tree/reverse_peptide_MHCII?tab=readme-ov-file#github--pypi-installation) and example cases in the REAMDE there. We are actively working on a stable release.
+
 ### Contents
 
 - [Overview](#overview)
@@ -29,8 +33,6 @@ PANDORA is anchor restrained modelling pipeline for generating peptide-MHC struc
 It contains multiple functions to pre-process data and it's able to exploit different crucial domain knowledge provided by the user to guide the modelling.
 
 PANDORA documentation can be found at: https://csb-pandora.readthedocs.io/en/latest/
-
-To use PANDORA for reverse docking, please switch to the reverse_peptide_MHCII branch.
 
 
 ## Dependencies
