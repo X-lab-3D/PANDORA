@@ -37,13 +37,6 @@ The following installations are required to start PANDORA installation:
 - [Python](https://www.python.org/) >=3.7
 - pip3
 
-The (conda) installation process will take care of installing the following dependencies (see [Installation](#installation)):
-
-- [BioPython](https://anaconda.org/conda-forge/biopython)
-- [muscle](https://anaconda.org/bioconda/muscle) >= 5.1
-- [Modeller](https://anaconda.org/salilab/modeller) >= 9.3
-- [Blast](https://anaconda.org/bioconda/blast) >= 10.2
-- [pdb2sql](https://github.com/DeepRank/pdb2sql) (Required only for RMSD calculations for evaluation purposes)
 
 
 ## Installation
