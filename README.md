@@ -87,7 +87,7 @@ Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. 
 
 Clone the repository:
 ```
-git clone https://github.com/X-lab-3D/PANDORA.git
+git clone -b reverse_peptide_MHCII https://github.com/X-lab-3D/PANDORA.git
 ```
 Enter the cloned directory and install the package:
 ```
