@@ -8,6 +8,7 @@
 
 ![PANDORA](https://github.com/DarioMarzella/PANDORA/blob/master/images/flowchart_pMHCI.png?raw=true)
 
+
 ### Contents
 
 - [Overview](#overview)
@@ -35,8 +36,16 @@ PANDORA requires MODELLER, python and some python libraries to be installed.
 The following installations are required to start PANDORA installation:
 
 - [Python](https://www.python.org/) >=3.7
+- conda
 - pip3
 
+The (conda) installation process will take care of installing the following dependencies (see [Installation](#installation)):
+
+- [BioPython](https://anaconda.org/conda-forge/biopython)
+- [muscle](https://anaconda.org/bioconda/muscle) >= 5.1
+- [Modeller](https://anaconda.org/salilab/modeller) >= 9.3
+- [Blast](https://anaconda.org/bioconda/blast) >= 10.2
+- [pdb2sql](https://github.com/DeepRank/pdb2sql) (Required only for RMSD calculations for evaluation purposes)
 
 
 ## Installation
@@ -52,6 +61,10 @@ export KEY_MODELLER='XXXX'
 
 #### 2. Install PANDORA
 
+Install with conda:
+```
+conda install -c csb-nijmegen csb-pandora=2.0.0beta2.2 -c salilab -c bioconda
+```
 
 Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
 ### GitHub / Pypi installation
@@ -98,7 +111,7 @@ pip install -e .
 ### Download Template Database
 PANDORA needs a PDB template database to work. All the structures are retrieved from [IMGT](http://www.imgt.org/3Dstructure-DB/) database.
 
-The database can be quickly retrieved by zenodo by running the command-line tool:
+The database can be quickly retrieved by surfdrive by running the command-line tool:
 
 ```bash
 pandora-fetch
