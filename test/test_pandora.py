@@ -42,7 +42,7 @@ def test_construct_database():
 
     # Construct database object
     db = Database.Database()
-    db.construct_database(save=PANDORA.PANDORA_data + '/database/PANDORA_database.pkl', download=False)
+    db.construct_database(save=PANDORA.PANDORA_data + '/PANDORA_database.pkl', download=False)
 
     # test the creation of bad files, log files and the information inside of the database object
     peptide_flag = False
@@ -299,6 +299,35 @@ def test_pandora_MHCII_modelling():
             pass_test = True
     # remove output file
     os.system('rm -r %s' % (target.output_dir))
+    assert pass_test
+
+def test_pandora_MHCII_reverse_modelling():
+    # Load database
+    db = Database.load()  # Assume the database loading path is correct.
+
+    # Create a target object for reverse docking
+    target = Target(id='7T6I',
+                    MHC_class='II',
+                    peptide='PVADAVIHASGKQMWQ',  # Original peptide
+                    M_chain_seq='IKADHVSTYAAFVQTHRPTGEFMFEFDEDEQFYVDLDKKETVWHLEEFGRAFSFEAQGGLANIAILNNNLNTLIQRSNHTQAANDPPEVTVFPKEPVELGQPNTLICHIDRFFPPVLNVTWLCNGEPVTEGVAESLFLPRTDYSFHKFHYLTFVPSAEDVYDCRVEHWGLDQPLLKHWEATSG',
+                    N_chain_seq='RATPENYVYQGRQECYAFNGTQRFLERYIYNREEYARFDSDVGEFRAVTELGRPAAEYWNSQKDILEEKRAVPDRVCRHNYELDEAVTLQRRVQPKVNVSPSKKGPLQHHNLLVCHVTDFYPGSIQVRWFLNGQEETAGVVSTNLIRNGDWTFQILVMLEMTPQQGDVYICQVEHTSLDSPVTVEWKATGG',
+                    anchors=[12, 9, 7, 4],  # Reverse docking anchors
+                    reverse=True)  # Reverse docking scenario
+
+    # Perform reverse modeling
+    mod = Pandora.Pandora(target, db)
+    mod.model(n_loop_models=1, restraints_stdev=0.3, benchmark=True, loop_refinement='very_fast')
+
+    # Check if the template is initiated and if the initial model is created correctly
+    pass_test = False
+    if [c.id for c in mod.target.initial_model.get_chains()] == ['M', 'N', 'P']:
+        if float(mod.results[0].molpdf) < 1000 and float(mod.results[0].molpdf) > -1000:
+            pass_test = True
+
+    # Clean up the output directory
+    os.system('rm -r %s' % (target.output_dir))
+
+    # Ensure the test passes
     assert pass_test
 
 def test_rmsd():
