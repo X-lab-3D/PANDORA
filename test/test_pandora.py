@@ -369,10 +369,11 @@ def test_rmsd():
     # Initiate Model object
     m = Model.Model(target, model_path=PANDORA.PANDORA_path + '/../test/test_data/1A1O.BL00010001.pdb')
     # Calculate L-RMSD and Core L-RMSD
-    m.calc_LRMSD(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb', ligand_zone="whole")
-    m.calc_LRMSD(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb', ligand_zone="core")
+    m.calc_LRMSD(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
+    m.calc_Core_LRMSD(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
     # Check if the rmsds are between 0.5 and 2 (I gave some slack for the cases that modeller gets lucky.
     pass_test = m.lrmsd > 1 and m.lrmsd < 1.5 and m.core_lrmsd > 1 and m.core_lrmsd < 1.5
 
     assert pass_test
+
 
