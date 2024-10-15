@@ -376,30 +376,32 @@ target = Target(id = 'myMHCITestCase',
 case = Pandora.Pandora(target, db)
 case.model(helix=target.helix)
 ```
-#### Example 5: Generating a peptide:MHC class II complex given the peptide sequence
 
-To model a peptide:MHC class II complex, you only need to specify that in *PMHC.Target()* function: as *MHC_class='II'* (By default it is set to model MHC class I).
+How to run PANDORA for a peptide sequence with anchor residues [10, 7, 5, 2] in reverse order:
 
 ```python
+## Import required modules
 from PANDORA import Target
 from PANDORA import Pandora
 from PANDORA import Database
 
-## A. Load pregenerated database of all pMHC PDBs as templates
+## A. Load local Database
 db = Database.load()
 
-target = Target(id='myMHCIITestCase',
-    MHC_class = 'II',
-    allele_type = ['HLA-DRA*0102', 'HLA-DRB1*0101'],
-    peptide = 'GELIGILNAAKVPAD',
-    anchors = [4, 7, 9, 12])
+## B. Create Target object with reverse peptide option
+target = Target(id='reversedTestCase',
+    MHC_class='II',
+    peptide='VLQAGFFLLTRIL',
+    allele_type=['HLA-DPA1*02:01', 'HLA-DPB1*01:01'],
+    anchors=[10, 7, 5, 2],                             # Input anchors in reverse order
+    reverse=True)                                      # Flag to indicate the use of reversed peptides
 
+## C. Perform modelling
 case = Pandora.Pandora(target, db)
 case.model()
 ```
-Note: For MHC II, no canonical anchors can be defined. Therefore the user must either install and use NetMHCIIpan or directly input the anchors positions as *anchors* in *PMHC.Target()*
 
-#### Example 6: Benchmark PANDORA on one modelling case
+#### Example 7: Benchmark PANDORA on one modelling case
 
 Evaluate the framework on a target with a known experimental structure:
 - Provide the PDB ID for the *Target* class
