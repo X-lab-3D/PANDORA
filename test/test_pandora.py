@@ -237,7 +237,7 @@ def test_template_select_MHCII():
     mod = Pandora.Pandora(target, db)
     mod.find_template(benchmark=True)
 
-    assert mod.template.id == '4GG6' and mod.template.peptide == 'SGEGSFQPSQENP'
+    assert mod.template.id == '4Z7U' and mod.template.peptide == 'PVADAVIHASGKQMWQ'
 
 def test_pandora_MHCI_modelling():
     # Load database
@@ -318,7 +318,7 @@ def test_pandora_MHCII_modelling():
     mod.model(n_loop_models=1, restraints_stdev=0.3, benchmark=True, loop_refinement='very_fast')
     # Check if mod.template is initiated and if the initial model is created. Then checks molpdf of output.
     pass_test = False
-    if mod.template.id == '4GG6' and [c.id for c in mod.target.initial_model.get_chains()] == ['M','N', 'P']:
+    if mod.template.id == '4Z7U' and [c.id for c in mod.target.initial_model.get_chains()] == ['M','N', 'P']:
         if float(mod.results[0].molpdf) < 1000 and float(mod.results[0].molpdf) > -1000:
             pass_test = True
     # remove output file
