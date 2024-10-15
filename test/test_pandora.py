@@ -237,7 +237,7 @@ def test_template_select_MHCII():
     mod = Pandora.Pandora(target, db)
     mod.find_template(benchmark=True)
 
-    assert mod.template.id == '4Z7U' and mod.template.peptide == 'PVADAVIHASGKQMWQ'
+    assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
 
 def test_pandora_MHCI_modelling():
     # Load database
