@@ -4,7 +4,6 @@ import subprocess
 import json
 from joblib import Parallel, delayed
 import argparse
-import urllib
 
 import PANDORA
 from PANDORA import Template
@@ -19,9 +18,26 @@ class Database:
         self.ref_MHCI_sequences = {}
         self.__IDs_list_MHCI = []
         self.__IDs_list_MHCII = []
+        self.reverse = False
+        
+    def __reverse(self):
+        for temp in self.MHCII_data:
+            peptide = self.MHCII_data[temp].peptide
+            self.MHCII_data[temp].peptide = peptide[::-1]
+            self.MHCII_data[temp].anchors = [len(peptide) - anchor + 1 for anchor in self.MHCII_data[temp].anchors][::-1]
+            self.MHCII_data[temp].reverse = not self.MHCII_data[temp].reverse
+    
+    def set_reverse(self, reverse):
+        if reverse:
+            if not self.reverse:
+                self.__reverse()
+        else:
+            if self.reverse:
+                self.__reverse()
+        self.reverse = reverse
 
-    def download_data(self, data_dir = f'{PANDORA.PANDORA_data}/database', download = True):
-        """download_data(self, data_dir = f'{PANDORA.PANDORA_data}/database', download = True)
+    def download_data(self, data_dir = PANDORA.PANDORA_data, download = True):
+        """download_data(self, data_dir = PANDORA.PANDORA_data, download = True)
         Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
 
         if download:
@@ -68,12 +84,12 @@ class Database:
         Returns a dictionary that can be used to select the desired reference sequence"""
         self.ref_MHCI_sequences = Database_functions.generate_mhcseq_database()
 
-    def construct_database(self, save=PANDORA.PANDORA_data + '/database/PANDORA_database.pkl', data_dir = PANDORA.PANDORA_data,
+    def construct_database(self, save=PANDORA.PANDORA_data + '/PANDORA_database.pkl', data_dir = PANDORA.PANDORA_data,
                            MHCI=True, MHCII=True, download=True,
                            update_ref_sequences=True, 
                            remove_biopython_objects = True,
                            n_jobs = 1):
-        '''construct_database(self, save=PANDORA.PANDORA_data + '/database/PANDORA_database.pkl', data_dir = PANDORA.PANDORA_data, MHCI=True, MHCII=True, download=True, update_ref_sequences=True, remove_biopython_objects = True, n_jobs = 1)
+        '''construct_database(self, save=PANDORA.PANDORA_data + '/PANDORA_database.pkl', data_dir = PANDORA.PANDORA_data, MHCI=True, MHCII=True, download=True, update_ref_sequences=True, remove_biopython_objects = True, n_jobs = 1)
         Construct the database. Download, clean and add all structures
 
         Args:
@@ -95,7 +111,7 @@ class Database:
         '''
         #Generate the necessary folders
         create_db_folders()
-    
+
         # Download the data
         self.download_data(download = download, data_dir = data_dir)
 
@@ -281,7 +297,7 @@ class Database:
         self.MHCI_data.pop(id, None)
         self.MHCII_data.pop(id, None)
 
-    def save(self, fn = PANDORA.PANDORA_data + '/database/PANDORA_database.pkl'):
+    def save(self, fn = PANDORA.PANDORA_data + '/PANDORA_database.pkl'):
         """Save the database as a pickle file
 
         :param fn: (str) pathname of file
@@ -289,13 +305,13 @@ class Database:
         with open(fn, "wb") as pkl_file:
             pickle.dump(self, pkl_file)
 
-def load(file_name = PANDORA.PANDORA_data + '/database/PANDORA_database.pkl'):
+def load(file_name = PANDORA.PANDORA_data + '/PANDORA_database.pkl'):
     """Loads a pre-generated database
 
 
     Args:
         file_name (str): Dabase file name/path. 
-            Defaults to PANDORA.PANDORA_data + '/database/PANDORA_database.pkl'.
+            Defaults to PANDORA.PANDORA_data + '/PANDORA_database.pkl'.
 
     Returns:
         Database.Database: Database object.
@@ -307,6 +323,9 @@ def load(file_name = PANDORA.PANDORA_data + '/database/PANDORA_database.pkl'):
     try:
         with open(file_name, 'rb') as inpkl:
             db = pickle.load(inpkl)
+            db.reverse = False
+            for temp in db.MHCII_data:
+                db.MHCII_data[temp].reverse = False 
         return db
     except FileNotFoundError:
         raise Exception('Database file not found. Are you sure you have it? If not, run Database.construct_database()')
@@ -340,7 +359,6 @@ def create_db_folders(db_path=None):
     parent_db_path = ('/').join(db_path.split('/')[:-1])
     dirs = [parent_db_path,
             db_path,
-            f'{db_path}/database'
             f'{db_path}/mhcseqs', 
             f'{db_path}/BLAST_databases',
             f'{db_path}/PDBs',
@@ -361,14 +379,14 @@ def create_db_folders(db_path=None):
         else:
             print(f'WARNING: folder {D} already exists!')
 
-def fetch_database(db_out_path, db_url='https://zenodo.org/records/6373630'):
-    """Downloads the pre-generated database from zotero.
+def fetch_database(db_out_path, db_url='https://surfdrive.surf.nl/files/index.php/s/D8f0n4ulfeZzsmJ/download'):
+    """Downloads the pre-generated database.
 
     Args:
         db_out_path (str): Path to the database to be downloaded,  
             should be pointing at a "PANDORA_databases" folder.
-        db_url (str, optional): URL for the zenodo database. 
-            Defaults to 'https://zenodo.org/records/6373630'.
+        db_url (str, optional): URL  database. 
+            Defaults to 'https://surfdrive.surf.nl/files/index.php/s/D8f0n4ulfeZzsmJ/download'.
 
     Raises:
         Exception: If the PANDORA_database.pkl file is not found in the destination folder,
@@ -376,22 +394,15 @@ def fetch_database(db_out_path, db_url='https://zenodo.org/records/6373630'):
     """    
 
     try:
-        ## Get most recent release url:
-        response = urllib.request.urlopen(db_url)
-        new_release_url = response.geturl()
-    except Exception as e:
-        print(f'ERROR: received error while fetching the latest database url: {e}')
-
-    try:
         parent_db_path = ('/').join(db_out_path.split('/')[:-1])
 
-        print('Downloading pre-built database from zenodo...')
-        os.popen(f'wget {new_release_url}/files/default.tar.gz?download=1 -O {parent_db_path}/default.tar.gz').read()
+        print('Downloading pre-built database ...')
+        os.popen(f'wget {db_url} -O {parent_db_path}/default.tar.gz').read()
         print('Copying the database')
         os.popen(f'tar -xzvf {parent_db_path}/default.tar.gz -C {parent_db_path}').read()
         os.popen(f'rm {parent_db_path}/default.tar.gz').read()
         print('Checking...')
-        if not os.path.exists(f'{db_out_path}/database/PANDORA_database.pkl'):
+        if not os.path.exists(f'{db_out_path}/PANDORA_database.pkl'):
             print('Database correctly retrieved')
         else:
             print('ERROR: Something is missing from the retrieved database.')
@@ -399,7 +410,7 @@ def fetch_database(db_out_path, db_url='https://zenodo.org/records/6373630'):
             raise Exception('Missing PANDORA_database.pkl')
 
     except Exception as e:
-        print(f'ERROR: received error while installing database: {e}')
+        print(f'WARNING: received error while installing database: {e}')
         print('To be able to use PANDORA you will have to generate a new database. Please follow the instructions in the README.')
 
 def install_database(db_path='~/PANDORA_databases/default'):
