@@ -362,7 +362,7 @@ def create_db_folders(db_path=None):
             print(f'WARNING: folder {D} already exists!')
 
 def fetch_database(db_out_path, db_url='https://zenodo.org/records/6373630'):
-    """Downloads the pre-generated database from zotero.
+    """Downloads the pre-generated database from zenodo.
 
     Args:
         db_out_path (str): Path to the database to be downloaded,  
