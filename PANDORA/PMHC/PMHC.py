@@ -118,7 +118,9 @@ class Template(PMHC):
 
 
     def get_pdb_path(self):
-        if not self.reverse:
+        if 'pdb_path' in locals():
+            return self.pdb_path
+        elif not self.reverse:
            return os.path.join(PANDORA.PANDORA_data, 'PDBs', f'pMHC{self.MHC_class}', f'{self.id}.pdb')
         else:
            return os.path.join(PANDORA.PANDORA_data, 'PDBs', f'pMHC{self.MHC_class}_reversed', f'{self.id}_reverse.pdb')
@@ -265,7 +267,7 @@ class Target(PMHC):
             output_dir: (string) Path to output directory. Defaults to current working directory.
             rm_netmhcpan_output: (bool) If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
         ''' 
-        
+
         anchors.sort()
         super().__init__(id, peptide=peptide, allele_type=allele_type, 
                          MHC_class=MHC_class, M_chain_seq=M_chain_seq, 
@@ -434,6 +436,11 @@ class Target(PMHC):
             alleles = [x for x in self.allele_type if any(y in x for y in PANDORA.alpha_genes)]
         elif chain == 'N':
             alleles = [x for x in self.allele_type if any(y in x for y in PANDORA.beta_genes)]
+            
+        if alleles == []:
+            print('WARNING: the provided allele(s) name have not been recognized as alpha or beta.')
+            print('this might cause PANDORA to assign the sequence to the wrong chain for MHC-II')
+            alleles = self.allele_type
         # Return the right sequences
         seq_flag = False
         #for seq in fasta_sequences:
@@ -503,7 +510,7 @@ class Target(PMHC):
         #Check if there are allele name for each MHC chain
         M_allele_flag = False
         N_allele_flag = False
-        if any(x in y for x in PANDORA.alpha_genes for y in self.allele_type):
+        if any(x in y for x in PANDORA.alpha_genes for y in self.allele_type) or self.MHC_class == 'I':
             M_allele_flag = True
         if self.MHC_class == 'II':
             if any(x in y for x in PANDORA.beta_genes for y in self.allele_type):
