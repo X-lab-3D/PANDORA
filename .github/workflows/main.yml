@@ -32,6 +32,7 @@ jobs:
         with:
           auto-update-conda: true
           miniforge-variant: Mambaforge
+          channels: conda-forge
           auto-activate-base: false
           activate-environment: pandora
           environment-file: environment.yml
