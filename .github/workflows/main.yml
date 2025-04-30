@@ -16,16 +16,22 @@ jobs:
     #   matrix:
     #     python-version: [3.10, 3.11, 3.12]
     # Steps represent a sequence of tasks that will be executed as part of the job
+    inputs:
+      python-version:
+        required: false
+        description: "The Python version to use. Specify major and minor version, e.g. '3.10'."
+        default: "3.11.10"
+
     steps:
     
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       # Runs a single command using the runners shell
-      - name: Set up Python 3.11.10
-        uses: actions/setup-python@v1
+      - name: Set up Python
+        uses: actions/setup-python@v3
         with:
-          python-version: 3.11.10
+          python-version: ${{ inputs.python-version }}
       - name: Set up conda test
         uses: conda-incubator/setup-miniconda@v2
         with:
@@ -34,7 +40,7 @@ jobs:
           auto-activate-base: false
           activate-environment: pandora
           environment-file: environment.yml
-          python-version: 3.11.10
+          python-version: ${{ inputs.python-version }}
           use-mamba: true
           # python-version: ${{ matrix.python-version }}
           # auto-update-conda: false
