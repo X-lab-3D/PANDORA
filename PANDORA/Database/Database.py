@@ -19,6 +19,23 @@ class Database:
         self.ref_MHCI_sequences = {}
         self.__IDs_list_MHCI = []
         self.__IDs_list_MHCII = []
+        self.reverse = False
+        
+    def __reverse(self):
+        for temp in self.MHCII_data:
+            peptide = self.MHCII_data[temp].peptide
+            self.MHCII_data[temp].peptide = peptide[::-1]
+            self.MHCII_data[temp].anchors = [len(peptide) - anchor + 1 for anchor in self.MHCII_data[temp].anchors][::-1]
+            self.MHCII_data[temp].reverse = not self.MHCII_data[temp].reverse
+    
+    def set_reverse(self, reverse):
+        if reverse:
+            if not self.reverse:
+                self.__reverse()
+        else:
+            if self.reverse:
+                self.__reverse()
+        self.reverse = reverse
 
     def download_data(self, data_dir = f'{PANDORA.PANDORA_data}/database', download = True):
         """download_data(self, data_dir = f'{PANDORA.PANDORA_data}/database', download = True)
@@ -95,7 +112,7 @@ class Database:
         '''
         #Generate the necessary folders
         create_db_folders()
-    
+
         # Download the data
         self.download_data(download = download, data_dir = data_dir)
 
@@ -301,12 +318,15 @@ def load(file_name = PANDORA.PANDORA_data + '/database/PANDORA_database.pkl'):
         Database.Database: Database object.
 
     Example:
-        >>> db = Database.load('MyDatabase.pkl')
+        >>> db = Database.load()
 
     """
     try:
         with open(file_name, 'rb') as inpkl:
             db = pickle.load(inpkl)
+            db.reverse = False
+            for temp in db.MHCII_data:
+                db.MHCII_data[temp].reverse = False 
         return db
     except FileNotFoundError:
         raise Exception('Database file not found. Are you sure you have it? If not, run Database.construct_database()')
@@ -340,7 +360,7 @@ def create_db_folders(db_path=None):
     parent_db_path = ('/').join(db_path.split('/')[:-1])
     dirs = [parent_db_path,
             db_path,
-            f'{db_path}/database'
+            f'{db_path}/database',
             f'{db_path}/mhcseqs', 
             f'{db_path}/BLAST_databases',
             f'{db_path}/PDBs',
@@ -367,7 +387,7 @@ def fetch_database(db_out_path, db_url='https://zenodo.org/records/6373630'):
     Args:
         db_out_path (str): Path to the database to be downloaded,  
             should be pointing at a "PANDORA_databases" folder.
-        db_url (str, optional): URL for the zenodo database. 
+        db_url (str, optional): URL to the zenodo database. 
             Defaults to 'https://zenodo.org/records/6373630'.
 
     Raises:
@@ -381,7 +401,7 @@ def fetch_database(db_out_path, db_url='https://zenodo.org/records/6373630'):
         new_release_url = response.geturl()
     except Exception as e:
         print(f'ERROR: received error while fetching the latest database url: {e}')
-
+        
     try:
         parent_db_path = ('/').join(db_out_path.split('/')[:-1])
 
