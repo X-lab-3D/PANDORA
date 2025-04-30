@@ -42,7 +42,7 @@ def test_construct_database():
 
     # Construct database object
     db = Database.Database()
-    db.construct_database(save=PANDORA.PANDORA_data + '/PANDORA_database.pkl', download=False)
+    db.construct_database(save=PANDORA.PANDORA_data + '/database/PANDORA_database.pkl', download=False)
 
     # test the creation of bad files, log files and the information inside of the database object
     peptide_flag = False

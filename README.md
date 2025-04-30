@@ -9,10 +9,6 @@
 
 ![PANDORA](https://github.com/DarioMarzella/PANDORA/blob/master/images/flowchart_pMHCI.png?raw=true)
 
-### For Reviewers of the Reversed Peptide Modeling
-
-For the reviewing purposes of our reversed peptide modelling paper, please switch to the [reverse_peptide_MHCII](https://github.com/X-lab-3D/PANDORA/tree/reverse_peptide_MHCII) branch, and follow the [installation instructions](https://github.com/X-lab-3D/PANDORA/tree/reverse_peptide_MHCII?tab=readme-ov-file#github--pypi-installation) and example cases in the REAMDE there. We are actively working on a stable release.
-
 ### Contents
 
 - [Overview](#overview)
@@ -106,6 +102,15 @@ cd PANDORA
 pip install -e .
 
 ```
+### Conda Installation
+
+Install with conda:
+```
+conda install -c csb-nijmegen csb-pandora=2.1.0beta -c salilab -c bioconda
+```
+
+Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
+
 ### Download Template Database
 PANDORA needs a PDB template database to work. All the structures are retrieved from [IMGT](http://www.imgt.org/3Dstructure-DB/) database.
 
