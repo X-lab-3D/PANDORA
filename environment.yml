@@ -3,7 +3,7 @@ name: pandora
 channels:
   - bioconda
   - salilab
-  - csb-nijmegen
+  #- csb-nijmegen
 dependencies:
   - python=3.11
   - muscle=5.1
