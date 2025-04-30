@@ -7,8 +7,8 @@ channels:
   - csb-nijmegen
 dependencies:
   - python=3.10
-  - muscle=5.1
-  - blast=2.10
+  - bioconda::muscle=5.1
+  - bioconda::blast=2.10
   - numpy
   - numpy-base
   - pip
