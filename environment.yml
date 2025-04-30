@@ -4,6 +4,7 @@ channels:
   - bioconda
   - salilab
   - csb-nijmegen
+  - conda-forge
 dependencies:
   - python=3.10
   - muscle=5.1
