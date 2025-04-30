@@ -33,8 +33,8 @@ jobs:
           auto-update-conda: true
           channels: conda-forge
           #auto-activate-base: false
-          activate-environment: pandora
           environment-file: environment.yml
+          activate-environment: pandora
           python-version: 3.11.10
           #use-mamba: true
           # python-version: ${{ matrix.python-version }}
