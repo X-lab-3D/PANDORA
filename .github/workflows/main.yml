@@ -5,6 +5,11 @@ name: CI
 # Controls when the action will run.
 on: [push, pull_request, workflow_dispatch]
 
+inputs:
+  python-version:
+    required: false
+    description: "The Python version to use. Specify major and minor version, e.g. '3.10'."
+    default: "3.11.10"
 # A workflow  run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -16,11 +21,6 @@ jobs:
     #   matrix:
     #     python-version: [3.10, 3.11, 3.12]
     # Steps represent a sequence of tasks that will be executed as part of the job
-    inputs:
-      python-version:
-        required: false
-        description: "The Python version to use. Specify major and minor version, e.g. '3.10'."
-        default: "3.11.10"
 
     steps:
     
