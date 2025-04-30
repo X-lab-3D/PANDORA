@@ -30,13 +30,13 @@ jobs:
       - name: Set up conda test
         uses: conda-incubator/setup-miniconda@v2
         with:
-          auto-update-conda: true
+          # auto-update-conda: true
           channels: conda-forge
           #auto-activate-base: false
           environment-file: environment.yml
           activate-environment: pandora
           python-version: 3.11.10
-          #use-mamba: true
+          # use-mamba: true
           # python-version: ${{ matrix.python-version }}
           # auto-update-conda: false
           miniforge-version: latest
