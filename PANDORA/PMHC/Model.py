@@ -1,14 +1,11 @@
 from pyexpat import model
-from Bio.PDB import PDBParser
-from Bio.SeqUtils import seq1
-from Bio import pairwise2
 import os
-from Bio.PDB import PDBIO
-import PANDORA
-import traceback
-from Bio.PDB import *
-import sys
 
+from Bio import pairwise2
+from Bio.SeqUtils import seq1
+from Bio.PDB import PDBParser, PDBIO, Select
+
+import PANDORA
 
 class Model:
 
@@ -117,8 +114,6 @@ class Model:
                 self.flanking_lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name=atoms)
         except:
             print('An error occurred while calculating the rmsd for target %s, model %s for %s' %(ref_path, decoy_path, ligand_zone))
-            #print('An error occurred while calculating the rmsd for target %s, model %s' %(self.target.id, self.model_path))
-            traceback.print_exc()
             raise Exception('Please check your model and ref info for model %s' %self.model_path)
 
         # remove intermediate files
@@ -519,7 +514,6 @@ def remove_mismatched_atoms_from_pdb(ref, decoy, atoms):
                continue
     return ref, decoy
 
-
 class NotDisordered(Select):  # Inherit methods from Select class
     '''
     Keep one Alternative location for the given atom
@@ -531,5 +525,3 @@ class NotDisordered(Select):  # Inherit methods from Select class
             return True
         else:  # Alt location was not one to be output.
             return False
-        
-

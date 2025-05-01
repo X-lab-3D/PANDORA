@@ -37,8 +37,8 @@ class Database:
                 self.__reverse()
         self.reverse = reverse
 
-    def download_data(self, data_dir = f'{PANDORA.PANDORA_data}/database', download = True):
-        """download_data(self, data_dir = f'{PANDORA.PANDORA_data}/database', download = True)
+    def download_data(self, data_dir = PANDORA.PANDORA_data + '/database', download = True):
+        """download_data(self, data_dir = PANDORA.PANDORA_data + '/database', download = True)
         Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
 
         if download:
