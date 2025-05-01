@@ -147,7 +147,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, 
             all_netMHCpan_alleles.append(line.split()[0].replace('\n', ''))
 
     # Format the alles to netMHCIIpan readable format
-    target_alleles = [i.split('-')[-1].replace('*', '_') for i in allele_type]
+    target_alleles = [i.split('-')[-1].replace('*', '_').replace(':','') for i in allele_type]
 
     # The DQ and DP alleles only function in pairs in netMHCIIpan, which we cannot match from our alleles
     # So take the first 3 partially matched allele combinations
@@ -174,9 +174,10 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, 
     if target_alleles == [] and any(al.startswith('H2') for al in allele_type):
         target_alleles = [i for i in all_netMHCpan_alleles if i.startswith('H-')]
 
-    # If there is no target allele that occurs in netMHCIIpan, just use the standard DRB1_0101
+    # If there is no target allele that occurs in netMHCIIpan, raise an Exception
     if target_alleles == []:
-        target_alleles = ['DRB1_0101']
+        #target_alleles = ['DRB1_0101']
+        raise Exception('ERROR: Provided allele is not available in netMHCIIpan-4.1.\n')
 
     target_alleles_str = ','.join(target_alleles)
 
