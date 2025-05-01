@@ -252,7 +252,7 @@ def test_wrapper_MHCI():
     wrap = Wrapper.Wrapper(data_file, db, MHC_class='I', header=False, 
                         delimiter='\t', IDs_col=0, peptides_col=1, 
                         allele_name_col=3, anchors_col=2, M_chain_col=4,
-                        num_cores=1, n_loop_models=1, 
+                        num_cores=1, n_loop_models=1, verbose=True,
                         benchmark=False, collective_output_dir=output_dir)
     
     # Check if the jobs went as expected
