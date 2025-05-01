@@ -1,5 +1,5 @@
 {% set name = "csb-pandora" %}
-{% set version = "2.0.0" %}
+{% set version = "2.1.0-beta" %}
 {% set build_number = "0" %}
 
 package:
@@ -25,11 +25,11 @@ build:
 
 requirements:
   build:
-    - python=3.11
+    - python=3.10
     - setuptools
     - pip
   host:
-    - python=3.11
+    - python=3.10
 
   run:
     - biopython
@@ -39,7 +39,7 @@ requirements:
     - numpy
     - numpy-base
     - pip
-    - python=3.11
+    - python=3.10
     - setuptools
     - joblib
     - pandas

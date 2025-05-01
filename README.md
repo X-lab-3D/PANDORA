@@ -61,12 +61,6 @@ export KEY_MODELLER='XXXX'
 
 #### 2. Install PANDORA
 
-Install with conda:
-```
-conda install -c csb-nijmegen csb-pandora=2.0.0beta2.2 -c salilab -c bioconda
-```
-
-Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
 ### GitHub / Pypi installation
 
 #### 1. Install Modeller:
@@ -108,6 +102,15 @@ cd PANDORA
 pip install -e .
 
 ```
+### Conda Installation
+
+Install with conda:
+```
+conda install -c csb-nijmegen csb-pandora=2.1.0beta -c salilab -c bioconda
+```
+
+Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
+
 ### Download Template Database
 PANDORA needs a PDB template database to work. All the structures are retrieved from [IMGT](http://www.imgt.org/3Dstructure-DB/) database.
 
@@ -395,7 +398,57 @@ case.model()
 ```
 Note: For MHC II, no canonical anchors can be defined. Therefore the user must either install and use NetMHCIIpan or directly input the anchors positions as *anchors* in *PMHC.Target()*
 
-#### Example 6: Benchmark PANDORA on one modelling case
+####  Example 6: Generating a peptide:MHC class II complex with a reversed peptide
+
+Reversed peptide binding is often observed in specific alleles of MHC-II, but PANDORA allows you to model reverse peptides for any MHC-II allele. 
+
+**Note**: When performing reversed peptide modeling, **only the anchor residues should be considered in reverse order**, while the rest of the peptide should maintain its normal sequence. This ensures that the reversed template preserves the correct binding interactions at the MHC anchor positions.
+
+Required Information:
+
+- Peptide sequence (normal sequence)
+
+- MHC allele or MHC sequence
+
+- Anchor residues (input in reverse order, descending)
+
+Steps:
+
+- A. Load the template database
+
+- B. Creating a Target object based on the given target information, with the reverse option set to True
+
+- C. Generating the pMHC model using the reversed template
+
+As illustrated in the figure, this example demonstrates a peptide sequence with anchor residues [11, 8, 6, 3] in reverse order.
+
+<img src="https://github.com/X-lab-3D/PANDORA/blob/reverse_peptide_MHCII/images/reverse_peptide.png" alt="Logo" width="500">
+
+How to run PANDORA for a peptide sequence with anchor residues [10, 7, 5, 2] in reverse order:
+
+```python
+## Import required modules
+from PANDORA import Target
+from PANDORA import Pandora
+from PANDORA import Database
+
+## A. Load local Database
+db = Database.load()
+
+## B. Create Target object with reverse peptide option
+target = Target(id='reversedTestCase',
+    MHC_class='II',
+    peptide='VLQAGFFLLTRIL',
+    allele_type=['HLA-DPA1*02:01', 'HLA-DPB1*01:01'],
+    anchors=[10, 7, 5, 2],                             # Input anchors in reverse order
+    reverse=True)                                      # Flag to indicate the use of reversed peptides
+
+## C. Perform modelling
+case = Pandora.Pandora(target, db)
+case.model()
+```
+
+#### Example 7: Benchmark PANDORA on one modelling case
 
 Evaluate the framework on a target with a known experimental structure:
 - Provide the PDB ID for the *Target* class
