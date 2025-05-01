@@ -24,7 +24,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11.10
       - name: Set up conda test
@@ -32,14 +32,14 @@ jobs:
         with:
           # auto-update-conda: true
           # channels: conda-forge
-          #auto-activate-base: false
-          environment-file: environment.yml
+          auto-activate-base: false
           activate-environment: pandora
+          environment-file: environment.yml
           python-version: 3.11.10
           # use-mamba: true
           # python-version: ${{ matrix.python-version }}
           # auto-update-conda: false
-          miniforge-version: latest
+          # miniforge-version: latest
       - name: Set up directories
         run: | 
           python test/install_git_test.py 
