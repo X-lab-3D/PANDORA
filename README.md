@@ -35,11 +35,11 @@ PANDORA documentation can be found at: https://csb-pandora.readthedocs.io/en/lat
 PANDORA requires MODELLER, python and some python libraries to be installed.
 The following installations are required to start PANDORA installation:
 
-- [Python](https://www.python.org/) >=3.7
-- conda
-- pip3
+- [Python](https://www.python.org/) = 3.11.10
+- [Conda](https://anaconda.org/anaconda/conda)
+- [pip3](https://pypi.org/project/pip/)
 
-The (conda) installation process will take care of installing the following dependencies (see [Installation](#installation)):
+The (conda) installation process takes care of installing the following dependencies (see [Installation](#installation)):
 
 - [BioPython](https://anaconda.org/conda-forge/biopython)
 - [muscle](https://anaconda.org/bioconda/muscle) >= 5.1
@@ -61,9 +61,9 @@ export KEY_MODELLER='XXXX'
 
 #### 2. Install PANDORA
 
-### GitHub / Pypi installation
+### Option 1: GitHub / Pypi installation
 
-#### 1. Install Modeller:
+#### 1.1 Install Modeller:
 Prior to PANDORA installation, you need to first activate MODELLER's license. Please request MODELLER license at: https://salilab.org/modeller/registration.html
 
 Replace XXXX with your MODELLER License key and run the command:
@@ -79,7 +79,7 @@ conda install -y -c salilab modeller
 
 Note: You can also follow the instruction in the conda install output to enter your modeller key in the appropriate file afterwars, instead of setting it beforehand.
 
-#### 2. Install Other dependencies
+#### 1.2 Install Other dependencies
 PANDORA relies on muscle (https://anaconda.org/bioconda/muscle) and blast (https://anaconda.org/bioconda/blast) that can be both installed via bioconda.
 
 
@@ -90,7 +90,7 @@ For some HPC systems the conda blast installation might not work due to missing 
 
 Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
 
-#### 3. Install PANDORA
+#### 1.3 Install PANDORA
 
 Clone the repository:
 ```
@@ -102,14 +102,17 @@ cd PANDORA
 pip install -e .
 
 ```
-### Conda Installation
+
+### Option 2: Conda Installation
 
 Install with conda:
 ```
-conda install -c csb-nijmegen csb-pandora=2.1.0beta -c salilab -c bioconda
+conda install -c csb-nijmegen csb-pandora -c salilab -c bioconda
 ```
 
-Note: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [their GitHub repo](https://github.com/rcedgar/muscle).
+Note 1: The conda installation might, in rare cases, fail when performed under an institutional firewall with an "ERROR 404" error ([example](https://github.com/X-lab-3D/PANDORA/issues/273#issue-2570999448)).  For such cases we advise the users to opt for the pip installation above.
+
+Note 2: Mac M1 processors cannot compile muscle version v5.0 and v5.1 from conda. To instll muscle, you will need to build it from source. You can find the muscle 5 code and the link to how to install from source in [muscle GitHub repo](https://github.com/rcedgar/muscle).
 
 ### Download Template Database
 PANDORA needs a PDB template database to work. All the structures are retrieved from [IMGT](http://www.imgt.org/3Dstructure-DB/) database.
@@ -130,7 +133,7 @@ Database.install_database()
 
 ### (Advanced) Generate template Database
 
-You can also generate the database from scratch, downloading and parsing the structures directly from IMGT. This will ensure you to have as many templates as possible, as the quickly-retrievable database will not be re-released often. 
+You can also generate the database from scratch, downloading and parsing the structures directly from IMGT. Please note that this does not include generation of MHC-II reversed templates yet. At the moment, those are only available in our published database.
 
 The database can be generated with the command-line tool:
 
@@ -155,15 +158,14 @@ db = Database.Database()
 db.construct_database(n_jobs=<n_jobs>)
 ```
 
-Note 1:  By default, the database generation will use one core only. You can sensitevly speed it up by changing the paramenter --num-cores for pandora-create or 'n_jobs' for Database.contruct_database().
+Note 2:  By default, the database generation will use one core only. You can sensitevly speed it up by changing the paramenter --num-cores for pandora-create or 'n_jobs' for Database.contruct_database().
 
-Note 2: the database is saved by default into `~/PANDORA_databases/default`. It is possible to modify the folder name (`default`) by creating a `config.json` file in the PANDORA installation folder using `data_folder_name` as a key, and the desired folder name as a value, like in the example below:
+Note 3: the database is saved by default into `~/PANDORA_databases/default`. It is possible to modify the folder name (`default`) by creating a `config.json` file in the PANDORA installation folder using `data_folder_name` as a key, and the desired folder name as a value, like in the example below:
 
 ```
 {"data_folder_name": "<folder_in_Databases>"}
 ```
 
-Note 3 (For master branch only, conda release v0.9.0): You can download the pre-made database from https://github.com/X-lab-3D/PANDORA_database (pMHC I only, generated on 23/03/2021) and follow the [instructions](https://github.com/X-lab-3D/PANDORA_database/blob/main/README.md). Please be sure you re-path your database as explained in the instructions.
 
 ### (Optional) Install NetMHCpan and/or NetMHCIIpan
 
@@ -521,6 +523,11 @@ If you have questions or find a bug, please report the issue in the [Github issu
 ## Publication
 If you use PANDORA, please cite the following paper in your work:
 
-Marzella DF, Parizi FM, Tilborg Dv, Renaud N, Sybrandi D, Buzatu R, Rademaker DT, ‘t Hoen PAC and Xue LC (2022) PANDORA: A Fast, Anchor-Restrained Modelling Protocol for Peptide: MHC Complexes. Front. Immunol. 13:878762. doi: 10.3389/fimmu.2022.878762
+[comment]: # (Zotero reference style: Elsevier - Harvard with titles)
 
-https://www.frontiersin.org/articles/10.3389/fimmu.2022.878762/full
+1. Rademaker, D.T., Parizi, F.M., van Vreeswijk, M., Eerden, S., Marzella, D.F., Xue, L.C., 2025. Predicting reverse-bound peptide conformations in MHC Class II with PANDORA. Front. Immunol. 16, 1525576. https://doi.org/10.3389/fimmu.2025.1525576
+
+2. Parizi, F.M., Marzella, D.F., Ramakrishnan, G., ‘T Hoen, P.A.C., Karimi-Jafari, M.H., Xue, L.C., 2023. PANDORA v2.0: Benchmarking peptide-MHC II models and software improvements. Front. Immunol. 14, 1285899. https://doi.org/10.3389/fimmu.2023.1285899
+
+3. Marzella, D.F., Parizi, F.M., Tilborg, D.V., Renaud, N., Sybrandi, D., Buzatu, R., Rademaker, D.T., ‘T Hoen, P.A.C., Xue, L.C., 2022. PANDORA: A Fast, Anchor-Restrained Modelling Protocol for Peptide: MHC Complexes. Front. Immunol. 13, 878762. https://doi.org/10.3389/fimmu.2022.878762
+
