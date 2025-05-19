@@ -1,4 +1,4 @@
-from PANDORA.Contacts import Contacts
+from PANDORA import Contacts
 
 def pMHCI_anchors(pdb):
     ''' Finds peptide anchor residues of p:MHCI complexes

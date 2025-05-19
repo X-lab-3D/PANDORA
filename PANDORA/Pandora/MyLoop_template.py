@@ -4,9 +4,12 @@ from modeller import automodel as MA       # Load the automodel class
 env = M.environ()
 
 class MyLoop(MA.loopmodel):
+    
     def special_patches(self, aln):
         # Rename both chains and renumber the residues in each
-        self.rename_segments(segment_ids=['M', 'P'], renumber_residues=[1, 1])
+        #RENAME SEGMENTS PLACEHOLDER / DO NOT DELETE THIS COMMENT
+        #self.rename_segments(segment_ids=['M', 'B', 'P'], renumber_residues=[1, 1, 1])
+        pass
         
     ### Skipping randomness in Initial modelling. Uncomment this funtion only if you specifically mean it. 
     def build_ini_loop(self, atmsel):

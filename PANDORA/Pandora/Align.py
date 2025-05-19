@@ -1,7 +1,4 @@
 from Bio import SeqIO
-from Bio.Align import substitution_matrices
-from Bio.Align import PairwiseAligner
-import Bio.Align
 import PANDORA
 import os
 import subprocess
@@ -9,8 +6,7 @@ import subprocess
 
 class Align:
 
-    def __init__(self, target, template, clip_C_domain=False,
-                 output_dir=PANDORA.PANDORA_data + '/outputs', remove_terms=True):
+    def __init__(self, target, template, clip_C_domain=False, remove_terms=True):
         ''' Performs a alignment of the target and template(s). Returns a filename that will be used for modeller.
 
         Args:
@@ -33,7 +29,7 @@ class Align:
             self.template = template
         else:
             self.template = [template]
-        self.output_dir = output_dir # + '/%s_%s' %('_'.join([i.id for i in self.template]), self.target.id)
+        self.output_dir = target.output_dir # + '/%s_%s' %('_'.join([i.id for i in self.template]), self.target.id)
         self.__muscle_command__ = 'muscle -align %s -output %s -quiet'
 
 
@@ -44,10 +40,15 @@ class Align:
         self.tar_id = target.id
         self.tem_id = [i.id for i in self.template]
 
-        # Define template m, n and p seqs
+        # Define template m, n (or b) and p seqs
         self.tem_m = self.template[0].M_chain_seq
-        if self.MHC_class == 'II':
+        
+        if self.MHC_class =='I':
+            self.tem_b = self.template[0].B2M_seq
+            
+        elif self.MHC_class == 'II':
             self.tem_n = self.template[0].N_chain_seq
+            
         self.tem_p = self.template[0].peptide 
         
         # if clip, cut away the C-like domain(s)
@@ -55,20 +56,24 @@ class Align:
             pass
         
         elif self.clip_C_domain == True:
-            #try:
-            self.tem_m, self.tem_m_c = self.clip(self.tem_m, self.template[0].G_domain_span[0])
-            if self.MHC_class == 'II':
-                self.tem_n, self.tem_n_c = self.clip(self.tem_n, self.template[0].G_domain_span[1])
-            #except:
-            #    print('WARNING: an error occurred while clipping the template sequence.')
+            try:
+                self.tem_m, self.tem_m_c = self.clip(self.tem_m, self.template[0].G_domain_span[0])
+                if self.MHC_class =='I':
+                    pass #Placeholder for removing B2M in case clip is true
+                elif self.MHC_class == 'II':
+                    self.tem_n, self.tem_n_c = self.clip(self.tem_n, self.template[0].G_domain_span[1])
+            except:
+                print('WARNING: an error occurred while clipping the template sequence.')
                 
         elif type(self.clip_C_domain) == list:
-            #try:
-            self.tem_m, self.tem_m_c = self.clip(self.tem_m, self.clip_C_domain[0])
-            if self.MHC_class == 'II':
-                self.tem_n, self.tem_n_c = self.clip(self.tem_n, self.clip_C_domain[1])
-            #except:
-            #    print('WARNING: an error occurred while clipping the template sequence.')
+            try:
+                self.tem_m, self.tem_m_c = self.clip(self.tem_m, self.clip_C_domain[0])
+                if self.MHC_class =='I':
+                    pass #Placeholder for removing B2M in case clip is true
+                elif self.MHC_class == 'II':
+                    self.tem_n, self.tem_n_c = self.clip(self.tem_n, self.clip_C_domain[1])
+            except:
+                print('WARNING: an error occurred while clipping the template sequence.')
 
         # Define target m, n and p seqs. If there are no m and n chains supplied, just take the seqs from the template
         if self.target.M_chain_seq == '':
@@ -79,6 +84,13 @@ class Align:
         else:
             self.tar_m = self.target.M_chain_seq
 
+        if self.MHC_class == 'I' and self.target.B2M_seq == '':
+            self.tar_b = self.tem_b
+        elif self.MHC_class == 'I' and self.target.B2M_seq != '':
+            self.tar_b = self.target.B2M_seq
+        else:
+            pass
+            
         # N chains (only for MHCII)
         if self.MHC_class == 'II' and self.target.N_chain_seq == '':
             print('WARNING: No M chain sequence could be retrieved for target %s' %self.target.id)
@@ -93,17 +105,22 @@ class Align:
 
         # Perform alignment
         self.aligned_seqs_and_pept = self.align_chains()
+        
         # Cut extra N-terminal and C-terminal
         if self.clip_C_domain==True or remove_terms==True:
             self.remove_terms()
+            
         if self.clip_C_domain:
             self.aligned_seqs_and_pept['%s M' %self.template[0].id] += self.tem_m_c
+            
             self.aligned_seqs_and_pept['%s M' %self.target.id] += ('').join(
                 ['-' for i in range(len(self.tem_m_c))])
+            
             if self.MHC_class == 'II':
                 self.aligned_seqs_and_pept['%s N' %self.template[0].id] += self.tem_n_c
                 self.aligned_seqs_and_pept['%s N' %self.target.id] += ('').join(
                 ['-' for i in range(len(self.tem_n_c))])
+                
         #Write alignment file for MODELLER
         self.alignment_file = self.write_ali_file()
 
@@ -121,8 +138,14 @@ class Align:
 
         # Align M and N chain for MHC II. Because the target chains need to be aligned to the respective chain of
         # the template, M and N are done seperately and later added together
-        if self.MHC_class == 'I':
-            chains = {"M" : ('alignment', self.tem_m, self.tar_m)}
+        # MHC-I with B2M
+        if self.MHC_class == 'I' and not self.clip_C_domain:
+            chains = {"M" : (f'{self.tar_id}_M', self.tem_m, self.tar_m),
+                      "B":(f'{self.tar_id}_B', self.tem_b, self.tar_b)}
+        # MHC-I without B2M
+        elif self.MHC_class == 'I' and self.clip_C_domain:
+            chains = {"M" : (f'{self.tar_id}_M', self.tem_m, self.tar_m)}
+        # MHC-II
         elif self.MHC_class == 'II':
             chains = {"M":(f'{self.tar_id}_M', self.tem_m, self.tar_m), 
                     "N":(f'{self.tar_id}_N', self.tem_n, self.tar_n)}
@@ -140,16 +163,20 @@ class Align:
             # Perform MSA with muscle
             in_file_muscle = f'{self.output_dir}/{self.tar_id}_{chain}.fasta'
             out_file_muscle = f'{self.output_dir}/{afa_name}.afa'
-            p = subprocess.check_call(self.__muscle_command__ % (in_file_muscle,out_file_muscle),shell=True)
+            subprocess.check_call(self.__muscle_command__ % (in_file_muscle,out_file_muscle),shell=True)
 
-        if self.MHC_class == 'II':
-            # Merge M and N chain into one file
-            os.system('cat %s/%s_M.afa %s/%s_N.afa > %s/alignment.afa' % (
-            self.output_dir.replace(' ', '\\ '), self.tar_id, self.output_dir.replace(' ', '\\ '), self.tar_id,
-            self.output_dir.replace(' ', '\\ ')))
+        #if self.MHC_class='I':
+            
+
+        #elif self.MHC_class == 'II':
+        # Merge M and N chain into one file
+        OD = self.output_dir.replace(' ', '\\ ')
+        files = (' ').join([f'{OD}/{self.tar_id}_{list(chains.keys())[i]}.afa' for i in range(len(chains))])
+        subprocess.check_call(f'cat {files} > {OD}/alignment.afa',
+                              shell=True)
 
         # Load aligned seqs into dict
-        seqs = {v.description: str(v.seq) for (v) in SeqIO.parse('%s/alignment.afa' % (self.output_dir), "fasta")}
+        seqs = {v.description: str(v.seq) for (v) in SeqIO.parse(f'{self.output_dir}/alignment.afa', "fasta")}
 
         # Align peptides
         # aligned_pepts = {'1D9K P': 'GNSHRGAIEWEGIESG', '1IAK P': '-STDYGILQINSRW--'}
@@ -307,10 +334,12 @@ class Align:
                 comment = 'sequence:::::::::'
 
             # The sequences
-            if self.MHC_class == 'II':
-                seq = '%s/%s/%s*' %(seqs[id+' M'], seqs[id+' N'], seqs[id+' P'])
-            if self.MHC_class == 'I':
-                seq = '%s/%s*' % (seqs[id + ' M'], seqs[id + ' P'])
+            if self.MHC_class == 'I' and not self.clip_C_domain:
+                seq = f"{seqs[id+' M']}/{seqs[id+' B']}/{seqs[id+' P']}*"
+            elif self.MHC_class == 'I' and self.clip_C_domain:
+                seq = f"{seqs[id+' M']}/{seqs[id+' P']}*"
+            elif self.MHC_class == 'II':
+                seq = f"{seqs[id+' M']}/{seqs[id+' N']}/{seqs[id+' P']}*"
 
             aligned_seqs[id] = (head, comment, seq)
 

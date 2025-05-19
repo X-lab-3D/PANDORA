@@ -1,5 +1,6 @@
 {% set name = "csb-pandora" %}
-{% set version = "1.0" %}
+{% set version = "2.1.0-beta" %}
+{% set build_number = "0" %}
 
 package:
   name: "{{ name|lower }}"
@@ -8,17 +9,27 @@ package:
 source:
   git_rev:
   git_url: git@github.com:X-lab-3D/PANDORA.git
+  git_tag: master
+  #path: .
 
 build:
-  number: 0
-  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed -vv "
+  number: {{ build_number }}
+  entry_points:
+    - pandora-fetch = PANDORA.cmd_pandora:cmd_install_database
+    - pandora-create = PANDORA.cmd_pandora:cmd_create_database
+    - pandora-run = PANDORA.cmd_pandora:cmd_run_pandora
+    - pandora-wrapper = PANDORA.cmd_pandora:cmd_run_wrapper
+    
+  script: "{{ PYTHON }} setup.py install --single-version-externally-managed --record=record.txt"
+  #script: {{ PYTHON }} -m pip install . -vv --no-deps --ignore-installed
 
 requirements:
   build:
-    - python
+    - python=3.10
     - setuptools
+    - pip
   host:
-    - python
+    - python=3.10
 
   run:
     - biopython
@@ -28,11 +39,12 @@ requirements:
     - numpy
     - numpy-base
     - pip
-    - python
+    - python=3.10
     - setuptools
     - joblib
     - pandas
     - python-dateutil
+    - urllib3=1.26.14
 
 about:
   home: https://github.com/X-lab-3D/PANDORA/blob/master/README.md

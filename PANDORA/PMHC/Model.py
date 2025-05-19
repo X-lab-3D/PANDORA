@@ -1,36 +1,37 @@
 from pyexpat import model
-from Bio.PDB import PDBParser
-from Bio.PDB.Polypeptide import three_to_one
-from Bio.SeqUtils import seq1
-from Bio import pairwise2
 import os
-from Bio.PDB import PDBIO
-import PANDORA
-import traceback
-from Bio.PDB import *
-import sys
 
+from Bio import pairwise2
+from Bio.SeqUtils import seq1
+from Bio.PDB import PDBParser, PDBIO, Select
+
+import PANDORA
 
 class Model:
 
-    def __init__(self, target, model_path='', output_dir = PANDORA.PANDORA_data, pdb=False, molpdf=0, dope=0):
-        '''__init__(self, target, model_path='', output_dir = PANDORA.PANDORA_data, pdb=False, molpdf=0, dope=0)
-         Initiate model object
+    def __init__(self, target, model_path='', output_dir=False, pdb=False, molpdf=0, dope=0):
+        ''' Initiate model object
         Args:
             target: Target object
-            output_dir: (string) output directory
             model_path: (string) path to hypothetical model
+            output_dir: (string) output directory
             pdb:  Bio.PDB object of the hypothetical model
             molpdf: (float) molpdf score
             dope:  (float) DOPE score
         '''
 
-
         self.target = target
         self.model_path = model_path
         self.molpdf = molpdf
         self.dope = dope
-        self.output_dir = output_dir
+
+        # Define the output directory
+        if output_dir == False:
+            self.output_dir = f"{os.getcwd()}/{self.target.id}"
+        else:
+            self.output_dir = output_dir
+        
+
 
         # Check if the user gave either the path to the model pdb or the pdb itself.
         if self.model_path == '' and not pdb:
@@ -113,15 +114,11 @@ class Model:
                 self.flanking_lrmsd = sim.compute_lrmsd_pdb2sql(exportpath=None, method='svd', name=atoms)
         except:
             print('An error occurred while calculating the rmsd for target %s, model %s for %s' %(ref_path, decoy_path, ligand_zone))
-            #print('An error occurred while calculating the rmsd for target %s, model %s' %(self.target.id, self.model_path))
-            traceback.print_exc()
             raise Exception('Please check your model and ref info for model %s' %self.model_path)
 
         # remove intermediate files
         os.system('rm %s %s' %(decoy_path, ref_path))
         os.chdir(start_dir)
-
-    
 
 def merge_chains(pdb):
     ''' Merges two chains of MHCII to one chain. pdb2sql can only calculate L-rmsd with one chain.
@@ -517,7 +514,6 @@ def remove_mismatched_atoms_from_pdb(ref, decoy, atoms):
                continue
     return ref, decoy
 
-
 class NotDisordered(Select):  # Inherit methods from Select class
     '''
     Keep one Alternative location for the given atom
@@ -529,5 +525,3 @@ class NotDisordered(Select):  # Inherit methods from Select class
             return True
         else:  # Alt location was not one to be output.
             return False
-        
-

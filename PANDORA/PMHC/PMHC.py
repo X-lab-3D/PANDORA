@@ -2,10 +2,9 @@ from Bio import SeqIO
 from Bio.PDB import PDBParser
 from Bio.SeqUtils import seq1
 import PANDORA
-from PANDORA.Contacts import Contacts
-from PANDORA.Database import Database_functions
-from PANDORA.Pandora import Modelling_functions
-from PANDORA.PMHC import Anchors
+from PANDORA import Contacts
+from PANDORA import Modelling_functions
+from PANDORA import Anchors
 from abc import ABC, abstractmethod
 import os
 import re
@@ -13,7 +12,7 @@ import re
 class PMHC(ABC):
 
     def __init__(self, id, peptide = '', allele_type = [], MHC_class = 'I',
-                 M_chain_seq = '', N_chain_seq = '', anchors = [],
+                 M_chain_seq = '', B2M_seq='', N_chain_seq = '', anchors = [],
                  helix=False, sheet=False):
         ''' pMHC class. Acts as a parent class to Template and Target
 
@@ -32,6 +31,7 @@ class PMHC(ABC):
         self.MHC_class = MHC_class
         self.peptide = peptide
         self.M_chain_seq = M_chain_seq
+        self.B2M_seq = B2M_seq
         self.N_chain_seq = N_chain_seq
         self.anchors = anchors
         self.helix = helix
@@ -61,9 +61,9 @@ class PMHC(ABC):
 class Template(PMHC):
 
     def __init__(self, id, peptide='',  allele_type=[], MHC_class='I',
-                 M_chain_seq='', N_chain_seq='', anchors=[], G_domain_span=False,
+                 M_chain_seq='', B2M_seq='', N_chain_seq='', anchors=[], G_domain_span=False,
                  helix=False, sheet=False, pdb_path=False, pdb=False,
-                 resolution=None, remove_biopython_object=False):
+                 remove_biopython_object=False, reverse= False):
         ''' Template structure class. This class holds all information of a template structure that is used for
             homology modelling. This class needs a id, allele and the path to a pdb file to work. (sequence info of
             the chains and peptide can be fetched from the pdb)
@@ -81,16 +81,14 @@ class Template(PMHC):
             pdb_path: (string) path to pdb file. The user should provide this argument if they want to use
                 a template outside the normal templates folder.
             pdb: (Bio.PDB) Biopython PBD object
-            resolution: (float) Structure resolution in Angstrom
         '''
         super().__init__(id, peptide=peptide, allele_type=allele_type,
                          MHC_class=MHC_class, M_chain_seq=M_chain_seq,
-                         N_chain_seq=N_chain_seq, anchors=anchors,
+                         B2M_seq=B2M_seq, N_chain_seq=N_chain_seq, anchors=anchors,
                          helix=helix, sheet=sheet)
         self.id = id
         self.pdb = pdb
         self.contacts = False
-        self.resolution = resolution
 
         if not G_domain_span:
             if self.MHC_class == 'I':
@@ -102,9 +100,11 @@ class Template(PMHC):
             self.allele_type = [self.allele_type]
 
         self.check_allele_name()
+        self.reverse = reverse
 
         if not os.path.isfile(self.get_pdb_path()) and not pdb:
-            raise Exception('Provide a PDB structure to the Template object first')
+            print(f'ERROR:file {self.get_pdb_path()} not found')
+            raise Exception(f'Provide a PDB structure to the Template object first.')
 
         if not pdb: # If the path to a pdb file or a Bio.PDB object is given, parse the pdb
             self.parse_pdb()
@@ -116,11 +116,14 @@ class Template(PMHC):
         if remove_biopython_object:
             self.pdb = None
 
+
     def get_pdb_path(self):
         if 'pdb_path' in locals():
             return self.pdb_path
+        elif not self.reverse:
+           return os.path.join(PANDORA.PANDORA_data, 'PDBs', f'pMHC{self.MHC_class}', f'{self.id}.pdb')
         else:
-            return os.path.join(PANDORA.PANDORA_data, 'PDBs', 'pMHC' + self.MHC_class, self.id + '.pdb')
+           return os.path.join(PANDORA.PANDORA_data, 'PDBs', f'pMHC{self.MHC_class}_reversed', f'{self.id}_reverse.pdb')
         
 
     def parse_pdb(self, custom_map={"MSE":"M"}):
@@ -135,7 +138,6 @@ class Template(PMHC):
         if self.get_pdb_path() and not self.pdb: #if there is a path to a pdb provided and there is not already a self.pdb...
             parser = PDBParser(QUIET=True)  # Create a parser object, used to read pdb files
             self.pdb = parser.get_structure('MHC', self.get_pdb_path()) #Create Bio.PDB object
-            self.resolution = Database_functions.get_resolution(self.get_pdb_path()) #Get resolution from pdb file
 
         # If the chains or peptide are not given by the user, fetch them from the pdb
         # Get the chain sequences
@@ -145,6 +147,8 @@ class Template(PMHC):
         if self.MHC_class == 'I':
             if self.M_chain_seq == '':
                 self.M_chain_seq = chain_seqs[0]
+            if self.B2M_seq == '':
+                self.B2M_seq = chain_seqs[1]
             if not self.peptide:
                 self.peptide = chain_seqs[-1]
         if self.MHC_class == 'II':
@@ -182,9 +186,9 @@ class Template(PMHC):
         if self.get_pdb_path():
             print('Path to PDB file: %s' %self.get_pdb_path())
         if not self.pdb:
-            print('PDB structure: no PDB structure provided')
+            print('Biopython PDB structure: no PDB loaded')
         else:
-            print('PDB structure:')
+            print('Biopython PDB structure:')
             for (k, v) in self.pdb.header.items():
                 print('\t'+k + ':', v)
 
@@ -236,13 +240,14 @@ class Template(PMHC):
                     print('The allele will not be changed')
 
 
-
 class Target(PMHC):
 
     def __init__(self, id, peptide, allele_type=[], MHC_class = 'I',
-                 M_chain_seq = '', N_chain_seq = '', anchors = [],
+                 M_chain_seq = '', N_chain_seq = '', 
+                 B2M_seq='', anchors = [],
                  helix=False, sheet=False, templates = False,
-                 use_netmhcpan = False, use_templ_seq=False):
+                 use_netmhcpan = False, use_templ_seq=False, output_dir=False,
+                 rm_netmhcpan_output=True, reverse=False):
         ''' Target structure class. This class needs an ID (preferably a PDB ID), allele and pepide information.
 
         Args:
@@ -258,14 +263,34 @@ class Target(PMHC):
             use_netmhcpan (bool): If True, uses local installation of NetMHCPan to predict the anchors when
                                   anchor positions are not provided. Defaults to False.
             use_templ_seq (bool): If True, if no MHC chain sequences could be retrieved starting from the allele name,
-                                    it will use the best template MHC sequences for the modelling.
-        '''
+                                   it will use the best template MHC sequences for the modelling.
+            output_dir: (string) Path to output directory. Defaults to current working directory.
+            rm_netmhcpan_output: (bool) If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
+        ''' 
 
-        super().__init__(id, peptide, allele_type, MHC_class, M_chain_seq, N_chain_seq, anchors, helix, sheet)
+        anchors.sort()
+        super().__init__(id, peptide=peptide, allele_type=allele_type, 
+                         MHC_class=MHC_class, M_chain_seq=M_chain_seq, 
+                         N_chain_seq=N_chain_seq, B2M_seq=B2M_seq, 
+                         anchors=anchors, helix=helix, sheet=sheet)
         self.templates = templates
         self.initial_model = False
         self.contacts = False
         self.anchor_contacts = False
+        self.reverse = reverse
+
+        # Changes all special characters in the case id to '-'
+        self.id = re.sub('[^a-zA-Z0-9 \n\.]', '_', id)
+
+        if output_dir == False:
+            self.output_dir = os.getcwd()
+        else:
+            self.output_dir = output_dir
+
+        self.output_dir = f"{self.output_dir}/{self.id}"
+
+        # Output directory is created
+        self.make_output_dir()
 
         # If the user does provide sequence info, make sure both the M and N chain are provided
         # if MHC_class == 'II' and M_chain_seq != '' and N_chain_seq == '':
@@ -295,7 +320,7 @@ class Target(PMHC):
                 print('WARNING: no anchor positions provided. Pandora will predict them using NetMHCpan')
                 # predict the anchors
                 try:
-                    self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type)
+                    self.anchors = Modelling_functions.predict_anchors_netMHCpan(self.peptide, self.allele_type, self.output_dir, rm_netmhcpan_output=rm_netmhcpan_output)
                     print('Predicted anchors: %s' %self.anchors)
                 except Exception as e:
                     print('Error: Something went wrong when predicting the anchors using netMHCpan')
@@ -305,11 +330,13 @@ class Target(PMHC):
             print('WARNING: no anchor positions provided. Pandora will predict them using netMHCIIpan.')
             # predict the anchors
             try:
-                self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type)
+                self.anchors = Modelling_functions.predict_anchors_netMHCIIpan(self.peptide, self.allele_type, self.output_dir, rm_netmhcpan_output=rm_netmhcpan_output)
             except Exception as e:
                 print('Error: Something went wrong when predicting the anchors using netMHCIIpan')
                 raise Exception(e)
 
+        print('###############################################')
+        self.info()
 
     def info(self):
         """ Print the basic info of this structure
@@ -397,9 +424,9 @@ class Target(PMHC):
         # Define correct fasta file
         if input_file == None:
             if self.allele_type[0].startswith('HLA'):
-                input_file = PANDORA.PANDORA_data+ '/mhcseqs/Human_MHC_data.fasta'
+                input_file = PANDORA.PANDORA_data+ '/mhcseqs/HLA_cleaned.fasta'
             else:
-                input_file = PANDORA.PANDORA_data+ '/mhcseqs/NonHuman_MHC_data.fasta'
+                input_file = PANDORA.PANDORA_data+ '/mhcseqs/MHC_cleaned.fasta'
 
         # Parse Fasta file
         fasta_sequences = SeqIO.parse(input_file,'fasta')
@@ -409,6 +436,11 @@ class Target(PMHC):
             alleles = [x for x in self.allele_type if any(y in x for y in PANDORA.alpha_genes)]
         elif chain == 'N':
             alleles = [x for x in self.allele_type if any(y in x for y in PANDORA.beta_genes)]
+            
+        if alleles == []:
+            print('WARNING: the provided allele(s) name have not been recognized as alpha or beta.')
+            print('this might cause PANDORA to assign the sequence to the wrong chain for MHC-II')
+            alleles = self.allele_type
         # Return the right sequences
         seq_flag = False
         #for seq in fasta_sequences:
@@ -457,12 +489,13 @@ class Target(PMHC):
             #print("or provide the MHC sequence as target.M_chain_seq (and target.N_chain_seq for MHCII beta chain)")
 
     def fill_allele_seq_info(self, use_templ_seq=False):
-        """_summary_
+        """Fills in MHC-II alpha chain name if missing and it tries to retireve the
+        sequence according to the allele name of vice versa
 
         Args:
             use_templ_seq (bool, optional): If true, it uses the template MHC sequence 
-                for each chain a sequence could not be found. This function will 
-                be removed in later releases. Defaults to False.
+                for each chain a sequence could not be found. This function is
+                mainly for benchmarking reason. Defaults to False.
 
         Raises:
             Exception: _description_
@@ -477,7 +510,7 @@ class Target(PMHC):
         #Check if there are allele name for each MHC chain
         M_allele_flag = False
         N_allele_flag = False
-        if any(x in y for x in PANDORA.alpha_genes for y in self.allele_type):
+        if any(x in y for x in PANDORA.alpha_genes for y in self.allele_type) or self.MHC_class == 'I':
             M_allele_flag = True
         if self.MHC_class == 'II':
             if any(x in y for x in PANDORA.beta_genes for y in self.allele_type):
@@ -489,7 +522,7 @@ class Target(PMHC):
                     print('\nWARNING: chain Beta allele name found only.')
                     print('PANDORA will assume chain alpha is HLA-DRA*01')
 
-        #Check if there are allele name for each MHC chain
+        #Check if there are allele names for each MHC chain
         if self.M_chain_seq =='' and M_allele_flag:
             print('\nNo MHC alpha chain sequence was provided. Trying to retrieve it from reference sequences...')
             try:
@@ -524,7 +557,7 @@ class Target(PMHC):
             try:
                 blast_results = Modelling_functions.blast_mhc_seq(self.M_chain_seq,
                                                                   chain='M',
-                                                                  blastdb=PANDORA.PANDORA_data + '/refseq_blast_db/refseq_blast_db')
+                                                                  blastdb=PANDORA.PANDORA_data + '/BLAST_databases/refseq_blast_db/refseq_blast_db')
                 #Take only the allele names with the highest id score
                 top_id = blast_results[0][1]
                 self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
@@ -563,10 +596,27 @@ class Target(PMHC):
             try:
                 blast_results = Modelling_functions.blast_mhc_seq(self.N_chain_seq,
                                                                   chain='N',
-                                                                  blastdb=PANDORA.PANDORA_data + '/refseq_blast_db/refseq_blast_db')
+                                                                  blastdb=PANDORA.PANDORA_data + '/BLAST_databases/refseq_blast_db/refseq_blast_db')
                 #Take only the allele names with the highest id score
                 top_id = blast_results[0][1]
                 self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
             except:
                 print('\nWARNING: something went wrong when trying to retrieve chain M allele')
                 print('with blast. Is blastp properly installed as working as "/bin/bash blastp"?')
+
+    def make_output_dir(self):
+        ''' Create an output directory and move the template pdb there
+            Uses self.output_dir (str): Path to output directory. Defaults to os.getcwd().
+            
+        Args:
+            None
+        '''
+
+        # create an output directory
+        try:
+            if not os.path.exists(self.output_dir):
+                os.makedirs(self.output_dir)
+                if not os.path.exists(self.output_dir):
+                    raise Exception('A problem occurred while creating output directory')
+        except:
+            raise Exception('A problem occurred while creating output directory')
