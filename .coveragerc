@@ -1,4 +1,7 @@
 [report]
 omit =
-	# omit the test
+	# omit test and template files
 	test/*
+	*__version__.py
+	Pandora/*_template*
+	Pandora/cmd_modeller_ini.py

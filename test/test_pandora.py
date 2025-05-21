@@ -42,7 +42,7 @@ def test_construct_database():
 
     # Construct database object
     db = Database.Database()
-    db.construct_database(save=PANDORA.PANDORA_data + '/PANDORA_database.pkl', download=False)
+    db.construct_database(save=PANDORA.PANDORA_data + '/database/PANDORA_database.pkl', download=False)
 
     # test the creation of bad files, log files and the information inside of the database object
     peptide_flag = False
@@ -252,7 +252,7 @@ def test_wrapper_MHCI():
     wrap = Wrapper.Wrapper(data_file, db, MHC_class='I', header=False, 
                         delimiter='\t', IDs_col=0, peptides_col=1, 
                         allele_name_col=3, anchors_col=2, M_chain_col=4,
-                        num_cores=1, n_loop_models=1, 
+                        num_cores=1, n_loop_models=1, verbose=True,
                         benchmark=False, collective_output_dir=output_dir)
     
     # Check if the jobs went as expected
