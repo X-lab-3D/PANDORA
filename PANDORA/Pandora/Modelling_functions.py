@@ -208,8 +208,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, 
         max_scores = [i[::-1] for i in sorted(max_scores, reverse=True)]
 
     except ValueError:
-        print('Could not predict binding core using netMHCIIpan. Will use the most common anchor positions instead')
-        return [3, 6, 8, 11]
+        raise Exception('ERROR: ValueError raised while predicting anchors with netMHCIIpan.')
 
     offset, core, core_reliability = max_scores[0]
     # Use the canonical spacing for 9-mer binding cores to predict the anchor positions
