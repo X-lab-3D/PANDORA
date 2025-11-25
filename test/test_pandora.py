@@ -149,7 +149,7 @@ def test_contacts():
     assert pass_test
 
 
-@pytest.mark.skip(reason="Redundant, already covered by test_pandora_MHCI_modelling")
+#@pytest.mark.skip(reason="Redundant, already covered by test_pandora_MHCI_modelling")
 def test_align():
     # initiate target and template object
     template = Template('1A1O',
