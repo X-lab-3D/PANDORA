@@ -215,7 +215,7 @@ def test_template_select_MHCII():
 
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
 
-@pytest.mark.skip(reason="Skip for faster testing")
+
 def test_pandora_MHCI_modelling():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -242,7 +242,7 @@ def test_pandora_MHCI_modelling():
 
     assert pass_test
 
-@pytest.mark.skip(reason="Skip for faster testing")
+
 def test_wrapper_MHCI():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -279,7 +279,7 @@ def test_wrapper_MHCI():
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
 
-@pytest.mark.skip(reason="Skip for faster testing")
+
 def test_pandora_MHCII_modelling():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -306,7 +306,7 @@ def test_pandora_MHCII_modelling():
     os.system('rm -r %s' % (target.output_dir))
     assert pass_test
 
-@pytest.mark.skip(reason="Skip for faster testing")
+
 def test_pandora_MHCII_reverse_modelling():
     # Load database
     db = Database.load()  # Assume the database loading path is correct.
