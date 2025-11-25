@@ -291,8 +291,7 @@ def test_pandora_MHCII_modelling():
                          M_chain_seq=db.MHCII_data['2NNA'].M_chain_seq,
                          N_chain_seq=db.MHCII_data['2NNA'].N_chain_seq,
                          anchors=db.MHCII_data['2NNA'].anchors,
-                         output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/',
-                         wrapper_id='test_MHCII_wrapper')
+                         output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/')
 
     # Perform modelling
     mod = Pandora.Pandora(target, db)
