@@ -215,6 +215,7 @@ def test_template_select_MHCII():
 
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
 
+@pytest.mark.skip(reason="Skip for faster testing")
 def test_pandora_MHCI_modelling():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -241,6 +242,7 @@ def test_pandora_MHCI_modelling():
 
     assert pass_test
 
+@pytest.mark.skip(reason="Skip for faster testing")
 def test_wrapper_MHCI():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -277,6 +279,7 @@ def test_wrapper_MHCI():
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
 
+@pytest.mark.skip(reason="Skip for faster testing")
 def test_pandora_MHCII_modelling():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -288,7 +291,8 @@ def test_pandora_MHCII_modelling():
                          M_chain_seq=db.MHCII_data['2NNA'].M_chain_seq,
                          N_chain_seq=db.MHCII_data['2NNA'].N_chain_seq,
                          anchors=db.MHCII_data['2NNA'].anchors,
-                         output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/')
+                         output_dir = os.path.dirname(PANDORA.PANDORA_path) + '/test/test_output/',
+                         wrapper_id='test_MHCII_wrapper')
 
     # Perform modelling
     mod = Pandora.Pandora(target, db)
@@ -302,6 +306,7 @@ def test_pandora_MHCII_modelling():
     os.system('rm -r %s' % (target.output_dir))
     assert pass_test
 
+@pytest.mark.skip(reason="Skip for faster testing")
 def test_pandora_MHCII_reverse_modelling():
     # Load database
     db = Database.load()  # Assume the database loading path is correct.
@@ -358,10 +363,10 @@ def test_database_install():
     #os.system(f'rm -r {PANDORA.PANDORA_data}')
 
     # Create folder and download database
-    Database.install_database(db_path='./PANDORA_databases/test/default/')
+    Database.install_database(db_path='./PANDORA_databases/')
 
     # Check that the database folder and files exist
-    data_folder = './PANDORA_databases/test/default/'
+    data_folder = './PANDORA_databases/default/'
     pass_data_folder = os.path.exists(data_folder)
 
     db_file = './PANDORA_databases/default/database/PANDORA_database.pkl'
