@@ -13,7 +13,7 @@ from PANDORA import Wrapper
 
 working_dir = os.path.dirname(os.path.realpath(__file__))
 
-@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
+@pytest.mark.skip(reason="Redundant, already covered by test_construct_database")
 def test_clean_MHCI_structure():
     x = Database_functions.parse_pMHCI_pdb('1A1O',
                        indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
@@ -23,7 +23,7 @@ def test_clean_MHCI_structure():
 
     assert x.peptide == 'KPIVQYDNF' and [i.id for i in x.pdb.get_chains()] == ['M', 'B', 'P']
 
-@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
+@pytest.mark.skip(reason="Redundant, already covered by test_construct_database")
 def test_clean_MHCII_structure():
     x = Database_functions.parse_pMHCII_pdb('2NNA',
                        indir=PANDORA.PANDORA_path + '/../test/test_data/PDBs/IMGT_retrieved/IMGT3DFlatFiles',
@@ -79,7 +79,7 @@ def test_construct_database():
     assert B2M_flag
 
 def test_load_db():
-    db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
+    db = Database.load()
     # test if items in the database are correct
     pass_test = False
     if '1A1O' in db.MHCI_data and '4Z7U' in db.MHCII_data:
@@ -88,7 +88,7 @@ def test_load_db():
 
     assert pass_test
 
-#@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCI_modelling")
+#@pytest.mark.skip(reason="Redundant, already covered by test_pandora_MHCI_modelling")
 def test_PMHC_target():
     # Create target object
     target = Target('1A1O',
@@ -110,7 +110,7 @@ def test_PMHC_target():
 
     assert pass_test
 
-#@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
+#@pytest.mark.skip(reason="Redundant, already covered by test_construct_database")
 def test_PMHC_template():
     # Create template object
     template = Template('1A1O',
@@ -137,7 +137,7 @@ def test_fail_PMHC():
 
     assert pass_test
 
-#@pytest.mark.skip(reason="Redundant, already dovered by test_construct_database")
+#@pytest.mark.skip(reason="Redundant, already covered by test_construct_database")
 def test_contacts():
     # Calculate atom contacts
     c = Contacts.Contacts(PANDORA.PANDORA_path + '/../test/test_data/PDBs/pMHCI/1A1O.pdb')
@@ -149,7 +149,7 @@ def test_contacts():
     assert pass_test
 
 
-#@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCI_modelling")
+#@pytest.mark.skip(reason="Redundant, already covered by test_pandora_MHCI_modelling")
 def test_align():
     # initiate target and template object
     template = Template('1A1O',
@@ -178,7 +178,7 @@ def test_align():
 
     assert pass_test
 
-#@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCI_modelling")
+#@pytest.mark.skip(reason="Redundant, already covered by test_pandora_MHCI_modelling")
 def test_template_select_MHCI():
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
@@ -195,7 +195,7 @@ def test_template_select_MHCI():
 
     assert mod.template.id == '2X4R' and mod.template.peptide == 'NLVPMVATV'
 
-#@pytest.mark.skip(reason="Redundant, already dovered by test_pandora_MHCII_modelling")
+#@pytest.mark.skip(reason="Redundant, already covered by test_pandora_MHCII_modelling")
 def test_template_select_MHCII():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -214,6 +214,7 @@ def test_template_select_MHCII():
     mod.find_template(benchmark=True)
 
     assert mod.template.id == '4Z7U' and mod.template.peptide == 'PSGEGSFQPSQENPQ'
+
 
 def test_pandora_MHCI_modelling():
     # Load database
@@ -241,6 +242,7 @@ def test_pandora_MHCI_modelling():
 
     assert pass_test
 
+
 def test_wrapper_MHCI():
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
@@ -253,7 +255,8 @@ def test_wrapper_MHCI():
                         delimiter='\t', IDs_col=0, peptides_col=1, 
                         allele_name_col=3, anchors_col=2, M_chain_col=4,
                         num_cores=1, n_loop_models=1, verbose=True,
-                        benchmark=False, collective_output_dir=output_dir)
+                        benchmark=False, collective_output_dir=output_dir,
+                        wrapper_id='test_MHCI_wrapper')
     
     # Check if the jobs went as expected
     errors = []
@@ -275,6 +278,7 @@ def test_wrapper_MHCI():
     #TODO: Add check molpdf flag
 
     assert not errors, "errors occured:\n{}".format("\n".join(errors))
+
 
 def test_pandora_MHCII_modelling():
     # Load database
@@ -300,6 +304,7 @@ def test_pandora_MHCII_modelling():
     # remove output file
     os.system('rm -r %s' % (target.output_dir))
     assert pass_test
+
 
 def test_pandora_MHCII_reverse_modelling():
     # Load database
@@ -331,6 +336,7 @@ def test_pandora_MHCII_reverse_modelling():
     assert pass_test
 
 def test_rmsd():
+
     # Load database
     db = Database.load()#PANDORA.PANDORA_path + '/../test/test_data/Test_Pandora_MHCI_and_MHCII_data.pkl')
     # Create target object
@@ -350,3 +356,22 @@ def test_rmsd():
     pass_test = m.lrmsd > 1 and m.lrmsd < 1.5 and m.core_lrmsd > 1 and m.core_lrmsd < 1.5
 
     assert pass_test
+
+def test_database_install():
+    #Remove test database
+    #os.system(f'rm -r {PANDORA.PANDORA_data}')
+
+    # Create folder and download database
+    Database.install_database(db_path='./PANDORA_databases/')
+
+    # Check that the database folder and files exist
+    data_folder = './PANDORA_databases/default/'
+    pass_data_folder = os.path.exists(data_folder)
+
+    db_file = './PANDORA_databases/default/database/PANDORA_database.pkl'
+    pass_test = os.path.exists(db_file)
+
+    assert pass_data_folder, "Folders presence test failed"
+    assert pass_test, "Database file presence test failed"
+
+
