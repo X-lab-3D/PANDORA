@@ -3,5 +3,9 @@ omit =
 	# omit test and template files
 	test/*
 	*__version__.py
-	Pandora/*_template*
-	Pandora/cmd_modeller_ini.py
+	PANDORA/Pandora/*_template*
+	PANDORA/Pandora/cmd_modeller_ini.py
+	# omit cmd file to add command line functions during pip installation
+	PANDORA/cmd_pandora.py
+	# omit Generate_reverse_templates.py as it's not meant to be ran by users
+	PANDORA/Database/Generate_reverse_templates.py
