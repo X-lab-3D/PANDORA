@@ -1,0 +1,15 @@
+version: 2.1.0-beta2
+
+build:
+  os: "ubuntu-20.04"
+  tools:
+    python: "3.10"
+
+# Build from the docs/source directory with Sphinx
+sphinx:
+  configuration: docs/source/conf.py
+
+# Explicitly set the version of Python and its requirements
+# python:
+#   install:
+#     - requirements: docs/requirements.txt
