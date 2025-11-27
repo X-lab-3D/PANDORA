@@ -1,4 +1,4 @@
-version: 2.1.0-beta2
+version: 2.1.0
 
 build:
   os: "ubuntu-20.04"
