@@ -273,6 +273,7 @@ class Target(PMHC):
                          MHC_class=MHC_class, M_chain_seq=M_chain_seq, 
                          N_chain_seq=N_chain_seq, B2M_seq=B2M_seq, 
                          anchors=anchors, helix=helix, sheet=sheet)
+                         
         self.templates = templates
         self.initial_model = False
         self.contacts = False
@@ -334,6 +335,10 @@ class Target(PMHC):
             except Exception as e:
                 print('Error: Something went wrong when predicting the anchors using netMHCIIpan')
                 raise Exception(e)
+
+        # Check that the provided anchors are not 0-based (should be 1-based)
+        if 0 in anchors:
+            raise Exception(f'Anchor positions should start from 1 (not 0). Current anchors: {anchors}')
 
         print('###############################################')
         self.info()

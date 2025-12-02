@@ -172,15 +172,10 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, 
         target_alleles = target_alleles_matched
 
     target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
-    # If there are no target alleles that occur in netMHCIIpan, but there is a mouse allele, use all mouse alleles
-    # that are supported by netMHCIIpan
-    if target_alleles == [] and any(al.startswith('H2') for al in allele_type):
-        target_alleles = [i for i in all_netMHCpan_alleles if i.startswith('H-')]
 
     # If there is no target allele that occurs in netMHCIIpan, raise an Exception
     if target_alleles == []:
-        #target_alleles = ['DRB1_0101']
-        raise Exception('ERROR: Provided allele is not available in netMHCIIpan-4.1.\n')
+        raise Exception('ERROR: Provided allele is not available in the netmhcIIpan version used\n')
 
     target_alleles_str = ','.join(target_alleles)
 
@@ -218,6 +213,8 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, 
     predicted_anchors = [offset + 1, offset + 4, offset + 6, offset + 9]
     # Make sure the prediction is not longer than the peptide just in case
     predicted_anchors = [i for i in predicted_anchors if i <= len(peptide)]
+    if pedicted_anchors == None:
+        raise Exception('ERROR: netMHCIIpan was not able to find any binding core for the provided peptide and MHC allele')
 
     if verbose:
         print('\tPredicted the binding core using netMHCIIpan (4.0):\n')
@@ -266,7 +263,7 @@ def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm
         
     #Ensure up to only 2 fields per allele are used (e.g. HLA-A*02:01:48 -> HLA-A*02:01)
     allele_type = [':'.join(allele.split(':')[:2]) for allele in allele_type]
-    
+
     ## Format alleles
     if any(x.startswith('HLA') for x in allele_type):
         target_alleles = [i.replace('*','') for i in allele_type]
@@ -284,13 +281,14 @@ def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm
         target_alleles = [i.replace(':','').replace('*','') for i in allele_type]
     elif any(x.startswith('SLA') for x in allele_type):
         target_alleles = [i.replace(':','').replace('*',':') for i in allele_type]
+    else:
+        target_alleles = [i.replace('*','') for i in allele_type]
     
     ## Make sure only netMHCpan available alleles are used
     target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
     
     if len(target_alleles) == 0:
-        print('ERROR: The provided Target allele is not available in NetMHCpan-4.1')
-        return None
+        raise Exception('ERROR: Provided allele is not available in the netmhcpan version used\n')
         
     target_alleles_str = ','.join(target_alleles)
         
@@ -322,9 +320,7 @@ def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm
         pred[allele] = list(sorted(pred[allele], key=lambda x:x[1]))
         
     if len(pred) == 0:
-        print('ERROR: NetMHCpan-4.1 was not able to find any binding core for')
-        print('the provided peptide and MHC allele')
-        return None
+        raise Exception('ERROR: netMHCIIpan was not able to find any binding core for the provided peptide and MHC allele')
         
     # For every allele, the binding core is predicted. Take the allele with the highest reliability score
     best_allele = min((pred[i][0][1], i) for i in pred)[1]
