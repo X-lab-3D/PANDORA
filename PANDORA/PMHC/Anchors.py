@@ -18,20 +18,8 @@ def pMHCI_anchors(pdb):
             anch_list.append((i, sum(l) / len(l))) #add mean distance between pept residue and MHC residue
         return min(((x[1], x[0]) for x in anch_list), default=(0, 0))[1] #get the pept residue with the min mean dist
 
-    # Rafaella's residues
-    # pocket_M = {'anch1': [24, 25, 35, 36], 'anch2': [81]}
-
-    # Derek's modified version. Empirically tested to have the highest prediction accuracy. See below. (only best shown)
+    # Pocket residues 
     pocket_M = {'anch1': [7, 24, 35], 'anch2': [118, 135]}
-
-    # Accuracies peptide residue anchor prediction using MHCI residue specified above.
-    # I selected all structures with non-canonically spaced anchors from Rafaella's prediction and 100 random pdbs.
-    # From this dataset I manually determined the peptide anchor residue position. I then looped through all MHCI
-    # residues and selected the ones with the highest accuracy in predicting the correct anchors.
-
-    # Getting all anchors right --> Accuracy: 100.0
-    # Anchor 1: 100.0
-    # Anchor 2: 100.0
 
     # Calculate the contacts with a cutoff of 18. This cutoff because at lower cutoffs, the orientations of side chains
     # of different structures, result in highly different contacts.
@@ -80,12 +68,7 @@ def pMHCII_anchors(pdb):
             anch_list.append((i, sum(l) / len(l))) #add mean distance between pept residue and MHC residue
         return min(((x[1], x[0]) for x in anch_list), default=(0, 0))[::-1] #get the pept residue with the min mean dist
 
-    # Rafaella's residues
-    # pocket_M = {'anch1':[28, 33, 31], 'anch3':[10]}
-    # pocket_N = {'anch2':[10, 11, 21, 22, 23], 'anch3':[6,7], 'anch4':[ 28, 27, 31, 33]}
-
-    # Derek's modified version. Empirically tested to have the highest prediction accuracy.
-    # Has a 100% accuracy on all IMGT templates
+    # Pocket residues
     pocket_M = {'anch1': [28, 29], 'anch2': [82, 81, 80], 'anch4': [82, 81, 80], 'anch3': [113, 114]}
     pocket_N = {'anch2': [24, 25], 'anch3': []}
 
