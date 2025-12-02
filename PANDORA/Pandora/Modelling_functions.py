@@ -146,6 +146,9 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, 
         for line in f:
             all_netMHCpan_alleles.append(line.split()[0].replace('\n', ''))
 
+    #Ensure up to only 2 fields per allele are used (e.g. HLA-A*02:01:48 -> HLA-A*02:01)
+    allele_type = [':'.join(allele.split(':')[:2]) for allele in allele_type]
+
     # Format the alles to netMHCIIpan readable format
     target_alleles = [i.split('-')[-1].replace('*', '_').replace(':','') for i in allele_type]
 
@@ -261,6 +264,9 @@ def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm
         for line in f:
             all_netMHCpan_alleles.append(line.split()[0])#.replace(':',''))
         
+    #Ensure up to only 2 fields per allele are used (e.g. HLA-A*02:01:48 -> HLA-A*02:01)
+    allele_type = [':'.join(allele.split(':')[:2]) for allele in allele_type]
+    
     ## Format alleles
     if any(x.startswith('HLA') for x in allele_type):
         target_alleles = [i.replace('*','') for i in allele_type]

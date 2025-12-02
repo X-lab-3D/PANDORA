@@ -37,8 +37,8 @@ class Database:
                 self.__reverse()
         self.reverse = reverse
 
-    def download_data(self, data_dir = PANDORA.PANDORA_data + '/database', download = True):
-        """download_data(self, data_dir = PANDORA.PANDORA_data + '/database', download = True)
+    def download_data(self, data_dir = PANDORA.PANDORA_data, download = True):
+        """download_data(self, data_dir = PANDORA.PANDORA_data, download = True)
         Download all MHC structures and get a two lists that contains all MHCI and MHCII IDs respectively"""
 
         if download:
@@ -59,6 +59,8 @@ class Database:
             if templ != None:
                 #self.MHCI_data[pdb_id] = templ
                 return (pdb_id, templ)
+            else:
+                raise Exception('Template parsing returned None')
 
         except Exception as e:
             print('something went wrong parsing %s:' %pdb_id)
