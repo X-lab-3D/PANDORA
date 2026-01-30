@@ -529,6 +529,52 @@ class Target(PMHC):
                     print('\nWARNING: chain Beta allele name found only.')
                     print('PANDORA will assume chain alpha is HLA-DRA*01')
 
+        #Check first for the Beta chain in MHC-II, as Alpha chain does not need to be specified for HLA-DR
+        if self.MHC_class == 'II' and self.N_chain_seq =='' and N_allele_flag:
+            print('\nNo MHC sequence was provided. Trying to retrieve it from reference sequences...')
+            try:
+                self.retrieve_MHC_refseq(chain='N')
+            except:
+                print('Something went wrong while retrieving the reference sequence.')
+                print('Please provide a N_chain_seq for your target.')
+                print('###################')
+                print('You can find all the reference MHC sequences used in PANDORA')
+                print(f' and use them for your target in {PANDORA.PANDORA_data}/mhcseqs')
+                print('###################')
+                print('All the HLA sequences are downloaded from:')
+                print('https://www.ebi.ac.uk/ipd/imgt/hla/')
+                print('Non-human MHC sequences are downloaded from:')
+                print('https://www.ebi.ac.uk/ipd/mhc/')
+                if not use_templ_seq:
+                    raise Exception('No MHC chain available')
+                else:
+                    print('###################')
+                    print('PANDORA will try to model case %s by using the best template N chain sequence' %self.id)
+
+        elif self.MHC_class == 'II' and self.N_chain_seq =='' and not N_allele_flag:
+                print('\nWARNING: Missing N chain (Beta chain) sequence and allele name.')
+                print('PANDORA will try to model case %s by using the best template N chain sequence' %self.id)
+                print('We strongly advice to provide either allele name or chain sequence for chain N')
+
+        if self.MHC_class == 'II' and self.N_chain_seq !='' and not N_allele_flag:
+            print('No MHC alpha chain allele was provided. Trying to retrieve it from reference sequences...')
+            #Blast against reference database
+            try:
+                blast_results = Modelling_functions.blast_mhc_seq(self.N_chain_seq,
+                                                                  chain='N',
+                                                                  blastdb=PANDORA.PANDORA_data + '/BLAST_databases/refseq_blast_db/refseq_blast_db')
+                #Take only the allele names with the highest id score
+                top_id = blast_results[0][1]
+                self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
+            except:
+                print('\nWARNING: something went wrong when trying to retrieve chain M allele')
+                print('with blast. Is blastp properly installed as working as "/bin/bash blastp"?')
+
+            # In the case of HLA-DRB, add HLA-DRA alpha chain
+            if any('HLA-DRB' in y for y in self.allele_type) and M_allele_flag == False:
+                self.allele_type.extend(['HLA-DRA*01:01', 'HLA-DRA*01:02'])
+                M_allele_flag = True
+
         #Check if there are allele names for each MHC chain
         if self.M_chain_seq =='' and M_allele_flag:
             print('\nNo MHC alpha chain sequence was provided. Trying to retrieve it from reference sequences...')
@@ -564,45 +610,6 @@ class Target(PMHC):
             try:
                 blast_results = Modelling_functions.blast_mhc_seq(self.M_chain_seq,
                                                                   chain='M',
-                                                                  blastdb=PANDORA.PANDORA_data + '/BLAST_databases/refseq_blast_db/refseq_blast_db')
-                #Take only the allele names with the highest id score
-                top_id = blast_results[0][1]
-                self.allele_type.extend([x[0] for x in blast_results if x[1] == top_id])
-            except:
-                print('\nWARNING: something went wrong when trying to retrieve chain M allele')
-                print('with blast. Is blastp properly installed as working as "/bin/bash blastp"?')
-
-        if self.MHC_class == 'II' and self.N_chain_seq =='' and N_allele_flag:
-            print('\nNo MHC sequence was provided. Trying to retrieve it from reference sequences...')
-            try:
-                self.retrieve_MHC_refseq(chain='N')
-            except:
-                print('Something went wrong while retrieving the reference sequence.')
-                print('Please provide a N_chain_seq for your target.')
-                print('###################')
-                print('You can find all the reference MHC sequences used in PANDORA')
-                print(f' and use them for your target in {PANDORA.PANDORA_data}/mhcseqs')
-                print('###################')
-                print('All the HLA sequences are downloaded from:')
-                print('https://www.ebi.ac.uk/ipd/imgt/hla/')
-                print('Non-human MHC sequences are downloaded from:')
-                print('https://www.ebi.ac.uk/ipd/mhc/')
-                if not use_templ_seq:
-                    raise Exception('No MHC chain available')
-                else:
-                    print('###################')
-                    print('PANDORA will try to model case %s by using the best template N chain sequence' %self.id)
-        elif self.MHC_class == 'II' and self.N_chain_seq =='' and not N_allele_flag:
-                print('\nWARNING: Missing N chain (Beta chain) sequence and allele name.')
-                print('PANDORA will try to model case %s by using the best template N chain sequence' %self.id)
-                print('We strongly advice to provide either allele name or chain sequence for chain N')
-
-        if self.MHC_class == 'II' and self.N_chain_seq !='' and not N_allele_flag:
-            print('No MHC alpha chain allele was provided. Trying to retrieve it from reference sequences...')
-            #Blast against reference database
-            try:
-                blast_results = Modelling_functions.blast_mhc_seq(self.N_chain_seq,
-                                                                  chain='N',
                                                                   blastdb=PANDORA.PANDORA_data + '/BLAST_databases/refseq_blast_db/refseq_blast_db')
                 #Take only the allele names with the highest id score
                 top_id = blast_results[0][1]
