@@ -5,10 +5,7 @@ import subprocess
 import PANDORA
 import pickle
 from PANDORA import Model
-# from Bio import Align
 from Bio import pairwise2
-#from PANDORA import Align
-#import statistics
 from Bio.Align import PairwiseAligner
 from datetime import datetime
 from copy import deepcopy
@@ -114,12 +111,13 @@ def check_presence(target, database, seq_based_templ_selection = False):
     return target_in_db
 
 
-def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, rm_netmhcpan_output=True):
+def predict_anchors_netMHCIIpan(peptide, M_chain_seq, N_chain_seq, output_dir, verbose=True, rm_netmhcpan_output=True):
     '''Uses netMHCIIpan to predict the binding core of a peptide and infer the anchor positions from that.
 
     Args:
         peptide: (str): AA sequence of the peptide
-        allele_type: (lst): list of strings of allele types
+        M_chain_seq: (str): AA sequence of the M (alpha) chain of the MHC molecule
+        N_chain_seq: (str): AA sequence of the N (beta) chain of the MHC molecule
         output_dir: (string) Path to output directory 
         verbose: (bool): Print information. Default = True
         rm_netmhcpan_output: (bool): If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
@@ -138,58 +136,28 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, 
         raise Exception("Need netMHCIIpan to predict anchor positions. Please download and install netMHCIIpan.\n\n"
         "You can request the software at https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1 in the 'Downloads' section.\n"
         "After installing netMHCpan, make sure it's added to your PATH or as an alias to your .bashrc / .bash_profile.\n")
-        
-    netmhcpan_path = os.path.dirname(netmhcpan_file_path)
-
-    all_netMHCpan_alleles = []
-    with open(os.path.join(netmhcpan_path, 'data/allelelist.txt')) as f:
-        for line in f:
-            all_netMHCpan_alleles.append(line.split()[0].replace('\n', ''))
-
-    #Ensure up to only 2 fields per allele are used (e.g. HLA-A*02:01:48 -> HLA-A*02:01)
-    allele_type = [':'.join(allele.split(':')[:2]) for allele in allele_type]
-
-    # Format the alles to netMHCIIpan readable format
-    target_alleles = [i.split('-')[-1].replace('*', '_').replace(':','') for i in allele_type]
-
-    # The DQ and DP alleles only function in pairs in netMHCIIpan, which we cannot match from our alleles
-    # So take the first 3 partially matched allele combinations
-    for i in target_alleles:
-        if 'DRB' not in i:
-            target_alleles = target_alleles + [al for al in all_netMHCpan_alleles if i.replace('_', '') in al][:3]
-
-    # for the DQ and DP cases, alleles are matched (e.g. 'HLA-DQA10102-DQB10602')
-    # If two alleles are present is such a combi case, select that combi case as the target allele
-    target_alleles_matched = []
-    for al in target_alleles:
-        hits = 0
-        for part in [i.split('*')[-1] for i in allele_type]:
-            if part in al:
-                hits +=1
-        if hits == 2:
-            target_alleles_matched.append(al)
-    if len(target_alleles_matched) > 0:
-        target_alleles = target_alleles_matched
-
-    target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
-
-    # If there is no target allele that occurs in netMHCIIpan, raise an Exception
-    if target_alleles == []:
-        raise Exception('ERROR: Provided allele is not available in the netmhcIIpan version used\n')
-
-    target_alleles_str = ','.join(target_alleles)
 
     # Setup files
-    infile = os.path.join(output_dir,f'{peptide}_{target_alleles[0].replace("*","").replace(":","")}_{datetime.today().strftime("%Y%m%d_%H%M%S")}.txt')
-    outfile = os.path.join(output_dir, f'{peptide}_{target_alleles[0].replace("*","").replace(":","")}_{datetime.today().strftime("%Y%m%d_%H%M%S")}_prediction.txt')
+    peptfile = os.path.join(output_dir,f'{peptide}_{datetime.today().strftime("%Y%m%d_%H%M%S")}.txt')
+    hlaafile = os.path.join(output_dir,f'{peptide}_M_MHC.fasta')
+    hlabfile = os.path.join(output_dir,f'{peptide}_N_MHC.fasta')
+    outfile = os.path.join(output_dir, f'{peptide}_{datetime.today().strftime("%Y%m%d_%H%M%S")}_prediction.txt')
 
     # Write peptide sequence to input file for netMHCIIpan
-    with open(infile, 'w') as f:
+    with open(peptfile, 'w') as f:
         f.write(peptide)
+
+    for seqfile, sequence in {hlaafile: M_chain_seq, hlabfile: N_chain_seq}.items():
+        # Write MHC sequence to fasta file for netMHCIIpan
+        with open(seqfile, 'w') as f:
+            # Write MHC sequence with line breaks every 60 characters
+            f.write('>MHC_sequence\n')
+            for i in range(0, len(sequence), 60):
+                f.write(sequence[i:i+60] + '\n')
 
     try:
         # run netMHCIIpan
-        subprocess.check_call('%s -f %s -inptype 1 -a %s > %s' % (netmhcpan_file_path, infile, target_alleles_str, outfile), shell=True)
+        subprocess.check_call(f'{netmhcpan_file_path} -f {peptfile} -inptype 1 -hlaseq {hlabfile} -hlaseqA {hlaafile} > {outfile}', shell=True)
 
         # Get the output from the netMHCIIpan prediction
         # {allele: (offset, core, core_reliability, score_EL, %rank_EL)}
@@ -213,7 +181,7 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, 
     predicted_anchors = [offset + 1, offset + 4, offset + 6, offset + 9]
     # Make sure the prediction is not longer than the peptide just in case
     predicted_anchors = [i for i in predicted_anchors if i <= len(peptide)]
-    if pedicted_anchors == None:
+    if predicted_anchors == None:
         raise Exception('ERROR: netMHCIIpan was not able to find any binding core for the provided peptide and MHC allele')
 
     if verbose:
@@ -222,19 +190,21 @@ def predict_anchors_netMHCIIpan(peptide, allele_type, output_dir, verbose=True, 
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' % predicted_anchors)
 
     if rm_netmhcpan_output:
-        subprocess.check_call('rm %s' %infile, shell=True)
-        subprocess.check_call('rm %s' %outfile, shell=True)
+        subprocess.check_call(f'rm {peptfile}', shell=True)
+        subprocess.check_call(f'rm {hlaafile}', shell=True)
+        subprocess.check_call(f'rm {hlabfile}', shell=True)
+        subprocess.check_call(f'rm {outfile}', shell=True)
 
     return predicted_anchors
    
 
-def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm_netmhcpan_output=True):
+def predict_anchors_netMHCpan(peptide, M_chain_seq, output_dir, verbose=True, rm_netmhcpan_output=True):
     '''Uses netMHCIpan to predict the binding core of a peptide and infer the
     anchor positions from that.
 
     Args:
         peptide: (str): AA sequence of the peptide
-        allele_type: (lst): list of strings of allele types
+        M_chain_seq: (str): AA sequence of the Alpha MHC chain
         output_dir: (string) Path to output directory
         verbose: (bool): Print information. Default = True
         rm_netmhcpan_output: (bool): If True, removes the netmhcpan infile and outfile after having used them for netmhcpan.
@@ -253,54 +223,24 @@ def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm
         raise Exception("Need netMHCpan to predict anchor positions. Please download and install netMHCpan.\n\n"
         "You can request the software at https://services.healthtech.dtu.dk/service.php?NetMHCpan-4.1 in the 'Downloads' section.\n"
         "After installing netMHCpan, make sure it's added to your PATH or as an alias to your .bashrc / .bash_profile.\n")
-    
-    netmhcpan_path = os.path.dirname(netmhcpan_file_path)
-
-    all_netMHCpan_alleles = []
-    with open(os.path.join(netmhcpan_path, 'data/allelenames')) as f:
-        for line in f:
-            all_netMHCpan_alleles.append(line.split()[0])#.replace(':',''))
-        
-    #Ensure up to only 2 fields per allele are used (e.g. HLA-A*02:01:48 -> HLA-A*02:01)
-    allele_type = [':'.join(allele.split(':')[:2]) for allele in allele_type]
-
-    ## Format alleles
-    if any(x.startswith('HLA') for x in allele_type):
-        target_alleles = [i.replace('*','') for i in allele_type]
-    elif any(x.startswith('BoLA') for x in allele_type):
-        target_alleles = [i.replace(':','').replace('*',':') for i in allele_type]
-    elif any(x.startswith('DLA') for x in allele_type):
-        target_alleles = [i.replace(':','').replace('*','') for i in allele_type]
-    elif any(x.startswith('Eqca') for x in allele_type):
-        target_alleles = [i.replace(':','').replace('*','') for i in allele_type]
-    elif any(x.startswith('Gogo') for x in allele_type):
-        target_alleles = [i.replace(':','').replace('*','') for i in allele_type]
-    elif any(x.startswith('Mamu') for x in allele_type):
-        target_alleles = [i.replace(':','').replace('*',':') for i in allele_type]
-    elif any(x.startswith('Patr') for x in allele_type):
-        target_alleles = [i.replace(':','').replace('*','') for i in allele_type]
-    elif any(x.startswith('SLA') for x in allele_type):
-        target_alleles = [i.replace(':','').replace('*',':') for i in allele_type]
-    else:
-        target_alleles = [i.replace('*','') for i in allele_type]
-    
-    ## Make sure only netMHCpan available alleles are used
-    target_alleles = [i for i in target_alleles if i in all_netMHCpan_alleles]
-    
-    if len(target_alleles) == 0:
-        raise Exception('ERROR: Provided allele is not available in the netmhcpan version used\n')
-        
-    target_alleles_str = ','.join(target_alleles)
         
     # Setup files
-    infile = os.path.join(output_dir,f'{peptide}_{target_alleles[0].replace("*","").replace(":","")}_{datetime.today().strftime("%Y%m%d_%H%M%S")}.txt')
-    outfile = os.path.join(output_dir, f'{peptide}_{target_alleles[0].replace("*","").replace(":","")}_{datetime.today().strftime("%Y%m%d_%H%M%S")}_prediction.txt')
+    peptfile = os.path.join(output_dir,f'{peptide}_{datetime.today().strftime("%Y%m%d_%H%M%S")}.txt')
+    hlafile = os.path.join(output_dir,f'{peptide}_{datetime.today().strftime("%Y%m%d_%H%M%S")}_MHC.fasta')
+    outfile = os.path.join(output_dir, f'{peptide}_{datetime.today().strftime("%Y%m%d_%H%M%S")}_prediction.txt')
 
     # Write peptide sequence to input file for netMHCIIpan
-    with open(infile, 'w') as f:
+    with open(peptfile, 'w') as f:
         f.write(peptide)
+    
+    # Write MHC sequence to fasta file for netMHCIIpan
+    with open(hlafile, 'w') as f:
+        # Write MHC sequence with line breaks every 60 characters
+        f.write('>MHC_sequence\n')
+        for i in range(0, len(M_chain_seq), 60):
+            f.write(M_chain_seq[i:i+60] + '\n')
 
-    subprocess.check_call('%s -p %s -a %s > %s' %(netmhcpan_file_path, infile, target_alleles_str, outfile), shell=True)
+    subprocess.check_call(f'{netmhcpan_file_path} -p {peptfile} -hlaseq {hlafile} > {outfile}', shell=True)
         
     # Get the output from the netMHCIIpan prediction
     # {allele: (core, %rank_EL)}
@@ -362,7 +302,7 @@ def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm
         print(pept1)
         print(pept2)
         
-    # Find the anchors by finding the first non dash from the left and from the right
+    # Find the anchors by finding the first non-dash from the left and from the right
     # Define chanonical ancors as starting list
     predicted_anchors = [2,len(peptide)]
 
@@ -395,7 +335,8 @@ def predict_anchors_netMHCpan(peptide, allele_type, output_dir, verbose=True, rm
         print('\tPredicted peptide anchor residues (assuming canonical spacing): %s' %predicted_anchors)
         
     if rm_netmhcpan_output:
-        subprocess.check_call('rm %s' %infile, shell=True)
+        subprocess.check_call('rm %s' %peptfile, shell=True)
+        subprocess.check_call('rm %s' %hlafile, shell=True)
         subprocess.check_call('rm %s' %outfile, shell=True)
     
     return predicted_anchors
