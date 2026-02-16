@@ -30,7 +30,7 @@ setup(
         'Source Code': 'https://github.com/X-lab-3D/PANDORA/tree/master',
         'Issue tracker': 'https://github.com/X-lab-3D/PANDORA/issues'
     },
-    packages=find_packages(),
+    packages=find_packages(exclude=['maintenance', 'test']),
     include_package_data=True,
     license="Apache Software License 2.0",
     keywords='PANDORA',

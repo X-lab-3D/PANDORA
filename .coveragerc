@@ -9,3 +9,5 @@ omit =
 	PANDORA/cmd_pandora.py
 	# omit Generate_reverse_templates.py as it's not meant to be ran by users
 	PANDORA/Database/Generate_reverse_templates.py
+	#omit maintenance folder
+	maintenance/*

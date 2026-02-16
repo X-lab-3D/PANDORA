@@ -1,0 +1,3 @@
+from PANDORA.Database import Database_functions
+
+Database_functions.generate_mhcseq_database()
